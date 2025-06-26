@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Comparison - Softhe.io</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">Softhe.io</a>
+            </div>
+            <ul class="nav-menu">
+            <li class="nav-item">
+            <a href="index.html" class="nav-link">Home</a>
+            </li>
+            <li class="nav-item">
+            <a href="services.html" class="nav-link">Services</a>
+            </li>
+            <li class="nav-item">
+            <a href="store.html" class="nav-link">Store</a>
+            </li>
+            <li class="nav-item">
+            <a href="performance.html" class="nav-link">Performance</a>
+            </li>
+            <li class="nav-item">
+            <a href="contact.html" class="nav-link">Contact</a>
+            </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Performance Comparison</h1>
+            <p>See the dramatic difference between stock Windows and Softhe.io optimization</p>
+        </div>
+    </section>
+
+    <section class="screenshot-comparison">
+        <div class="container">
+
+            <div class="screenshot-grid">
+                <div class="screenshot-item">
+                    <div class="screenshot-header">
+                        <h3>Task Manager - Stock Windows Iso</h3>
+                        <span class="screenshot-badge stock-badge">High Resource Usage</span>
+                    </div>
+                    <div class="screenshot-container">
+                        <img src="images/stock-task-manager.png" alt="Stock Windows Task Manager showing high resource usage" class="screenshot-image">
+                        <div class="screenshot-overlay">
+                            <div class="overlay-stats">
+                                <div class="overlay-stat">
+                                    <span class="stat-label">RAM Usage:</span>
+                                    <span class="stat-value poor">2.5GB</span>
+                                </div>
+                                <div class="overlay-stat">
+                                    <span class="stat-label">Processes:</span>
+                                    <span class="stat-value poor">111</span>
+                                </div>
+                                <div class="overlay-stat">
+                                    <span class="stat-label">CPU Usage:</span>
+                                    <span class="stat-value poor">1%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="screenshot-item">
+                    <div class="screenshot-header">
+                        <h3>Task Manager - Custom Iso</h3>
+                        <span class="screenshot-badge optimized-badge">Minimal Resource Usage</span>
+                    </div>
+                    <div class="screenshot-container">
+                        <img src="images/optimized-task-manager.png" alt="Optimized Windows Task Manager showing minimal resource usage" class="screenshot-image">
+                        <div class="screenshot-overlay">
+                            <div class="overlay-stats">
+                                <div class="overlay-stat">
+                                    <span class="stat-label">RAM Usage:</span>
+                                    <span class="stat-value excellent">0.8GB</span>
+                                </div>
+                                <div class="overlay-stat">
+                                    <span class="stat-label">Processes:</span>
+                                    <span class="stat-value excellent">31</span>
+                                </div>
+                                <div class="overlay-stat">
+                                    <span class="stat-label">CPU Usage:</span>
+                                    <span class="stat-value excellent">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="fps-comparison">
+        <div class="container">
+            <h2 class="section-title">In-Game Performance Screenshots</h2>
+            
+            <div class="fps-showcase">
+                <div class="fps-comparison-item">
+                    <div class="fps-header">
+                        <h3>Counter-Strike 2 Performance</h3>
+                        <p>Same hardware, different optimization levels</p>
+                    </div>
+                    
+                    <div class="fps-images">
+                        <div class="fps-image-container">
+                            <div class="fps-label">
+                                <span class="fps-title">Stock Windows</span>
+                                <span class="fps-value poor">670 FPS</span>
+                            </div>
+                            <img src="images/cs2-stock-fps.png" alt="Counter-Strike 2 running on stock Windows showing 165 FPS" class="fps-screenshot">
+                            <div class="fps-details">
+                                <span>1% Low: 355 FPS</span>
+                                <span>Frame Time: 1.5ms</span>
+                            </div>
+                        </div>
+                        
+                        <div class="fps-image-container">
+                            <div class="fps-label">
+                                <span class="fps-title">Softhe.io Optimized</span>
+                                <span class="fps-value excellent">932 Average FPS</span>
+                            </div>
+                            <img src="images/cs2-optimized-fps.png" alt="Counter-Strike 2 running on optimized Windows showing 420+ FPS" class="fps-screenshot">
+                            <div class="fps-details">
+                                <span>1% Low: 498 FPS</span>
+                                <span>Frame Time: 1.1ms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="detailed-comparison">
+        <div class="container">
+            <h2 class="section-title">Detailed Performance Analysis</h2>
+            
+            <div class="comparison-table">
+                <div class="table-header">
+                    <div class="table-cell">Feature</div>
+                    <div class="table-cell">Stock Windows</div>
+                    <div class="table-cell">Softhe.io Optimized</div>
+                    <div class="table-cell">Improvement</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell feature-name">
+                        <i class="fas fa-chart-line"></i>
+                        Frame Rate (CS2)
+                    </div>
+                    <div class="table-cell stock-value">670 avg FPS</div>
+                    <div class="table-cell optimized-value">932 avg FPS</div>
+                    <div class="table-cell improvement">+40% avg</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell feature-name">
+                        <i class="fas fa-stopwatch"></i>
+                        Input Latency
+                    </div>
+                    <div class="table-cell stock-value">1,5ms</div>
+                    <div class="table-cell optimized-value">1.1ms</div>
+                    <div class="table-cell improvement">-36% reduction</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell feature-name">
+                        <i class="fas fa-microchip"></i>
+                        CPU Usage (Gaming)
+                    </div>
+                    <div class="table-cell stock-value">75-90%</div>
+                    <div class="table-cell optimized-value">45-65%</div>
+                    <div class="table-cell improvement">-30% usage</div>
+                </div>
+                
+                <div class="table-row">
+                    <div class="table-cell feature-name">
+                        <i class="fas fa-hdd"></i>
+                        Boot Time
+                    </div>
+                    <div class="table-cell stock-value">~30 seconds</div>
+                    <div class="table-cell optimized-value">~15 seconds</div>
+                    <div class="table-cell improvement">~65% faster</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="optimization-features">
+        <div class="container">
+            <h2 class="section-title">What Makes Our Windows Different</h2>
+            <div class="features-comparison">
+                <div class="feature-comparison-item">
+                    <div class="feature-icon removed">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Bloatware Eliminated</h3>
+                        <p>All unnecessary Microsoft apps, services, and telemetry completely removed. No Cortana, Xbox services, or advertising components consuming resources.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-comparison-item">
+                    <div class="feature-icon optimized">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Gaming-First Registry</h3>
+                        <p>Thousands of registry optimizations specifically tuned for gaming performance, including GPU scheduling, timer resolution, and network stack improvements.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-comparison-item">
+                    <div class="feature-icon enhanced">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Enterprise Security</h3>
+                        <p>Built on Windows Enterprise foundation with enhanced security features while maintaining peak performance for competitive gaming.</p>
+                    </div>
+                </div>
+                
+                <div class="feature-comparison-item">
+                    <div class="feature-icon optimized">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div class="feature-content">
+                        <h3>Network Optimization</h3>
+                        <p>TCP/IP stack optimizations, reduced network latency, and prioritized gaming traffic for the lowest possible ping times.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Experience the Difference?</h2>
+                <p>Join thousands of competitive gamers who've made the switch to optimized performance.</p>
+                <a href="store.html" class="btn btn-primary">Get Optimized Windows</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer" id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Softhe.io</h3>
+                    <p>Elite PC optimization for esports professionals and enthusiasts worldwide.</p>
+                    <div class="social-links">
+                        <a href="https://x.com/SoftheCS"><i class="fab fa-twitter"></i></a>
+                        <a href="https://discord.com/users/softhecs"><i class="fab fa-discord"></i></a>
+                        <a href="https://github.com/Softhe"><i class="fab fa-github"></i></a>
+                        <a href="https://www.youtube.com/@softhe"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="services.html">Custom Windows ISO</a></li>
+                        <li><a href="services.html">BIOS Optimization</a></li>
+                        <li><a href="services.html">Performance Tuning</a></li>
+                        <li><a href="services.html">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> support@softhe.io</li>
+                        <li><i class="fas fa-discord"></i> Discord Support</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Softhe.io. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

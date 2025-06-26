@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Softhe.io</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="index.html">Softhe.io</a>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="services.html" class="nav-link">Services</a>
+                </li>
+                <li class="nav-item">
+                    <a href="store.html" class="nav-link">Store</a>
+                </li>
+                <li class="nav-item">
+                    <a href="performance.html" class="nav-link">Performance</a>
+                </li>
+                <li class="nav-item">
+                    <a href="contact.html" class="nav-link active">Contact</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <div class="container">
+            <h1>Get In Touch</h1>
+            <p>Ready to optimize your gaming experience? We're here to help you dominate the competition.</p>
+        </div>
+    </section>
+
+    <section class="contact-hero">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h2>Contact Information</h2>
+                    <p class="contact-description">
+                        Our team of PC optimization experts is available 24/7 to help you achieve peak gaming performance. 
+                        Choose your preferred method of communication below.
+                    </p>
+                    
+                    <div class="contact-methods">
+                        <div class="contact-method primary-contact">
+                            <div class="contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Email Support</h3>
+                                <p>Primary contact method for all inquiries</p>
+                                <a href="mailto:support@softhe.io" class="contact-link">support@softhe.io</a>
+                                <span class="response-time">Response within 2-4 hours</span>
+                            </div>
+                        </div>
+
+                        <div class="contact-method">
+                            <div class="contact-icon">
+                                <i class="fab fa-discord"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Discord Support</h3>
+                                <p>Real-time chat and community support</p>
+                                <a href="https://discord.com/users/softhecs" class="contact-link" target="_blank">@softhecs</a>
+                                <span class="response-time">Usually online 12-20 GMT+2</span>
+                            </div>
+                        </div>
+
+                        <div class="contact-method">
+                            <div class="contact-icon">
+                                <i class="fab fa-steam"></i>
+                            </div>
+                            <div class="contact-details">
+                                <h3>Steam Community</h3>
+                                <p>Gaming-focused discussions and support</p>
+                                <a href="https://steamcommunity.com/id/softhe" class="contact-link" target="_blank">steamcommunity.com/id/softhe</a>
+                                <span class="response-time">Community discussions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form-section">
+                    <div class="contact-form-container">
+                        <h2>Send Us a Message</h2>
+                        <p>Have a specific question? Fill out the form below and we'll get back to you quickly.</p>
+                        
+                        <form class="contact-form" id="contactForm">
+                            <div class="form-group">
+                                <label for="name">Full Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="subject">Subject</label>
+                                <select id="subject" name="subject" required>
+                                    <option value="">Select a topic</option>
+                                    <option value="general">General Inquiry</option>
+                                    <option value="technical">Technical Support</option>
+                                    <option value="sales">Sales Question</option>
+                                    <option value="custom">Custom Optimization</option>
+                                    <option value="billing">Billing Support</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="hardware">Your Hardware (Optional)</label>
+                                <input type="text" id="hardware" name="hardware" placeholder="e.g., RTX 4080, i7-13700K, 32GB RAM">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" rows="6" required placeholder="Tell us about your gaming setup and what you're looking to optimize..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary form-submit">
+                                <i class="fas fa-paper-plane"></i>
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="support-info">
+        <div class="container">
+            <h2 class="section-title">Support Information</h2>
+            
+            <div class="support-grid">
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Response Times</h3>
+                    <ul class="support-list">
+                        <li><strong>Email:</strong> 2-4 hours average</li>
+                        <li><strong>Discord:</strong> Real-time when online</li>
+                        <li><strong>Phone:</strong> Immediate during business hours</li>
+                        <li><strong>Emergency:</strong> Within 1 hour</li>
+                    </ul>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Support Types</h3>
+                    <ul class="support-list">
+                        <li><strong>Pre-sales:</strong> Product questions & recommendations</li>
+                        <li><strong>Technical:</strong> Installation & optimization help</li>
+                        <li><strong>Custom:</strong> Personalized optimization requests</li>
+                        <li><strong>Emergency:</strong> Critical system issues</li>
+                    </ul>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3>Languages</h3>
+                    <ul class="support-list">
+                        <li><strong>English:</strong> Native language</li>
+                        <li><strong>Swedish:</strong> Fluent language</li>
+                    </ul>
+                </div>
+
+                <div class="support-card">
+                    <div class="support-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Privacy & Security</h3>
+                    <ul class="support-list">
+                        <li><strong>Encrypted:</strong> All communications secured</li>
+                        <li><strong>Private:</strong> Your data stays confidential</li>
+                        <li><strong>GDPR:</strong> Compliant data handling</li>
+                        <li><strong>No Spam:</strong> We respect your inbox</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq-preview">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>How long does optimization take?</h3>
+                    <p>Most optimizations are completed within 24-48 hours. Custom BIOS configurations may take up to 72 hours depending on your hardware.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Do you offer refunds?</h3>
+                    <p>Yes, we offer a 30-day money-back guarantee if you're not satisfied with the performance improvements.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Is remote support available?</h3>
+                    <p>Absolutely! We can provide remote assistance through secure screen sharing for troubleshooting and optimization.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>What hardware do you support?</h3>
+                    <p>We support all modern gaming hardware from Intel, AMD, NVIDIA, and other major manufacturers. Contact us for specific compatibility questions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact-cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Optimize Your Gaming Experience?</h2>
+                <p>Don't let poor performance hold you back. Contact us today and start dominating the competition.</p>
+                <div class="cta-buttons">
+                    <a href="mailto:support@softhe.io" class="btn btn-primary">
+                        <i class="fas fa-envelope"></i>
+                        Email Us Now
+                    </a>
+                    <a href="https://discord.com/users/softhecs" class="btn btn-secondary" target="_blank">
+                        <i class="fab fa-discord"></i>
+                        Join Discord
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Softhe.io</h3>
+                    <p>Elite PC optimization for esports professionals and enthusiasts worldwide.</p>
+                    <div class="social-links">
+                        <a href="https://x.com/SoftheCS"><i class="fab fa-twitter"></i></a>
+                        <a href="https://discord.com/users/softhecs"><i class="fab fa-discord"></i></a>
+                        <a href="https://github.com/Softhe"><i class="fab fa-github"></i></a>
+                        <a href="https://www.youtube.com/@softhe"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="services.html">Custom Windows ISO</a></li>
+                        <li><a href="services.html">BIOS Optimization</a></li>
+                        <li><a href="services.html">Performance Tuning</a></li>
+                        <li><a href="services.html">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> support@softhe.io</li>
+                        <li><i class="fab fa-discord"></i> Discord Support</li>
+                        <li><i class="fas fa-clock"></i> 24/7 Support</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Softhe.io. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
