@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="3;url=/">
+    <title>Page Not Found - Redirecting...</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="/images/terminal-solid.svg">
+    <style>
+        .redirect-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+        .redirect-icon {
+            font-size: 4rem;
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
+        .redirect-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .redirect-text {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .redirect-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .redirect-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="redirect-container">
+        <i class="fas fa-sync-alt redirect-icon"></i>
+        <h1 class="redirect-title">Page Not Found</h1>
+        <p class="redirect-text">Redirecting you to the home page in 3 seconds...</p>
+        <a href="/" class="redirect-link">Click here if you're not redirected automatically</a>
+    </div>
+</body>
+</html> 
