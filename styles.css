@@ -1880,3 +1880,10 @@ body {
     padding: 1.5rem;
   }
 }
+
+.footer-section ul li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
