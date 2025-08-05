@@ -15,10 +15,6 @@ document.querySelectorAll(".nav-link").forEach((n) =>
   })
 );
 
-// Store functionality
-let cart = [];
-let cartTotal = 0;
-
 // Product data
 const products = {
   "Custom Windows 10 Enterprise ISO": 50,
@@ -56,126 +52,6 @@ if (filterButtons.length > 0) {
         }
       });
     });
-  });
-}
-
-// Add to cart functionality
-const addToCartButtons = document.querySelectorAll(".add-to-cart");
-const cartSummary = document.getElementById("cart-summary");
-const cartItems = document.getElementById("cart-items");
-const cartTotalElement = document.getElementById("cart-total");
-
-if (addToCartButtons.length > 0) {
-  addToCartButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
-      const productCard = e.target.closest(".product-card");
-      const productName = productCard.querySelector("h3").textContent;
-      const productPrice = products[productName];
-
-      if (productPrice) {
-        addToCart(productName, productPrice);
-        updateCartDisplay();
-        showCartSummary();
-
-        // Visual feedback
-        button.textContent = "Added!";
-        button.style.background = "#10b981";
-        setTimeout(() => {
-          button.textContent = button.textContent.includes("Subscribe")
-            ? "Subscribe"
-            : "Add to Cart";
-          button.style.background = "";
-        }, 1000);
-      }
-    });
-  });
-}
-
-function addToCart(name, price) {
-  const existingItem = cart.find((item) => item.name === name);
-  if (existingItem) {
-    existingItem.quantity += 1;
-  } else {
-    cart.push({ name, price, quantity: 1 });
-  }
-  cartTotal += price;
-}
-
-function updateCartDisplay() {
-  if (!cartItems) return;
-
-  cartItems.innerHTML = "";
-  cart.forEach((item) => {
-    const cartItem = document.createElement("div");
-    cartItem.className = "cart-item";
-    cartItem.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color);">
-                <div>
-                    <h4>${item.name}</h4>
-                    <p>€${item.price} x ${item.quantity}</p>
-                </div>
-                <button onclick="removeFromCart('${item.name}')" style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Remove</button>
-            </div>
-        `;
-    cartItems.appendChild(cartItem);
-  });
-
-  if (cartTotalElement) {
-    cartTotalElement.textContent = `€${cartTotal}`;
-  }
-}
-
-function removeFromCart(name) {
-  const itemIndex = cart.findIndex((item) => item.name === name);
-  if (itemIndex > -1) {
-    cartTotal -= cart[itemIndex].price * cart[itemIndex].quantity;
-    cart.splice(itemIndex, 1);
-    updateCartDisplay();
-    if (cart.length === 0) {
-      hideCartSummary();
-    }
-  }
-}
-
-function showCartSummary() {
-  if (cartSummary) {
-    cartSummary.style.display = "block";
-  }
-}
-
-function hideCartSummary() {
-  if (cartSummary) {
-    cartSummary.style.display = "none";
-  }
-}
-
-// Clear cart functionality
-const clearCartButton = document.getElementById("clear-cart");
-if (clearCartButton) {
-  clearCartButton.addEventListener("click", () => {
-    cart = [];
-    cartTotal = 0;
-    updateCartDisplay();
-    hideCartSummary();
-  });
-}
-
-// Checkout functionality
-const checkoutButton = document.getElementById("checkout");
-if (checkoutButton) {
-  checkoutButton.addEventListener("click", () => {
-    if (cart.length === 0) {
-      alert("Your cart is empty!");
-      return;
-    }
-
-    alert(
-      `Thank you for your purchase! Total: €${cartTotal}\n\nYou will receive download links and instructions via email within 24 hours.`
-    );
-    cart = [];
-    cartTotal = 0;
-    updateCartDisplay();
-    hideCartSummary();
   });
 }
 
