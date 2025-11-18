@@ -76,8 +76,8 @@ describe("Contact Component", () => {
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please enter a valid name/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please enter a valid name/i);
 		});
 
 		it("should show error for name less than 2 characters", async () => {
@@ -90,8 +90,8 @@ describe("Contact Component", () => {
 			await user.type(nameInput, "A");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please enter a valid name/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please enter a valid name/i);
 		});
 
 		it("should show error for invalid email format", async () => {
@@ -106,8 +106,8 @@ describe("Contact Component", () => {
 			await user.type(emailInput, "invalid-email");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please enter a valid email address/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please enter a valid email address/i);
 		});
 
 		it("should show error for empty subject", async () => {
@@ -122,8 +122,8 @@ describe("Contact Component", () => {
 			await user.type(emailInput, "john@example.com");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please select a subject/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please select a subject/i);
 		});
 
 		it("should show error for empty message", async () => {
@@ -140,8 +140,8 @@ describe("Contact Component", () => {
 			await user.selectOptions(subjectInput, "general");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please enter a message/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please enter a message/i);
 		});
 
 		it("should show error for message less than 10 characters", async () => {
@@ -156,12 +156,12 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "Short");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please enter a message/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please enter a message/i);
 		});
 
 		it("should accept valid email formats", async () => {
@@ -247,9 +247,8 @@ describe("Contact Component", () => {
 			await user.click(submitButton);
 
 			// Wait for success message first
-			await waitFor(() => {
-				expect(screen.getByText(/Thank you for your message/i)).toBeInTheDocument();
-			}, { timeout: 5000 });
+			const successMessage = await screen.findByRole("status", {}, { timeout: 5000 });
+			expect(successMessage).toHaveTextContent(/Thank you for your message/i);
 
 			// Then check that form was cleared
 			await waitFor(() => {
@@ -278,9 +277,8 @@ describe("Contact Component", () => {
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Thank you for your message/i)).toBeInTheDocument();
-			}, { timeout: 5000 });
+			const successMessage = await screen.findByRole("status", {}, { timeout: 5000 });
+			expect(successMessage).toHaveTextContent(/Thank you for your message/i);
 		});
 
 		it("should disable submit button while submitting", async () => {
@@ -427,8 +425,8 @@ describe("Contact Component", () => {
 			render(<Contact />);
 
 			// Should show rate limit warning
-			const warning = await screen.findByText(/Too many attempts/i, {}, { timeout: 3000 });
-			expect(warning).toBeInTheDocument();
+			const warning = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(warning).toHaveTextContent(/Too many attempts/i);
 		});
 
 		it("should disable submit button when rate limited", async () => {
@@ -490,8 +488,8 @@ describe("Contact Component", () => {
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText(/Please enter a valid name/i, {}, { timeout: 3000 });
-			expect(errorMessage).toBeInTheDocument();
+			const errorMessage = await screen.findByRole("alert", {}, { timeout: 3000 });
+			expect(errorMessage).toHaveTextContent(/Please enter a valid name/i);
 		});
 
 		it("should have accessible success messages", async () => {
@@ -506,15 +504,12 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				const successMessage = screen.getByText(/Message sent successfully/i);
-				expect(successMessage).toBeInTheDocument();
-				expect(successMessage).toHaveClass("success");
-			});
+			const successMessage = await screen.findByRole("status", {}, { timeout: 5000 });
+			expect(successMessage).toHaveTextContent(/Thank you for your message/i);
 		});
 	});
 

@@ -278,10 +278,9 @@ function Contact() {
 
 								{/* Rate Limit Warning */}
 								{rateLimit.isBlocked && (
-									<div className="rate-limit-warning">
+									<div className="rate-limit-warning" role="alert" aria-live="polite">
 										<i className="fas fa-exclamation-triangle"></i>
 										<div>
-											<strong>Too many attempts</strong>
 											<p>{rateLimit.getBlockMessage()}</p>
 										</div>
 									</div>
@@ -308,6 +307,8 @@ function Contact() {
 								{submitStatus.message && (
 									<div
 										className={`form-status ${submitStatus.type}`}
+										role={submitStatus.type === "error" ? "alert" : "status"}
+										aria-live="polite"
 									>
 										<i
 											className={`fas ${submitStatus.type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}`}
