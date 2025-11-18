@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import CookieConsent from "./CookieConsent";
+import * as analytics from "../utils/analytics";
 
 // Mock the analytics utility
 vi.mock("../utils/analytics", () => ({
@@ -34,8 +35,7 @@ describe("CookieConsent Component", () => {
 
 	describe("Banner Visibility", () => {
 		it("should not show banner immediately on mount", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 
@@ -43,8 +43,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should show banner after 1 second delay if no consent decision", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 
@@ -57,8 +56,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should not show banner if user already made a consent decision", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(true);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
 
 			render(<CookieConsent />);
 
@@ -69,19 +67,17 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should initialize analytics if consent already given", () => {
-			const { hasConsentDecision, initGA } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(true);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
 
 			render(<CookieConsent />);
 
-			expect(initGA).toHaveBeenCalled();
+			expect(analytics.initGA).toHaveBeenCalled();
 		});
 	});
 
 	describe("User Interactions", () => {
 		it("should have Accept and Decline buttons", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -94,8 +90,7 @@ describe("CookieConsent Component", () => {
 
 		it("should call setAnalyticsConsent(true) when Accept is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision, setAnalyticsConsent } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -107,13 +102,12 @@ describe("CookieConsent Component", () => {
 			const acceptButton = screen.getByRole("button", { name: /Accept/i });
 			await user.click(acceptButton);
 
-			expect(setAnalyticsConsent).toHaveBeenCalledWith(true);
+			expect(analytics.setAnalyticsConsent).toHaveBeenCalledWith(true);
 		});
 
 		it("should call setAnalyticsConsent(false) when Decline is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision, setAnalyticsConsent } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -125,13 +119,12 @@ describe("CookieConsent Component", () => {
 			const declineButton = screen.getByRole("button", { name: /Decline/i });
 			await user.click(declineButton);
 
-			expect(setAnalyticsConsent).toHaveBeenCalledWith(false);
+			expect(analytics.setAnalyticsConsent).toHaveBeenCalledWith(false);
 		});
 
 		it("should hide banner after Accept is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -150,8 +143,7 @@ describe("CookieConsent Component", () => {
 
 		it("should hide banner after Decline is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -170,8 +162,7 @@ describe("CookieConsent Component", () => {
 
 		it("should initialize Google Analytics when Accept is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision, initGA } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -183,13 +174,12 @@ describe("CookieConsent Component", () => {
 			const acceptButton = screen.getByRole("button", { name: /Accept/i });
 			await user.click(acceptButton);
 
-			expect(initGA).toHaveBeenCalled();
+			expect(analytics.initGA).toHaveBeenCalled();
 		});
 
 		it("should not initialize Google Analytics when Decline is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision, initGA } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -202,14 +192,13 @@ describe("CookieConsent Component", () => {
 			await user.click(declineButton);
 
 			// initGA should not be called for decline
-			expect(initGA).not.toHaveBeenCalled();
+			expect(analytics.initGA).not.toHaveBeenCalled();
 		});
 	});
 
 	describe("Details Toggle", () => {
 		it("should have a button to show/hide cookie details", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -224,8 +213,7 @@ describe("CookieConsent Component", () => {
 
 		it("should toggle details section when details button is clicked", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -259,8 +247,7 @@ describe("CookieConsent Component", () => {
 
 	describe("Content and Accessibility", () => {
 		it("should display privacy message", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -271,8 +258,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should have an icon in the header", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -284,8 +270,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should have accessible button labels", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -300,8 +285,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should have appropriate ARIA attributes", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -315,8 +299,7 @@ describe("CookieConsent Component", () => {
 
 	describe("Timer Cleanup", () => {
 		it("should cleanup timer on unmount", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			const { unmount } = render(<CookieConsent />);
 
@@ -334,8 +317,7 @@ describe("CookieConsent Component", () => {
 	describe("Edge Cases", () => {
 		it("should handle multiple rapid Accept clicks gracefully", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision, setAnalyticsConsent } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -357,8 +339,7 @@ describe("CookieConsent Component", () => {
 
 		it("should handle Accept then Decline clicks", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);

@@ -105,13 +105,28 @@ describe('FAQ Component', () => {
 	it('renders CTA section', () => {
 		renderFAQ();
 		expect(screen.getByText(/Still Have Questions?/i)).toBeInTheDocument();
-		expect(screen.getByText(/Contact Support/i)).toBeInTheDocument();
+
+		// Use getAllByText since "Contact Support" appears in both content and button
+		const contactSupportElements = screen.getAllByText(/Contact Support/i);
+		expect(contactSupportElements.length).toBeGreaterThan(0);
+
+		// Check that at least one is a link/button
+		const hasLink = contactSupportElements.some(el =>
+			el.tagName === 'A' || el.closest('a') !== null
+		);
+		expect(hasLink).toBe(true);
+
 		expect(screen.getByText(/Join Discord/i)).toBeInTheDocument();
 	});
 
 	it('has correct links in CTA section', () => {
 		renderFAQ();
-		const contactLink = screen.getByText(/Contact Support/i).closest('a');
+
+		// Get all Contact Support elements and find the one that's a link
+		const contactSupportElements = screen.getAllByText(/Contact Support/i);
+		const contactLinks = contactSupportElements.map(el => el.closest('a')).filter(Boolean);
+		const contactLink = contactLinks.find(link => link.getAttribute('href') === '/contact');
+
 		const discordLink = screen.getByText(/Join Discord/i).closest('a');
 
 		expect(contactLink).toHaveAttribute('href', '/contact');

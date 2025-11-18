@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import Contact from "./Contact";
+import useRateLimit from "../hooks/useRateLimit";
 
 // Mock the useRateLimit hook
 vi.mock("../hooks/useRateLimit", () => ({
@@ -401,14 +402,12 @@ describe("Contact Component", () => {
 			render(<Contact />);
 
 			// Verify the hook was called (it's mocked at the top of the file)
-			const useRateLimit = require("../hooks/useRateLimit").default;
 			expect(useRateLimit).toHaveBeenCalled();
 		});
 
 		it("should show rate limit warning when blocked", async () => {
 			// Get the mock and set return value before rendering
-			const useRateLimit = require("../hooks/useRateLimit").default;
-			useRateLimit.mockReturnValueOnce({
+			vi.mocked(useRateLimit).mockReturnValueOnce({
 				isBlocked: true,
 				attemptsLeft: 0,
 				blockTimeLeft: 45,
@@ -426,8 +425,7 @@ describe("Contact Component", () => {
 
 		it("should disable submit button when rate limited", async () => {
 			// Get the mock and set return value before rendering
-			const useRateLimit = require("../hooks/useRateLimit").default;
-			useRateLimit.mockReturnValueOnce({
+			vi.mocked(useRateLimit).mockReturnValueOnce({
 				isBlocked: true,
 				attemptsLeft: 0,
 				blockTimeLeft: 45,
