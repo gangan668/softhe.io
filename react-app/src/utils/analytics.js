@@ -4,7 +4,18 @@
  * and privacy-focused tracking
  */
 
-const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+// Safely handle import.meta in test environments
+const getEnvVar = (key, defaultValue) => {
+	try {
+		return (typeof import.meta !== 'undefined' && import.meta.env)
+			? import.meta.env[key] || defaultValue
+			: defaultValue;
+	} catch {
+		return defaultValue;
+	}
+};
+
+const GA_MEASUREMENT_ID = getEnvVar('VITE_GA_MEASUREMENT_ID', 'G-XXXXXXXXXX');
 
 // Check if Google Analytics is loaded
 const isGALoaded = () => {

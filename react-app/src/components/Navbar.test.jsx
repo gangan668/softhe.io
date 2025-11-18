@@ -280,13 +280,13 @@ describe("Navbar Component", () => {
 		it("should have nav-item class on list items", () => {
 			renderNavbar();
 			const items = document.querySelectorAll(".nav-item");
-			expect(items.length).toBeGreaterThanOrEqual(5);
+			expect(items.length).toBeGreaterThanOrEqual(6);
 		});
 
 		it("should have nav-link class on navigation links", () => {
 			renderNavbar();
 			const links = document.querySelectorAll(".nav-link");
-			expect(links.length).toBeGreaterThanOrEqual(5);
+			expect(links.length).toBeGreaterThanOrEqual(6);
 		});
 	});
 
@@ -305,14 +305,14 @@ describe("Navbar Component", () => {
 		it("should have list items for each link", () => {
 			renderNavbar();
 			const listItems = screen.getAllByRole("listitem");
-			expect(listItems.length).toBe(5);
+			expect(listItems.length).toBe(6);
 		});
 
 		it("should have accessible links", () => {
 			renderNavbar();
 			const links = screen.getAllByRole("link");
-			// 5 nav links + 1 logo link = 6 total
-			expect(links.length).toBe(6);
+			// 6 nav links + 1 logo link = 7 total
+			expect(links.length).toBe(7);
 		});
 
 		it("should have clickable hamburger button", async () => {

@@ -43,9 +43,13 @@ jobs:
 
             - name: Run linter
               run: npm run lint
+              env:
+                  VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
 
             - name: Run tests
               run: npm run test -- --run
+              env:
+                  VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
 
             - name: Build
               run: npm run build

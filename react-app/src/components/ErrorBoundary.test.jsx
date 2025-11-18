@@ -20,12 +20,18 @@ const NestedThrowError = () => {
 };
 
 describe('ErrorBoundary', () => {
+	let originalEnv;
+
 	beforeEach(() => {
+		// Save original NODE_ENV
+		originalEnv = process.env.NODE_ENV;
 		// Suppress console.error for tests
 		vi.spyOn(console, 'error').mockImplementation(() => { });
 	});
 
 	afterEach(() => {
+		// Restore original NODE_ENV
+		process.env.NODE_ENV = originalEnv;
 		vi.restoreAllMocks();
 	});
 
@@ -101,7 +107,6 @@ describe('ErrorBoundary', () => {
 	});
 
 	it('should show error details in development mode', () => {
-		const originalEnv = process.env.NODE_ENV;
 		process.env.NODE_ENV = 'development';
 
 		render(
@@ -112,12 +117,9 @@ describe('ErrorBoundary', () => {
 
 		const details = screen.getByText('Error Details (Development Only)');
 		expect(details).toBeInTheDocument();
-
-		process.env.NODE_ENV = originalEnv;
 	});
 
 	it('should not show error details in production mode', () => {
-		const originalEnv = process.env.NODE_ENV;
 		process.env.NODE_ENV = 'production';
 
 		render(
@@ -128,8 +130,6 @@ describe('ErrorBoundary', () => {
 
 		const details = screen.queryByText('Error Details (Development Only)');
 		expect(details).not.toBeInTheDocument();
-
-		process.env.NODE_ENV = originalEnv;
 	});
 
 	it('should call console.error when error is caught', () => {
