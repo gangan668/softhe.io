@@ -3,59 +3,86 @@ permalink: /performance/
 ---
 
 <!doctype html>
+
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 		<title>Performance Comparison - Softhe.io</title>
+
 		<meta
 			name="description"
 			content="See dramatic performance improvements with Softhe.io optimization. Compare stock Windows vs optimized performance with real benchmarks and screenshots."
 		/>
+
 		<meta
 			name="keywords"
 			content="PC performance comparison, gaming FPS improvement, Windows optimization results, before after benchmarks"
 		/>
+
 		<meta
 			property="og:title"
 			content="Performance Comparison - Softhe.io"
 		/>
+
 		<meta
 			property="og:description"
 			content="See dramatic performance improvements with Softhe.io optimization. Compare stock Windows vs optimized performance with real benchmarks and screenshots."
 		/>
+
 		<meta property="og:type" content="website" />
+
 		<meta property="og:url" content="https://softhe.io/performance/" />
+
 		<link rel="canonical" href="https://softhe.io/performance/" />
 
 		<!-- Structured Data for Performance Comparison -->
+
 		<script type="application/ld+json">
 			{
 				"@context": "https://schema.org",
+
 				"@type": "Article",
+
 				"headline": "Performance Comparison: Stock Windows vs Softhe.io Optimization",
+
 				"description": "Detailed comparison showing dramatic performance improvements between stock Windows and Softhe.io optimized systems",
+
 				"author": {
 					"@type": "Organization",
+
 					"name": "Softhe.io"
 				},
+
 				"publisher": {
 					"@type": "Organization",
+
 					"name": "Softhe.io",
+
 					"logo": {
 						"@type": "ImageObject",
+
 						"url": "https://softhe.io/images/terminal-solid.svg"
 					}
 				},
+
 				"datePublished": "2025-01-01",
+
 				"dateModified": "2025-01-01",
+
 				"mainEntityOfPage": {
 					"@type": "WebPage",
+
 					"@id": "https://softhe.io/performance/"
 				},
+
 				"about": {
 					"@type": "Thing",
+
 					"name": "PC Gaming Optimization Performance",
+
 					"description": "Performance benchmarks showing improvements in FPS, frame time, and system responsiveness"
 				}
 			}
@@ -64,31 +91,49 @@ permalink: /performance/
 		<script type="application/ld+json">
 			{
 				"@context": "https://schema.org",
+
 				"@type": "Dataset",
+
 				"name": "Gaming Performance Benchmarks",
+
 				"description": "Performance comparison data between stock and optimized Windows systems",
+
 				"creator": {
 					"@type": "Organization",
+
 					"name": "Softhe.io"
 				},
+
 				"measurementTechnique": "Real-world gaming benchmarks",
+
 				"variableMeasured": [
 					{
 						"@type": "PropertyValue",
+
 						"name": "Average FPS",
+
 						"description": "Frames per second improvement",
+
 						"value": "+40%"
 					},
+
 					{
 						"@type": "PropertyValue",
+
 						"name": "Frame Time",
+
 						"description": "Frame time reduction",
+
 						"value": "-36%"
 					},
+
 					{
 						"@type": "PropertyValue",
+
 						"name": "CPU Usage",
+
 						"description": "CPU usage optimization",
+
 						"value": "-30%"
 					}
 				]
@@ -96,40 +141,354 @@ permalink: /performance/
 		</script>
 
 		<link rel="stylesheet" href="{{ site.baseurl }}/styles.css" />
+
 		<link
 			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
 			rel="stylesheet"
 		/>
+
 		<link
 			rel="stylesheet"
 			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
 		/>
+
 		<link
 			rel="icon"
 			type="image/svg+xml"
 			href="{{ site.baseurl }}/images/terminal-solid.svg"
 		/>
+
+		<style>
+			/* Wide container for performance page to use full screen space */
+			.page-performance .container {
+				max-width: 95% !important;
+				margin: 0 auto !important;
+				width: 95% !important;
+			}
+
+			.page-performance .screenshot-comparison .container,
+			.page-performance .fps-comparison .container {
+				max-width: 98% !important;
+				width: 98% !important;
+			}
+
+
+			/* Force override any inherited container constraints */
+
+			section.screenshot-comparison .container,
+
+			section.fps-comparison .container {
+
+				max-width: 98% !important;
+
+				width: 98% !important;
+
+			}
+
+
+
+			/* Safety net: remove any blur on performance page */
+			.page-performance *, .performance-page * {
+				backdrop-filter: none !important;
+				-webkit-backdrop-filter: none !important;
+			}
+
+			/* Interactive before/after compare slider - scoped to performance page */
+
+			.page-performance .compare-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 2rem;
+			}
+
+			.page-performance .compare-card {
+				background: var(--surface-color, #1a1a2e);
+				border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+				border-radius: 16px;
+				padding: 1.25rem;
+			}
+			.page-performance .compare-title {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 0 0 0.75rem 0;
+				border-bottom: 1px solid
+					var(--glass-border, rgba(255, 255, 255, 0.08));
+				margin-bottom: 1rem;
+			}
+			.page-performance .compare-title h3 {
+				font-size: 1.2rem;
+				font-weight: 600;
+				margin: 0;
+			}
+			.page-performance .chip-row {
+				display: flex;
+				gap: 10px;
+				flex-wrap: wrap;
+				margin-top: 12px;
+			}
+			.page-performance .chip {
+				font-size: 12px;
+				padding: 6px 10px;
+				border-radius: 999px;
+				border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+				background: rgba(255, 255, 255, 0.05);
+				color: var(--text-secondary, #a1a1aa);
+			}
+			.page-performance .chip.good {
+				color: #10b981;
+				border-color: rgba(16, 185, 129, 0.35);
+				background: rgba(16, 185, 129, 0.08);
+			}
+			.page-performance .chip.bad {
+				color: #ef4444;
+				border-color: rgba(239, 68, 68, 0.35);
+				background: rgba(239, 68, 68, 0.08);
+			}
+
+			/* Task Manager Side-by-Side Comparison */
+			.page-performance .tm-comparison {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 1.5rem;
+				margin: 1.5rem 0;
+			}
+
+			.page-performance .tm-item {
+				background: var(--background-color, #0f0f23);
+				border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+				border-radius: 12px;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+			}
+
+			.page-performance .tm-item-header {
+				padding: 1rem;
+				border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.page-performance .tm-item-header h4 {
+				margin: 0;
+				font-size: 1rem;
+				font-weight: 600;
+			}
+
+			.page-performance .tm-item.bad .tm-item-header {
+				background: rgba(239, 68, 68, 0.08);
+			}
+
+			.page-performance .tm-item.good .tm-item-header {
+				background: rgba(16, 185, 129, 0.08);
+			}
+
+			.page-performance .tm-item-image {
+				padding: 1rem;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #000;
+				min-height: 700px !important;
+			}
+
+			.page-performance .tm-item-image img {
+				width: 100% !important;
+				height: auto !important;
+				max-width: 100% !important;
+				display: block;
+				border-radius: 8px;
+			}
+
+			.page-performance .tm-stats {
+				padding: 1rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+			}
+
+			.page-performance .tm-stat-row {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 0.9rem;
+			}
+
+			.page-performance .tm-stat-label {
+				color: var(--text-secondary, #a1a1aa);
+			}
+
+			.page-performance .tm-stat-value {
+				font-weight: 600;
+			}
+
+			/* In-Game Screenshot Slider - Larger for better visibility */
+			.page-performance .ba-slider {
+				position: relative;
+				width: 100% !important;
+				border-radius: 12px;
+				overflow: hidden;
+				border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+				background: var(--background-color, #0f0f23);
+				height: 80vh !important;
+				min-height: 900px !important;
+				max-height: none !important;
+				aspect-ratio: unset !important;
+			}
+
+			.page-performance .ba-slider--cs2 {
+				height: 80vh !important;
+				min-height: 900px !important;
+				max-height: none !important;
+				aspect-ratio: unset !important;
+			}
+
+			.page-performance .ba-img {
+				position: absolute;
+				inset: 0;
+				width: 100% !important;
+				height: 100% !important;
+				object-fit: cover !important;
+				background-color: #000;
+				display: block;
+			}
+
+			.page-performance .ba-after {
+				z-index: 1;
+			}
+			.page-performance .ba-before {
+				z-index: 2;
+				clip-path: polygon(
+					0 0,
+					var(--pos, 50%) 0,
+					var(--pos, 50%) 100%,
+					0 100%
+				);
+			}
+			.page-performance .ba-range {
+				position: absolute;
+				inset: 0;
+				width: 100%;
+				height: 100%;
+				opacity: 0;
+				cursor: ew-resize;
+				z-index: 5;
+			}
+			.page-performance .ba-handle {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: var(--pos, 50%);
+				width: 0;
+				z-index: 4;
+			}
+			.page-performance .ba-handle span {
+				position: absolute;
+				top: 50%;
+				transform: translate(-50%, -50%);
+				width: 3px;
+				height: 100%;
+				background: rgba(255, 255, 255, 0.35);
+				box-shadow: 0 0 0 1px
+					var(--glass-border, rgba(255, 255, 255, 0.08));
+			}
+			.page-performance .ba-label {
+				position: absolute;
+				top: 12px;
+				padding: 6px 10px;
+				border-radius: 999px;
+				font-size: 12px;
+				font-weight: 600;
+				backdrop-filter: blur(8px);
+				-webkit-backdrop-filter: blur(8px);
+				border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+			}
+			.page-performance .ba-label--left {
+				left: 12px;
+				background: rgba(239, 68, 68, 0.18);
+			}
+			.page-performance .ba-label--right {
+				right: 12px;
+				background: rgba(99, 102, 241, 0.18);
+			}
+
+			@media (max-width: 1600px) {
+				.page-performance .ba-slider,
+				.page-performance .ba-slider--cs2 {
+					height: 70vh !important;
+					min-height: 700px !important;
+				}
+			}
+
+			@media (max-width: 1024px) {
+				.page-performance .container {
+					max-width: 95% !important;
+				}
+
+				.page-performance .tm-comparison {
+					grid-template-columns: 1fr;
+				}
+
+				.page-performance .ba-slider,
+				.page-performance .ba-slider--cs2 {
+					height: 60vh !important;
+					min-height: 600px !important;
+				}
+			}
+
+			@media (max-width: 768px) {
+				.page-performance .tm-item-image {
+					min-height: 300px !important;
+				}
+
+				.page-performance .ba-slider,
+				.page-performance .ba-slider--cs2 {
+					height: 50vh !important;
+					min-height: 400px !important;
+				}
+			}
+
+			/* Nuclear option - force large sizes */
+			@media (min-width: 2000px) {
+				.page-performance .ba-slider,
+				.page-performance .ba-slider--cs2 {
+					height: 85vh !important;
+					min-height: 1000px !important;
+				}
+
+				.page-performance .tm-item-image {
+					min-height: 800px !important;
+				}
+			}
+		</style>
 	</head>
-	<body>
+
+	<body class="page-performance">
 		<nav class="navbar">
 			<div class="nav-container">
 				<div class="nav-logo">
 					<a href="{{ site.baseurl }}/">Softhe.io</a>
 				</div>
+
 				<ul class="nav-menu">
 					<li class="nav-item">
 						<a href="{{ site.baseurl }}/" class="nav-link">Home</a>
 					</li>
+
 					<li class="nav-item">
 						<a href="{{ site.baseurl }}/services/" class="nav-link"
 							>Services</a
 						>
 					</li>
+
 					<li class="nav-item">
 						<a href="{{ site.baseurl }}/store/" class="nav-link"
 							>Store</a
 						>
 					</li>
+
 					<li class="nav-item">
 						<a
 							href="{{ site.baseurl }}/performance/"
@@ -137,15 +496,19 @@ permalink: /performance/
 							>Performance</a
 						>
 					</li>
+
 					<li class="nav-item">
 						<a href="{{ site.baseurl }}/contact/" class="nav-link"
 							>Contact</a
 						>
 					</li>
 				</ul>
+
 				<div class="hamburger">
 					<span class="bar"></span>
+
 					<span class="bar"></span>
+
 					<span class="bar"></span>
 				</div>
 			</div>
@@ -154,6 +517,7 @@ permalink: /performance/
 		<section class="page-header">
 			<div class="container">
 				<h1>Performance Comparison</h1>
+
 				<p>
 					See the dramatic difference between stock Windows and
 					Softhe.io optimization
@@ -161,87 +525,77 @@ permalink: /performance/
 			</div>
 		</section>
 
+		<!-- Task Manager Before/After -->
 		<section class="screenshot-comparison">
 			<div class="container">
-				<div class="screenshot-grid">
-					<div class="screenshot-item">
-						<div class="screenshot-header">
-							<h3>Task Manager - Stock Windows Iso</h3>
-							<span class="screenshot-badge stock-badge"
-								>High Resource Usage</span
-							>
+				<h2 class="section-title">
+					Windows Task Manager Resource Usage
+				</h2>
+				<div class="compare-grid">
+					<div class="compare-card">
+						<div class="compare-title">
+							<h3>Stock vs Custom ISO</h3>
+							<div class="chip-row">
+								<span class="chip bad">Stock • High usage</span>
+								<span class="chip good"
+									>Optimized • Minimal usage</span
+								>
+							</div>
 						</div>
-						<div class="screenshot-container">
-							<img
-								src="{{ site.baseurl }}/images/optimized-task-manager.png"
-								alt="Stock Windows Task Manager showing high resource usage"
-								class="screenshot-image"
-							/>
-							<div class="screenshot-overlay">
-								<div class="overlay-stats">
-									<div class="overlay-stat">
-										<span class="stat-label"
-											>RAM Usage:</span
-										>
-										<span class="stat-value poor"
-											>2.5GB</span
-										>
+
+						<div class="tm-comparison">
+							<div class="tm-item bad">
+								<div class="tm-item-header">
+									<h4>Stock Windows</h4>
+									<span class="chip bad">High Usage</span>
+								</div>
+								<div class="tm-item-image">
+									<img
+										src="{{ site.baseurl }}/images/stock-task-manager.png"
+										alt="Stock Windows Task Manager - higher RAM and processes"
+										loading="eager"
+									/>
+								</div>
+								<div class="tm-stats">
+									<div class="tm-stat-row">
+										<span class="tm-stat-label">RAM Usage:</span>
+										<span class="tm-stat-value" style="color: #ef4444;">2.5 GB</span>
 									</div>
-									<div class="overlay-stat">
-										<span class="stat-label"
-											>Processes:</span
-										>
-										<span class="stat-value poor">111</span>
+									<div class="tm-stat-row">
+										<span class="tm-stat-label">Processes:</span>
+										<span class="tm-stat-value" style="color: #ef4444;">111</span>
 									</div>
-									<div class="overlay-stat">
-										<span class="stat-label"
-											>CPU Usage:</span
-										>
-										<span class="stat-value poor">1%</span>
+									<div class="tm-stat-row">
+										<span class="tm-stat-label">CPU Usage:</span>
+										<span class="tm-stat-value" style="color: #ef4444;">1%</span>
 									</div>
 								</div>
 							</div>
-						</div>
-					</div>
 
-					<div class="screenshot-item">
-						<div class="screenshot-header">
-							<h3>Task Manager - Custom Iso</h3>
-							<span class="screenshot-badge optimized-badge"
-								>Minimal Resource Usage</span
-							>
-						</div>
-						<div class="screenshot-container">
-							<img
-								src="{{ site.baseurl }}/images/stock-task-manager.png"
-								alt="Optimized Windows Task Manager showing minimal resource usage"
-								class="screenshot-image"
-							/>
-							<div class="screenshot-overlay">
-								<div class="overlay-stats">
-									<div class="overlay-stat">
-										<span class="stat-label"
-											>RAM Usage:</span
-										>
-										<span class="stat-value excellent"
-											>0.8GB</span
-										>
+							<div class="tm-item good">
+								<div class="tm-item-header">
+									<h4>Softhe.io Optimized</h4>
+									<span class="chip good">Minimal Usage</span>
+								</div>
+								<div class="tm-item-image">
+									<img
+										src="{{ site.baseurl }}/images/optimized-task-manager.png"
+										alt="Softhe.io Optimized Task Manager - minimal resource usage"
+										loading="eager"
+									/>
+								</div>
+								<div class="tm-stats">
+									<div class="tm-stat-row">
+										<span class="tm-stat-label">RAM Usage:</span>
+										<span class="tm-stat-value" style="color: #10b981;">0.8 GB</span>
 									</div>
-									<div class="overlay-stat">
-										<span class="stat-label"
-											>Processes:</span
-										>
-										<span class="stat-value excellent"
-											>31</span
-										>
+									<div class="tm-stat-row">
+										<span class="tm-stat-label">Processes:</span>
+										<span class="tm-stat-value" style="color: #10b981;">31</span>
 									</div>
-									<div class="overlay-stat">
-										<span class="stat-label"
-											>CPU Usage:</span
-										>
-										<span class="stat-value excellent"
-											>0%</span
-										>
+									<div class="tm-stat-row">
+										<span class="tm-stat-label">CPU Usage:</span>
+										<span class="tm-stat-value" style="color: #10b981;">0%</span>
 									</div>
 								</div>
 							</div>
@@ -251,53 +605,79 @@ permalink: /performance/
 			</div>
 		</section>
 
+		<!-- CS2 Before/After -->
 		<section class="fps-comparison">
 			<div class="container">
-				<h2 class="section-title">In-Game Performance Screenshots</h2>
+				<h2 class="section-title">
+					In-Game Performance: Counter‑Strike 2
+				</h2>
 
-				<div class="fps-showcase">
-					<div class="fps-comparison-item">
-						<div class="fps-header">
-							<h3>Counter-Strike 2 Performance</h3>
-							<p>Same hardware, different optimization levels</p>
+				<div class="compare-grid">
+					<div class="compare-card">
+						<div class="compare-title">
+							<h3>Same hardware, different optimization</h3>
+							<div class="chip-row">
+								<span class="chip bad"
+									>Stock • 670 avg FPS</span
+								>
+								<span class="chip good"
+									>Optimized • 932 avg FPS</span
+								>
+							</div>
 						</div>
 
-						<div class="fps-images">
-							<div class="fps-image-container">
-								<div class="fps-label">
-									<span class="fps-title">Stock Windows</span>
-									<span class="fps-value poor">670 FPS</span>
-								</div>
-								<img
-									src="{{ site.baseurl }}/images/cs2-stock-fps.png"
-									alt="Counter-Strike 2 running on stock Windows showing 165 FPS"
-									class="fps-screenshot"
-								/>
-								<div class="fps-details">
-									<span>1% Low: 355 FPS</span>
-									<span>Frame Time: 1.5ms</span>
-								</div>
-							</div>
+						<div
+							class="ba-slider ba-slider--cs2"
+							aria-label="Drag to compare CS2 FPS overlay: Stock vs Optimized"
+						>
+							<!-- Before (left) = Stock -->
+							<img
+								src="{{ site.baseurl }}/images/cs2-stock-fps.png"
+								alt="CS2 on Stock Windows showing lower FPS overlay"
+								class="ba-img ba-before"
+								loading="lazy"
+							/>
+							<!-- After (right) = Optimized -->
+							<img
+								src="{{ site.baseurl }}/images/cs2-optimized-fps.png"
+								alt="CS2 on Softhe.io optimized Windows showing higher FPS overlay"
+								class="ba-img ba-after"
+								loading="lazy"
+							/>
 
-							<div class="fps-image-container">
-								<div class="fps-label">
-									<span class="fps-title"
-										>Softhe.io Optimized</span
-									>
-									<span class="fps-value excellent"
-										>932 Average FPS</span
-									>
-								</div>
-								<img
-									src="{{ site.baseurl }}/images/cs2-optimized-fps.png"
-									alt="Counter-Strike 2 running on optimized Windows showing 420+ FPS"
-									class="fps-screenshot"
-								/>
-								<div class="fps-details">
-									<span>1% Low: 498 FPS</span>
-									<span>Frame Time: 1.1ms</span>
-								</div>
+							<input
+								class="ba-range"
+								type="range"
+								min="0"
+								max="100"
+								value="50"
+								aria-label="Slide to compare CS2 FPS overlays"
+							/>
+							<div class="ba-handle" aria-hidden="true">
+								<span></span>
 							</div>
+							<div class="ba-label ba-label--left">Stock</div>
+							<div class="ba-label ba-label--right">
+								Optimized
+							</div>
+						</div>
+
+						<div
+							class="chip-row"
+							style="justify-content: flex-start"
+						>
+							<span class="chip bad">Stock 1% Low: 355 FPS</span>
+							<span class="chip good"
+								>Optimized 1% Low: 498 FPS</span
+							>
+
+							<span class="chip bad"
+								>Stock Frame Time: 1.5ms</span
+							>
+
+							<span class="chip good"
+								>Optimized Frame Time: 1.1ms</span
+							>
 						</div>
 					</div>
 				</div>
@@ -311,52 +691,71 @@ permalink: /performance/
 				<div class="comparison-table">
 					<div class="table-header">
 						<div class="table-cell">Feature</div>
+
 						<div class="table-cell">Stock Windows</div>
+
 						<div class="table-cell">Softhe.io Optimized</div>
+
 						<div class="table-cell">Improvement</div>
 					</div>
 
 					<div class="table-row">
 						<div class="table-cell feature-name">
 							<i class="fas fa-chart-line"></i>
+
 							Frame Rate (CS2)
 						</div>
+
 						<div class="table-cell stock-value">670 avg FPS</div>
+
 						<div class="table-cell optimized-value">
 							932 avg FPS
 						</div>
+
 						<div class="table-cell improvement">+40% avg</div>
 					</div>
 
 					<div class="table-row">
 						<div class="table-cell feature-name">
 							<i class="fas fa-stopwatch"></i>
-							Input Latency
+
+							Frame Time
 						</div>
+
 						<div class="table-cell stock-value">1,5ms</div>
+
 						<div class="table-cell optimized-value">1.1ms</div>
+
 						<div class="table-cell improvement">-36% reduction</div>
 					</div>
 
 					<div class="table-row">
 						<div class="table-cell feature-name">
 							<i class="fas fa-microchip"></i>
+
 							CPU Usage (Gaming)
 						</div>
+
 						<div class="table-cell stock-value">75-90%</div>
+
 						<div class="table-cell optimized-value">45-65%</div>
+
 						<div class="table-cell improvement">-30% usage</div>
 					</div>
 
 					<div class="table-row">
 						<div class="table-cell feature-name">
 							<i class="fas fa-hdd"></i>
+
 							Boot Time
 						</div>
+
 						<div class="table-cell stock-value">~30 seconds</div>
+
 						<div class="table-cell optimized-value">
 							~15 seconds
 						</div>
+
 						<div class="table-cell improvement">~65% faster</div>
 					</div>
 				</div>
@@ -366,13 +765,16 @@ permalink: /performance/
 		<section class="optimization-features">
 			<div class="container">
 				<h2 class="section-title">What Makes Our Windows Different</h2>
+
 				<div class="features-comparison">
 					<div class="feature-comparison-item">
 						<div class="feature-icon removed">
 							<i class="fas fa-times"></i>
 						</div>
+
 						<div class="feature-content">
 							<h3>Bloatware Eliminated</h3>
+
 							<p>
 								All unnecessary Microsoft apps, services, and
 								telemetry completely removed. No Cortana, Xbox
@@ -386,8 +788,10 @@ permalink: /performance/
 						<div class="feature-icon optimized">
 							<i class="fas fa-tachometer-alt"></i>
 						</div>
+
 						<div class="feature-content">
 							<h3>Gaming-First Registry</h3>
+
 							<p>
 								Thousands of registry optimizations specifically
 								tuned for gaming performance, including GPU
@@ -401,8 +805,10 @@ permalink: /performance/
 						<div class="feature-icon enhanced">
 							<i class="fas fa-shield-alt"></i>
 						</div>
+
 						<div class="feature-content">
 							<h3>Enterprise Security</h3>
+
 							<p>
 								Built on Windows Enterprise foundation with
 								enhanced security features while maintaining
@@ -415,8 +821,10 @@ permalink: /performance/
 						<div class="feature-icon optimized">
 							<i class="fas fa-network-wired"></i>
 						</div>
+
 						<div class="feature-content">
 							<h3>Network Optimization</h3>
+
 							<p>
 								TCP/IP stack optimizations, reduced network
 								latency, and prioritized gaming traffic for the
@@ -432,10 +840,12 @@ permalink: /performance/
 			<div class="container">
 				<div class="cta-content">
 					<h2>Ready to Experience the Difference?</h2>
+
 					<p>
 						Join thousands of competitive gamers who've made the
 						switch to optimized performance.
 					</p>
+
 					<a href="{{ site.baseurl }}/store/" class="btn btn-primary"
 						>Get Optimized Windows</a
 					>
@@ -448,43 +858,53 @@ permalink: /performance/
 				<div class="footer-content">
 					<div class="footer-section">
 						<h3>Softhe.io</h3>
+
 						<p>
 							Elite PC optimization for esports professionals and
 							enthusiasts worldwide.
 						</p>
+
 						<div class="social-links">
 							<a href="https://x.com/SoftheCS"
 								><i class="fab fa-twitter"></i
 							></a>
+
 							<a href="https://discord.com/users/softhecs"
 								><i class="fab fa-discord"></i
 							></a>
+
 							<a href="https://github.com/Softhe"
 								><i class="fab fa-github"></i
 							></a>
+
 							<a href="https://www.youtube.com/@softhe"
 								><i class="fab fa-youtube"></i
 							></a>
 						</div>
 					</div>
+
 					<div class="footer-section">
 						<h4>Services</h4>
+
 						<ul>
 							<li>
 								<a href="{{ site.baseurl }}/services/"
 									>Custom Windows ISO</a
 								>
 							</li>
+
 							<li>
 								<a href="{{ site.baseurl }}/services/"
 									>BIOS Optimization</a
 								>
 							</li>
+
 							<li>
 								<a href="{{ site.baseurl }}/performance/"
 									>Performance Tuning</a
 								>
 							</li>
+
 							<li>
 								<a href="{{ site.baseurl }}/contact/"
 									>Support</a
@@ -492,17 +912,22 @@ permalink: /performance/
 							</li>
 						</ul>
 					</div>
+
 					<div class="footer-section">
 						<h4>Contact</h4>
+
 						<ul>
 							<li>
 								<i class="fas fa-envelope"></i>
+
 								<a href="mailto:support@softhe.io"
 									>support@softhe.io</a
 								>
 							</li>
+
 							<li>
 								<i class="fab fa-discord"></i>
+
 								<a
 									href="https://discord.com/users/softhecs"
 									target="_blank"
@@ -512,6 +937,7 @@ permalink: /performance/
 						</ul>
 					</div>
 				</div>
+
 				<div class="footer-bottom">
 					<p>&copy; 2025 Softhe.io. All rights reserved.</p>
 				</div>
@@ -519,5 +945,27 @@ permalink: /performance/
 		</footer>
 
 		<script src="{{ site.baseurl }}/script.js"></script>
+
+		<script>
+			// Initialize all compare sliders
+			(function () {
+				document
+					.querySelectorAll(".ba-slider")
+					.forEach(function (slider) {
+						var range = slider.querySelector(".ba-range");
+						if (!range) return;
+						var setPos = function (val) {
+							var pct = Math.min(100, Math.max(0, Number(val)));
+							slider.style.setProperty("--pos", pct + "%");
+						};
+						// Initial
+						setPos(range.value || 50);
+						// Update on input
+						range.addEventListener("input", function (e) {
+							setPos(e.target.value);
+						});
+					});
+			})();
+		</script>
 	</body>
 </html>
