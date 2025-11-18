@@ -24,7 +24,6 @@ function Contact() {
 	const sanitizeInput = (input) => {
 		return input
 			.replace(/[<>]/g, "") // Remove < and >
-			.trim()
 			.slice(0, 1000); // Limit length
 	};
 
@@ -40,7 +39,8 @@ function Contact() {
 	 * Validate form data
 	 */
 	const validateForm = () => {
-		if (!formData.name || formData.name.length < 2) {
+		const trimmedName = formData.name.trim();
+		if (!trimmedName || trimmedName.length < 2) {
 			setSubmitStatus({
 				type: "error",
 				message: "Please enter a valid name (at least 2 characters).",
@@ -64,7 +64,8 @@ function Contact() {
 			return false;
 		}
 
-		if (!formData.message || formData.message.length < 10) {
+		const trimmedMessage = formData.message.trim();
+		if (!trimmedMessage || trimmedMessage.length < 10) {
 			setSubmitStatus({
 				type: "error",
 				message: "Please enter a message (at least 10 characters).",
@@ -86,9 +87,12 @@ function Contact() {
 	const handleChange = (e) => {
 		const { name, value } = e.target;
 
+		// Apply sanitization but preserve spaces
+		const sanitizedValue = sanitizeInput(value);
+
 		setFormData({
 			...formData,
-			[name]: sanitizeInput(value),
+			[name]: sanitizedValue,
 		});
 
 		// Clear error message when user starts typing

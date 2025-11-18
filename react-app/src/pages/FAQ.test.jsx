@@ -21,10 +21,19 @@ describe('FAQ Component', () => {
 	it('renders all category buttons', () => {
 		renderFAQ();
 		expect(screen.getByText(/All Questions/i)).toBeInTheDocument();
-		expect(screen.getByText(/General/i)).toBeInTheDocument();
-		expect(screen.getByText(/Technical/i)).toBeInTheDocument();
-		expect(screen.getByText(/Billing/i)).toBeInTheDocument();
-		expect(screen.getByText(/Support/i)).toBeInTheDocument();
+
+		// Use getAllByText and filter for buttons to avoid multiple matches
+		const generalButtons = screen.getAllByText(/General/i);
+		expect(generalButtons.some(el => el.classList.contains('category-btn'))).toBe(true);
+
+		const technicalButtons = screen.getAllByText(/Technical/i);
+		expect(technicalButtons.some(el => el.classList.contains('category-btn'))).toBe(true);
+
+		const billingButtons = screen.getAllByText(/Billing/i);
+		expect(billingButtons.some(el => el.classList.contains('category-btn'))).toBe(true);
+
+		const supportButtons = screen.getAllByText(/Support/i);
+		expect(supportButtons.some(el => el.classList.contains('category-btn'))).toBe(true);
 	});
 
 	it('renders search input', () => {
@@ -59,14 +68,15 @@ describe('FAQ Component', () => {
 	it('filters FAQ items by category', () => {
 		renderFAQ();
 
-		// Click on Technical category
-		const technicalButton = screen.getByText(/Technical/i);
+		// Click on Technical category button specifically
+		const technicalButtons = screen.getAllByText(/Technical/i);
+		const technicalButton = technicalButtons.find(el => el.classList.contains('category-btn'));
 		fireEvent.click(technicalButton);
 
 		// Technical questions should be visible
 		expect(screen.getByText(/How much performance improvement can I expect?/i)).toBeInTheDocument();
 
-		// General category should have active class on All Questions by default
+		// Technical button should have active class
 		expect(technicalButton).toHaveClass('active');
 	});
 
@@ -129,8 +139,9 @@ describe('FAQ Component', () => {
 		fireEvent.change(searchInput, { target: { value: 'test search' } });
 		expect(searchInput.value).toBe('test search');
 
-		// Click on a category
-		const generalButton = screen.getByText(/General/i);
+		// Click on a category button specifically
+		const generalButtons = screen.getAllByText(/General/i);
+		const generalButton = generalButtons.find(el => el.classList.contains('category-btn'));
 		fireEvent.click(generalButton);
 
 		// Search should be cleared

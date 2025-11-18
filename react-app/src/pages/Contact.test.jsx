@@ -398,17 +398,17 @@ describe("Contact Component", () => {
 
 	describe("Rate Limiting Integration", () => {
 		it("should use rate limiting hook", () => {
-			const useRateLimit = require("../hooks/useRateLimit").default;
 			render(<Contact />);
 
-			// Verify the hook was called
+			// Verify the hook was called (it's mocked at the top of the file)
+			const useRateLimit = require("../hooks/useRateLimit").default;
 			expect(useRateLimit).toHaveBeenCalled();
 		});
 
 		it("should show rate limit warning when blocked", async () => {
-			// Mock rate limit as blocked
+			// Get the mock and set return value before rendering
 			const useRateLimit = require("../hooks/useRateLimit").default;
-			useRateLimit.mockReturnValue({
+			useRateLimit.mockReturnValueOnce({
 				isBlocked: true,
 				attemptsLeft: 0,
 				blockTimeLeft: 45,
@@ -425,9 +425,9 @@ describe("Contact Component", () => {
 		});
 
 		it("should disable submit button when rate limited", async () => {
-			// Mock rate limit as blocked
+			// Get the mock and set return value before rendering
 			const useRateLimit = require("../hooks/useRateLimit").default;
-			useRateLimit.mockReturnValue({
+			useRateLimit.mockReturnValueOnce({
 				isBlocked: true,
 				attemptsLeft: 0,
 				blockTimeLeft: 45,

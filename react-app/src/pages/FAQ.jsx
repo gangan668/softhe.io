@@ -2,6 +2,23 @@ import { useState } from "react";
 import SEO from "../components/SEO";
 import "./FAQ.css";
 
+// Helper function to extract text from React elements safely
+const extractTextFromReactElement = (element) => {
+	if (typeof element === "string") {
+		return element;
+	}
+	if (typeof element === "number") {
+		return String(element);
+	}
+	if (Array.isArray(element)) {
+		return element.map(extractTextFromReactElement).join(" ");
+	}
+	if (element?.props?.children) {
+		return extractTextFromReactElement(element.props.children);
+	}
+	return "";
+};
+
 function FAQ() {
 	const [activeCategory, setActiveCategory] = useState("all");
 	const [searchTerm, setSearchTerm] = useState("");
@@ -660,9 +677,7 @@ function FAQ() {
 					const answerText =
 						typeof item.answer === "string"
 							? item.answer.toLowerCase()
-							: item.answer?.props?.children
-								? JSON.stringify(item.answer.props.children).toLowerCase()
-								: "";
+							: extractTextFromReactElement(item.answer).toLowerCase();
 
 					if (
 						questionText.includes(value.toLowerCase()) ||
@@ -687,9 +702,7 @@ function FAQ() {
 			const answerText =
 				typeof item.answer === "string"
 					? item.answer.toLowerCase()
-					: item.answer?.props?.children
-						? JSON.stringify(item.answer.props.children).toLowerCase()
-						: "";
+					: extractTextFromReactElement(item.answer).toLowerCase();
 
 			return (
 				questionText.includes(searchTerm) || answerText.includes(searchTerm)
