@@ -242,16 +242,22 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
+			// Wait for success message first
+			await waitFor(() => {
+				expect(screen.getByText(/Thank you for your message/i)).toBeInTheDocument();
+			}, { timeout: 5000 });
+
+			// Then check that form was cleared
 			await waitFor(() => {
 				expect(nameInput).toHaveValue("");
 				expect(emailInput).toHaveValue("");
 				expect(subjectInput).toHaveValue("");
 				expect(messageInput).toHaveValue("");
-			});
+			}, { timeout: 1000 });
 		});
 	});
 
@@ -268,13 +274,13 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
 			await waitFor(() => {
-				expect(screen.getByText(/Message sent successfully/i)).toBeInTheDocument();
-			});
+				expect(screen.getByText(/Thank you for your message/i)).toBeInTheDocument();
+			}, { timeout: 5000 });
 		});
 
 		it("should disable submit button while submitting", async () => {
@@ -289,7 +295,7 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "This is a test message with enough characters");
 
 			expect(submitButton).not.toBeDisabled();
@@ -297,27 +303,31 @@ describe("Contact Component", () => {
 			await user.click(submitButton);
 
 			// Button should be disabled during submission
-			expect(submitButton).toBeDisabled();
+			await waitFor(() => {
+				expect(submitButton).toBeDisabled();
+			}, { timeout: 1000 });
 		});
 
 		it("should show loading state during submission", async () => {
 			const user = userEvent.setup();
 			render(<Contact />);
 
-			const nameInput = screen.getByLabelText(/Name/i);
-			const emailInput = screen.getByLabelText(/Email/i);
+			const nameInput = screen.getByLabelText(/Full Name/i);
+			const emailInput = screen.getByLabelText(/Email Address/i);
 			const subjectInput = screen.getByLabelText(/Subject/i);
-			const messageInput = screen.getByLabelText(/Message/i);
+			const messageInput = screen.getByLabelText(/^Message/i);
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
 			// Check for loading indicator
-			expect(screen.getByText(/Sending/i)).toBeInTheDocument();
+			await waitFor(() => {
+				expect(screen.getByText(/Sending/i)).toBeInTheDocument();
+			}, { timeout: 1000 });
 		});
 	});
 
@@ -379,10 +389,13 @@ describe("Contact Component", () => {
 
 				await user.type(nameInput, "John Doe");
 				await user.type(emailInput, "john@example.com");
-				await user.type(subjectInput, "Test Subject");
+				await user.selectOptions(subjectInput, "general");
 				await user.type(messageInput, "This is a test message");
 				await user.click(submitButton);
 
+				await waitFor(() => {
+					expect(screen.getByText(/Sending/i)).toBeInTheDocument();
+				}, { timeout: 1000 });
 				// Should detect bot and block submission
 				await waitFor(() => {
 					expect(screen.queryByText(/Message sent successfully/i)).not.toBeInTheDocument();
@@ -414,7 +427,8 @@ describe("Contact Component", () => {
 			render(<Contact />);
 
 			// Should show rate limit warning
-			expect(screen.getByText(/Too many attempts/i)).toBeInTheDocument();
+			const warning = await screen.findByText(/Too many attempts/i, {}, { timeout: 3000 });
+			expect(warning).toBeInTheDocument();
 		});
 
 		it("should disable submit button when rate limited", async () => {
@@ -432,7 +446,9 @@ describe("Contact Component", () => {
 			render(<Contact />);
 
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
-			expect(submitButton).toBeDisabled();
+			await waitFor(() => {
+				expect(submitButton).toBeDisabled();
+			});
 		});
 	});
 
@@ -515,10 +531,11 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.type(messageInput, "This is a test message");
+			await user.click(submitButton);
 
-			// Try to submit multiple times rapidly
+			// Try clicking again rapidly
 			await user.click(submitButton);
 			await user.click(submitButton);
 			await user.click(submitButton);

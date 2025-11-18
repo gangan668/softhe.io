@@ -328,19 +328,29 @@ describe("CookieConsent Component", () => {
 		it("should handle analytics utility errors gracefully", async () => {
 			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
-			vi.mocked(analytics.setAnalyticsConsent).mockImplementation(() => {
-				throw new Error("Analytics error");
-			});
 
-			// Should not throw error on render
-			expect(() => {
-				render(<CookieConsent />);
-			}).not.toThrow();
+			// Make setAnalyticsConsent return a rejected promise instead of throwing synchronously
+			vi.mocked(analytics.setAnalyticsConsent).mockImplementation(() =>
+				Promise.reject(new Error("Analytics error"))
+			);
+
+			// Spy on console.error to verify error was handled/logged
+			const consoleError = vi.spyOn(console, "error").mockImplementation(() => { });
+
+			render(<CookieConsent />);
 
 			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 
-			// Should handle error gracefully when clicking
-			await expect(user.click(acceptButton)).rejects.toThrow("Analytics error");
+			// Click should resolve (no unhandled exception)
+			await user.click(acceptButton);
+
+			// Ensure the mock was called and the component handled the error (logged it)
+			await waitFor(() => {
+				expect(analytics.setAnalyticsConsent).toHaveBeenCalledWith(true);
+				expect(consoleError).toHaveBeenCalled();
+			});
+
+			consoleError.mockRestore();
 		});
 	});
 
