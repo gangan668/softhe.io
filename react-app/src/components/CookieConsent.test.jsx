@@ -334,7 +334,7 @@ describe("CookieConsent Component", () => {
 			await user.click(acceptButton);
 
 			// Should only call once or handle gracefully
-			expect(setAnalyticsConsent).toHaveBeenCalledWith(true);
+			expect(analytics.setAnalyticsConsent).toHaveBeenCalledWith(true);
 		});
 
 		it("should handle Accept then Decline clicks", async () => {
@@ -358,8 +358,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should return null when banner is hidden", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(true);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
 
 			const { container } = render(<CookieConsent />);
 
@@ -370,19 +369,17 @@ describe("CookieConsent Component", () => {
 
 	describe("Analytics Integration", () => {
 		it("should check for existing consent on mount", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 
-			expect(hasConsentDecision).toHaveBeenCalled();
+			expect(analytics.hasConsentDecision).toHaveBeenCalled();
 		});
 
 		it("should handle analytics utility errors gracefully", async () => {
 			const user = userEvent.setup({ delay: null });
-			const { hasConsentDecision, setAnalyticsConsent } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
-			setAnalyticsConsent.mockImplementation(() => {
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
+			vi.mocked(analytics.setAnalyticsConsent).mockImplementation(() => {
 				throw new Error("Analytics error");
 			});
 
@@ -409,8 +406,7 @@ describe("CookieConsent Component", () => {
 
 	describe("UX and Timing", () => {
 		it("should delay banner appearance for better UX", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 
@@ -429,8 +425,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should show banner exactly after 1000ms", () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 
@@ -446,8 +441,7 @@ describe("CookieConsent Component", () => {
 
 	describe("Visual Elements", () => {
 		it("should have overlay and modal container", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
@@ -462,8 +456,7 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should have styled buttons", async () => {
-			const { hasConsentDecision } = require("../utils/analytics");
-			hasConsentDecision.mockReturnValue(false);
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 			vi.advanceTimersByTime(1000);
