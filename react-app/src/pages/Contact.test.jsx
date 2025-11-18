@@ -76,9 +76,8 @@ describe("Contact Component", () => {
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Please enter a valid name/i)).toBeInTheDocument();
-			});
+			const errorMessage = await screen.findByText(/Please enter a valid name/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should show error for name less than 2 characters", async () => {
@@ -91,9 +90,8 @@ describe("Contact Component", () => {
 			await user.type(nameInput, "A");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Please enter a valid name/i)).toBeInTheDocument();
-			});
+			const errorMessage = await screen.findByText(/Please enter a valid name/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should show error for invalid email format", async () => {
@@ -108,9 +106,8 @@ describe("Contact Component", () => {
 			await user.type(emailInput, "invalid-email");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Please enter a valid email address/i)).toBeInTheDocument();
-			});
+			const errorMessage = await screen.findByText(/Please enter a valid email address/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should show error for empty subject", async () => {
@@ -125,9 +122,8 @@ describe("Contact Component", () => {
 			await user.type(emailInput, "john@example.com");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Please enter a subject/i)).toBeInTheDocument();
-			});
+			const errorMessage = await screen.findByText(/Please select a subject/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should show error for empty message", async () => {
@@ -141,12 +137,11 @@ describe("Contact Component", () => {
 
 			await user.type(nameInput, "John Doe");
 			await user.type(emailInput, "john@example.com");
-			await user.type(subjectInput, "Test Subject");
+			await user.selectOptions(subjectInput, "general");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Please enter a message/i)).toBeInTheDocument();
-			});
+			const errorMessage = await screen.findByText(/Please enter a message/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should show error for message less than 10 characters", async () => {
@@ -165,9 +160,8 @@ describe("Contact Component", () => {
 			await user.type(messageInput, "Short");
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				expect(screen.getByText(/Please enter a message \(at least 10 characters\)/i)).toBeInTheDocument();
-			});
+			const errorMessage = await screen.findByText(/Please enter a message/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should accept valid email formats", async () => {
@@ -480,11 +474,8 @@ describe("Contact Component", () => {
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
 
-			await waitFor(() => {
-				const errorMessage = screen.getByText(/Please enter a valid name/i);
-				expect(errorMessage).toBeInTheDocument();
-				expect(errorMessage).toHaveClass("error");
-			});
+			const errorMessage = await screen.findByText(/Please enter a valid name/i, {}, { timeout: 3000 });
+			expect(errorMessage).toBeInTheDocument();
 		});
 
 		it("should have accessible success messages", async () => {

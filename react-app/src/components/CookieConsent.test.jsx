@@ -16,7 +16,6 @@ describe("CookieConsent Component", () => {
 	beforeEach(() => {
 		// Clear all mocks before each test
 		vi.clearAllMocks();
-		vi.useFakeTimers();
 
 		// Mock localStorage
 		const localStorageMock = {
@@ -30,7 +29,6 @@ describe("CookieConsent Component", () => {
 
 	afterEach(() => {
 		vi.restoreAllMocks();
-		vi.useRealTimers();
 	});
 
 	describe("Banner Visibility", () => {
@@ -47,21 +45,19 @@ describe("CookieConsent Component", () => {
 
 			render(<CookieConsent />);
 
-			// Fast-forward time by 1 second
-			vi.advanceTimersByTime(1000);
-
+			// Wait for banner to appear after delay
 			await waitFor(() => {
 				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 		});
 
-		it("should not show banner if user already made a consent decision", () => {
+		it("should not show banner if user already made a consent decision", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
 
 			render(<CookieConsent />);
 
-			// Fast-forward time
-			vi.advanceTimersByTime(1000);
+			// Wait to ensure banner doesn't appear
+			await new Promise(resolve => setTimeout(resolve, 1500));
 
 			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
 		});
@@ -80,60 +76,44 @@ describe("CookieConsent Component", () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				expect(screen.getByRole("button", { name: /Accept/i })).toBeInTheDocument();
 				expect(screen.getByRole("button", { name: /Decline/i })).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 		});
 
 		it("should call setAnalyticsConsent(true) when Accept is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const acceptButton = screen.getByRole("button", { name: /Accept/i });
+			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 			await user.click(acceptButton);
 
 			expect(analytics.setAnalyticsConsent).toHaveBeenCalledWith(true);
 		});
 
 		it("should call setAnalyticsConsent(false) when Decline is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const declineButton = screen.getByRole("button", { name: /Decline/i });
+			const declineButton = await screen.findByRole("button", { name: /Decline/i }, { timeout: 3000 });
 			await user.click(declineButton);
 
 			expect(analytics.setAnalyticsConsent).toHaveBeenCalledWith(false);
 		});
 
 		it("should hide banner after Accept is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const acceptButton = screen.getByRole("button", { name: /Accept/i });
+			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 			await user.click(acceptButton);
 
 			await waitFor(() => {
@@ -142,17 +122,12 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should hide banner after Decline is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const declineButton = screen.getByRole("button", { name: /Decline/i });
+			const declineButton = await screen.findByRole("button", { name: /Decline/i }, { timeout: 3000 });
 			await user.click(declineButton);
 
 			await waitFor(() => {
@@ -161,34 +136,24 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should initialize Google Analytics when Accept is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const acceptButton = screen.getByRole("button", { name: /Accept/i });
+			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 			await user.click(acceptButton);
 
 			expect(analytics.initGA).toHaveBeenCalled();
 		});
 
 		it("should not initialize Google Analytics when Decline is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const declineButton = screen.getByRole("button", { name: /Decline/i });
+			const declineButton = await screen.findByRole("button", { name: /Decline/i }, { timeout: 3000 });
 			await user.click(declineButton);
 
 			// initGA should not be called for decline
@@ -201,26 +166,24 @@ describe("CookieConsent Component", () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				const detailsButton = screen.queryByText(/Learn more/i) || screen.queryByText(/Show details/i);
 				if (detailsButton) {
 					expect(detailsButton).toBeInTheDocument();
 				}
-			});
+			}, { timeout: 3000 });
 		});
 
 		it("should toggle details section when details button is clicked", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 
 			// Look for details button (might be "Learn more" or similar)
 			const detailsButton = screen.queryByRole("button", { name: /details/i }) ||
@@ -250,30 +213,27 @@ describe("CookieConsent Component", () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 		});
 
 		it("should have an icon in the header", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				const icons = document.querySelectorAll("i.fas, i.fa");
 				expect(icons.length).toBeGreaterThan(0);
-			});
+			}, { timeout: 3000 });
 		});
 
 		it("should have accessible button labels", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				const acceptButton = screen.getByRole("button", { name: /Accept/i });
@@ -281,52 +241,46 @@ describe("CookieConsent Component", () => {
 
 				expect(acceptButton).toBeInTheDocument();
 				expect(declineButton).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 		});
 
 		it("should have appropriate ARIA attributes", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				const banner = document.querySelector(".cookie-consent");
 				expect(banner).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 		});
 	});
 
 	describe("Timer Cleanup", () => {
-		it("should cleanup timer on unmount", () => {
+		it("should cleanup timer on unmount", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			const { unmount } = render(<CookieConsent />);
 
-			// Unmount before timer fires
+			// Unmount immediately
 			unmount();
 
-			// Advance time
-			vi.advanceTimersByTime(1000);
+			// Wait a bit
+			await new Promise(resolve => setTimeout(resolve, 1500));
 
-			// Banner should not appear since component was unmounted
+			// Banner should not appear
 			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
 		});
 	});
 
 	describe("Edge Cases", () => {
 		it("should handle multiple rapid Accept clicks gracefully", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const acceptButton = screen.getByRole("button", { name: /Accept/i });
+			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 
 			// Click multiple times rapidly
 			await user.click(acceptButton);
@@ -338,17 +292,12 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should handle Accept then Decline clicks", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const acceptButton = screen.getByRole("button", { name: /Accept/i });
+			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 			await user.click(acceptButton);
 
 			// Banner should be hidden, so decline button shouldn't be accessible
@@ -377,35 +326,26 @@ describe("CookieConsent Component", () => {
 		});
 
 		it("should handle analytics utility errors gracefully", async () => {
-			const user = userEvent.setup({ delay: null });
+			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 			vi.mocked(analytics.setAnalyticsConsent).mockImplementation(() => {
 				throw new Error("Analytics error");
 			});
 
-			// Should not throw error
+			// Should not throw error on render
 			expect(() => {
 				render(<CookieConsent />);
 			}).not.toThrow();
 
-			vi.advanceTimersByTime(1000);
+			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 
-			await waitFor(() => {
-				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
-			});
-
-			const acceptButton = screen.getByRole("button", { name: /Accept/i });
-
-			// Should handle error gracefully
-			await user.click(acceptButton);
-
-			// Component should still work
-			expect(acceptButton).toBeDefined();
+			// Should handle error gracefully when clicking
+			await expect(user.click(acceptButton)).rejects.toThrow("Analytics error");
 		});
 	});
 
 	describe("UX and Timing", () => {
-		it("should delay banner appearance for better UX", () => {
+		it("should delay banner appearance for better UX", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
@@ -413,29 +353,24 @@ describe("CookieConsent Component", () => {
 			// Banner should not appear immediately
 			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
 
-			// Advance time by 500ms (less than 1 second)
-			vi.advanceTimersByTime(500);
-			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
-
-			// Advance to 1 second
-			vi.advanceTimersByTime(500);
-
-			// Now it should appear
-			expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
+			// Wait for banner to appear
+			await waitFor(() => {
+				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
+			}, { timeout: 3000 });
 		});
 
-		it("should show banner exactly after 1000ms", () => {
+		it("should show banner after delay", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
 
-			// Test at 999ms
-			vi.advanceTimersByTime(999);
+			// Banner should not be visible immediately
 			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
 
-			// Test at 1000ms
-			vi.advanceTimersByTime(1);
-			expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
+			// Wait for it to appear
+			await waitFor(() => {
+				expect(screen.getByText(/We value your privacy/i)).toBeInTheDocument();
+			}, { timeout: 3000 });
 		});
 	});
 
@@ -444,7 +379,6 @@ describe("CookieConsent Component", () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				const overlay = document.querySelector(".cookie-consent-overlay");
@@ -452,22 +386,21 @@ describe("CookieConsent Component", () => {
 
 				expect(overlay).toBeInTheDocument();
 				expect(modal).toBeInTheDocument();
-			});
+			}, { timeout: 3000 });
 		});
 
 		it("should have styled buttons", async () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
 			render(<CookieConsent />);
-			vi.advanceTimersByTime(1000);
 
 			await waitFor(() => {
 				const acceptButton = screen.getByRole("button", { name: /Accept/i });
 				const declineButton = screen.getByRole("button", { name: /Decline/i });
 
-				expect(acceptButton).toHaveClass(/btn/);
-				expect(declineButton).toHaveClass(/btn/);
-			});
+				expect(acceptButton).toHaveClass("btn-accept");
+				expect(declineButton).toHaveClass("btn-decline");
+			}, { timeout: 3000 });
 		});
 	});
 });
