@@ -39,10 +39,7 @@ describe('ErrorBoundary', () => {
 		process.env.NODE_ENV = originalEnv;
 		// Restore import.meta.env.DEV
 		if (import.meta && import.meta.env) {
-			Object.defineProperty(import.meta.env, 'DEV', {
-				value: originalDev,
-				configurable: true
-			});
+			import.meta.env.DEV = originalDev;
 		}
 		vi.restoreAllMocks();
 	});
@@ -119,10 +116,7 @@ describe('ErrorBoundary', () => {
 	});
 
 	it('should show error details in development mode', () => {
-		Object.defineProperty(import.meta.env, 'DEV', {
-			value: true,
-			configurable: true
-		});
+		import.meta.env.DEV = true;
 
 		render(
 			<ErrorBoundary>
@@ -135,10 +129,7 @@ describe('ErrorBoundary', () => {
 	});
 
 	it('should not show error details in production mode', () => {
-		Object.defineProperty(import.meta.env, 'DEV', {
-			value: false,
-			configurable: true
-		});
+		import.meta.env.DEV = false;
 
 		render(
 			<ErrorBoundary>
