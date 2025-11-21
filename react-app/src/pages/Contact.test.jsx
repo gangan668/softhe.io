@@ -76,7 +76,7 @@ describe("Contact Component", () => {
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please enter a valid name"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please enter a valid name/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -90,7 +90,7 @@ describe("Contact Component", () => {
 			await user.type(nameInput, "A");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please enter a valid name"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please enter a valid name/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -106,7 +106,7 @@ describe("Contact Component", () => {
 			await user.type(emailInput, "invalid-email");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please enter a valid email address"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please enter a valid email address/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -122,7 +122,7 @@ describe("Contact Component", () => {
 			await user.type(emailInput, "john@example.com");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please select a subject"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please select a subject/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -140,7 +140,7 @@ describe("Contact Component", () => {
 			await user.selectOptions(subjectInput, "general");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please enter a message"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please enter a message/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -160,7 +160,7 @@ describe("Contact Component", () => {
 			await user.type(messageInput, "Short");
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please enter a message"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please enter a message/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -247,7 +247,7 @@ describe("Contact Component", () => {
 			await user.click(submitButton);
 
 			// Wait for success message first
-			const successMessage = await screen.findByText((content) => content.includes("Thank you for your message"), {}, { timeout: 3000 });
+			const successMessage = await screen.findByRole("status", { name: /Thank you for your message/i }, { timeout: 3000 });
 			expect(successMessage).toBeInTheDocument();
 
 			// Then check that form was cleared
@@ -277,7 +277,7 @@ describe("Contact Component", () => {
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
-			const successMessage = await screen.findByText((content) => content.includes("Thank you for your message"), {}, { timeout: 3000 });
+			const successMessage = await screen.findByRole("status", { name: /Thank you for your message/i }, { timeout: 3000 });
 			expect(successMessage).toBeInTheDocument();
 		});
 
@@ -487,7 +487,7 @@ describe("Contact Component", () => {
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
 
-			const errorMessage = await screen.findByText((content) => content.includes("Please enter a valid name"), {}, { timeout: 3000 });
+			const errorMessage = await screen.findByRole("alert", { name: /Please enter a valid name/i }, { timeout: 3000 });
 			expect(errorMessage).toBeInTheDocument();
 		});
 
@@ -507,7 +507,7 @@ describe("Contact Component", () => {
 			await user.type(messageInput, "This is a test message with enough characters");
 			await user.click(submitButton);
 
-			const successMessage = await screen.findByText((content) => content.includes("Thank you for your message"), {}, { timeout: 3000 });
+			const successMessage = await screen.findByRole("status", { name: /Thank you for your message/i }, { timeout: 3000 });
 			expect(successMessage).toBeInTheDocument();
 		});
 	});
