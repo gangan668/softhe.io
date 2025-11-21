@@ -302,20 +302,6 @@ function Contact() {
 										</div>
 									)}
 
-								{/* Status Messages */}
-								{submitStatus.message && (
-									<div
-										className={`form-status ${submitStatus.type}`}
-										role={submitStatus.type === "error" ? "alert" : "status"}
-										aria-live="polite"
-									>
-										<i
-											className={`fas ${submitStatus.type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}`}
-										></i>
-										<span>{submitStatus.message}</span>
-									</div>
-								)}
-
 								<form
 									className="contact-form"
 									onSubmit={handleSubmit}
@@ -461,6 +447,20 @@ function Contact() {
 											characters
 										</div>
 									</div>
+
+									{/* Status Messages */}
+									{submitStatus.message && (
+										<div
+											className={`form-status ${submitStatus.type}`}
+											role={submitStatus.type === "error" ? "alert" : "status"}
+											aria-live="polite"
+										>
+											<i
+												className={`fas ${submitStatus.type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}`}
+											></i>
+											<span>{submitStatus.message}</span>
+										</div>
+									)}
 
 									<button
 										type="submit"
