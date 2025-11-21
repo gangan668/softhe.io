@@ -51,7 +51,7 @@ function Contact() {
 		if (!isValidEmail(formData.email)) {
 			setSubmitStatus({
 				type: "error",
-				message: "Please enter a valid email address.",
+				message: "Please enter a valid email address",
 			});
 			return false;
 		}
@@ -59,7 +59,7 @@ function Contact() {
 		if (!formData.subject) {
 			setSubmitStatus({
 				type: "error",
-				message: "Please select a subject.",
+				message: "Please select a subject",
 			});
 			return false;
 		}
