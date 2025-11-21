@@ -95,8 +95,8 @@ function Contact() {
 			[name]: sanitizedValue,
 		});
 
-		// Clear error message when user starts typing
-		if (submitStatus.type === "error") {
+		// Clear success message when user starts typing
+		if (submitStatus.type === "success") {
 			setSubmitStatus({ type: "", message: "" });
 		}
 	};
@@ -449,14 +449,26 @@ function Contact() {
 									</div>
 
 									{/* Status Messages */}
-									{submitStatus.message && (
+									{submitStatus.type && (
 										<div
 											className={`form-status ${submitStatus.type}`}
-											role={submitStatus.type === "error" ? "alert" : "status"}
-											aria-live="polite"
+											role={
+												submitStatus.type === "error"
+													? "alert"
+													: submitStatus.type === "success"
+														? "status"
+														: undefined
+											}
+											aria-live={submitStatus.type ? "polite" : undefined}
+											aria-atomic="true"
+											data-testid="form-status"
 										>
 											<i
-												className={`fas ${submitStatus.type === "success" ? "fa-check-circle" : "fa-exclamation-circle"}`}
+												className={`fas ${submitStatus.type === "success"
+														? "fa-check-circle"
+														: "fa-exclamation-circle"
+													}`}
+												aria-hidden="true"
 											></i>
 											<span>{submitStatus.message}</span>
 										</div>
