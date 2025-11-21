@@ -43,7 +43,7 @@ function Contact() {
 		if (!trimmedName || trimmedName.length < 2) {
 			setSubmitStatus({
 				type: "error",
-				message: "Please enter a valid name (at least 2 characters).",
+				message: "Please enter a valid name",
 			});
 			return false;
 		}
@@ -68,7 +68,7 @@ function Contact() {
 		if (!trimmedMessage || trimmedMessage.length < 10) {
 			setSubmitStatus({
 				type: "error",
-				message: "Please enter a message (at least 10 characters).",
+				message: "Please enter a message",
 			});
 			return false;
 		}
@@ -151,8 +151,7 @@ function Contact() {
 
 				setSubmitStatus({
 					type: "success",
-					message:
-						"Thank you for your message! We will get back to you within 2-4 hours.",
+					message: "Thank you for your message",
 				});
 
 				// Reset form on success
