@@ -21,10 +21,15 @@ const NestedThrowError = () => {
 
 describe('ErrorBoundary', () => {
 	let originalEnv;
+	let originalDev;
 
 	beforeEach(() => {
 		// Save original NODE_ENV
 		originalEnv = process.env.NODE_ENV;
+		// Save original import.meta.env.DEV
+		if (import.meta && import.meta.env) {
+			originalDev = import.meta.env.DEV;
+		}
 		// Suppress console.error for tests
 		vi.spyOn(console, 'error').mockImplementation(() => { });
 	});
@@ -32,6 +37,13 @@ describe('ErrorBoundary', () => {
 	afterEach(() => {
 		// Restore original NODE_ENV
 		process.env.NODE_ENV = originalEnv;
+		// Restore import.meta.env.DEV
+		if (import.meta && import.meta.env) {
+			Object.defineProperty(import.meta.env, 'DEV', {
+				value: originalDev,
+				configurable: true
+			});
+		}
 		vi.restoreAllMocks();
 	});
 
@@ -107,7 +119,10 @@ describe('ErrorBoundary', () => {
 	});
 
 	it('should show error details in development mode', () => {
-		process.env.NODE_ENV = 'development';
+		Object.defineProperty(import.meta.env, 'DEV', {
+			value: true,
+			configurable: true
+		});
 
 		render(
 			<ErrorBoundary>
@@ -120,7 +135,10 @@ describe('ErrorBoundary', () => {
 	});
 
 	it('should not show error details in production mode', () => {
-		process.env.NODE_ENV = 'production';
+		Object.defineProperty(import.meta.env, 'DEV', {
+			value: false,
+			configurable: true
+		});
 
 		render(
 			<ErrorBoundary>
