@@ -1,4 +1,6 @@
-name: Deploy React App to GitHub Pages
+name: Deploy React App to GitHub Pages (DISABLED)
+
+# This workflow is disabled - rename to deploy-react.yml to enable
 
 on:
     # Runs on pushes targeting the main branch

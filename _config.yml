@@ -1,28 +1,28 @@
 # Jekyll Configuration for GitHub Pages
-baseurl: "/softhe.io"
-url: "https://gangan668.github.io"
+baseurl: ""
+url: "https://softhe.io"
 
 # Build settings
 markdown: kramdown
 plugins:
-  - jekyll-relative-links
+    - jekyll-relative-links
 
 # Exclude files from processing
 exclude:
-  - node_modules/
-  - react-app/
-  - package.json
-  - package-lock.json
-  - MIGRATION_SUMMARY.md
-  - .gitignore
-  - .vscode/
-  - .github/
+    - node_modules/
+    - react-app/
+    - package.json
+    - package-lock.json
+    - MIGRATION_SUMMARY.md
+    - .gitignore
+    - .vscode/
+    - .github/
 
 # Include files
 include:
-  - _redirects
+    - _redirects
 
 # Relative links settings
 relative_links:
-  enabled: true
-  collections: false
+    enabled: true
+    collections: false
