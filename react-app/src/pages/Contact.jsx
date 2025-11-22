@@ -462,6 +462,7 @@ function Contact() {
 											aria-live={submitStatus.type ? "polite" : undefined}
 											aria-atomic="true"
 											data-testid="form-status"
+											aria-label={submitStatus.message}
 										>
 											<i
 												className={`fas ${submitStatus.type === "success"
