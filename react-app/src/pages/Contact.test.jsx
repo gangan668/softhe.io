@@ -11,7 +11,10 @@ vi.mock("../hooks/useRateLimit", () => ({
 		isBlocked: false,
 		attemptsLeft: 3,
 		blockTimeLeft: 0,
-		attempt: vi.fn((action) => action()),
+		attempt: vi.fn(async (action) => {
+			await action();
+			return true;
+		}),
 		reset: vi.fn(),
 		checkRateLimit: vi.fn(() => true),
 		getBlockMessage: vi.fn(() => "Rate limit exceeded"),

@@ -86,7 +86,7 @@ function CookieConsent() {
 								<div className="cookie-detail-section">
 									<h4>
 										<i className="fas fa-chart-line"></i>
-										Analytics Cookies
+										Performance Cookies
 									</h4>
 									<p>
 										These cookies help us understand how visitors interact with our website
@@ -125,6 +125,7 @@ function CookieConsent() {
 							onClick={toggleDetails}
 							className="toggle-details-btn"
 							aria-expanded={showDetails}
+							aria-label={showDetails ? "Hide cookie details" : "Show cookie details"}
 						>
 							{showDetails ? (
 								<>

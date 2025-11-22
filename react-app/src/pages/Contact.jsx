@@ -13,7 +13,8 @@ function Contact() {
 
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitStatus, setSubmitStatus] = useState({ type: "", message: "" });
-	const [honeypot, setHoneypot] = useState(""); // Bot detection
+	const [errors, setErrors] = useState({});
+	const [honeypot, setHoneypot] = useState(""); // Bot detection</parameter>
 
 	// Rate limiting: 3 attempts per minute
 	const rateLimit = useRateLimit(3, 60000);
@@ -39,49 +40,30 @@ function Contact() {
 	 * Validate form data
 	 */
 	const validateForm = () => {
+		const newErrors = {};
+
 		const trimmedName = formData.name.trim();
 		if (!trimmedName || trimmedName.length < 2) {
-			setSubmitStatus({
-				type: "error",
-				message: "Please enter a valid name",
-			});
-			return false;
+			newErrors.name = "Please enter a valid name";
 		}
 
 		if (!isValidEmail(formData.email)) {
-			setSubmitStatus({
-				type: "error",
-				message: "Please enter a valid email address",
-			});
-			return false;
+			newErrors.email = "Please enter a valid email address";
 		}
 
 		if (!formData.subject) {
-			setSubmitStatus({
-				type: "error",
-				message: "Please select a subject",
-			});
-			return false;
+			newErrors.subject = "Please select a subject";
 		}
 
 		const trimmedMessage = formData.message.trim();
 		if (!trimmedMessage || trimmedMessage.length < 10) {
-			setSubmitStatus({
-				type: "error",
-				message: "Please enter a message",
-			});
-			return false;
+			newErrors.message = "Please enter a message";
+		} else if (formData.message.length > 2000) {
+			newErrors.message = "Message is too long (maximum 2000 characters).";
 		}
 
-		if (formData.message.length > 2000) {
-			setSubmitStatus({
-				type: "error",
-				message: "Message is too long (maximum 2000 characters).",
-			});
-			return false;
-		}
-
-		return true;
+		setErrors(newErrors);
+		return Object.keys(newErrors).length === 0;
 	};
 
 	const handleChange = (e) => {
@@ -94,6 +76,14 @@ function Contact() {
 			...formData,
 			[name]: sanitizedValue,
 		});
+
+		// Clear error for this field when user starts typing
+		if (errors[name]) {
+			setErrors({
+				...errors,
+				[name]: undefined,
+			});
+		}
 
 		// Clear success message when user starts typing
 		if (submitStatus.type === "success") {
@@ -305,6 +295,7 @@ function Contact() {
 								<form
 									className="contact-form"
 									onSubmit={handleSubmit}
+									noValidate
 								>
 									{/* Honeypot field - hidden from users, bots will fill it */}
 									<input
@@ -343,7 +334,22 @@ function Contact() {
 												rateLimit.isBlocked
 											}
 											placeholder="John Doe"
+											aria-invalid={errors.name ? "true" : "false"}
+											aria-describedby={errors.name ? "name-error" : undefined}
 										/>
+										{errors.name && (
+											<div
+												id="name-error"
+												role="alert"
+												aria-label={errors.name}
+												aria-live="assertive"
+												className="form-status error"
+												data-testid="form-status"
+											>
+												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+												{errors.name}
+											</div>
+										)}
 									</div>
 
 									<div className="form-group">
@@ -364,7 +370,22 @@ function Contact() {
 												rateLimit.isBlocked
 											}
 											placeholder="john@example.com"
+											aria-invalid={errors.email ? "true" : "false"}
+											aria-describedby={errors.email ? "email-error" : undefined}
 										/>
+										{errors.email && (
+											<div
+												id="email-error"
+												role="alert"
+												aria-label={errors.email}
+												aria-live="assertive"
+												className="form-status error"
+												data-testid="form-status"
+											>
+												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+												{errors.email}
+											</div>
+										)}
 									</div>
 
 									<div className="form-group">
@@ -382,6 +403,8 @@ function Contact() {
 												isSubmitting ||
 												rateLimit.isBlocked
 											}
+											aria-invalid={errors.subject ? "true" : "false"}
+											aria-describedby={errors.subject ? "subject-error" : undefined}
 										>
 											<option value="">
 												Select a topic
@@ -402,6 +425,19 @@ function Contact() {
 												Billing Support
 											</option>
 										</select>
+										{errors.subject && (
+											<div
+												id="subject-error"
+												role="alert"
+												aria-label={errors.subject}
+												aria-live="assertive"
+												className="form-status error"
+												data-testid="form-status"
+											>
+												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+												{errors.subject}
+											</div>
+										)}
 									</div>
 
 									<div className="form-group">
@@ -441,42 +477,54 @@ function Contact() {
 												rateLimit.isBlocked
 											}
 											placeholder="Tell us about your gaming setup and what you're looking to optimize..."
+											aria-invalid={errors.message ? "true" : "false"}
+											aria-describedby={errors.message ? "message-error" : undefined}
 										></textarea>
 										<div className="character-count">
 											{formData.message.length} / 2000
 											characters
 										</div>
+										{errors.message && (
+											<div
+												id="message-error"
+												role="alert"
+												aria-label={errors.message}
+												aria-live="assertive"
+												className="form-status error"
+												data-testid="form-status"
+											>
+												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+												{errors.message}
+											</div>
+										)}
 									</div>
 
-									{/* Status Messages */}
-									{submitStatus.type && (
+									{/* Success Message */}
+									{submitStatus.type === "success" && (
 										<div
-											className={`form-status ${submitStatus.type}`}
-											role={
-												submitStatus.type === "error"
-													? "alert"
-													: submitStatus.type === "success"
-														? "status"
-														: undefined
-											}
-											aria-live={
-												submitStatus.type === "error"
-													? "assertive"
-													: submitStatus.type === "success"
-														? "polite"
-														: undefined
-											}
+											className="form-status success"
+											role="status"
+											aria-live="polite"
 											aria-atomic="true"
 											data-testid="form-status"
 											aria-label={submitStatus.message}
 										>
-											<i
-												className={`fas ${submitStatus.type === "success"
-													? "fa-check-circle"
-													: "fa-exclamation-circle"
-													}`}
-												aria-hidden="true"
-											></i>
+											<i className="fas fa-check-circle" aria-hidden="true"></i>
+											{submitStatus.message}
+										</div>
+									)}
+
+									{/* General Error Message (for rate limiting, etc.) */}
+									{submitStatus.type === "error" && (
+										<div
+											className="form-status error"
+											role="alert"
+											aria-live="assertive"
+											aria-atomic="true"
+											data-testid="form-status"
+											aria-label={submitStatus.message}
+										>
+											<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
 											{submitStatus.message}
 										</div>
 									)}
