@@ -2,11 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
 	// Set base path for GitHub Pages deployment
-	// In development: use '/' for local dev server
-	// In production: use '/softhe.io/' for GitHub Pages (username.github.io/softhe.io)
-	// Change to '/' in production if using a custom domain
+	// Using '/' for custom domain (softhe.io)
 	base: '/',
 	plugins: [react()],
 	test: {
