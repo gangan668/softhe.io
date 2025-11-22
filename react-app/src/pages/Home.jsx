@@ -31,7 +31,7 @@ function Home() {
 								<span className="metric-label">Frame Time</span>
 							</div>
 							<div className="performance-metric">
-								<span className="metric-value">-350%</span>
+								<span className="metric-value">72%</span>
 								<span className="metric-label">Background Processes</span>
 							</div>
 						</div>
