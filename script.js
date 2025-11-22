@@ -617,6 +617,15 @@ function throttle(func, limit) {
 document.addEventListener('DOMContentLoaded', () => {
 	console.log('Softhe.io initialized ✓');
 
+	// Fix corrupted URLs from previous bug
+	// Check if URL contains repeated ~and~/ patterns
+	if (window.location.search && window.location.search.includes('~and~')) {
+		// Clean the URL by removing query string and hash
+		const cleanUrl = window.location.origin + window.location.pathname;
+		window.history.replaceState(null, '', cleanUrl);
+		console.log('Fixed corrupted URL');
+	}
+
 	// Set ARIA attributes
 	if (hamburger) {
 		hamburger.setAttribute('aria-expanded', 'false');
