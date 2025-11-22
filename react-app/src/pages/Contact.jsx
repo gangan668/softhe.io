@@ -459,7 +459,13 @@ function Contact() {
 														? "status"
 														: undefined
 											}
-											aria-live={submitStatus.type ? "polite" : undefined}
+											aria-live={
+												submitStatus.type === "error"
+													? "assertive"
+													: submitStatus.type === "success"
+														? "polite"
+														: undefined
+											}
 											aria-atomic="true"
 											data-testid="form-status"
 											aria-label={submitStatus.message}
