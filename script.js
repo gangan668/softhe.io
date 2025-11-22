@@ -166,6 +166,10 @@ if (filterButtons.length > 0) {
 // SMOOTH SCROLLING
 // ============================================================================
 
+// Debounce history updates to prevent rate limiting
+let lastHistoryUpdate = 0;
+const HISTORY_UPDATE_DELAY = 1000; // 1 second between updates
+
 document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 	anchor.addEventListener("click", function (e) {
 		const href = this.getAttribute("href");
@@ -178,7 +182,9 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 
 		if (target) {
 			// Close mobile menu if open
-			toggleMobileMenu(false);
+			if (typeof toggleMobileMenu === 'function') {
+				toggleMobileMenu(false);
+			}
 
 			// Scroll to target
 			target.scrollIntoView({
@@ -186,10 +192,8 @@ document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
 				block: "start",
 			});
 
-			// Update URL without triggering scroll
-			if (history.pushState) {
-				history.pushState(null, null, href);
-			}
+			// Don't update history for anchor links - causes rate limiting errors
+			// Users can still bookmark or share the page without fragment
 		}
 	});
 });
