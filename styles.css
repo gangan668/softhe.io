@@ -148,35 +148,56 @@ body {
 	display: none;
 	flex-direction: column;
 	cursor: pointer;
-	padding: 10px;
-	margin: -10px;
+	padding: 8px;
+	margin: -8px;
 	background: transparent;
 	border: none;
 	min-width: 44px;
 	min-height: 44px;
 	align-items: center;
 	justify-content: center;
+	gap: 5px;
+	position: relative;
+	z-index: 1001;
+	border-radius: 8px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger:hover {
+	background: rgba(99, 102, 241, 0.1);
+	transform: scale(1.05);
+}
+
+.hamburger:active {
+	transform: scale(0.95);
 }
 
 .bar {
-	width: 25px;
-	height: 3px;
+	width: 22px;
+	height: 2px;
 	background: var(--text-primary);
-	margin: 3px 0;
-	transition: var(--transition);
-	border-radius: 2px;
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	border-radius: 3px;
+	display: block;
+	box-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.hamburger:hover .bar {
+	background: var(--primary-color);
+	box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
 }
 
 .hamburger.active .bar:nth-child(1) {
-	transform: translateY(9px) rotate(45deg);
+	transform: translateY(7px) rotate(45deg);
 }
 
 .hamburger.active .bar:nth-child(2) {
 	opacity: 0;
+	transform: scaleX(0);
 }
 
 .hamburger.active .bar:nth-child(3) {
-	transform: translateY(-9px) rotate(-45deg);
+	transform: translateY(-7px) rotate(-45deg);
 }
 
 /* Hero Section */
@@ -1555,7 +1576,6 @@ body {
 @media (max-width: 768px) {
 	.hamburger {
 		display: flex;
-		z-index: 1001;
 	}
 
 	.nav-menu {
@@ -1697,8 +1717,15 @@ body {
 	}
 
 	.hamburger {
-		min-width: 48px;
-		min-height: 48px;
+		min-width: 44px;
+		min-height: 44px;
+		padding: 6px;
+		border-radius: 6px;
+	}
+
+	.bar {
+		width: 20px;
+		height: 1.5px;
 	}
 
 	/* Form improvements for mobile */
