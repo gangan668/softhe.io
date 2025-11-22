@@ -465,12 +465,12 @@ function Contact() {
 										>
 											<i
 												className={`fas ${submitStatus.type === "success"
-														? "fa-check-circle"
-														: "fa-exclamation-circle"
+													? "fa-check-circle"
+													: "fa-exclamation-circle"
 													}`}
 												aria-hidden="true"
 											></i>
-											<span>{submitStatus.message}</span>
+											{submitStatus.message}
 										</div>
 									)}
 
