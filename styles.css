@@ -148,6 +148,14 @@ body {
 	display: none;
 	flex-direction: column;
 	cursor: pointer;
+	padding: 10px;
+	margin: -10px;
+	background: transparent;
+	border: none;
+	min-width: 44px;
+	min-height: 44px;
+	align-items: center;
+	justify-content: center;
 }
 
 .bar {
@@ -156,6 +164,19 @@ body {
 	background: var(--text-primary);
 	margin: 3px 0;
 	transition: var(--transition);
+	border-radius: 2px;
+}
+
+.hamburger.active .bar:nth-child(1) {
+	transform: translateY(9px) rotate(45deg);
+}
+
+.hamburger.active .bar:nth-child(2) {
+	opacity: 0;
+}
+
+.hamburger.active .bar:nth-child(3) {
+	transform: translateY(-9px) rotate(-45deg);
 }
 
 /* Hero Section */
@@ -1534,6 +1555,7 @@ body {
 @media (max-width: 768px) {
 	.hamburger {
 		display: flex;
+		z-index: 1001;
 	}
 
 	.nav-menu {
@@ -1541,12 +1563,16 @@ body {
 		left: -100%;
 		top: 70px;
 		flex-direction: column;
-		background-color: var(--surface-color);
+		background: var(--surface-color);
 		width: 100%;
+		height: calc(100vh - 70px);
 		text-align: center;
-		transition: var(--transition);
-		box-shadow: var(--shadow);
-		border-top: 1px solid var(--border-color);
+		transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 10px 27px rgba(0, 0, 0, 0.3);
+		padding: 2rem 0;
+		overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		z-index: 1000;
 	}
 
 	.nav-menu.active {
@@ -1554,7 +1580,31 @@ body {
 	}
 
 	.nav-menu li {
-		margin: 1rem 0;
+		margin: 0;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	}
+
+	.nav-menu li:last-child {
+		border-bottom: none;
+	}
+
+	.nav-link {
+		display: flex;
+		padding: 1.25rem 2rem;
+		font-size: 1.125rem;
+		min-height: 56px;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+	}
+
+	.nav-link:hover {
+		background: rgba(99, 102, 241, 0.1);
+	}
+
+	.nav-link.active {
+		margin: 0.5rem 1rem;
+		border-radius: 12px;
 	}
 
 	.hero-container {
@@ -1628,7 +1678,41 @@ body {
 
 	.faq-cta-buttons .btn {
 		width: 100%;
-		max-width: 300px;
+		margin: 0.5rem 0;
+	}
+
+	/* Back to Top button mobile adjustments */
+	.back-to-top {
+		bottom: 20px;
+		right: 20px;
+		width: 48px;
+		height: 48px;
+	}
+
+	/* Improve touch targets */
+	.btn {
+		min-height: 48px;
+		padding: 14px 20px;
+		font-size: 1rem;
+	}
+
+	.hamburger {
+		min-width: 48px;
+		min-height: 48px;
+	}
+
+	/* Form improvements for mobile */
+	.form-group input,
+	.form-group textarea,
+	.form-group select {
+		font-size: 16px;
+		padding: 14px;
+	}
+
+	.form-submit {
+		width: 100%;
+		min-height: 54px;
+		font-size: 1.125rem;
 	}
 }
 
@@ -3057,4 +3141,295 @@ body {
 	align-items: center;
 	justify-content: center;
 	font-size: 16px;
+}
+
+/* ============================================================================
+   BACK TO TOP BUTTON
+   ============================================================================ */
+
+.back-to-top {
+	position: fixed;
+	bottom: 30px;
+	right: 30px;
+	width: 50px;
+	height: 50px;
+	background: var(--gradient);
+	color: white;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.25rem;
+	box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	z-index: 999;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(20px);
+}
+
+.back-to-top.visible {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+}
+
+.back-to-top:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+}
+
+.back-to-top:active {
+	transform: translateY(-2px);
+}
+
+/* ============================================================================
+   FORM VALIDATION & ERROR STATES
+   ============================================================================ */
+
+.form-group {
+	position: relative;
+	margin-bottom: 1.5rem;
+}
+
+.form-error {
+	display: block;
+	color: #ef4444;
+	font-size: 0.875rem;
+	margin-top: 0.5rem;
+	animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+	border-color: #ef4444;
+	background: rgba(239, 68, 68, 0.05);
+}
+
+.form-group input.error:focus,
+.form-group textarea.error:focus,
+.form-group select.error:focus {
+	border-color: #ef4444;
+	box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-success-message {
+	padding: 1.5rem;
+	background: rgba(16, 185, 129, 0.1);
+	border: 1px solid rgba(16, 185, 129, 0.3);
+	border-radius: var(--radius-md);
+	margin-bottom: 2rem;
+	text-align: center;
+	animation: slideDown 0.3s ease;
+}
+
+.form-success-message i {
+	font-size: 3rem;
+	color: #10b981;
+	margin-bottom: 1rem;
+	display: block;
+}
+
+.form-success-message strong {
+	display: block;
+	font-size: 1.25rem;
+	color: var(--text-primary);
+	margin-bottom: 0.5rem;
+}
+
+.form-success-message p {
+	color: var(--text-secondary);
+	margin: 0;
+}
+
+.form-submit.success {
+	background: #10b981;
+	border-color: #10b981;
+}
+
+.form-submit.success:hover {
+	background: #059669;
+}
+
+/* ============================================================================
+   MOBILE MENU OVERLAY
+   ============================================================================ */
+
+body.menu-open {
+	overflow: hidden;
+}
+
+@media (max-width: 768px) {
+
+	/* Mobile menu backdrop */
+	.nav-menu::before {
+		content: '';
+		position: fixed;
+		top: 70px;
+		left: 0;
+		width: 100%;
+		height: calc(100vh - 70px);
+		background: rgba(0, 0, 0, 0.5);
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.3s ease;
+		pointer-events: none;
+	}
+
+	.nav-menu.active::before {
+		opacity: 1;
+		visibility: visible;
+	}
+}
+
+/* ============================================================================
+   TOUCH TARGET IMPROVEMENTS
+   ============================================================================ */
+
+@media (hover: none) and (pointer: coarse) {
+
+	/* Increase touch targets on mobile devices */
+	.btn,
+	button,
+	input[type="submit"],
+	input[type="button"],
+	a.btn {
+		min-height: 48px;
+		min-width: 48px;
+		padding: 14px 20px;
+	}
+
+	.nav-link {
+		min-height: 56px;
+		padding: 1.25rem 2rem;
+	}
+
+	.hamburger {
+		min-width: 48px;
+		min-height: 48px;
+	}
+
+	.social-links a {
+		min-width: 48px;
+		min-height: 48px;
+	}
+
+	.filter-btn,
+	.category-btn {
+		min-height: 48px;
+		padding: 12px 20px;
+	}
+
+	.faq-question {
+		min-height: 56px;
+		padding: 1.25rem 1.5rem;
+	}
+
+	/* Larger form inputs on touch devices */
+	input[type="text"],
+	input[type="email"],
+	input[type="tel"],
+	input[type="password"],
+	textarea,
+	select {
+		min-height: 48px;
+		font-size: 16px;
+		/* Prevents zoom on iOS */
+		padding: 14px;
+	}
+
+	textarea {
+		min-height: 120px;
+	}
+}
+
+/* ============================================================================
+   SMOOTH SCROLLING & REDUCED MOTION
+   ============================================================================ */
+
+html {
+	scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+
+	.back-to-top {
+		transition: opacity 0.2s ease;
+	}
+}
+
+/* ============================================================================
+   FOCUS VISIBLE IMPROVEMENTS
+   ============================================================================ */
+
+*:focus {
+	outline: 2px solid transparent;
+}
+
+*:focus-visible {
+	outline: 2px solid var(--primary-color);
+	outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+	outline: 2px solid var(--primary-color);
+	outline-offset: 2px;
+}
+
+.btn:focus-visible {
+	outline: 2px solid white;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3);
+}
+
+/* ============================================================================
+   LOADING STATES
+   ============================================================================ */
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.fa-spinner {
+	animation: spin 1s linear infinite;
+}
+
+button[disabled],
+.btn[disabled] {
+	opacity: 0.6;
+	cursor: not-allowed;
 }
