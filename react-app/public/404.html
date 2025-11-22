@@ -3,169 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="3;url=/">
-    <title>404 - Page Not Found | Softhe.io</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>Redirecting...</title>
+    <script>
+        // Single Page Apps for GitHub Pages
+        // MIT License
+        // https://github.com/rafgraph/spa-github-pages
+        // This script takes the current URL and converts the path and query
+        // string into just a query string, and then redirects the browser
+        // to the new URL with only a query string and hash fragment,
+        // e.g. https://www.foo.tld/one/two?a=b&c=d#qwe, becomes
+        // https://www.foo.tld/?/one/two&a=b~and~c=d#qwe
+        // Note: this 404.html file must be at least 512 bytes for it to work
+        // with Internet Explorer (it is currently > 512 bytes)
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+        // If you're creating a Project Pages site and NOT using a custom domain,
+        // then set pathSegmentsToKeep to 1 (enterprise users may need to set it to > 1).
+        // This way the code will only replace the route part of the path, and not
+        // the real directory in which the app resides, for example:
+        // https://username.github.io/repo-name/one/two?a=b&c=d#qwe becomes
+        // https://username.github.io/repo-name/?/one/two&a=b~and~c=d#qwe
+        // Otherwise, leave pathSegmentsToKeep as 0.
+        var pathSegmentsToKeep = 1;
 
-        .container {
-            text-align: center;
-            max-width: 600px;
-        }
-
-        .error-code {
-            font-size: 8rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            line-height: 1;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #ffffff;
-        }
-
-        p {
-            font-size: 1.125rem;
-            color: #a1a1aa;
-            margin-bottom: 2rem;
-            line-height: 1.6;
-        }
-
-        .countdown {
-            font-size: 1rem;
-            color: #6366f1;
-            margin-bottom: 2rem;
-        }
-
-        .buttons {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary {
-            background: rgba(99, 102, 241, 0.1);
-            color: #6366f1;
-            border: 1px solid rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: #6366f1;
-        }
-
-        .icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        @media (max-width: 768px) {
-            .error-code {
-                font-size: 5rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
-
-            p {
-                font-size: 1rem;
-            }
-
-            .buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
-    </style>
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
 </head>
 <body>
-    <div class="container">
-        <div class="error-code">404</div>
-        <h1>Page Not Found</h1>
-        <p>
-            Oops! The page you're looking for doesn't exist or has been moved.
-            <br>
-            <span class="countdown">Redirecting to homepage in <span id="countdown">3</span> seconds...</span>
-        </p>
-        <div class="buttons">
-            <a href="/" class="btn btn-primary">Go to Homepage</a>
-            <a href="/services/" class="btn btn-secondary">View Services</a>
-        </div>
-    </div>
-
-    <script>
-        // Countdown and redirect
-        let seconds = 3;
-        const countdownEl = document.getElementById('countdown');
-
-        const timer = setInterval(() => {
-            seconds--;
-            if (countdownEl) {
-                countdownEl.textContent = seconds;
-            }
-
-            if (seconds <= 0) {
-                clearInterval(timer);
-                window.location.href = '/';
-            }
-        }, 1000);
-
-        // Allow user to stop redirect by clicking anywhere
-        let redirectCancelled = false;
-        document.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'A') {
-                redirectCancelled = true;
-                clearInterval(timer);
-                const countdownSpan = document.querySelector('.countdown');
-                if (countdownSpan) {
-                    countdownSpan.textContent = 'Redirect cancelled. Click a button to navigate.';
-                }
-            }
-        });
-    </script>
+    <!-- This page is intentionally blank for SPA routing -->
 </body>
 </html>
