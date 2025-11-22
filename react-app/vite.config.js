@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => ({
 	// In development: use '/' for local dev server
 	// In production: use '/softhe.io/' for GitHub Pages (username.github.io/softhe.io)
 	// Change to '/' in production if using a custom domain
-	base: mode === 'production' ? '/softhe.io/' : '/',
+	base: '/',
 	plugins: [react()],
 	test: {
 		globals: true,
