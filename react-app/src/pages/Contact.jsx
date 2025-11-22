@@ -14,7 +14,7 @@ function Contact() {
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [submitStatus, setSubmitStatus] = useState({ type: "", message: "" });
 	const [errors, setErrors] = useState({});
-	const [honeypot, setHoneypot] = useState(""); // Bot detection</parameter>
+	const [honeypot, setHoneypot] = useState(""); // Bot detection
 
 	// Rate limiting: 3 attempts per minute
 	const rateLimit = useRateLimit(3, 60000);
