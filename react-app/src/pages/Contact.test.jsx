@@ -5,10 +5,14 @@ import "@testing-library/jest-dom";
 import Contact from "./Contact";
 import useRateLimit from "../hooks/useRateLimit";
 
-// Mock EmailJS
+// Mock EmailJS with a delay to simulate real API call
 vi.mock("@emailjs/browser", () => ({
 	default: {
-		send: vi.fn(() => Promise.resolve({ status: 200, text: "OK" })),
+		send: vi.fn(() =>
+			new Promise((resolve) =>
+				setTimeout(() => resolve({ status: 200, text: "OK" }), 100)
+			)
+		),
 	},
 }));
 

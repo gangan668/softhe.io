@@ -118,11 +118,12 @@ function Contact() {
 			return;
 		}
 
+		// Set submitting state immediately to disable button and show loading
+		setIsSubmitting(true);
+
 		// Attempt submission with rate limiting
 		try {
 			const success = await rateLimit.attempt(async () => {
-				setIsSubmitting(true);
-
 				// EmailJS Configuration
 				// TODO: Replace these with your actual credentials from https://dashboard.emailjs.com/
 				const serviceId = "YOUR_SERVICE_ID";
