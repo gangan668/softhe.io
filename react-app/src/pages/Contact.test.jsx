@@ -5,6 +5,13 @@ import "@testing-library/jest-dom";
 import Contact from "./Contact";
 import useRateLimit from "../hooks/useRateLimit";
 
+// Mock EmailJS
+vi.mock("@emailjs/browser", () => ({
+	default: {
+		send: vi.fn(() => Promise.resolve({ status: 200, text: "OK" })),
+	},
+}));
+
 // Mock the useRateLimit hook
 vi.mock("../hooks/useRateLimit", () => ({
 	default: vi.fn(() => ({
