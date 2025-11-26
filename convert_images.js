@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Path to the images directory in the react-app
-const imagesDir = path.join(__dirname, 'softhe.io', 'react-app', 'public', 'images');
+const imagesDir = path.join(__dirname, 'react-app', 'public', 'images');
 
 console.log(`Scanning for images in: ${imagesDir}`);
 
