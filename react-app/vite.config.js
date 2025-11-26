@@ -86,11 +86,11 @@ export default defineConfig(() => ({
 			// Apply same security headers for preview (relaxed for local testing)
 			"Content-Security-Policy": [
 				"default-src 'self' 'unsafe-inline'",
-				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com",
+				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com",
 				"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
 				"font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
 				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com",
+				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com https://api.emailjs.com",
 				"frame-src 'self' https://buy.stripe.com https://js.stripe.com",
 				"object-src 'none'",
 				"base-uri 'self'",

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmailJS Test - Softhe.io</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .config-section h2 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .config-section h2::before {
+            content: "⚙️";
+            margin-right: 8px;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .config-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .config-value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+            background: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .status h3 {
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .note strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 EmailJS Test Page</h1>
+        <p class="subtitle">Test your contact form email configuration</p>
+
+        <div class="config-section">
+            <h2>Current Configuration</h2>
+            <div class="config-item">
+                <span class="config-label">Service ID:</span>
+                <span class="config-value" id="displayServiceId">-</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Template ID:</span>
+                <span class="config-value" id="displayTemplateId">-</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Public Key:</span>
+                <span class="config-value" id="displayPublicKey">-</span>
+            </div>
+        </div>
+
+        <form id="testForm">
+            <div class="form-group">
+                <label for="name">Your Name:</label>
+                <input type="text" id="name" required value="Test User">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Your Email:</label>
+                <input type="email" id="email" required value="test@example.com">
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <select id="subject" required>
+                    <option value="general">General Inquiry</option>
+                    <option value="technical" selected>Technical Support</option>
+                    <option value="sales">Sales Question</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="hardware">Hardware (optional):</label>
+                <input type="text" id="hardware" value="RTX 4080, i7-13700K, 32GB RAM">
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message:</label>
+                <textarea id="message" required>This is a test message from the EmailJS test page. If you receive this email, your configuration is working correctly!</textarea>
+            </div>
+
+            <button type="submit" id="submitBtn">
+                🚀 Send Test Email
+            </button>
+        </form>
+
+        <div id="status" class="status"></div>
+
+        <div class="note">
+            <strong>📝 Note:</strong>
+            This test uses the same EmailJS configuration as your Contact page.
+            Check the email inbox associated with your EmailJS account after sending.
+        </div>
+    </div>
+
+    <script type="module">
+        // EmailJS Configuration (from Contact.jsx)
+        const serviceId = "service_xnl0j5o";
+        const templateId = "template_5fcvkls";
+        const publicKey = "Duz4mhIKjppfn5Xvb";
+
+        // Display configuration
+        document.getElementById('displayServiceId').textContent = serviceId;
+        document.getElementById('displayTemplateId').textContent = templateId;
+        document.getElementById('displayPublicKey').textContent = publicKey;
+
+        // Import EmailJS
+        import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+
+        // Initialize EmailJS
+        emailjs.init(publicKey);
+
+        const form = document.getElementById('testForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Get form data
+            const formData = {
+                from_name: document.getElementById('name').value,
+                from_email: document.getElementById('email').value,
+                reply_to: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                hardware: document.getElementById('hardware').value,
+                message: document.getElementById('message').value
+            };
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Sending...';
+            status.className = 'status info';
+            status.innerHTML = '<h3>⏳ Sending...</h3><p>Please wait while we send your test email...</p>';
+
+            try {
+                const response = await emailjs.send(serviceId, templateId, formData);
+
+                // Success
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🚀 Send Test Email';
+                status.className = 'status success';
+                status.innerHTML = `
+                    <h3>✅ Success!</h3>
+                    <p><strong>Email sent successfully!</strong></p>
+                    <p>Status Code: ${response.status}</p>
+                    <p>Response: ${response.text}</p>
+                    <p style="margin-top: 10px;">📬 Check your inbox for the test email.</p>
+                `;
+
+                console.log('✅ EmailJS Response:', response);
+
+            } catch (error) {
+                // Error
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🚀 Send Test Email';
+                status.className = 'status error';
+                status.innerHTML = `
+                    <h3>❌ Error!</h3>
+                    <p><strong>Failed to send email.</strong></p>
+                    <p>Status: ${error.status || 'Unknown'}</p>
+                    <p>Message: ${error.text || error.message || 'Unknown error'}</p>
+                    <p style="margin-top: 10px;">💡 Check your EmailJS dashboard and verify your credentials.</p>
+                `;
+
+                console.error('❌ EmailJS Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

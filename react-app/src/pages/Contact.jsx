@@ -126,9 +126,9 @@ function Contact() {
 			const success = await rateLimit.attempt(async () => {
 				// EmailJS Configuration
 				// TODO: Replace these with your actual credentials from https://dashboard.emailjs.com/
-				const serviceId = "YOUR_SERVICE_ID";
-				const templateId = "YOUR_TEMPLATE_ID";
-				const publicKey = "YOUR_PUBLIC_KEY";
+				const serviceId = "service_xnl0j5o";
+				const templateId = "template_5fcvkls";
+				const publicKey = "Duz4mhIKjppfn5Xvb";
 
 				await emailjs.send(
 					serviceId,
