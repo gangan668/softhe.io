@@ -1,4 +1,5 @@
 import { useState } from "react";
+import emailjs from "@emailjs/browser";
 import useRateLimit from "../hooks/useRateLimit";
 import "./Contact.css";
 
@@ -122,22 +123,25 @@ function Contact() {
 			const success = await rateLimit.attempt(async () => {
 				setIsSubmitting(true);
 
-				// Simulate API call (replace with actual backend endpoint)
-				await new Promise((resolve) => setTimeout(resolve, 1500));
+				// EmailJS Configuration
+				// TODO: Replace these with your actual credentials from https://dashboard.emailjs.com/
+				const serviceId = "YOUR_SERVICE_ID";
+				const templateId = "YOUR_TEMPLATE_ID";
+				const publicKey = "YOUR_PUBLIC_KEY";
 
-				// In production, you would send to your backend:
-				// const response = await fetch('/api/contact', {
-				//   method: 'POST',
-				//   headers: { 'Content-Type': 'application/json' },
-				//   body: JSON.stringify({
-				//     name: formData.name,
-				//     email: formData.email,
-				//     subject: formData.subject,
-				//     hardware: formData.hardware,
-				//     message: formData.message,
-				//     timestamp: Date.now()
-				//   })
-				// });
+				await emailjs.send(
+					serviceId,
+					templateId,
+					{
+						from_name: formData.name,
+						from_email: formData.email,
+						reply_to: formData.email,
+						subject: formData.subject,
+						hardware: formData.hardware,
+						message: formData.message,
+					},
+					publicKey
+				);
 
 				setSubmitStatus({
 					type: "success",

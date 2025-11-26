@@ -29,7 +29,7 @@ function Performance() {
 										</span>
 									</div>
 									<img
-										src="/images/cs2-stock-fps.png"
+										src="/images/cs2-stock-fps.webp"
 										alt="Counter-Strike 2 Stock"
 										className="fps-screenshot"
 									/>
@@ -49,7 +49,7 @@ function Performance() {
 										</span>
 									</div>
 									<img
-										src="/images/cs2-optimized-fps.png"
+										src="/images/cs2-optimized-fps.webp"
 										alt="Counter-Strike 2 Optimized"
 										className="fps-screenshot"
 									/>
@@ -90,7 +90,7 @@ function Performance() {
 										</span>
 									</div>
 									<img
-										src="/images/stock-task-manager.png"
+										src="/images/stock-task-manager.webp"
 										alt="Stock Windows Task Manager"
 										className="fps-screenshot"
 									/>
@@ -111,7 +111,7 @@ function Performance() {
 										</span>
 									</div>
 									<img
-										src="/images/optimized-task-manager.png"
+										src="/images/optimized-task-manager.webp"
 										alt="Softhe.io Optimized Task Manager"
 										className="fps-screenshot"
 									/>
