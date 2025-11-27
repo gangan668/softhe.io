@@ -332,7 +332,7 @@ describe("Contact Component", () => {
 
 		it("should show loading state during submission", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -354,7 +354,7 @@ describe("Contact Component", () => {
 	describe("Input Sanitization", () => {
 		it("should sanitize input to prevent XSS", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 
@@ -367,7 +367,7 @@ describe("Contact Component", () => {
 
 		it("should limit input length", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const messageInput = screen.getByLabelText(/^Message/i);
 			const longMessage = "a".repeat(1500); // Exceeds 1000 char limit
@@ -380,7 +380,7 @@ describe("Contact Component", () => {
 
 		it("should trim whitespace from inputs", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			await user.type(nameInput, "  John Doe  ");
@@ -393,7 +393,7 @@ describe("Contact Component", () => {
 	describe("Honeypot Bot Detection", () => {
 		it("should block submission if honeypot field is filled", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			// Find the honeypot field (it should be hidden)
 			const honeypotField = document.querySelector('input[name="website"]');
@@ -427,7 +427,7 @@ describe("Contact Component", () => {
 
 	describe("Rate Limiting Integration", () => {
 		it("should use rate limiting hook", () => {
-			render(<Contact />);
+			renderContact();
 
 			// Verify the hook was called (it's mocked at the top of the file)
 			expect(useRateLimit).toHaveBeenCalled();
@@ -445,7 +445,7 @@ describe("Contact Component", () => {
 				getBlockMessage: vi.fn(() => "Too many attempts. Please wait 45 seconds."),
 			});
 
-			render(<Contact />);
+			renderContact();
 
 			// Should show rate limit warning
 			const warning = await screen.findByText(/Too many attempts/i, {}, { timeout: 3000 });
@@ -464,7 +464,7 @@ describe("Contact Component", () => {
 				getBlockMessage: vi.fn(() => "Too many attempts. Please wait 45 seconds."),
 			});
 
-			render(<Contact />);
+			renderContact();
 
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await waitFor(() => {
@@ -475,7 +475,7 @@ describe("Contact Component", () => {
 
 	describe("Accessibility", () => {
 		it("should have proper form labels", () => {
-			render(<Contact />);
+			renderContact();
 
 			expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
 			expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
@@ -484,7 +484,7 @@ describe("Contact Component", () => {
 		});
 
 		it("should have required attributes on required fields", () => {
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -498,7 +498,7 @@ describe("Contact Component", () => {
 		});
 
 		it("should have proper input types", () => {
-			render(<Contact />);
+			renderContact();
 
 			const emailInput = screen.getByLabelText(/Email Address/i);
 			expect(emailInput).toHaveAttribute("type", "email");
@@ -506,7 +506,7 @@ describe("Contact Component", () => {
 
 		it("should have accessible error messages", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
@@ -517,7 +517,7 @@ describe("Contact Component", () => {
 
 		it("should have accessible success messages", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -539,7 +539,7 @@ describe("Contact Component", () => {
 	describe("Edge Cases", () => {
 		it("should handle rapid form submissions", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -564,7 +564,7 @@ describe("Contact Component", () => {
 
 		it("should handle special characters in name", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			await user.type(nameInput, "José María O'Brien-Smith");
@@ -574,7 +574,7 @@ describe("Contact Component", () => {
 
 		it("should handle very long valid input", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const messageInput = screen.getByLabelText(/^Message/i);
 			const longMessage = "This is a very long message. ".repeat(30); // ~900 chars
