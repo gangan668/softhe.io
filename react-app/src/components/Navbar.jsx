@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 import "./Navbar.css";
 
-function Navbar() {
+function Navbar({ onCartClick }) {
 	const [isOpen, setIsOpen] = useState(false);
+	const { getCartCount } = useCart();
+	const cartCount = getCartCount();
 
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
@@ -88,6 +91,16 @@ function Navbar() {
 						</NavLink>
 					</li>
 				</ul>
+				<button
+					className="cart-icon-btn"
+					onClick={onCartClick}
+					aria-label={`Shopping cart with ${cartCount} items`}
+				>
+					<i className="fas fa-shopping-cart"></i>
+					{cartCount > 0 && (
+						<span className="cart-badge">{cartCount}</span>
+					)}
+				</button>
 				<div
 					className={"hamburger " + (isOpen ? "active" : "")}
 					onClick={toggleMenu}

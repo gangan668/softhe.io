@@ -1,6 +1,7 @@
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import useRateLimit from "../hooks/useRateLimit";
+import SEO from '../components/SEO';
 import "./Contact.css";
 
 function Contact() {
@@ -177,394 +178,403 @@ function Contact() {
 	};
 
 	return (
-		<div className="contact-page">
-			<section className="page-header">
-				<div className="container">
-					<h1>Get In Touch</h1>
-					<p>
-						Ready to optimize your gaming experience? We're here to
-						help you dominate the competition.
-					</p>
-				</div>
-			</section>
+		<>
+			<SEO
+				title="Contact Us - Get Expert PC Optimization Support | Softhe.io"
+				description="Contact Softhe.io for professional PC optimization support. 24/7 email support with 2-4 hour response time. Get help with custom Windows ISOs, BIOS tuning, and performance optimization."
+				keywords="contact pc optimization, gaming support, technical support, pc optimization help, custom windows support, bios tuning support, gaming pc help"
+				ogTitle="Contact Softhe.io - Expert Gaming PC Optimization Support"
+				ogDescription="Need help optimizing your gaming PC? Our expert team is available 24/7 to help you achieve maximum performance. Email and Discord support available."
+			/>
+			<div className="contact-page">
+				<section className="page-header">
+					<div className="container">
+						<h1>Get In Touch</h1>
+						<p>
+							Ready to optimize your gaming experience? We're here to
+							help you dominate the competition.
+						</p>
+					</div>
+				</section>
 
-			<section className="contact-hero">
-				<div className="container">
-					<div className="contact-grid">
-						<div className="contact-info">
-							<h2>Contact Information</h2>
-							<p className="contact-description">
-								Our team of PC optimization experts is available
-								24/7 to help you achieve peak gaming
-								performance. Choose your preferred method of
-								communication below.
-							</p>
-
-							<div className="contact-methods">
-								<div className="contact-method primary-contact">
-									<div className="contact-icon">
-										<i className="fas fa-envelope"></i>
-									</div>
-									<div className="contact-details">
-										<h3>Email Support</h3>
-										<p>
-											Primary contact method for all
-											inquiries
-										</p>
-										<a
-											href="mailto:support@softhe.io"
-											className="contact-link"
-										>
-											support@softhe.io
-										</a>
-										<span className="response-time">
-											Response within 2-4 hours
-										</span>
-									</div>
-								</div>
-
-								<div className="contact-method">
-									<div className="contact-icon">
-										<i className="fab fa-discord"></i>
-									</div>
-									<div className="contact-details">
-										<h3>Discord Support</h3>
-										<p>
-											Real-time chat and community support
-										</p>
-										<a
-											href="https://discord.com/users/softhecs"
-											className="contact-link"
-											target="_blank"
-											rel="noreferrer"
-										>
-											@softhecs
-										</a>
-										<span className="response-time">
-											Usually online 12-20 GMT+2
-										</span>
-									</div>
-								</div>
-							</div>
-
-							{/* Security & Privacy Notice */}
-							<div className="security-notice">
-								<i className="fas fa-shield-alt"></i>
-								<div>
-									<h4>Your Privacy Matters</h4>
-									<p>
-										All communications are encrypted and
-										your data is never shared with third
-										parties.
-									</p>
-								</div>
-							</div>
-						</div>
-
-						<div className="contact-form-section">
-							<div className="contact-form-container">
-								<h2>Send Us a Message</h2>
-								<p>
-									Have a specific question? Fill out the form
-									below and we'll get back to you quickly.
+				<section className="contact-hero">
+					<div className="container">
+						<div className="contact-grid">
+							<div className="contact-info">
+								<h2>Contact Information</h2>
+								<p className="contact-description">
+									Our team of PC optimization experts is available
+									24/7 to help you achieve peak gaming
+									performance. Choose your preferred method of
+									communication below.
 								</p>
 
-								{/* Rate Limit Warning */}
-								{rateLimit.isBlocked && (
-									<div className="rate-limit-warning" role="alert" aria-live="polite">
-										<i className="fas fa-exclamation-triangle"></i>
-										<div>
-											<p>{rateLimit.getBlockMessage()}</p>
+								<div className="contact-methods">
+									<div className="contact-method primary-contact">
+										<div className="contact-icon">
+											<i className="fas fa-envelope"></i>
 										</div>
-									</div>
-								)}
-
-								{/* Attempts Left Indicator */}
-								{!rateLimit.isBlocked &&
-									rateLimit.attemptsLeft < 3 &&
-									rateLimit.attemptsLeft > 0 && (
-										<div className="attempts-notice">
-											<i className="fas fa-info-circle"></i>
-											<span>
-												{rateLimit.attemptsLeft}{" "}
-												submission
-												{rateLimit.attemptsLeft !== 1
-													? "s"
-													: ""}{" "}
-												remaining in the next minute
+										<div className="contact-details">
+											<h3>Email Support</h3>
+											<p>
+												Primary contact method for all
+												inquiries
+											</p>
+											<a
+												href="mailto:support@softhe.io"
+												className="contact-link"
+											>
+												support@softhe.io
+											</a>
+											<span className="response-time">
+												Response within 2-4 hours
 											</span>
 										</div>
-									)}
-
-								<form
-									className="contact-form"
-									onSubmit={handleSubmit}
-									noValidate
-								>
-									{/* Honeypot field - hidden from users, bots will fill it */}
-									<input
-										type="text"
-										name="website"
-										value={honeypot}
-										onChange={(e) =>
-											setHoneypot(e.target.value)
-										}
-										style={{
-											position: "absolute",
-											left: "-9999px",
-											width: "1px",
-											height: "1px",
-										}}
-										tabIndex="-1"
-										autoComplete="off"
-										aria-hidden="true"
-									/>
-
-									<div className="form-group">
-										<label htmlFor="name">
-											Full Name{" "}
-											<span className="required">*</span>
-										</label>
-										<input
-											type="text"
-											id="name"
-											name="name"
-											value={formData.name}
-											onChange={handleChange}
-											required
-											maxLength="100"
-											disabled={
-												isSubmitting ||
-												rateLimit.isBlocked
-											}
-											placeholder="John Doe"
-											aria-invalid={errors.name ? "true" : "false"}
-											aria-describedby={errors.name ? "name-error" : undefined}
-										/>
-										{errors.name && (
-											<div
-												id="name-error"
-												role="alert"
-												aria-label={errors.name}
-												aria-live="assertive"
-												className="form-status error"
-												data-testid="form-status"
-											>
-												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
-												{errors.name}
-											</div>
-										)}
 									</div>
 
-									<div className="form-group">
-										<label htmlFor="email">
-											Email Address{" "}
-											<span className="required">*</span>
-										</label>
-										<input
-											type="email"
-											id="email"
-											name="email"
-											value={formData.email}
-											onChange={handleChange}
-											required
-											maxLength="100"
-											disabled={
-												isSubmitting ||
-												rateLimit.isBlocked
-											}
-											placeholder="john@example.com"
-											aria-invalid={errors.email ? "true" : "false"}
-											aria-describedby={errors.email ? "email-error" : undefined}
-										/>
-										{errors.email && (
-											<div
-												id="email-error"
-												role="alert"
-												aria-label={errors.email}
-												aria-live="assertive"
-												className="form-status error"
-												data-testid="form-status"
-											>
-												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
-												{errors.email}
-											</div>
-										)}
-									</div>
-
-									<div className="form-group">
-										<label htmlFor="subject">
-											Subject{" "}
-											<span className="required">*</span>
-										</label>
-										<select
-											id="subject"
-											name="subject"
-											value={formData.subject}
-											onChange={handleChange}
-											required
-											disabled={
-												isSubmitting ||
-												rateLimit.isBlocked
-											}
-											aria-invalid={errors.subject ? "true" : "false"}
-											aria-describedby={errors.subject ? "subject-error" : undefined}
-										>
-											<option value="">
-												Select a topic
-											</option>
-											<option value="general">
-												General Inquiry
-											</option>
-											<option value="technical">
-												Technical Support
-											</option>
-											<option value="sales">
-												Sales Question
-											</option>
-											<option value="custom">
-												Custom Optimization
-											</option>
-											<option value="billing">
-												Billing Support
-											</option>
-										</select>
-										{errors.subject && (
-											<div
-												id="subject-error"
-												role="alert"
-												aria-label={errors.subject}
-												aria-live="assertive"
-												className="form-status error"
-												data-testid="form-status"
-											>
-												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
-												{errors.subject}
-											</div>
-										)}
-									</div>
-
-									<div className="form-group">
-										<label htmlFor="hardware">
-											Your Hardware (Optional)
-										</label>
-										<input
-											type="text"
-											id="hardware"
-											name="hardware"
-											value={formData.hardware}
-											onChange={handleChange}
-											maxLength="200"
-											disabled={
-												isSubmitting ||
-												rateLimit.isBlocked
-											}
-											placeholder="e.g., RTX 4080, i7-13700K, 32GB RAM"
-										/>
-									</div>
-
-									<div className="form-group">
-										<label htmlFor="message">
-											Message{" "}
-											<span className="required">*</span>
-										</label>
-										<textarea
-											id="message"
-											name="message"
-											rows="6"
-											value={formData.message}
-											onChange={handleChange}
-											required
-											maxLength="2000"
-											disabled={
-												isSubmitting ||
-												rateLimit.isBlocked
-											}
-											placeholder="Tell us about your gaming setup and what you're looking to optimize..."
-											aria-invalid={errors.message ? "true" : "false"}
-											aria-describedby={errors.message ? "message-error" : undefined}
-										></textarea>
-										<div className="character-count">
-											{formData.message.length} / 2000
-											characters
+									<div className="contact-method">
+										<div className="contact-icon">
+											<i className="fab fa-discord"></i>
 										</div>
-										{errors.message && (
-											<div
-												id="message-error"
-												role="alert"
-												aria-label={errors.message}
-												aria-live="assertive"
-												className="form-status error"
-												data-testid="form-status"
+										<div className="contact-details">
+											<h3>Discord Support</h3>
+											<p>
+												Real-time chat and community support
+											</p>
+											<a
+												href="https://discord.com/users/softhecs"
+												className="contact-link"
+												target="_blank"
+												rel="noreferrer"
 											>
-												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
-												{errors.message}
-											</div>
-										)}
+												@softhecs
+											</a>
+											<span className="response-time">
+												Usually online 12-20 GMT+2
+											</span>
+										</div>
 									</div>
+								</div>
 
-									{/* Success Message */}
-									{submitStatus.type === "success" && (
-										<div
-											className="form-status success"
-											role="status"
-											aria-live="polite"
-											aria-atomic="true"
-											data-testid="form-status"
-											aria-label={submitStatus.message}
-										>
-											<i className="fas fa-check-circle" aria-hidden="true"></i>
-											{submitStatus.message}
-										</div>
-									)}
+								{/* Security & Privacy Notice */}
+								<div className="security-notice">
+									<i className="fas fa-shield-alt"></i>
+									<div>
+										<h4>Your Privacy Matters</h4>
+										<p>
+											All communications are encrypted and
+											your data is never shared with third
+											parties.
+										</p>
+									</div>
+								</div>
+							</div>
 
-									{/* General Error Message (for rate limiting, etc.) */}
-									{submitStatus.type === "error" && (
-										<div
-											className="form-status error"
-											role="alert"
-											aria-live="assertive"
-											aria-atomic="true"
-											data-testid="form-status"
-											aria-label={submitStatus.message}
-										>
-											<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
-											{submitStatus.message}
-										</div>
-									)}
-
-									<button
-										type="submit"
-										className="btn btn-primary form-submit"
-										disabled={
-											isSubmitting || rateLimit.isBlocked
-										}
-									>
-										{isSubmitting ? (
-											<>
-												<i className="fas fa-spinner fa-spin"></i>
-												Sending...
-											</>
-										) : (
-											<>
-												<i className="fas fa-paper-plane"></i>
-												Send Message
-											</>
-										)}
-									</button>
-
-									<p className="form-note">
-										<i className="fas fa-lock"></i>
-										Your information is protected and will
-										never be shared.
+							<div className="contact-form-section">
+								<div className="contact-form-container">
+									<h2>Send Us a Message</h2>
+									<p>
+										Have a specific question? Fill out the form
+										below and we'll get back to you quickly.
 									</p>
-								</form>
+
+									{/* Rate Limit Warning */}
+									{rateLimit.isBlocked && (
+										<div className="rate-limit-warning" role="alert" aria-live="polite">
+											<i className="fas fa-exclamation-triangle"></i>
+											<div>
+												<p>{rateLimit.getBlockMessage()}</p>
+											</div>
+										</div>
+									)}
+
+									{/* Attempts Left Indicator */}
+									{!rateLimit.isBlocked &&
+										rateLimit.attemptsLeft < 3 &&
+										rateLimit.attemptsLeft > 0 && (
+											<div className="attempts-notice">
+												<i className="fas fa-info-circle"></i>
+												<span>
+													{rateLimit.attemptsLeft}{" "}
+													submission
+													{rateLimit.attemptsLeft !== 1
+														? "s"
+														: ""}{" "}
+													remaining in the next minute
+												</span>
+											</div>
+										)}
+
+									<form
+										className="contact-form"
+										onSubmit={handleSubmit}
+										noValidate
+									>
+										{/* Honeypot field - hidden from users, bots will fill it */}
+										<input
+											type="text"
+											name="website"
+											value={honeypot}
+											onChange={(e) =>
+												setHoneypot(e.target.value)
+											}
+											style={{
+												position: "absolute",
+												left: "-9999px",
+												width: "1px",
+												height: "1px",
+											}}
+											tabIndex="-1"
+											autoComplete="off"
+											aria-hidden="true"
+										/>
+
+										<div className="form-group">
+											<label htmlFor="name">
+												Full Name{" "}
+												<span className="required">*</span>
+											</label>
+											<input
+												type="text"
+												id="name"
+												name="name"
+												value={formData.name}
+												onChange={handleChange}
+												required
+												maxLength="100"
+												disabled={
+													isSubmitting ||
+													rateLimit.isBlocked
+												}
+												placeholder="John Doe"
+												aria-invalid={errors.name ? "true" : "false"}
+												aria-describedby={errors.name ? "name-error" : undefined}
+											/>
+											{errors.name && (
+												<div
+													id="name-error"
+													role="alert"
+													aria-label={errors.name}
+													aria-live="assertive"
+													className="form-status error"
+													data-testid="form-status"
+												>
+													<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+													{errors.name}
+												</div>
+											)}
+										</div>
+
+										<div className="form-group">
+											<label htmlFor="email">
+												Email Address{" "}
+												<span className="required">*</span>
+											</label>
+											<input
+												type="email"
+												id="email"
+												name="email"
+												value={formData.email}
+												onChange={handleChange}
+												required
+												maxLength="100"
+												disabled={
+													isSubmitting ||
+													rateLimit.isBlocked
+												}
+												placeholder="john@example.com"
+												aria-invalid={errors.email ? "true" : "false"}
+												aria-describedby={errors.email ? "email-error" : undefined}
+											/>
+											{errors.email && (
+												<div
+													id="email-error"
+													role="alert"
+													aria-label={errors.email}
+													aria-live="assertive"
+													className="form-status error"
+													data-testid="form-status"
+												>
+													<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+													{errors.email}
+												</div>
+											)}
+										</div>
+
+										<div className="form-group">
+											<label htmlFor="subject">
+												Subject{" "}
+												<span className="required">*</span>
+											</label>
+											<select
+												id="subject"
+												name="subject"
+												value={formData.subject}
+												onChange={handleChange}
+												required
+												disabled={
+													isSubmitting ||
+													rateLimit.isBlocked
+												}
+												aria-invalid={errors.subject ? "true" : "false"}
+												aria-describedby={errors.subject ? "subject-error" : undefined}
+											>
+												<option value="">
+													Select a topic
+												</option>
+												<option value="general">
+													General Inquiry
+												</option>
+												<option value="technical">
+													Technical Support
+												</option>
+												<option value="sales">
+													Sales Question
+												</option>
+												<option value="custom">
+													Custom Optimization
+												</option>
+												<option value="billing">
+													Billing Support
+												</option>
+											</select>
+											{errors.subject && (
+												<div
+													id="subject-error"
+													role="alert"
+													aria-label={errors.subject}
+													aria-live="assertive"
+													className="form-status error"
+													data-testid="form-status"
+												>
+													<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+													{errors.subject}
+												</div>
+											)}
+										</div>
+
+										<div className="form-group">
+											<label htmlFor="hardware">
+												Your Hardware (Optional)
+											</label>
+											<input
+												type="text"
+												id="hardware"
+												name="hardware"
+												value={formData.hardware}
+												onChange={handleChange}
+												maxLength="200"
+												disabled={
+													isSubmitting ||
+													rateLimit.isBlocked
+												}
+												placeholder="e.g., RTX 4080, i7-13700K, 32GB RAM"
+											/>
+										</div>
+
+										<div className="form-group">
+											<label htmlFor="message">
+												Message{" "}
+												<span className="required">*</span>
+											</label>
+											<textarea
+												id="message"
+												name="message"
+												rows="6"
+												value={formData.message}
+												onChange={handleChange}
+												required
+												maxLength="2000"
+												disabled={
+													isSubmitting ||
+													rateLimit.isBlocked
+												}
+												placeholder="Tell us about your gaming setup and what you're looking to optimize..."
+												aria-invalid={errors.message ? "true" : "false"}
+												aria-describedby={errors.message ? "message-error" : undefined}
+											></textarea>
+											<div className="character-count">
+												{formData.message.length} / 2000
+												characters
+											</div>
+											{errors.message && (
+												<div
+													id="message-error"
+													role="alert"
+													aria-label={errors.message}
+													aria-live="assertive"
+													className="form-status error"
+													data-testid="form-status"
+												>
+													<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+													{errors.message}
+												</div>
+											)}
+										</div>
+
+										{/* Success Message */}
+										{submitStatus.type === "success" && (
+											<div
+												className="form-status success"
+												role="status"
+												aria-live="polite"
+												aria-atomic="true"
+												data-testid="form-status"
+												aria-label={submitStatus.message}
+											>
+												<i className="fas fa-check-circle" aria-hidden="true"></i>
+												{submitStatus.message}
+											</div>
+										)}
+
+										{/* General Error Message (for rate limiting, etc.) */}
+										{submitStatus.type === "error" && (
+											<div
+												className="form-status error"
+												role="alert"
+												aria-live="assertive"
+												aria-atomic="true"
+												data-testid="form-status"
+												aria-label={submitStatus.message}
+											>
+												<i className="fas fa-exclamation-circle" aria-hidden="true"></i>
+												{submitStatus.message}
+											</div>
+										)}
+
+										<button
+											type="submit"
+											className="btn btn-primary form-submit"
+											disabled={
+												isSubmitting || rateLimit.isBlocked
+											}
+										>
+											{isSubmitting ? (
+												<>
+													<i className="fas fa-spinner fa-spin"></i>
+													Sending...
+												</>
+											) : (
+												<>
+													<i className="fas fa-paper-plane"></i>
+													Send Message
+												</>
+											)}
+										</button>
+
+										<p className="form-note">
+											<i className="fas fa-lock"></i>
+											Your information is protected and will
+											never be shared.
+										</p>
+									</form>
+								</div>
 							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-		</div>
+				</section>
+			</div>
+		</>
 	);
 }
 
