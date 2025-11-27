@@ -4,7 +4,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import CookieConsent from "./components/CookieConsent";
-import { CartProvider } from "./context/CartContext";
+import { CartProvider } from "./context/CartProvider";
 import Cart from "./components/Cart";
 import "./App.css";
 
