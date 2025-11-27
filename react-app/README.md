@@ -50,10 +50,20 @@ react-app/
 
 ### Installation
 
+1. Install dependencies:
+
 ```bash
 cd react-app
 npm install
 ```
+
+2. Set up environment variables:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and add your EmailJS credentials. See [ENV_VARIABLES.md](./ENV_VARIABLES.md) for detailed instructions.
 
 ### Development
 
@@ -88,7 +98,18 @@ npm run preview
 - **React 19**: Latest React features and hooks
 - **React Router v7**: Client-side routing
 - **Vite**: Fast build tool and dev server
+- **EmailJS**: Email service for contact form
 - **CSS**: Custom CSS with CSS variables for theming
+
+## Environment Variables
+
+The application requires environment variables for the contact form functionality. See [ENV_VARIABLES.md](./ENV_VARIABLES.md) for:
+
+- Setting up EmailJS credentials
+- Local development configuration
+- Production deployment setup
+- Security best practices
+- Troubleshooting guide
 
 ## Features Implemented
 
@@ -122,7 +143,9 @@ npm run preview
 
 #### Contact
 - Contact information display
-- Interactive contact form
+- Interactive contact form with validation
+- Rate limiting and bot protection
+- EmailJS integration for email delivery
 - Multiple contact methods
 
 ### Components
@@ -144,6 +167,43 @@ The application uses CSS custom properties (CSS variables) for consistent themin
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
+
+## Testing
+
+Run the test suite:
+
+```bash
+npm run test
+```
+
+Run tests with UI:
+
+```bash
+npm run test:ui
+```
+
+Generate coverage report:
+
+```bash
+npm run test:coverage
+```
+
+## Deployment
+
+This project is configured for GitHub Pages deployment. See [DEPLOYMENT.md](../docs/DEPLOYMENT.md) for detailed deployment instructions.
+
+```bash
+npm run deploy
+```
+
+**Important**: Ensure environment variables are set as GitHub repository secrets before deploying.
+
+## Documentation
+
+- [ENV_VARIABLES.md](./ENV_VARIABLES.md) - Environment variable configuration
+- [QUICKSTART.md](../docs/QUICKSTART.md) - Quick start guide
+- [DEPLOYMENT.md](../docs/DEPLOYMENT.md) - Deployment instructions
+- [TEST_COVERAGE.md](../docs/TEST_COVERAGE.md) - Testing documentation
 
 ## Future Enhancements
 

@@ -10,16 +10,16 @@ function Footer() {
 						<h3>Softhe.io</h3>
 						<p>Elite PC optimization for esports professionals and enthusiasts worldwide.</p>
 						<div className="social-links">
-							<a href="https://x.com/SoftheCS" target="_blank" rel="noreferrer">
+							<a href="https://x.com/SoftheCS" target="_blank" rel="noreferrer" aria-label="X (formerly Twitter)">
 								<i className="fab fa-twitter"></i>
 							</a>
-							<a href="https://discord.com/users/softhecs" target="_blank" rel="noreferrer">
+							<a href="https://discord.com/users/softhecs" target="_blank" rel="noreferrer" aria-label="Discord">
 								<i className="fab fa-discord"></i>
 							</a>
-							<a href="https://github.com/Softhe" target="_blank" rel="noreferrer">
+							<a href="https://github.com/Softhe" target="_blank" rel="noreferrer" aria-label="GitHub">
 								<i className="fab fa-github"></i>
 							</a>
-							<a href="https://www.youtube.com/@softhe" target="_blank" rel="noreferrer">
+							<a href="https://www.youtube.com/@softhe" target="_blank" rel="noreferrer" aria-label="YouTube">
 								<i className="fab fa-youtube"></i>
 							</a>
 						</div>

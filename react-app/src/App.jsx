@@ -16,14 +16,18 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 
 // Loading component
 const PageLoader = () => (
-	<div style={{
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		minHeight: '60vh',
-		color: '#6366f1'
-	}}>
-		<i className="fas fa-spinner fa-spin fa-2x"></i>
+	<div
+		role="status"
+		aria-label="Loading"
+		style={{
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+			minHeight: '60vh',
+			color: '#6366f1'
+		}}
+	>
+		<i className="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>
 	</div>
 );
 

@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import "./Navbar.css";
 
 function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
-	const location = useLocation();
 
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
@@ -12,10 +11,6 @@ function Navbar() {
 
 	const closeMenu = () => {
 		setIsOpen(false);
-	};
-
-	const isActive = (path) => {
-		return location.pathname === path ? "active" : "";
 	};
 
 	return (
@@ -26,58 +21,71 @@ function Navbar() {
 				</div>
 				<ul className={"nav-menu " + (isOpen ? "active" : "")}>
 					<li className="nav-item">
-						<Link
+						<NavLink
 							to="/"
-							className={"nav-link " + isActive("/")}
+							end
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
 							onClick={closeMenu}
 						>
 							Home
-						</Link>
+						</NavLink>
 					</li>
 					<li className="nav-item">
-						<Link
+						<NavLink
 							to="/services"
-							className={"nav-link " + isActive("/services")}
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
 							onClick={closeMenu}
 						>
 							Services
-						</Link>
+						</NavLink>
 					</li>
 					<li className="nav-item">
-						<Link
+						<NavLink
 							to="/store"
-							className={"nav-link " + isActive("/store")}
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
 							onClick={closeMenu}
 						>
 							Store
-						</Link>
+						</NavLink>
 					</li>
 					<li className="nav-item">
-						<Link
+						<NavLink
 							to="/performance"
-							className={"nav-link " + isActive("/performance")}
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
 							onClick={closeMenu}
 						>
 							Performance
-						</Link>
+						</NavLink>
 					</li>
 					<li className="nav-item">
-						<Link
+						<NavLink
 							to="/contact"
-							className={"nav-link " + isActive("/contact")}
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
 							onClick={closeMenu}
 						>
 							Contact
-						</Link>
+						</NavLink>
 					</li>
 					<li className="nav-item">
-						<Link
+						<NavLink
 							to="/faq"
-							className={"nav-link " + isActive("/faq")}
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
 							onClick={closeMenu}
 						>
 							FAQ
-						</Link>
+						</NavLink>
 					</li>
 				</ul>
 				<div

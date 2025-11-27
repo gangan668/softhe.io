@@ -125,10 +125,9 @@ function Contact() {
 		try {
 			const success = await rateLimit.attempt(async () => {
 				// EmailJS Configuration
-				// TODO: Replace these with your actual credentials from https://dashboard.emailjs.com/
-				const serviceId = "service_xnl0j5o";
-				const templateId = "template_5fcvkls";
-				const publicKey = "Duz4mhIKjppfn5Xvb";
+				const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+				const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+				const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 				await emailjs.send(
 					serviceId,
