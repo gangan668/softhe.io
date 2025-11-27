@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { CartProvider } from "../context/CartProvider";
 import Navbar from "./Navbar";
 
 describe("Navbar Component", () => {
@@ -14,11 +15,14 @@ describe("Navbar Component", () => {
 		vi.restoreAllMocks();
 	});
 
-	// Helper function to render Navbar with Router
+	// Helper function to render Navbar with Router and CartProvider
 	const renderNavbar = (initialRoute = "/") => {
+		const mockOnCartClick = vi.fn();
 		return render(
 			<MemoryRouter initialEntries={[initialRoute]}>
-				<Navbar />
+				<CartProvider>
+					<Navbar onCartClick={mockOnCartClick} />
+				</CartProvider>
 			</MemoryRouter>
 		);
 	};

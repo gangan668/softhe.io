@@ -47,8 +47,8 @@ function App() {
 
 	return (
 		<ErrorBoundary>
-			<CartProvider>
-				<Router>
+			<Router>
+				<CartProvider>
 					<div className="App">
 						<Navbar onCartClick={toggleCart} />
 						<ErrorBoundary>
@@ -68,8 +68,8 @@ function App() {
 						<Cart isOpen={isCartOpen} onClose={closeCart} />
 					</div>
 					<CookieConsent />
-				</Router>
-			</CartProvider>
+				</CartProvider>
+			</Router>
 		</ErrorBoundary>
 	);
 }

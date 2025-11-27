@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
+import { MemoryRouter } from "react-router-dom";
 import Contact from "./Contact";
 import useRateLimit from "../hooks/useRateLimit";
 
@@ -33,6 +34,15 @@ vi.mock("../hooks/useRateLimit", () => ({
 }));
 
 describe("Contact Component", () => {
+	// Helper function to render Contact with Router
+	const renderContact = () => {
+		return render(
+			<MemoryRouter>
+				<Contact />
+			</MemoryRouter>
+		);
+	};
+
 	beforeEach(() => {
 		// Reset all mocks before each test
 		vi.clearAllMocks();
@@ -48,12 +58,12 @@ describe("Contact Component", () => {
 
 	describe("Rendering", () => {
 		it("should render the contact page with heading", () => {
-			render(<Contact />);
+			renderContact();
 			expect(screen.getByText(/Get in Touch/i)).toBeInTheDocument();
 		});
 
 		it("should render all form fields", () => {
-			render(<Contact />);
+			renderContact();
 
 			expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
 			expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
@@ -63,19 +73,19 @@ describe("Contact Component", () => {
 		});
 
 		it("should render submit button", () => {
-			render(<Contact />);
+			renderContact();
 			expect(screen.getByRole("button", { name: /Send Message/i })).toBeInTheDocument();
 		});
 
 		it("should render contact information", () => {
-			render(<Contact />);
+			renderContact();
 
 			expect(screen.getByText(/support@softhe.io/i)).toBeInTheDocument();
 			expect(screen.getByText(/@softhecs/i)).toBeInTheDocument();
 		});
 
 		it("should render social media links", () => {
-			render(<Contact />);
+			renderContact();
 
 			const links = screen.getAllByRole("link");
 			expect(links.length).toBeGreaterThan(0);
@@ -85,7 +95,7 @@ describe("Contact Component", () => {
 	describe("Form Validation", () => {
 		it("should show error for empty name", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
 			await user.click(submitButton);
@@ -96,7 +106,7 @@ describe("Contact Component", () => {
 
 		it("should show error for name less than 2 characters", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const submitButton = screen.getByRole("button", { name: /Send Message/i });
@@ -110,7 +120,7 @@ describe("Contact Component", () => {
 
 		it("should show error for invalid email format", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -126,7 +136,7 @@ describe("Contact Component", () => {
 
 		it("should show error for empty subject", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -142,7 +152,7 @@ describe("Contact Component", () => {
 
 		it("should show error for empty message", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -160,7 +170,7 @@ describe("Contact Component", () => {
 
 		it("should show error for message less than 10 characters", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -180,7 +190,7 @@ describe("Contact Component", () => {
 
 		it("should accept valid email formats", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const emailInput = screen.getByLabelText(/Email Address/i);
 
@@ -196,7 +206,7 @@ describe("Contact Component", () => {
 	describe("Form Input Handling", () => {
 		it("should update name field on input", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			await user.type(nameInput, "John Doe");
@@ -206,7 +216,7 @@ describe("Contact Component", () => {
 
 		it("should update email field on input", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const emailInput = screen.getByLabelText(/Email Address/i);
 			await user.type(emailInput, "john@example.com");
@@ -216,7 +226,7 @@ describe("Contact Component", () => {
 
 		it("should update subject field on input", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const subjectInput = screen.getByLabelText(/Subject/i);
 			await user.selectOptions(subjectInput, "general");
@@ -226,7 +236,7 @@ describe("Contact Component", () => {
 
 		it("should update hardware field on input", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const hardwareInput = screen.getByLabelText(/Your Hardware/i);
 			await user.type(hardwareInput, "Intel i9, RTX 4090");
@@ -236,7 +246,7 @@ describe("Contact Component", () => {
 
 		it("should update message field on input", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const messageInput = screen.getByLabelText(/^Message/i);
 			await user.type(messageInput, "This is a test message");
@@ -246,7 +256,7 @@ describe("Contact Component", () => {
 
 		it("should clear form after successful submission", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -277,7 +287,7 @@ describe("Contact Component", () => {
 	describe("Form Submission", () => {
 		it("should show success message on valid form submission", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
@@ -297,7 +307,7 @@ describe("Contact Component", () => {
 
 		it("should disable submit button while submitting", async () => {
 			const user = userEvent.setup();
-			render(<Contact />);
+			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
 			const emailInput = screen.getByLabelText(/Email Address/i);
