@@ -2,11 +2,20 @@ import { useState, useEffect } from 'react';
 import { setAnalyticsConsent, hasConsentDecision, initGA } from '../utils/analytics';
 import './CookieConsent.css';
 
+const COOKIE_SETTINGS_EVENT = 'softhe:open-cookie-settings';
+
 function CookieConsent() {
 	const [showBanner, setShowBanner] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
 
 	useEffect(() => {
+		const openSettings = () => {
+			setShowDetails(true);
+			setShowBanner(true);
+		};
+
+		window.addEventListener(COOKIE_SETTINGS_EVENT, openSettings);
+
 		// Check if user has already made a consent decision
 		if (!hasConsentDecision()) {
 			// Show banner after a short delay for better UX
@@ -14,11 +23,16 @@ function CookieConsent() {
 				setShowBanner(true);
 			}, 1000);
 
-			return () => clearTimeout(timer);
+			return () => {
+				clearTimeout(timer);
+				window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
+			};
 		} else {
 			// User has already consented, initialize analytics
 			initGA();
 		}
+
+		return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
 	}, []);
 
 	const handleAccept = async () => {

@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
+import { trackEvent } from '../utils/analytics';
+import { STRIPE_PRODUCT_URLS, openExternalUrl } from '../utils/products';
 import './Cart.css';
 
 function Cart({ isOpen, onClose }) {
@@ -10,18 +12,16 @@ function Cart({ isOpen, onClose }) {
 		// In the future, this could be enhanced with a custom checkout page
 		if (cart.length === 0) return;
 
-		// Map cart items to Stripe product URLs
-		// This is a simplified version - in production, you'd want a backend to handle this
-		const stripeUrls = {
-			'windows-10': 'https://buy.stripe.com/7sY5kwg8AdMfcxm5ST28800',
-			'windows-11': 'https://buy.stripe.com/cNiaEQ9KcdMf2WMbdd28803',
-			'bios-optimization': 'https://buy.stripe.com/bJe9AMe0sfUn8h62GH28804',
-		};
+		trackEvent('cart_checkout_click', {
+			items: cart.map((item) => item.id).join(','),
+			value: getCartTotal(),
+			currency: 'EUR',
+		});
 
 		// For now, if there's only one item, redirect to its Stripe page
 		// For multiple items, we'll need to implement a custom checkout
 		if (cart.length === 1) {
-			window.open(stripeUrls[cart[0].id], '_blank');
+			openExternalUrl(STRIPE_PRODUCT_URLS[cart[0].id]);
 		} else {
 			// Navigate to a checkout page that can handle multiple items
 			window.location.href = '/checkout';
@@ -43,6 +43,7 @@ function Cart({ isOpen, onClose }) {
 				role="dialog"
 				aria-modal="true"
 				aria-label="Shopping cart"
+				aria-hidden={!isOpen}
 			>
 				<div className="cart-header">
 					<h2>

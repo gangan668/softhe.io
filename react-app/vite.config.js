@@ -30,8 +30,8 @@ export default defineConfig(() => ({
 			"Content-Security-Policy": [
 				"default-src 'self' 'unsafe-inline' 'unsafe-eval'",
 				"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://buy.stripe.com https://js.stripe.com",
-				"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
-				"font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+				"style-src 'self' 'unsafe-inline'",
+				"font-src 'self'",
 				"img-src 'self' data: https: http: blob:",
 				"connect-src 'self' ws: wss: http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com",
 				"frame-src 'self' https://buy.stripe.com https://js.stripe.com",
@@ -66,8 +66,8 @@ export default defineConfig(() => ({
 		},
 	},
 	build: {
-		// Enable source maps for production debugging
-		sourcemap: true,
+		// Keep source maps out of public production deploys.
+		sourcemap: false,
 
 		// Optimize chunk size
 		chunkSizeWarningLimit: 1000,
@@ -87,8 +87,8 @@ export default defineConfig(() => ({
 			"Content-Security-Policy": [
 				"default-src 'self' 'unsafe-inline'",
 				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com",
-				"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
-				"font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+				"style-src 'self' 'unsafe-inline'",
+				"font-src 'self'",
 				"img-src 'self' data: https: http: blob:",
 				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com https://api.emailjs.com",
 				"frame-src 'self' https://buy.stripe.com https://js.stripe.com",

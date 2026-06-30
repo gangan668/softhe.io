@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SEO from "../components/SEO";
+import { trackEvent } from "../utils/analytics";
 import "./FAQ.css";
 
 // Helper function to extract text from React elements safely
@@ -29,7 +30,7 @@ function FAQ() {
 			{
 				question: "What is Softhe.io and what do you offer?",
 				answer:
-					"Softhe.io is a premium PC optimization service specializing in maximizing gaming performance for esports professionals and enthusiasts. We offer custom-built Windows ISOs with all bloatware removed, expert BIOS optimization services, and comprehensive performance tuning packages. Our solutions are designed to squeeze every bit of performance from your hardware, resulting in higher FPS, lower latency, and smoother gameplay.",
+					"Softhe.io is a PC optimization service for competitive gaming setups. We offer custom-built Windows ISOs, BIOS optimization services, and performance tuning packages designed to reduce overhead, improve consistency, and make setup easier to maintain.",
 			},
 			{
 				question: "What exactly is included in the custom Windows ISO?",
@@ -50,7 +51,7 @@ function FAQ() {
 								enabled, reducing CPU and RAM usage
 							</li>
 							<li>
-								<strong>Privacy Settings:</strong> Pre-configured for maximum
+								<strong>Privacy Settings:</strong> Pre-configured for stronger
 								privacy and minimal telemetry
 							</li>
 							<li>
@@ -244,7 +245,7 @@ function FAQ() {
 							<li>Video tutorials walking through the entire process</li>
 							<li>Pre-configured settings (no manual tweaking required)</li>
 							<li>Automated scripts that do the work for you</li>
-							<li>24/7 support team ready to help</li>
+								<li>Email and Discord support for setup questions</li>
 							<li>Discord community for peer support</li>
 						</ul>
 						<p>
@@ -302,7 +303,7 @@ function FAQ() {
 							<strong>Do you need it?</strong> If you:
 						</p>
 						<ul>
-							<li>Want to extract maximum performance from your hardware</li>
+							<li>Want to improve consistency and reduce system overhead</li>
 							<li>Have a high-end system that's not performing as expected</li>
 							<li>Experience stuttering or inconsistent frame times</li>
 							<li>Are a competitive player seeking every advantage</li>
@@ -553,8 +554,8 @@ function FAQ() {
 								<strong>After Hours:</strong> Within 12 hours
 							</li>
 							<li>
-								<strong>Premium Support:</strong> Priority response within 1
-								hour, 24/7
+								<strong>Premium Support:</strong> Priority response during
+								available support hours
 							</li>
 						</ul>
 						<p>Business hours: Monday-Sunday, 9 AM - 10 PM CET</p>
@@ -618,8 +619,8 @@ function FAQ() {
 							<li>We include recovery tools in case of system issues</li>
 						</ul>
 						<p>
-							In thousands of installations, serious issues are extremely rare,
-							and we've always been able to resolve them quickly.
+							Serious issues are uncommon when the installation guide is followed,
+							and support can help troubleshoot if something does not behave as expected.
 						</p>
 					</div>
 				),
@@ -667,6 +668,9 @@ function FAQ() {
 
 	const handleSearch = (value) => {
 		setSearchTerm(value.toLowerCase());
+		if (value.trim().length >= 3) {
+			trackEvent("faq_search", { search_term: value.trim().slice(0, 80) });
+		}
 		if (value) {
 			// Auto-expand all matching items
 			const matchingItems = [];
@@ -722,7 +726,7 @@ function FAQ() {
 				title="FAQ - Frequently Asked Questions | Softhe.io"
 				description="Find answers to common questions about PC optimization, custom Windows ISOs, BIOS tuning, and our services at Softhe.io."
 				keywords="PC optimization FAQ, Windows ISO questions, BIOS tuning help, gaming optimization FAQ"
-				canonical="https://softhe.io/faq"
+				canonicalUrl="https://softhe.io/faq"
 			/>
 
 			<section className="page-header">
@@ -743,6 +747,7 @@ function FAQ() {
 									}`}
 								onClick={() => {
 									setActiveCategory(category.id);
+									trackEvent("faq_category_select", { category: category.id });
 									setSearchTerm("");
 									setActiveItems([]);
 								}}

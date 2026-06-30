@@ -16,6 +16,15 @@ const getEnvVar = (key, defaultValue) => {
 };
 
 const GA_MEASUREMENT_ID = getEnvVar('VITE_GA_MEASUREMENT_ID', 'G-XXXXXXXXXX');
+const isDev = () => Boolean(import.meta.env?.DEV);
+const hasValidMeasurementId = (measurementId) =>
+	Boolean(measurementId && measurementId !== 'G-XXXXXXXXXX' && /^G-[A-Z0-9]+$/.test(measurementId));
+
+const logDevWarning = (...args) => {
+	if (isDev()) {
+		console.warn(...args);
+	}
+};
 
 // Check if Google Analytics is loaded
 const isGALoaded = () => {
@@ -29,14 +38,17 @@ const isGALoaded = () => {
 export const initGA = (measurementId = GA_MEASUREMENT_ID) => {
 	// Check if already initialized
 	if (isGALoaded()) {
-		console.log('Google Analytics already initialized');
+		return;
+	}
+
+	if (!hasValidMeasurementId(measurementId)) {
+		logDevWarning('Google Analytics measurement ID is not configured.');
 		return;
 	}
 
 	// Check consent
 	const consent = getAnalyticsConsent();
 	if (!consent) {
-		console.log('Analytics consent not granted');
 		return;
 	}
 
@@ -57,8 +69,6 @@ export const initGA = (measurementId = GA_MEASUREMENT_ID) => {
 		cookie_flags: 'SameSite=None;Secure', // Cookie security
 		send_page_view: true
 	});
-
-	console.log('Google Analytics initialized');
 };
 
 /**
@@ -194,7 +204,7 @@ export const getAnalyticsConsent = () => {
 		const consent = localStorage.getItem(CONSENT_KEY);
 		return consent === 'true';
 	} catch (e) {
-		console.warn('Unable to read consent from localStorage:', e);
+		logDevWarning('Unable to read consent from localStorage:', e);
 		return false;
 	}
 };
@@ -222,7 +232,7 @@ export const setAnalyticsConsent = (granted) => {
 
 		return true;
 	} catch (e) {
-		console.warn('Unable to save consent to localStorage:', e);
+		logDevWarning('Unable to save consent to localStorage:', e);
 		return false;
 	}
 };
@@ -247,7 +257,7 @@ export const clearConsent = () => {
 		localStorage.removeItem(CONSENT_KEY);
 		return true;
 	} catch (e) {
-		console.warn('Unable to clear consent from localStorage:', e);
+		logDevWarning('Unable to clear consent from localStorage:', e);
 		return false;
 	}
 };

@@ -9,6 +9,7 @@ function SEO({
 	ogDescription,
 	ogImage,
 	canonicalUrl,
+	structuredData,
 	type = 'website'
 }) {
 	const location = useLocation();
@@ -67,7 +68,22 @@ function SEO({
 		}
 		canonical.setAttribute('href', canonicalUrl || fullUrl);
 
-	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, type, location.pathname, fullUrl, baseUrl]);
+		// Structured data
+		const structuredDataId = 'softhe-structured-data';
+		let structuredDataElement = document.getElementById(structuredDataId);
+		if (structuredData) {
+			if (!structuredDataElement) {
+				structuredDataElement = document.createElement('script');
+				structuredDataElement.id = structuredDataId;
+				structuredDataElement.type = 'application/ld+json';
+				document.head.appendChild(structuredDataElement);
+			}
+			structuredDataElement.textContent = JSON.stringify(structuredData);
+		} else if (structuredDataElement) {
+			structuredDataElement.remove();
+		}
+
+	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, type, location.pathname, fullUrl, baseUrl]);
 
 	return null; // This component doesn't render anything
 }

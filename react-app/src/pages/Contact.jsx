@@ -2,6 +2,7 @@ import { useState } from "react";
 import emailjs from "@emailjs/browser";
 import useRateLimit from "../hooks/useRateLimit";
 import SEO from '../components/SEO';
+import { trackFormSubmission } from '../utils/analytics';
 import "./Contact.css";
 
 function Contact() {
@@ -148,6 +149,7 @@ function Contact() {
 					type: "success",
 					message: "Thank you for your message",
 				});
+				trackFormSubmission("contact", formData.subject || "general");
 
 				// Reset form on success
 				setFormData({
@@ -181,18 +183,18 @@ function Contact() {
 		<>
 			<SEO
 				title="Contact Us - Get Expert PC Optimization Support | Softhe.io"
-				description="Contact Softhe.io for professional PC optimization support. 24/7 email support with 2-4 hour response time. Get help with custom Windows ISOs, BIOS tuning, and performance optimization."
+				description="Contact Softhe.io for PC optimization support. Get help with custom Windows ISOs, BIOS tuning, compatibility questions, and setup guidance."
 				keywords="contact pc optimization, gaming support, technical support, pc optimization help, custom windows support, bios tuning support, gaming pc help"
 				ogTitle="Contact Softhe.io - Expert Gaming PC Optimization Support"
-				ogDescription="Need help optimizing your gaming PC? Our expert team is available 24/7 to help you achieve maximum performance. Email and Discord support available."
+				ogDescription="Need help choosing or setting up a PC optimization product? Email and Discord support are available."
 			/>
 			<div className="contact-page">
 				<section className="page-header">
 					<div className="container">
 						<h1>Get In Touch</h1>
 						<p>
-							Ready to optimize your gaming experience? We're here to
-							help you dominate the competition.
+							Questions about compatibility, setup, or which product fits your
+							PC? Send the details and we will help you choose the right path.
 						</p>
 					</div>
 				</section>
@@ -204,9 +206,9 @@ function Contact() {
 								<h2>Contact Information</h2>
 								<p className="contact-description">
 									Our team of PC optimization experts is available
-									24/7 to help you achieve peak gaming
-									performance. Choose your preferred method of
-									communication below.
+									to help with product questions, setup guidance,
+									and compatibility checks. Choose your preferred
+									contact method below.
 								</p>
 
 								<div className="contact-methods">

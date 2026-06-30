@@ -2,13 +2,17 @@ import { Link } from 'react-router-dom';
 import './Footer.css';
 
 function Footer() {
+	const openCookieSettings = () => {
+		window.dispatchEvent(new Event('softhe:open-cookie-settings'));
+	};
+
 	return (
 		<footer className="footer" id="contact">
 			<div className="container">
 				<div className="footer-content">
 					<div className="footer-section">
 						<h3>Softhe.io</h3>
-						<p>Elite PC optimization for esports professionals and enthusiasts worldwide.</p>
+						<p>PC optimization products and support for competitive gaming setups.</p>
 						<div className="social-links">
 							<a href="https://x.com/SoftheCS" target="_blank" rel="noreferrer" aria-label="X (formerly Twitter)">
 								<i className="fab fa-twitter"></i>
@@ -31,6 +35,18 @@ function Footer() {
 							<li><Link to="/performance">Performance</Link></li>
 							<li><Link to="/faq">FAQ</Link></li>
 							<li><Link to="/contact">Contact</Link></li>
+						</ul>
+					</div>
+					<div className="footer-section">
+						<h4>Legal</h4>
+						<ul>
+							<li><Link to="/privacy-policy">Privacy Policy</Link></li>
+							<li><Link to="/cookie-policy">Cookie Policy</Link></li>
+							<li>
+								<button type="button" className="footer-link-button" onClick={openCookieSettings}>
+									Cookie Settings
+								</button>
+							</li>
 						</ul>
 					</div>
 					<div className="footer-section">

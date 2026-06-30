@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
+import { trackEvent } from '../utils/analytics';
+import { STRIPE_PRODUCT_URLS, openExternalUrl } from '../utils/products';
 import './Checkout.css';
 
 function Checkout() {
@@ -15,30 +17,15 @@ function Checkout() {
 		}
 	}, [cart.length, navigate]);
 
-	const handleCheckout = () => {
-		// Calculate bundle discount (5% off for 2 items, 10% off for 3+ items)
-		const discount = cart.length >= 3 ? 0.10 : cart.length >= 2 ? 0.05 : 0;
-		const subtotal = getCartTotal();
-		const discountAmount = subtotal * discount;
-		const total = subtotal - discountAmount;
-
-		// In a production environment, this would create a Stripe Checkout Session
-		// with all the products and apply the bundle discount
-
-		// For now, we'll show an alert with the order details
-		alert(
-			`Order Summary:\n\n` +
-			cart.map(item => `${item.name} x${item.quantity} - €${item.price * item.quantity}`).join('\n') +
-			`\n\nSubtotal: €${subtotal}\n` +
-			(discount > 0 ? `Bundle Discount (${discount * 100}%): -€${discountAmount.toFixed(2)}\n` : '') +
-			`Total: €${total.toFixed(2)}\n\n` +
-			`This would redirect to Stripe Checkout in production.`
-		);
-
-		// In production, redirect to Stripe or process payment
-		// For now, just clear the cart and redirect to home
-		// clearCart();
-		// navigate('/');
+	const handleSingleProductCheckout = (item) => {
+		trackEvent('begin_checkout', {
+			item_id: item.id,
+			item_name: item.name,
+			value: item.price,
+			currency: 'EUR',
+			source: 'checkout_page',
+		});
+		openExternalUrl(STRIPE_PRODUCT_URLS[item.id]);
 	};
 
 	if (cart.length === 0) {
@@ -54,7 +41,7 @@ function Checkout() {
 		<>
 			<SEO
 				title="Checkout - Complete Your Order | Softhe.io"
-				description="Complete your purchase of premium PC optimization products. Secure checkout with bundle discounts available."
+				description="Review your selected PC optimization products and continue to payment."
 				keywords="checkout, buy pc optimization, secure payment, bundle discount"
 			/>
 			<div className="checkout-page">
@@ -161,13 +148,45 @@ function Checkout() {
 									</div>
 								</div>
 
-								<button
-									className="btn btn-primary btn-checkout-full"
-									onClick={handleCheckout}
-								>
-									<i className="fas fa-lock"></i>
-									Proceed to Payment
-								</button>
+								{cart.length === 1 ? (
+									<button
+										className="btn btn-primary btn-checkout-full"
+										onClick={() => handleSingleProductCheckout(cart[0])}
+									>
+										<i className="fas fa-lock"></i>
+										Pay Securely with Stripe
+									</button>
+								) : (
+									<div className="static-checkout-notice">
+										<i className="fas fa-circle-info" aria-hidden="true"></i>
+										<div>
+											<strong>Bundle checkout needs manual confirmation</strong>
+											<p>
+												This static site cannot create a combined Stripe Checkout Session.
+												Use the individual payment buttons below or contact support for a
+												bundle invoice.
+											</p>
+										</div>
+									</div>
+								)}
+
+								{cart.length > 1 && (
+									<div className="individual-payment-links">
+										{cart.map((item) => (
+											<button
+												key={item.id}
+												type="button"
+												className="btn btn-secondary"
+												onClick={() => handleSingleProductCheckout(item)}
+											>
+												Pay for {item.name}
+											</button>
+										))}
+										<Link to="/contact" className="btn btn-primary">
+											Request Bundle Invoice
+										</Link>
+									</div>
+								)}
 
 								<div className="payment-features">
 									<div className="feature">
@@ -180,7 +199,7 @@ function Checkout() {
 									</div>
 									<div className="feature">
 										<i className="fas fa-undo"></i>
-										<span>30-Day Guarantee</span>
+										<span>14-Day Refund Window</span>
 									</div>
 								</div>
 
@@ -208,12 +227,12 @@ function Checkout() {
 								<div className="trust-badge">
 									<i className="fas fa-certificate"></i>
 									<h4>Professional Quality</h4>
-									<p>Premium optimization products used by esports professionals</p>
+									<p>Focused optimization products for competitive gaming PCs</p>
 								</div>
 								<div className="trust-badge">
 									<i className="fas fa-headset"></i>
 									<h4>Expert Support</h4>
-									<p>24/7 support from PC optimization specialists</p>
+									<p>Email and Discord help for product and setup questions</p>
 								</div>
 								<div className="trust-badge">
 									<i className="fas fa-lock"></i>
@@ -222,8 +241,8 @@ function Checkout() {
 								</div>
 								<div className="trust-badge">
 									<i className="fas fa-check-circle"></i>
-									<h4>Guaranteed Results</h4>
-									<p>30-day money-back guarantee if not satisfied</p>
+									<h4>Clear Refund Window</h4>
+									<p>14-day refund policy documented in the FAQ</p>
 								</div>
 							</div>
 						</div>

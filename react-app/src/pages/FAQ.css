@@ -1,476 +1,256 @@
-/* softhe/Dev/softhe.io/softhe.io/react-app/src/pages/FAQ.css
-   Updated to:
-   1. Use stronger dark surfaces (--surface-color)
-   2. Use site card shadow (--shadow)
-   3. Active category buttons filled with --gradient
-   4. Increase contrast / font-weight for answers (accessibility / print)
-   5. Remove glass blur / reduce transparency (opaque surfaces)
-   6. Add chevron transition + answer fade-in animation
-*/
-
-/* Note: relies on global CSS variables defined in /styles.css:
-   --background-color, --surface-color, --text-primary, --text-secondary,
-   --gradient, --primary-color, --primary-dark, --shadow, --navbar-height, etc.
-*/
-
-.faq-page {
-	min-height: 100vh;
-	background: var(--background-color);
-	color: var(--text-primary);
-}
-
-/* Header */
-.page-header {
-	background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(139, 92, 246, 0.08)),
-		linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-	color: var(--text-primary);
-	padding: 72px 20px;
-	text-align: center;
-	margin-top: var(--navbar-height);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-}
-
-.page-header h1 {
-	font-size: 2.4rem;
-	margin-bottom: 0.5rem;
-	font-weight: 700;
-	letter-spacing: -0.02em;
-}
-
-.page-header p {
-	font-size: 1.05rem;
-	opacity: 0.95;
-	max-width: 720px;
-	margin: 0 auto;
-	color: var(--text-secondary);
-}
-
-/* Main section */
 .faq-section {
-	padding: 48px 20px;
-	background: transparent;
+	padding: 72px 0 88px;
 }
 
 .faq-section .container {
 	max-width: 980px;
-	margin: 0 auto;
 }
 
-/* Category Navigation (made opaque / solid surface) */
+.faq-categories,
+.faq-item,
+.no-results,
+.faq-cta {
+	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-soft);
+}
+
 .faq-categories {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 10px;
+	gap: 0.55rem;
 	justify-content: center;
-	margin-bottom: 28px;
-	padding: 12px;
-	background: var(--surface-color);
-	/* solid dark surface */
-	border: 1px solid rgba(255, 255, 255, 0.03);
-	border-radius: 12px;
-	box-shadow: var(--shadow);
+	margin-bottom: 1.5rem;
+	padding: 0.75rem;
 }
 
-/* Category buttons */
 .category-btn {
-	padding: 10px 18px;
+	padding: 0.7rem 1rem;
 	border: 1px solid transparent;
 	background: transparent;
-	border-radius: 10px;
+	border-radius: 999px;
 	cursor: pointer;
-	font-size: 0.95rem;
-	font-weight: 600;
+	font: inherit;
+	font-size: 0.92rem;
+	font-weight: 750;
 	transition: var(--transition);
-	display: flex;
+	display: inline-flex;
 	align-items: center;
-	gap: 10px;
+	gap: 0.55rem;
 	color: var(--text-secondary);
 }
 
-/* Icon color inherits */
-.category-btn i {
-	font-size: 1rem;
-	color: var(--text-secondary);
-}
-
-/* Hover */
 .category-btn:hover {
-	color: var(--text-primary);
-	transform: translateY(-2px);
-	box-shadow: 0 8px 30px rgba(2, 6, 23, 0.45), 0 6px 20px rgba(99, 102, 241, 0.06);
-	border-color: rgba(255, 255, 255, 0.03);
+	color: var(--primary-color);
+	background: rgba(255, 255, 255, 0.04);
 }
 
-/* Active state: fully filled with gradient for stronger visual cue */
 .category-btn.active {
-	background: var(--gradient);
-	color: var(--text-primary);
-	border: 1px solid rgba(255, 255, 255, 0.04);
-	box-shadow: 0 14px 40px rgba(99, 102, 241, 0.14);
+	background: rgba(66, 232, 196, 0.12);
+	color: var(--primary-color);
+	border-color: rgba(66, 232, 196, 0.24);
 }
 
-/* Search Box (opaque, no glass blur) */
 .faq-search {
 	position: relative;
-	margin: 24px auto 32px auto;
-	max-width: 680px;
+	margin: 0 auto 2.5rem;
+	max-width: 720px;
 }
 
 .faq-search i {
 	position: absolute;
-	left: 16px;
+	left: 1rem;
 	top: 50%;
 	transform: translateY(-50%);
 	color: var(--text-secondary);
-	font-size: 1.05rem;
 }
 
-/* Make search input use solid surface color */
 .faq-search input {
 	width: 100%;
-	padding: 14px 16px 14px 44px;
-	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.04);
-	background: var(--surface-color);
-	/* solid surface */
+	padding: 0.95rem 1rem 0.95rem 2.8rem;
+	border-radius: var(--radius-md);
+	border: 1px solid var(--border-color);
+	background: rgba(255, 255, 255, 0.035);
 	color: var(--text-primary);
-	font-size: 1rem;
+	font: inherit;
 	transition: var(--transition);
 }
 
-/* Focus states */
 .faq-search input:focus {
 	outline: none;
-	box-shadow: 0 8px 28px rgba(99, 102, 241, 0.08);
-	border-color: rgba(99, 102, 241, 0.18);
+	border-color: rgba(66, 232, 196, 0.55);
+	box-shadow: 0 0 0 3px rgba(66, 232, 196, 0.1);
 }
 
-/* Placeholder color */
-.faq-search input::placeholder {
-	color: rgba(161, 161, 170, 0.7);
-}
-
-/* Category Title */
 .faq-category {
-	margin-bottom: 40px;
+	margin-bottom: 2.5rem;
 }
 
 .category-title {
-	font-size: 1.6rem;
+	font-size: 1.45rem;
 	color: var(--text-primary);
-	margin-bottom: 18px;
+	margin-bottom: 1rem;
 	display: flex;
 	align-items: center;
-	gap: 12px;
-	font-weight: 700;
+	gap: 0.7rem;
+	font-weight: 800;
 }
 
 .category-title i {
 	color: var(--primary-color);
-	font-size: 1.4rem;
 }
 
-/* FAQ Items - stronger dark surface and site shadow */
 .faq-item {
-	background: var(--surface-color);
-	/* solid surface for higher contrast */
-	border-radius: 12px;
-	margin-bottom: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.03);
-	box-shadow: var(--shadow);
-	/* use site card shadow for parity */
-	transition: var(--transition);
+	margin-bottom: 0.75rem;
 	overflow: hidden;
+	transition: var(--transition);
 }
 
-/* Hover effect */
 .faq-item:hover {
-	transform: translateY(-4px);
-	box-shadow: var(--shadow);
+	border-color: rgba(66, 232, 196, 0.32);
 }
 
-/* Question row */
 .faq-question {
 	width: 100%;
-	padding: 18px 22px;
+	padding: 1rem 1.15rem;
 	border: none;
 	background: transparent;
 	cursor: pointer;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	gap: 16px;
+	gap: 1rem;
 	text-align: left;
-	font-size: 1.03rem;
-	font-weight: 700;
-	/* slightly heavier for readability */
+	font: inherit;
+	font-size: 1rem;
+	font-weight: 800;
 	color: var(--text-primary);
-	transition: color 0.18s ease;
 }
 
-/* Hover color */
 .faq-question:hover {
 	color: var(--primary-color);
 }
 
-/* Chevron / icon with improved transition */
 .faq-question i {
 	color: var(--text-secondary);
-	font-size: 1rem;
-	transition: transform 0.28s ease, color 0.2s ease;
+	transition: transform 0.25s ease, color 0.2s ease;
 }
 
-/* Rotate and recolor when active */
 .faq-item.active .faq-question i {
 	transform: rotate(180deg);
 	color: var(--primary-color);
 }
 
-/* Answer area with fade-in + slide effect
-   Start hidden with max-height + opacity; when active, expand and fade-in.
-*/
 .faq-answer {
 	max-height: 0;
 	opacity: 0;
-	transform: translateY(-6px);
+	transform: translateY(-4px);
 	overflow: hidden;
-	transition: max-height 0.36s ease, opacity 0.28s ease 0.06s, transform 0.28s ease;
-	padding: 0 22px;
-	color: rgba(255, 255, 255, 0.92);
-	/* brighter for accessibility */
-	line-height: 1.75;
-	font-weight: 500;
-	/* slightly bolder answers for readability */
-	background: transparent;
+	transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease, padding 0.35s ease;
+	padding: 0 1.15rem;
+	color: var(--text-secondary);
+	line-height: 1.7;
 }
 
-/* When open, expand, fade and slide into place */
 .faq-item.active .faq-answer {
-	max-height: 2000px;
+	max-height: 2200px;
 	opacity: 1;
 	transform: translateY(0);
-	padding: 0 22px 20px 22px;
+	padding: 0 1.15rem 1.15rem;
 }
 
-/* Answer paragraph spacing and improved contrast */
 .faq-answer p {
-	margin-bottom: 12px;
-	color: rgba(255, 255, 255, 0.92);
-	font-weight: 500;
+	margin-bottom: 0.85rem;
 }
 
-/* Lists inside answers */
 .faq-answer ul {
-	margin: 12px 0;
-	padding-left: 20px;
-	color: rgba(255, 255, 255, 0.9);
+	margin: 0.85rem 0;
+	padding-left: 1.2rem;
 }
 
 .faq-answer li {
-	margin-bottom: 8px;
-	line-height: 1.6;
+	margin-bottom: 0.5rem;
 }
 
-/* Strong text color */
-.faq-answer strong {
-	color: var(--text-primary);
-	font-weight: 700;
-}
-
+.faq-answer strong,
 .faq-answer h4 {
 	color: var(--text-primary);
-	font-size: 1.02rem;
-	margin: 16px 0 8px;
-	font-weight: 700;
 }
 
-/* Links in answers */
-.faq-answer a {
-	color: var(--primary-color);
-	text-decoration: none;
-	font-weight: 700;
-	transition: color 0.18s ease;
-}
-
-.faq-answer a:hover {
-	color: var(--primary-dark);
-	text-decoration: underline;
-}
-
-/* No-results area: use solid surface */
-.no-results {
-	text-align: center;
-	padding: 36px 20px;
-	background: var(--surface-color);
-	border-radius: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.03);
-	box-shadow: var(--shadow);
-}
-
-.no-results i {
-	font-size: 3.25rem;
-	color: rgba(161, 161, 170, 0.55);
-	margin-bottom: 14px;
-}
-
-.no-results h3 {
-	font-size: 1.25rem;
-	color: var(--text-primary);
-	margin-bottom: 6px;
-}
-
-.no-results p {
-	color: var(--text-secondary);
-}
-
+.faq-answer a,
 .no-results a {
 	color: var(--primary-color);
 	text-decoration: none;
-	font-weight: 700;
-}
-
-/* CTA Section: toned gradient, solid surface feel */
-.faq-cta {
-	margin-top: 48px;
-	background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.06));
-	border-radius: 14px;
-	padding: 38px 28px;
-	text-align: center;
-	color: var(--text-primary);
-	border: 1px solid rgba(255, 255, 255, 0.03);
-	box-shadow: var(--shadow);
-}
-
-.faq-cta-content h2 {
-	font-size: 1.6rem;
-	margin-bottom: 10px;
-	color: var(--text-primary);
 	font-weight: 800;
 }
 
+.no-results {
+	text-align: center;
+	padding: 2.25rem 1.25rem;
+}
+
+.no-results i {
+	font-size: 2.5rem;
+	color: var(--text-muted);
+	margin-bottom: 0.9rem;
+}
+
+.no-results h3 {
+	margin-bottom: 0.35rem;
+}
+
+.no-results p,
 .faq-cta-content p {
-	font-size: 1rem;
-	margin-bottom: 18px;
 	color: var(--text-secondary);
-	font-weight: 600;
 }
 
-/* Buttons */
-.btn {
-	display: inline-flex;
-	align-items: center;
-	gap: 10px;
-	padding: 12px 26px;
-	border-radius: 10px;
-	text-decoration: none;
-	font-weight: 700;
-	font-size: 0.98rem;
-	transition: var(--transition);
-	cursor: pointer;
-	border: 1px solid rgba(255, 255, 255, 0.03);
-	background: transparent;
-	color: var(--text-primary);
+.faq-cta {
+	margin-top: 2.5rem;
+	padding: clamp(1.5rem, 4vw, 2.5rem);
+	text-align: center;
 }
 
-.btn-primary {
-	background: var(--gradient);
-	color: var(--text-primary);
-	box-shadow: var(--shadow);
+.faq-cta-content h2 {
+	font-size: clamp(1.6rem, 3vw, 2.35rem);
+	line-height: 1.1;
+	margin-bottom: 0.75rem;
 }
 
-.btn-primary:hover {
-	transform: translateY(-3px);
-	box-shadow: 0 18px 48px rgba(99, 102, 241, 0.18);
+.faq-cta-content p {
+	margin-bottom: 1.25rem;
+	line-height: 1.65;
 }
 
-.btn-secondary {
-	background: transparent;
-	color: var(--text-primary);
-	border: 1px solid rgba(255, 255, 255, 0.06);
+.faq-cta-buttons {
+	display: flex;
+	justify-content: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
 }
 
-.btn-secondary:hover {
-	background: rgba(255, 255, 255, 0.02);
-	color: var(--primary-color);
-	transform: translateY(-3px);
-}
-
-/* Accessibility: focus outlines */
 .category-btn:focus,
 .faq-question:focus,
-.btn:focus,
 .faq-search input:focus {
-	outline: 2px solid rgba(99, 102, 241, 0.12);
+	outline: 2px solid rgba(66, 232, 196, 0.28);
 	outline-offset: 2px;
 }
 
-/* Responsive adjustments */
-@media (max-width: 900px) {
-	.page-header {
-		padding: 60px 18px;
-	}
-
+@media (max-width: 640px) {
 	.faq-section {
-		padding: 36px 16px;
-	}
-
-	.faq-search {
-		max-width: 100%;
+		padding: 56px 0 68px;
 	}
 
 	.faq-categories {
-		padding: 10px;
+		justify-content: flex-start;
 	}
 
 	.category-btn {
-		padding: 9px 14px;
-		font-size: 0.9rem;
-	}
-}
-
-@media (max-width: 600px) {
-	.page-header {
-		padding: 48px 14px;
+		flex: 1 1 auto;
+		justify-content: center;
 	}
 
-	.page-header h1 {
-		font-size: 1.8rem;
-	}
-
-	.faq-cta {
-		padding: 26px 18px;
-	}
-
-	.faq-answer {
-		padding: 0 16px;
-	}
-
-	.faq-item.active .faq-answer {
-		padding: 0 16px 18px;
-	}
-}
-
-/* Print friendly / contrast adjustments */
-@media print {
-
-	.page-header,
-	.faq-categories,
-	.faq-search,
-	.faq-cta {
-		page-break-inside: avoid;
-		background: #000 !important;
-		color: #fff !important;
-	}
-
-	.faq-answer,
-	.faq-question {
-		color: #fff !important;
-		font-weight: 700 !important;
-		/* stronger for print readability */
-	}
-
-	body {
-		background: #fff;
-		color: #000;
+	.faq-cta-buttons .btn {
+		width: 100%;
 	}
 }

@@ -16,6 +16,9 @@ const Performance = lazy(() => import("./pages/Performance"));
 const Contact = lazy(() => import("./pages/Contact"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const Checkout = lazy(() => import("./pages/Checkout"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Loading component
 const PageLoader = () => (
@@ -61,6 +64,9 @@ function App() {
 									<Route path="/contact" element={<Contact />} />
 									<Route path="/faq" element={<FAQ />} />
 									<Route path="/checkout" element={<Checkout />} />
+									<Route path="/privacy-policy" element={<PrivacyPolicy />} />
+									<Route path="/cookie-policy" element={<CookiePolicy />} />
+									<Route path="*" element={<NotFound />} />
 								</Routes>
 							</Suspense>
 						</ErrorBoundary>

@@ -1,128 +1,168 @@
+import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import './Services.css';
+
+const services = [
+	{
+		icon: 'fab fa-windows',
+		title: 'Custom Windows Enterprise ISO',
+		summary:
+			'A lean Windows build for players who want fewer background tasks, gaming-focused defaults, and a cleaner install baseline.',
+		bestFor: 'Fresh installs, competitive FPS setups, and PCs currently carrying unnecessary Windows overhead.',
+		price: 'Starting at €65',
+		features: [
+			'Zero bloatware installation',
+			'Gaming-focused registry and service tuning',
+			'Privacy-conscious defaults',
+			'Installation guidance and update notes',
+		],
+	},
+	{
+		icon: 'fas fa-microchip',
+		title: 'Expert BIOS Optimization',
+		summary:
+			'Hardware-aware motherboard configuration focused on memory behavior, CPU settings, boot flow, and stable performance.',
+		bestFor: 'High-refresh systems with inconsistent lows, untuned memory, or unclear BIOS defaults.',
+		price: 'Starting at €75',
+		features: [
+			'Memory timing optimization',
+			'CPU and power behavior tuning',
+			'Unused feature cleanup',
+			'Stability-oriented review',
+		],
+	},
+	{
+		icon: 'fas fa-tachometer-alt',
+		title: 'Complete Performance Tuning',
+		summary:
+			'A combined service path for users who want Windows, BIOS, driver, and game-specific configuration handled together.',
+		bestFor: 'Full rebuilds, new gaming PCs, or users who want one coordinated optimization pass.',
+		price: 'Starting at €120',
+		features: [
+			'Custom Windows ISO installation',
+			'BIOS optimization service',
+			'Driver and software cleanup',
+			'Game-specific configuration guidance',
+		],
+	},
+	{
+		icon: 'fas fa-headset',
+		title: 'Premium Support & Maintenance',
+		summary:
+			'Direct support for troubleshooting, compatibility questions, follow-up configuration, and optimization maintenance.',
+		bestFor: 'Customers who want help after setup or need a second pass when hardware or games change.',
+		price: '€25/request',
+		features: [
+			'Priority support requests',
+			'Performance checkups',
+			'Optimization update guidance',
+			'Remote troubleshooting when needed',
+		],
+	},
+];
+
+const processSteps = [
+	{
+		title: 'Profile',
+		text: 'Review hardware, games, operating system, and the problem you are trying to solve.',
+	},
+	{
+		title: 'Tune',
+		text: 'Apply the Windows, BIOS, and software changes that fit the system instead of a generic preset.',
+	},
+	{
+		title: 'Validate',
+		text: 'Check stability, resource use, and benchmark signals before considering the setup complete.',
+	},
+	{
+		title: 'Support',
+		text: 'Provide follow-up help for installation, compatibility, or later configuration changes.',
+	},
+];
 
 function Services() {
 	return (
 		<>
 			<SEO
 				title="Our Services - Professional PC Optimization | Softhe.io"
-				description="Premium PC optimization services for competitive gaming. Custom Windows ISOs, BIOS tuning, complete performance packages, and expert support. Starting at €50."
+				description="PC optimization services for competitive gaming. Custom Windows ISOs, BIOS tuning, complete performance packages, and setup support."
 				keywords="pc optimization services, windows iso, bios tuning, gaming pc optimization, custom windows, performance tuning, gaming services, esports optimization"
-				ogTitle="Professional PC Optimization Services for Esports"
-				ogDescription="Expert optimization services: Custom Windows ISOs, BIOS tuning, and complete performance packages. Transform your gaming PC into a competitive powerhouse."
+				ogTitle="Professional PC Optimization Services for Gaming PCs"
+				ogDescription="Custom Windows ISOs, BIOS tuning, support, and complete performance packages for competitive gaming systems."
 			/>
 			<div className="services-page">
 				<section className="page-header">
 					<div className="container">
 						<h1>Our Services</h1>
-						<p>Professional PC optimization services tailored for competitive gaming</p>
+						<p>PC optimization services built around your hardware, games, and support needs.</p>
 					</div>
 				</section>
 
 				<section className="services-detailed">
 					<div className="container">
-						<div className="service-item">
-							<div className="service-content">
-								<div className="service-icon">
-									<i className="fab fa-windows"></i>
-								</div>
-								<div className="service-info">
-									<h3>Custom Windows Enterprise ISO</h3>
-									<p>Our flagship service provides a completely optimized Windows Enterprise build, stripped of bloatware and fine-tuned for maximum gaming performance. Each ISO is crafted with precision to deliver the ultimate competitive advantage.</p>
-									<ul className="service-features">
-										<li><i className="fas fa-check"></i> Zero bloatware installation</li>
-										<li><i className="fas fa-check"></i> Gaming-optimized registry tweaks</li>
-										<li><i className="fas fa-check"></i> Enhanced security features</li>
-										<li><i className="fas fa-check"></i> Lifetime updates included</li>
-									</ul>
-									<div className="service-price">Starting at €65</div>
-								</div>
+						<div className="services-intro">
+							<div>
+								<span className="section-kicker">Service menu</span>
+								<h2>Pick the depth of optimization your setup needs.</h2>
 							</div>
+							<p>
+								Some systems only need a clean Windows baseline. Others need BIOS, drivers,
+								and game settings reviewed together. These packages make that decision clearer.
+							</p>
 						</div>
 
-						<div className="service-item">
-							<div className="service-content">
-								<div className="service-icon">
-									<i className="fas fa-microchip"></i>
-								</div>
-								<div className="service-info">
-									<h3>Expert BIOS Optimization</h3>
-									<p>Unlock your hardware's true potential with our professional BIOS optimization service. Our experts configure every setting to maximize performance while maintaining system stability and longevity.</p>
+						<div className="services-grid">
+							{services.map((service) => (
+								<article className="service-card" key={service.title}>
+									<div className="service-card-top">
+										<div className="service-icon">
+											<i className={service.icon}></i>
+										</div>
+										<div className="service-price">{service.price}</div>
+									</div>
+									<h3>{service.title}</h3>
+									<p>{service.summary}</p>
+									<div className="service-fit">
+										<span>Best for</span>
+										<strong>{service.bestFor}</strong>
+									</div>
 									<ul className="service-features">
-										<li><i className="fas fa-check"></i> Memory timing optimization</li>
-										<li><i className="fas fa-check"></i> CPU performance tuning</li>
-										<li><i className="fas fa-check"></i> Power management optimization</li>
-										<li><i className="fas fa-check"></i> Stability testing included</li>
+										{service.features.map((feature) => (
+											<li key={feature}>
+												<i className="fas fa-check"></i>
+												{feature}
+											</li>
+										))}
 									</ul>
-									<div className="service-price">Starting at €75</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="service-item">
-							<div className="service-content">
-								<div className="service-icon">
-									<i className="fas fa-tachometer-alt"></i>
-								</div>
-								<div className="service-info">
-									<h3>Complete Performance Tuning</h3>
-									<p>A comprehensive optimization package that combines our Windows ISO with BIOS tuning, driver optimization, and personalized gaming configurations for the ultimate competitive setup.</p>
-									<ul className="service-features">
-										<li><i className="fas fa-check"></i> Custom Windows ISO installation</li>
-										<li><i className="fas fa-check"></i> BIOS optimization service</li>
-										<li><i className="fas fa-check"></i> Driver and software optimization</li>
-										<li><i className="fas fa-check"></i> Game-specific configurations</li>
-										<li><i className="fas fa-check"></i> 30-day performance guarantee</li>
-									</ul>
-									<div className="service-price">Starting at €120</div>
-								</div>
-							</div>
-						</div>
-
-						<div className="service-item">
-							<div className="service-content">
-								<div className="service-icon">
-									<i className="fas fa-headset"></i>
-								</div>
-								<div className="service-info">
-									<h3>Premium Support & Maintenance</h3>
-									<p>Ongoing support and maintenance to keep your system running at peak performance. Includes priority support, regular optimization updates, and performance monitoring.</p>
-									<ul className="service-features">
-										<li><i className="fas fa-check"></i> 24/7 priority support</li>
-										<li><i className="fas fa-check"></i> Monthly performance checkups</li>
-										<li><i className="fas fa-check"></i> Automatic optimization updates</li>
-										<li><i className="fas fa-check"></i> Remote troubleshooting</li>
-									</ul>
-									<div className="service-price">€25/request</div>
-								</div>
-							</div>
+								</article>
+							))}
 						</div>
 					</div>
 				</section>
 
 				<section className="process">
 					<div className="container">
-						<h2 className="section-title">Our Process</h2>
+						<div className="process-header">
+							<span className="section-kicker">Workflow</span>
+							<h2 className="section-title">How the optimization work moves</h2>
+						</div>
 						<div className="process-steps">
-							<div className="process-step">
-								<div className="step-number">1</div>
-								<h3>Consultation</h3>
-								<p>We analyze your current setup and gaming requirements to create a personalized optimization plan.</p>
+							{processSteps.map((step, index) => (
+								<div className="process-step" key={step.title}>
+									<div className="step-number">{index + 1}</div>
+									<h3>{step.title}</h3>
+									<p>{step.text}</p>
+								</div>
+							))}
+						</div>
+						<div className="services-cta">
+							<div>
+								<h3>Need help choosing?</h3>
+								<p>Send your CPU, GPU, RAM, motherboard, and main games before buying.</p>
 							</div>
-							<div className="process-step">
-								<div className="step-number">2</div>
-								<h3>Optimization</h3>
-								<p>Our experts implement custom optimizations tailored to your hardware and gaming preferences.</p>
-							</div>
-							<div className="process-step">
-								<div className="step-number">3</div>
-								<h3>Testing</h3>
-								<p>Comprehensive testing ensures maximum performance gains while maintaining system stability.</p>
-							</div>
-							<div className="process-step">
-								<div className="step-number">4</div>
-								<h3>Delivery</h3>
-								<p>Receive your optimized system with detailed documentation and ongoing support.</p>
+							<div className="services-cta-actions">
+								<Link to="/contact" className="btn btn-secondary">Ask First</Link>
+								<Link to="/store" className="btn btn-primary">View Products</Link>
 							</div>
 						</div>
 					</div>
