@@ -57,8 +57,9 @@ describe('Checkout', () => {
 			},
 		]);
 
-		expect(screen.getByText(/Bundle checkout needs manual confirmation/i)).toBeInTheDocument();
+		expect(screen.getByText(/Bundle checkout uses manual invoicing/i)).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: /request bundle invoice/i })).toHaveAttribute('href', '/contact');
 		expect(screen.getByRole('button', { name: /pay for custom windows 10 iso/i })).toBeInTheDocument();
 	});
 });
+

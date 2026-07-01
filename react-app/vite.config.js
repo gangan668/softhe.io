@@ -71,15 +71,6 @@ export default defineConfig(() => ({
 
 		// Optimize chunk size
 		chunkSizeWarningLimit: 1000,
-
-		rollupOptions: {
-			output: {
-				manualChunks: {
-					"react-vendor": ["react", "react-dom"],
-					"router-vendor": ["react-router-dom"],
-				},
-			},
-		},
 	},
 	preview: {
 		headers: {

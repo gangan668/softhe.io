@@ -164,6 +164,32 @@ function Home() {
 					</div>
 				</section>
 
+				<section className="trust-preview" aria-labelledby="trust-preview-title">
+					<div className="container">
+						<div className="section-heading">
+							<span className="section-kicker">Buyer confidence</span>
+							<h2 id="trust-preview-title" className="section-title">Clear expectations before checkout</h2>
+						</div>
+						<div className="trust-preview-grid">
+							<div className="trust-preview-item">
+								<i className="fas fa-lock" aria-hidden="true"></i>
+								<h3>Stripe payment links</h3>
+								<p>Single products use direct Stripe checkout links with card and wallet support handled by Stripe.</p>
+							</div>
+							<div className="trust-preview-item">
+								<i className="fas fa-rotate-left" aria-hidden="true"></i>
+								<h3>14-day refund window</h3>
+								<p>The refund policy is documented in the FAQ so buyers can review terms before ordering.</p>
+							</div>
+							<div className="trust-preview-item">
+								<i className="fas fa-headset" aria-hidden="true"></i>
+								<h3>Pre-purchase support</h3>
+								<p>Compatibility questions can go through email or Discord before committing to an ISO or BIOS service.</p>
+							</div>
+						</div>
+					</div>
+				</section>
+
 				<section className="features">
 					<div className="container">
 						<div className="section-heading">

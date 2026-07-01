@@ -36,6 +36,7 @@ function Checkout() {
 	const discount = cart.length >= 3 ? 0.10 : cart.length >= 2 ? 0.05 : 0;
 	const discountAmount = subtotal * discount;
 	const total = subtotal - discountAmount;
+	const hasBundle = cart.length > 1;
 
 	return (
 		<>
@@ -103,13 +104,16 @@ function Checkout() {
 									))}
 								</div>
 
-								{/* Bundle Discount Banner */}
-								{discount > 0 && (
+								{/* Bundle Invoice Banner */}
+								{hasBundle && (
 									<div className="bundle-banner">
 										<i className="fas fa-gift"></i>
 										<div>
-											<strong>Bundle Discount Applied!</strong>
-											<p>You're saving {discount * 100}% on your order</p>
+											<strong>Bundle invoice available</strong>
+											<p>
+												Request a manual invoice to apply the {discount * 100}% bundle discount
+												to this combined order.
+											</p>
 										</div>
 									</div>
 								)}
@@ -135,15 +139,15 @@ function Checkout() {
 										<span>€{subtotal.toFixed(2)}</span>
 									</div>
 
-									{discount > 0 && (
+									{hasBundle && (
 										<div className="summary-row discount">
-											<span>Bundle Discount ({discount * 100}%)</span>
+											<span>Invoice discount ({discount * 100}%)</span>
 											<span>-€{discountAmount.toFixed(2)}</span>
 										</div>
 									)}
 
 									<div className="summary-row total">
-										<span>Total</span>
+										<span>{hasBundle ? 'Invoice total' : 'Total'}</span>
 										<span>€{total.toFixed(2)}</span>
 									</div>
 								</div>
@@ -160,11 +164,11 @@ function Checkout() {
 									<div className="static-checkout-notice">
 										<i className="fas fa-circle-info" aria-hidden="true"></i>
 										<div>
-											<strong>Bundle checkout needs manual confirmation</strong>
+											<strong>Bundle checkout uses manual invoicing</strong>
 											<p>
-												This static site cannot create a combined Stripe Checkout Session.
-												Use the individual payment buttons below or contact support for a
-												bundle invoice.
+												Direct Stripe payment links are available for individual products.
+												To pay the discounted combined total, request a bundle invoice and
+												support will confirm the order manually.
 											</p>
 										</div>
 									</div>
@@ -254,3 +258,5 @@ function Checkout() {
 }
 
 export default Checkout;
+
+
