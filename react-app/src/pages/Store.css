@@ -30,6 +30,7 @@
 
 .store-trust div,
 .store-note,
+.store-assurance,
 .product-finder,
 .product-card {
 	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
@@ -277,6 +278,50 @@
 	pointer-events: none;
 }
 
+
+.store-assurance {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+	padding: 1rem;
+}
+
+.assurance-item {
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	gap: 0.75rem;
+	align-items: start;
+	padding: 0.85rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md);
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.assurance-item i {
+	width: 34px;
+	height: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	color: var(--primary-color);
+	background: rgba(66, 232, 196, 0.1);
+	border: 1px solid rgba(66, 232, 196, 0.2);
+}
+
+.assurance-item strong {
+	display: block;
+	font-size: 0.95rem;
+	margin-bottom: 0.2rem;
+}
+
+.assurance-item span {
+	color: var(--text-secondary);
+	font-size: 0.88rem;
+	line-height: 1.45;
+}
+
 .store-note {
 	margin-top: 1rem;
 	padding: 1rem 1.1rem;
@@ -315,7 +360,8 @@
 }
 
 @media (max-width: 860px) {
-	.store-intro {
+	.store-intro,
+	.store-assurance {
 		grid-template-columns: 1fr;
 		align-items: start;
 	}

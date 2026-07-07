@@ -70,6 +70,17 @@ function Navbar({ onCartClick }) {
 					</li>
 					<li className="nav-item">
 						<NavLink
+							to="/guides"
+							className={({ isActive }) =>
+								"nav-link" + (isActive ? " active" : "")
+							}
+							onClick={closeMenu}
+						>
+							Guides
+						</NavLink>
+					</li>
+					<li className="nav-item">
+						<NavLink
 							to="/contact"
 							className={({ isActive }) =>
 								"nav-link" + (isActive ? " active" : "")

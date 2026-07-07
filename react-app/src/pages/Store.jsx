@@ -1,65 +1,77 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
 import { STRIPE_PRODUCT_URLS, openExternalUrl } from '../utils/products';
 import './Store.css';
 
+const products = [
+	{
+		id: 'windows-10',
+		name: 'Custom Windows 10 ISO',
+		price: 65,
+		description: 'Our custom Windows Enterprise ISO is built for ultimate speed and no bloat. Experience gaming as it should be.',
+		bestFor: 'Competitive FPS players who want maximum compatibility and low overhead.',
+		features: [
+			'Zero bloatware',
+			'Gaming optimizations',
+			'Minimal background tasks',
+			'Updates until EOL 2027'
+		],
+		icon: 'fab fa-windows',
+		badge: 'Best Seller',
+		stripeUrl: STRIPE_PRODUCT_URLS['windows-10']
+	},
+	{
+		id: 'windows-11',
+		name: 'Custom Windows 11 ISO',
+		price: 75,
+		description: 'Latest Windows 11 for next-gen gaming performance and DirectX 12 Ultimate support.',
+		bestFor: 'Newer systems that need current Windows 11 gaming features.',
+		features: [
+			'DirectX 12 Ultimate',
+			'Auto HDR support',
+			'Optimizations for windowed fullscreen',
+			'Regular updates'
+		],
+		icon: 'fab fa-windows',
+		badge: null,
+		stripeUrl: STRIPE_PRODUCT_URLS['windows-11']
+	},
+	{
+		id: 'bios-optimization',
+		name: 'BIOS Optimization Service',
+		price: 50,
+		description: "Professional BIOS tuning service to unlock your hardware's maximum potential with expert configurations.",
+		bestFor: 'Systems with strong hardware that still show stutter, inconsistent lows, or untuned memory.',
+		features: [
+			'CPU tuning',
+			'GPU tuning',
+			'Stability testing',
+			'Custom profiles'
+		],
+		icon: 'fas fa-microchip',
+		badge: 'Popular',
+		stripeUrl: STRIPE_PRODUCT_URLS['bios-optimization']
+	}
+];
+
 function Store() {
 	const { addToCart } = useCart();
 	const [addedToCart, setAddedToCart] = useState(null);
 	const [quizChoice, setQuizChoice] = useState('windows-10');
 
-	const products = [
-		{
-			id: 'windows-10',
-			name: 'Custom Windows 10 ISO',
-			price: 65,
-			description: 'Our custom Windows Enterprise ISO is built for ultimate speed and no bloat. Experience gaming as it should be.',
-			bestFor: 'Competitive FPS players who want maximum compatibility and low overhead.',
-			features: [
-				'Zero bloatware',
-				'Gaming optimizations',
-				'Minimal background tasks',
-				'Updates until EOL 2027'
-			],
-			icon: 'fab fa-windows',
-			badge: 'Best Seller',
-			stripeUrl: STRIPE_PRODUCT_URLS['windows-10']
-		},
-		{
-			id: 'windows-11',
-			name: 'Custom Windows 11 ISO',
-			price: 75,
-			description: 'Latest Windows 11 for next-gen gaming performance and DirectX 12 Ultimate support.',
-			bestFor: 'Newer systems that need current Windows 11 gaming features.',
-			features: [
-				'DirectX 12 Ultimate',
-				'Auto HDR support',
-				'Optimizations for windowed fullscreen',
-				'Regular updates'
-			],
-			icon: 'fab fa-windows',
-			badge: null,
-			stripeUrl: STRIPE_PRODUCT_URLS['windows-11']
-		},
-		{
-			id: 'bios-optimization',
-			name: 'BIOS Optimization Service',
-			price: 50,
-			description: 'Professional BIOS tuning service to unlock your hardware\'s maximum potential with expert configurations.',
-			bestFor: 'Systems with strong hardware that still show stutter, inconsistent lows, or untuned memory.',
-			features: [
-				'CPU tuning',
-				'GPU tuning',
-				'Stability testing',
-				'Custom profiles'
-			],
-			icon: 'fas fa-microchip',
-			badge: 'Popular',
-			stripeUrl: STRIPE_PRODUCT_URLS['bios-optimization']
-		}
-	];
+	useEffect(() => {
+		trackEvent('view_item_list', {
+			item_list_name: 'store_products',
+			items: products.map((product) => ({
+				item_id: product.id,
+				item_name: product.name,
+				price: product.price,
+				currency: 'EUR',
+			})),
+		});
+	}, []);
 
 	const handleAddToCart = (product) => {
 		addToCart(product);
@@ -81,6 +93,14 @@ function Store() {
 			currency: 'EUR',
 		});
 		openExternalUrl(product.stripeUrl);
+	};
+
+	const handleQuizChoice = (productId, reason) => {
+		setQuizChoice(productId);
+		trackEvent('product_recommendation_select', {
+			item_id: productId,
+			reason,
+		});
 	};
 
 	const recommendedProduct = products.find((product) => product.id === quizChoice) || products[0];
@@ -160,21 +180,21 @@ function Store() {
 								<button
 									type="button"
 									className={quizChoice === 'windows-10' ? 'active' : ''}
-									onClick={() => setQuizChoice('windows-10')}
+									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
 								>
 									I want a clean competitive Windows baseline
 								</button>
 								<button
 									type="button"
 									className={quizChoice === 'windows-11' ? 'active' : ''}
-									onClick={() => setQuizChoice('windows-11')}
+									onClick={() => handleQuizChoice('windows-11', 'newer_pc_windows_11')}
 								>
 									My newer PC should stay on Windows 11
 								</button>
 								<button
 									type="button"
 									className={quizChoice === 'bios-optimization' ? 'active' : ''}
-									onClick={() => setQuizChoice('bios-optimization')}
+									onClick={() => handleQuizChoice('bios-optimization', 'untuned_hardware')}
 								>
 									My hardware feels untuned or inconsistent
 								</button>
@@ -240,6 +260,30 @@ function Store() {
 									</div>
 								</div>
 							))}
+						</div>
+
+						<div className="store-assurance" aria-label="Store purchase confidence">
+							<div className="assurance-item">
+								<i className="fas fa-lock" aria-hidden="true"></i>
+								<div>
+									<strong>Direct Stripe checkout</strong>
+									<span>Single products use hosted Stripe payment links.</span>
+								</div>
+							</div>
+							<div className="assurance-item">
+								<i className="fas fa-file-invoice" aria-hidden="true"></i>
+								<div>
+									<strong>Bundle invoices</strong>
+									<span>Multi-product discounts are confirmed manually before payment.</span>
+								</div>
+							</div>
+							<div className="assurance-item">
+								<i className="fas fa-circle-question" aria-hidden="true"></i>
+								<div>
+									<strong>Compatibility check</strong>
+									<span>Ask support before buying if hardware fit is unclear.</span>
+								</div>
+							</div>
 						</div>
 
 						<div className="store-note">

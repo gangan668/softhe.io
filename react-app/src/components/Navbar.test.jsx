@@ -50,6 +50,7 @@ describe("Navbar Component", () => {
 			expect(screen.getByText("Services")).toBeInTheDocument();
 			expect(screen.getByText("Store")).toBeInTheDocument();
 			expect(screen.getByText("Performance")).toBeInTheDocument();
+			expect(screen.getByText("Guides")).toBeInTheDocument();
 			expect(screen.getByText("Contact")).toBeInTheDocument();
 		});
 
@@ -89,6 +90,12 @@ describe("Navbar Component", () => {
 			renderNavbar();
 			const performanceLink = screen.getByText("Performance");
 			expect(performanceLink).toHaveAttribute("href", "/performance");
+		});
+
+		it("should have correct href for Guides link", () => {
+			renderNavbar();
+			const guidesLink = screen.getByText("Guides");
+			expect(guidesLink).toHaveAttribute("href", "/guides");
 		});
 
 		it("should have correct href for Contact link", () => {
@@ -309,14 +316,14 @@ describe("Navbar Component", () => {
 		it("should have list items for each link", () => {
 			renderNavbar();
 			const listItems = screen.getAllByRole("listitem");
-			expect(listItems.length).toBe(6);
+			expect(listItems.length).toBe(7);
 		});
 
 		it("should have accessible links", () => {
 			renderNavbar();
 			const links = screen.getAllByRole("link");
-			// 6 nav links + 1 logo link = 7 total
-			expect(links.length).toBe(7);
+			// 7 nav links + 1 logo link = 8 total
+			expect(links.length).toBe(8);
 		});
 
 		it("should have clickable hamburger button", async () => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { reportError } from '../utils/monitoring';
 import './ErrorBoundary.css';
 
 class ErrorBoundary extends React.Component {
@@ -27,8 +28,10 @@ class ErrorBoundary extends React.Component {
 			errorCount: prevState.errorCount + 1
 		}));
 
-		// In production, you might want to log to an error reporting service
-		// logErrorToService(error, errorInfo);
+		reportError(error, {
+			source: 'ErrorBoundary',
+			componentStack: errorInfo?.componentStack,
+		});
 	}
 
 	handleReset = () => {

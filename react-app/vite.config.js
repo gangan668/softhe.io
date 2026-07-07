@@ -13,6 +13,7 @@ export default defineConfig(() => ({
 		setupFiles: "./src/test/setup.js",
 		css: true,
 		testTimeout: 10000,
+		exclude: ["node_modules/", "dist/", "e2e/**"],
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "json", "html"],
