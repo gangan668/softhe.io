@@ -42,7 +42,6 @@ export const initGA = (measurementId = GA_MEASUREMENT_ID) => {
 	}
 
 	if (!hasValidMeasurementId(measurementId)) {
-		logDevWarning('Google Analytics measurement ID is not configured.');
 		return;
 	}
 

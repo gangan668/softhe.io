@@ -59,7 +59,7 @@ function App() {
 	const [isCartOpen, setIsCartOpen] = useState(false);
 
 	useEffect(() => {
-		initMonitoring();
+		return initMonitoring();
 	}, []);
 
 

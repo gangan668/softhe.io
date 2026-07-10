@@ -36,7 +36,7 @@ function CookiePolicy() {
 							<section>
 								<h2>Payment Links</h2>
 								<p>
-									Stripe payment links may set their own cookies after you leave Softhe.io.
+									Stripe Checkout may set its own cookies after you leave Softhe.io.
 									Review Stripe's privacy and cookie information during checkout.
 								</p>
 							</section>

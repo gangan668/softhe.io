@@ -39,7 +39,7 @@ describe('Checkout', () => {
 		expect(screen.getByRole('button', { name: /pay securely with stripe/i })).toBeInTheDocument();
 	});
 
-	it('renders static-site bundle fallback for multiple items', () => {
+	it('renders server-backed Stripe checkout for multiple items', () => {
 		renderCheckout([
 			{
 				id: 'windows-10',
@@ -57,9 +57,10 @@ describe('Checkout', () => {
 			},
 		]);
 
-		expect(screen.getByText(/Bundle checkout uses manual invoicing/i)).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /request bundle invoice/i })).toHaveAttribute('href', '/contact');
-		expect(screen.getByRole('button', { name: /pay for custom windows 10 iso/i })).toBeInTheDocument();
+		expect(screen.getByText(/Bundle discount applied/i)).toBeInTheDocument();
+		expect(screen.getByText(/Bundle discount \(5%\)/i)).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /pay securely with stripe/i })).toBeInTheDocument();
+		expect(screen.queryByText(/manual invoicing/i)).not.toBeInTheDocument();
 	});
 });
 

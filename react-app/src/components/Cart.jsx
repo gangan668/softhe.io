@@ -1,15 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { trackEvent } from '../utils/analytics';
-import { STRIPE_PRODUCT_URLS, openExternalUrl } from '../utils/products';
 import './Cart.css';
 
 function Cart({ isOpen, onClose }) {
 	const { cart, removeFromCart, updateQuantity, getCartTotal, getCartCount } = useCart();
 
 	const handleCheckout = () => {
-		// For now, we'll create a Stripe checkout session with all products
-		// In the future, this could be enhanced with a custom checkout page
 		if (cart.length === 0) return;
 
 		trackEvent('cart_checkout_click', {
@@ -18,14 +15,7 @@ function Cart({ isOpen, onClose }) {
 			currency: 'EUR',
 		});
 
-		// For now, if there's only one item, redirect to its Stripe page
-		// For multiple items, we'll need to implement a custom checkout
-		if (cart.length === 1) {
-			openExternalUrl(STRIPE_PRODUCT_URLS[cart[0].id]);
-		} else {
-			// Navigate to a checkout page that can handle multiple items
-			window.location.href = '/checkout';
-		}
+		window.location.href = '/checkout';
 	};
 
 	return (

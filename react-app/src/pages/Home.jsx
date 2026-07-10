@@ -173,8 +173,8 @@ function Home() {
 						<div className="trust-preview-grid">
 							<div className="trust-preview-item">
 								<i className="fas fa-lock" aria-hidden="true"></i>
-								<h3>Stripe payment links</h3>
-								<p>Single products use direct Stripe checkout links with card and wallet support handled by Stripe.</p>
+								<h3>Secure Stripe checkout</h3>
+								<p>Prices and bundle discounts are validated on the server before Stripe handles card and wallet payment.</p>
 							</div>
 							<div className="trust-preview-item">
 								<i className="fas fa-rotate-left" aria-hidden="true"></i>

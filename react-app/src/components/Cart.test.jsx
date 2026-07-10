@@ -29,6 +29,20 @@ describe('Cart', () => {
 		expect(screen.getByRole('link', { name: /browse products/i })).toHaveAttribute('href', '/store');
 	});
 
+	it('falls back to an empty cart when stored cart data is invalid', () => {
+		localStorage.setItem('softhe_cart', 'not-json');
+
+		render(
+			<MemoryRouter>
+				<CartProvider>
+					<Cart isOpen={true} onClose={vi.fn()} />
+				</CartProvider>
+			</MemoryRouter>
+		);
+
+		expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
+	});
+
 	it('renders cart items and total', async () => {
 		const user = userEvent.setup();
 		renderCart([

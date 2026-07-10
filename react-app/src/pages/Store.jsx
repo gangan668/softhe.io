@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
-import { STRIPE_PRODUCT_URLS, openExternalUrl } from '../utils/products';
 import './Store.css';
 
 const products = [
@@ -20,7 +20,6 @@ const products = [
 		],
 		icon: 'fab fa-windows',
 		badge: 'Best Seller',
-		stripeUrl: STRIPE_PRODUCT_URLS['windows-10']
 	},
 	{
 		id: 'windows-11',
@@ -36,7 +35,6 @@ const products = [
 		],
 		icon: 'fab fa-windows',
 		badge: null,
-		stripeUrl: STRIPE_PRODUCT_URLS['windows-11']
 	},
 	{
 		id: 'bios-optimization',
@@ -52,12 +50,12 @@ const products = [
 		],
 		icon: 'fas fa-microchip',
 		badge: 'Popular',
-		stripeUrl: STRIPE_PRODUCT_URLS['bios-optimization']
 	}
 ];
 
 function Store() {
 	const { addToCart } = useCart();
+	const navigate = useNavigate();
 	const [addedToCart, setAddedToCart] = useState(null);
 	const [quizChoice, setQuizChoice] = useState('windows-10');
 
@@ -86,13 +84,14 @@ function Store() {
 	};
 
 	const handleBuyNow = (product) => {
+		addToCart(product);
 		trackEvent('begin_checkout', {
 			item_id: product.id,
 			item_name: product.name,
 			value: product.price,
 			currency: 'EUR',
 		});
-		openExternalUrl(product.stripeUrl);
+		navigate('/checkout');
 	};
 
 	const handleQuizChoice = (productId, reason) => {
@@ -109,7 +108,7 @@ function Store() {
 		<>
 			<SEO
 				title="Store - PC Optimization Products | Softhe.io"
-				description="Shop custom Windows ISOs and BIOS optimization services for competitive gaming PCs. Products start at €50 with Stripe payment links."
+				description="Shop custom Windows ISOs and BIOS optimization services for competitive gaming PCs. Products start at €50 with secure Stripe checkout."
 				keywords="buy windows iso, custom windows, bios optimization service, gaming pc products, windows optimization, pc optimization store"
 				ogTitle="Shop PC Optimization Products"
 				ogDescription="Custom Windows 10/11 ISOs and BIOS optimization services for competitive gaming setups."
@@ -129,7 +128,7 @@ function Store() {
 								price: product.price,
 								priceCurrency: "EUR",
 								availability: "https://schema.org/InStock",
-								url: product.stripeUrl,
+								url: `https://softhe.io/store#${product.id}`,
 							},
 						},
 					})),
@@ -151,13 +150,13 @@ function Store() {
 								<h2>Simple packages, clear outcomes.</h2>
 								<p>
 									Start with a lean Windows install, add BIOS tuning for deeper hardware work,
-									or buy directly through Stripe when you already know what you need.
+									then complete one server-validated Stripe checkout when you are ready.
 								</p>
 							</div>
 							<div className="store-trust">
 								<div>
 									<strong>Stripe</strong>
-									<span>Secure payment links</span>
+									<span>Secure hosted checkout</span>
 								</div>
 								<div>
 									<strong>14 days</strong>
@@ -281,15 +280,15 @@ function Store() {
 							<div className="assurance-item">
 								<i className="fas fa-lock" aria-hidden="true"></i>
 								<div>
-									<strong>Direct Stripe checkout</strong>
-									<span>Single products use hosted Stripe payment links.</span>
+									<strong>Server-validated checkout</strong>
+									<span>Product prices and quantities are verified before Stripe opens.</span>
 								</div>
 							</div>
 							<div className="assurance-item">
-								<i className="fas fa-file-invoice" aria-hidden="true"></i>
+								<i className="fas fa-tags" aria-hidden="true"></i>
 								<div>
-									<strong>Bundle invoices</strong>
-									<span>Multi-product discounts are confirmed manually before payment.</span>
+									<strong>Automatic bundle discounts</strong>
+									<span>Two products save 5%; three products save 10% at checkout.</span>
 								</div>
 							</div>
 							<div className="assurance-item">

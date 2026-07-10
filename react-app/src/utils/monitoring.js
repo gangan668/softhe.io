@@ -49,13 +49,21 @@ export const reportError = (error, context = {}) => {
 };
 
 export const initMonitoring = () => {
-	if (typeof window === 'undefined') return;
+	if (typeof window === 'undefined') return () => {};
 
-	window.addEventListener('error', (event) => {
+	const handleError = (event) => {
 		reportError(event.error || event.message, { source: 'window.error' });
-	});
+	};
 
-	window.addEventListener('unhandledrejection', (event) => {
+	const handleUnhandledRejection = (event) => {
 		reportError(event.reason || 'Unhandled promise rejection', { source: 'unhandledrejection' });
-	});
+	};
+
+	window.addEventListener('error', handleError);
+	window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+	return () => {
+		window.removeEventListener('error', handleError);
+		window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+	};
 };

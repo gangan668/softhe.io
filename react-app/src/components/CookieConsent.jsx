@@ -77,9 +77,7 @@ function CookieConsent() {
 
 					<div className="cookie-content">
 						<p className="cookie-description">
-							We use cookies and similar technologies to enhance your browsing experience,
-							analyze site traffic, and understand where our visitors are coming from.
-							This helps us improve our services for you.
+							Essential storage keeps the site working. Optional usage data helps us improve it.
 						</p>
 
 						{showDetails && (
@@ -174,10 +172,7 @@ function CookieConsent() {
 						</button>
 					</div>
 
-					<p className="cookie-note">
-						<i className="fas fa-info-circle"></i>
-						By clicking "Accept All", you agree to the storing of cookies on your device.
-					</p>
+					<p className="cookie-note">You can change this choice from Cookie Settings.</p>
 				</div>
 			</div>
 		</div>

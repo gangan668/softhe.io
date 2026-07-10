@@ -27,8 +27,8 @@ describe('Store', () => {
 		expect(screen.getAllByText('Custom Windows 11 ISO').length).toBeGreaterThanOrEqual(1);
 		expect(screen.getByText('BIOS Optimization Service')).toBeInTheDocument();
 		expect(screen.getByText('Which product should I start with?')).toBeInTheDocument();
-		expect(screen.getByText('Direct Stripe checkout')).toBeInTheDocument();
-		expect(screen.getByText('Bundle invoices')).toBeInTheDocument();
+		expect(screen.getByText('Server-validated checkout')).toBeInTheDocument();
+		expect(screen.getByText('Automatic bundle discounts')).toBeInTheDocument();
 	});
 
 	it('updates the product recommendation', async () => {

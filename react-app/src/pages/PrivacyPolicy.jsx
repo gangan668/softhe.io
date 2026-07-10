@@ -6,14 +6,14 @@ function PrivacyPolicy() {
 		<>
 			<SEO
 				title="Privacy Policy | Softhe.io"
-				description="Privacy information for Softhe.io, including contact forms, analytics consent, payment links, and data handling."
+				description="Privacy information for Softhe.io, including contact forms, analytics consent, Stripe Checkout, and data handling."
 				canonicalUrl="https://softhe.io/privacy-policy"
 			/>
 			<div className="legal-page">
 				<section className="page-header">
 					<div className="container">
 						<h1>Privacy Policy</h1>
-						<p>How Softhe.io handles contact details, analytics consent, and payment links.</p>
+						<p>How Softhe.io handles contact details, analytics consent, and Stripe Checkout.</p>
 					</div>
 				</section>
 				<section className="legal-content">
@@ -26,7 +26,7 @@ function PrivacyPolicy() {
 									email address, subject, hardware information, and message content.
 								</p>
 								<p>
-									When you use the store, payment is handled through Stripe payment links.
+									When you use the store, payment is handled through a Stripe-hosted Checkout Session.
 									Softhe.io does not store card numbers in this React application.
 								</p>
 							</section>

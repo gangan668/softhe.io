@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
-import { STRIPE_PRODUCT_URLS, openExternalUrl } from '../utils/products';
+import { createCheckoutSession } from '../utils/checkout';
 import './Checkout.css';
 
 function Checkout() {
 	const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart();
 	const navigate = useNavigate();
+	const [isStartingCheckout, setIsStartingCheckout] = useState(false);
+	const [checkoutError, setCheckoutError] = useState('');
 
 	useEffect(() => {
 		// Redirect to store if cart is empty
@@ -17,15 +19,23 @@ function Checkout() {
 		}
 	}, [cart.length, navigate]);
 
-	const handleSingleProductCheckout = (item) => {
+	const handleCheckout = async () => {
+		setIsStartingCheckout(true);
+		setCheckoutError('');
 		trackEvent('begin_checkout', {
-			item_id: item.id,
-			item_name: item.name,
-			value: item.price,
+			items: cart.map((item) => ({ item_id: item.id, quantity: item.quantity })),
+			value: getCartTotal(),
 			currency: 'EUR',
 			source: 'checkout_page',
 		});
-		openExternalUrl(STRIPE_PRODUCT_URLS[item.id]);
+
+		try {
+			const { url } = await createCheckoutSession(cart);
+			window.location.assign(url);
+		} catch (error) {
+			setCheckoutError(error.message);
+			setIsStartingCheckout(false);
+		}
 	};
 
 	if (cart.length === 0) {
@@ -104,15 +114,15 @@ function Checkout() {
 									))}
 								</div>
 
-								{/* Bundle Invoice Banner */}
+								{/* Bundle Discount Banner */}
 								{hasBundle && (
 									<div className="bundle-banner">
 										<i className="fas fa-gift"></i>
 										<div>
-											<strong>Bundle invoice available</strong>
+											<strong>Bundle discount applied</strong>
 											<p>
-												Request a manual invoice to apply the {discount * 100}% bundle discount
-												to this combined order.
+												Your {discount * 100}% discount is validated on the server and applied
+												at Stripe Checkout.
 											</p>
 										</div>
 									</div>
@@ -141,54 +151,30 @@ function Checkout() {
 
 									{hasBundle && (
 										<div className="summary-row discount">
-											<span>Invoice discount ({discount * 100}%)</span>
+										<span>Bundle discount ({discount * 100}%)</span>
 											<span>-€{discountAmount.toFixed(2)}</span>
 										</div>
 									)}
 
 									<div className="summary-row total">
-										<span>{hasBundle ? 'Invoice total' : 'Total'}</span>
+										<span>Total</span>
 										<span>€{total.toFixed(2)}</span>
 									</div>
 								</div>
 
-								{cart.length === 1 ? (
-									<button
-										className="btn btn-primary btn-checkout-full"
-										onClick={() => handleSingleProductCheckout(cart[0])}
-									>
-										<i className="fas fa-lock"></i>
-										Pay Securely with Stripe
-									</button>
-								) : (
-									<div className="static-checkout-notice">
-										<i className="fas fa-circle-info" aria-hidden="true"></i>
-										<div>
-											<strong>Bundle checkout uses manual invoicing</strong>
-											<p>
-												Direct Stripe payment links are available for individual products.
-												To pay the discounted combined total, request a bundle invoice and
-												support will confirm the order manually.
-											</p>
-										</div>
-									</div>
-								)}
+								<button
+									className="btn btn-primary btn-checkout-full"
+									onClick={handleCheckout}
+									disabled={isStartingCheckout}
+								>
+									<i className={isStartingCheckout ? 'fas fa-spinner fa-spin' : 'fas fa-lock'}></i>
+									{isStartingCheckout ? 'Opening secure checkout...' : 'Pay Securely with Stripe'}
+								</button>
 
-								{cart.length > 1 && (
-									<div className="individual-payment-links">
-										{cart.map((item) => (
-											<button
-												key={item.id}
-												type="button"
-												className="btn btn-secondary"
-												onClick={() => handleSingleProductCheckout(item)}
-											>
-												Pay for {item.name}
-											</button>
-										))}
-										<Link to="/contact" className="btn btn-primary">
-											Request Bundle Invoice
-										</Link>
+								{checkoutError && (
+									<div className="checkout-error" role="alert">
+										<i className="fas fa-circle-exclamation" aria-hidden="true"></i>
+										<span>{checkoutError}</span>
 									</div>
 								)}
 

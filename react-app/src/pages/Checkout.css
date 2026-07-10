@@ -13,10 +13,20 @@
 .order-summary,
 .payment-summary,
 .trust-badge {
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: rgba(20, 29, 39, 0.96);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
+}
+
+.payment-summary {
+	background: rgba(15, 38, 38, 0.96);
+	border-color: rgba(66, 232, 196, 0.3);
+}
+
+.trust-badge {
+	background: transparent;
+	box-shadow: none;
 }
 
 .order-summary,
@@ -222,6 +232,27 @@
 	width: 100%;
 	min-height: 50px;
 	margin-bottom: 1.25rem;
+}
+
+.btn-checkout-full:disabled {
+	cursor: wait;
+	opacity: 0.72;
+	transform: none;
+}
+
+.checkout-error {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.65rem;
+	align-items: start;
+	margin: -0.5rem 0 1.25rem;
+	padding: 0.85rem 1rem;
+	border: 1px solid rgba(255, 92, 117, 0.38);
+	border-radius: var(--radius-sm);
+	background: rgba(255, 92, 117, 0.1);
+	color: #ffd9df;
+	font-size: 0.9rem;
+	line-height: 1.5;
 }
 
 .static-checkout-notice {
