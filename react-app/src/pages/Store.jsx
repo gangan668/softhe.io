@@ -170,6 +170,21 @@ function Store() {
 							</div>
 						</div>
 
+						<div className="store-proof" aria-label="Benchmark evidence">
+							<div>
+								<span className="section-kicker">Benchmark context</span>
+								<h3>Current test sample: 670 to 932 average FPS in CS2.</h3>
+								<p>
+									The store points buyers back to measured before/after screenshots so product
+									choice is grounded in the available evidence.
+								</p>
+							</div>
+							<a href="/performance" className="proof-link">
+								Review benchmarks
+								<i className="fas fa-arrow-right" aria-hidden="true"></i>
+							</a>
+						</div>
+
 						<div className="product-finder">
 							<div>
 								<span className="section-kicker">Quick fit</span>

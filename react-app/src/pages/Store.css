@@ -31,12 +31,44 @@
 .store-trust div,
 .store-note,
 .store-assurance,
+.store-proof,
 .product-finder,
 .product-card {
 	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
+}
+
+.store-proof {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.5rem;
+	margin-bottom: 1rem;
+	padding: 1.1rem 1.2rem;
+}
+
+.store-proof h3 {
+	font-size: 1.35rem;
+	line-height: 1.2;
+	margin: 0.25rem 0 0.4rem;
+}
+
+.store-proof p {
+	color: var(--text-secondary);
+	line-height: 1.55;
+	max-width: 760px;
+}
+
+.proof-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-shrink: 0;
+	color: var(--primary-color);
+	font-weight: 800;
+	text-decoration: none;
 }
 
 .product-finder {
@@ -364,6 +396,11 @@
 	.store-assurance {
 		grid-template-columns: 1fr;
 		align-items: start;
+	}
+
+	.store-proof {
+		align-items: flex-start;
+		flex-direction: column;
 	}
 }
 

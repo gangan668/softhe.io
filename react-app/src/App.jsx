@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
@@ -18,31 +18,17 @@ import { trackPageView } from "./utils/analytics";
 import { initMonitoring } from "./utils/monitoring";
 
 import "./App.css";
-
-
-
-// Lazy load pages to improve initial load time
-
-const Home = lazy(() => import("./pages/Home"));
-
-const Services = lazy(() => import("./pages/Services"));
-
-const Store = lazy(() => import("./pages/Store"));
-const Guides = lazy(() => import("./pages/Guides"));
-
-const Performance = lazy(() => import("./pages/Performance"));
-
-const Contact = lazy(() => import("./pages/Contact"));
-
-const FAQ = lazy(() => import("./pages/FAQ"));
-
-const Checkout = lazy(() => import("./pages/Checkout"));
-
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-
-const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
-
-const NotFound = lazy(() => import("./pages/NotFound"));
+import Home from "./pages/Home";
+import Services from "./pages/Services";
+import Store from "./pages/Store";
+import Guides from "./pages/Guides";
+import Performance from "./pages/Performance";
+import Contact from "./pages/Contact";
+import FAQ from "./pages/FAQ";
+import Checkout from "./pages/Checkout";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import CookiePolicy from "./pages/CookiePolicy";
+import NotFound from "./pages/NotFound";
 
 
 
@@ -65,40 +51,6 @@ function RouteTracker() {
 	return null;
 
 }
-
-
-
-// Loading component
-
-const PageLoader = () => (
-
-	<div
-
-		role="status"
-
-		aria-label="Loading"
-
-		style={{
-
-			display: 'flex',
-
-			justifyContent: 'center',
-
-			alignItems: 'center',
-
-			minHeight: '60vh',
-
-			color: '#6366f1'
-
-		}}
-
-	>
-
-		<i className="fas fa-spinner fa-spin fa-2x" aria-hidden="true"></i>
-
-	</div>
-
-);
 
 
 
@@ -144,34 +96,30 @@ function App() {
 
 						<ErrorBoundary>
 
-							<Suspense fallback={<PageLoader />}>
+							<Routes>
 
-								<Routes>
+								<Route path="/" element={<Home />} />
 
-									<Route path="/" element={<Home />} />
+								<Route path="/services" element={<Services />} />
 
-									<Route path="/services" element={<Services />} />
+								<Route path="/store" element={<Store />} />
 
-									<Route path="/store" element={<Store />} />
+								<Route path="/performance" element={<Performance />} />
+								<Route path="/guides" element={<Guides />} />
 
-									<Route path="/performance" element={<Performance />} />
-									<Route path="/guides" element={<Guides />} />
+								<Route path="/contact" element={<Contact />} />
 
-									<Route path="/contact" element={<Contact />} />
+								<Route path="/faq" element={<FAQ />} />
 
-									<Route path="/faq" element={<FAQ />} />
+								<Route path="/checkout" element={<Checkout />} />
 
-									<Route path="/checkout" element={<Checkout />} />
+								<Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
-									<Route path="/privacy-policy" element={<PrivacyPolicy />} />
+								<Route path="/cookie-policy" element={<CookiePolicy />} />
 
-									<Route path="/cookie-policy" element={<CookiePolicy />} />
+								<Route path="*" element={<NotFound />} />
 
-									<Route path="*" element={<NotFound />} />
-
-								</Routes>
-
-							</Suspense>
+							</Routes>
 
 						</ErrorBoundary>
 
