@@ -34,30 +34,29 @@ Expected time: 1-3 minutes depending on your internet connection.
 
 ### 4. Set Up Environment Variables
 
-#### A. Create Local Environment File
-
-```bash
-cp .env.example .env
-```
-
-#### B. Get EmailJS Credentials
+#### A. Get EmailJS Credentials
 
 - [ ] Sign up at [EmailJS](https://www.emailjs.com/)
 - [ ] Create an Email Service and note the **Service ID**
 - [ ] Create an Email Template and note the **Template ID**
 - [ ] Get your **Public Key** from Account settings
+- [ ] Optionally get the **Private Key** for authenticated API requests
 
-#### C. Update .env File
+#### B. Configure Server Environment
 
-Edit the `.env` file with your credentials:
+Configure these as server-only variables in Vercel:
 
 ```env
-VITE_EMAILJS_SERVICE_ID=your_service_id_here
-VITE_EMAILJS_TEMPLATE_ID=your_template_id_here
-VITE_EMAILJS_PUBLIC_KEY=your_public_key_here
+EMAILJS_SERVICE_ID=your_service_id_here
+EMAILJS_TEMPLATE_ID=your_template_id_here
+EMAILJS_PUBLIC_KEY=your_public_key_here
+EMAILJS_PRIVATE_KEY=your_optional_private_key
+CONTACT_RATE_LIMIT_SECRET=use_a_long_random_value
+UPSTASH_REDIS_REST_URL=https://your-database.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your_token
 ```
 
-See [ENV_VARIABLES.md](./react-app/ENV_VARIABLES.md) for detailed instructions.
+See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for the complete checkout and fulfillment configuration.
 
 ### 5. Start Development Server
 
@@ -181,29 +180,9 @@ npm install  # In case dependencies changed
 - [ ] No console errors or warnings
 - [ ] Mobile responsive (test with browser dev tools)
 
-## Deployment Setup (Optional)
+## Deployment Setup
 
-### For GitHub Pages Deployment
-
-#### 1. Add Repository Secrets
-
-Go to GitHub repository → Settings → Secrets and variables → Actions
-
-Add these secrets:
-
-- [ ] `VITE_EMAILJS_SERVICE_ID`
-- [ ] `VITE_EMAILJS_TEMPLATE_ID`
-- [ ] `VITE_EMAILJS_PUBLIC_KEY`
-- [ ] `VITE_GA_MEASUREMENT_ID` (if using Google Analytics)
-- [ ] `VITE_APP_URL` (your production URL)
-
-#### 2. Enable GitHub Pages
-
-- [ ] Go to Settings → Pages
-- [ ] Source: GitHub Actions
-- [ ] Wait for deployment workflow to complete
-
-See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed deployment instructions.
+Production requires a Node serverless host; GitHub Pages cannot run the API functions. Import the repository into Vercel, configure the server and client variables, then register the Stripe webhook described in [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
 
 ## Useful Commands
 
@@ -216,7 +195,6 @@ See [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md) for detailed deployment instructi
 | `npm run test:ui` | Run tests with UI |
 | `npm run test:coverage` | Generate coverage report |
 | `npm run lint` | Check code for errors |
-| `npm run deploy` | Deploy to GitHub Pages |
 
 ## Additional Resources
 

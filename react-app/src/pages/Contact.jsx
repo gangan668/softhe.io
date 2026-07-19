@@ -1,8 +1,8 @@
 import { useState } from "react";
-import emailjs from "@emailjs/browser";
 import useRateLimit from "../hooks/useRateLimit";
 import SEO from '../components/SEO';
 import { trackFormSubmission } from '../utils/analytics';
+import { submitContactForm } from '../utils/contact';
 import "./Contact.css";
 
 function Contact() {
@@ -126,24 +126,7 @@ function Contact() {
 		// Attempt submission with rate limiting
 		try {
 			const success = await rateLimit.attempt(async () => {
-				// EmailJS Configuration
-				const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-				const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-				const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-				await emailjs.send(
-					serviceId,
-					templateId,
-					{
-						from_name: formData.name,
-						from_email: formData.email,
-						reply_to: formData.email,
-						subject: formData.subject,
-						hardware: formData.hardware,
-						message: formData.message,
-					},
-					publicKey
-				);
+				await submitContactForm(formData, honeypot);
 
 				setSubmitStatus({
 					type: "success",
@@ -171,8 +154,7 @@ function Contact() {
 			console.error("Form submission error:", error);
 			setSubmitStatus({
 				type: "error",
-				message:
-					"An error occurred. Please try again or contact us directly at support@softhe.io",
+				message: error.message || "An error occurred. Please contact support@softhe.io",
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -264,9 +246,8 @@ function Contact() {
 									<div>
 										<h4>Your Privacy Matters</h4>
 										<p>
-											All communications are encrypted and
-											your data is never shared with third
-											parties.
+											Form submissions are sent securely through
+											EmailJS so our support team can reply.
 										</p>
 									</div>
 								</div>
@@ -566,8 +547,8 @@ function Contact() {
 
 										<p className="form-note">
 											<i className="fas fa-lock"></i>
-											Your information is protected and will
-											never be shared.
+										Your message is processed by EmailJS and
+										delivered to our support inbox.
 										</p>
 									</form>
 								</div>

@@ -1,5 +1,14 @@
 const getApiBaseUrl = () => import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '';
 
+export const isStripeCheckoutUrl = (value) => {
+	try {
+		const url = new URL(value);
+		return url.protocol === 'https:' && url.hostname === 'checkout.stripe.com';
+	} catch {
+		return false;
+	}
+};
+
 export const createCheckoutSession = async (cart, fetchImpl = fetch) => {
 	const response = await fetchImpl(`${getApiBaseUrl()}/api/create-checkout-session`, {
 		method: 'POST',
@@ -10,7 +19,7 @@ export const createCheckoutSession = async (cart, fetchImpl = fetch) => {
 	});
 
 	const data = await response.json().catch(() => ({}));
-	if (!response.ok || !data.url) {
+	if (!response.ok || !isStripeCheckoutUrl(data.url)) {
 		throw new Error(data.error || 'Checkout could not be started. Please try again.');
 	}
 	return data;

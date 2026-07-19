@@ -28,4 +28,14 @@ describe('createCheckoutSession', () => {
 		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], fetchImpl))
 			.rejects.toThrow('Stripe checkout is not configured');
 	});
+
+	it('rejects a successful response that does not point to Stripe Checkout', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ url: 'https://attacker.example/checkout' }),
+		});
+
+		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], fetchImpl))
+			.rejects.toThrow('Checkout could not be started');
+	});
 });

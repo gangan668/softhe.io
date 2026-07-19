@@ -1,9 +1,21 @@
 const crypto = require('node:crypto');
+const { claimKey, deleteKey, setKey } = require('./_lib/redis');
+
+const MAX_WEBHOOK_BYTES = 1024 * 1024;
 
 const readRawBody = async (req) => {
-	if (Buffer.isBuffer(req.body)) return req.body;
+	if (Buffer.isBuffer(req.body)) {
+		if (req.body.length > MAX_WEBHOOK_BYTES) throw new Error('Webhook payload is too large');
+		return req.body;
+	}
 	const chunks = [];
-	for await (const chunk of req) chunks.push(Buffer.from(chunk));
+	let totalBytes = 0;
+	for await (const chunk of req) {
+		const buffer = Buffer.from(chunk);
+		totalBytes += buffer.length;
+		if (totalBytes > MAX_WEBHOOK_BYTES) throw new Error('Webhook payload is too large');
+		chunks.push(buffer);
+	}
 	return Buffer.concat(chunks);
 };
 
@@ -13,7 +25,9 @@ const verifyStripeSignature = (payload, signatureHeader, secret, toleranceSecond
 	const timestamp = parts.find(([key]) => key === 't')?.[1];
 	const signatures = parts.filter(([key]) => key === 'v1').map(([, value]) => value);
 	if (!timestamp || signatures.length === 0) return false;
-	if (Math.abs(Date.now() / 1000 - Number(timestamp)) > toleranceSeconds) return false;
+	const timestampSeconds = Number(timestamp);
+	if (!Number.isInteger(timestampSeconds) || timestampSeconds <= 0) return false;
+	if (Math.abs(Date.now() / 1000 - timestampSeconds) > toleranceSeconds) return false;
 
 	const expected = crypto
 		.createHmac('sha256', secret)
@@ -26,6 +40,55 @@ const verifyStripeSignature = (payload, signatureHeader, secret, toleranceSecond
 	});
 };
 
+const getFulfillmentUrl = () => {
+	const value = process.env.ORDER_FULFILLMENT_WEBHOOK_URL;
+	const secret = process.env.ORDER_FULFILLMENT_WEBHOOK_SECRET;
+	if (!value || !secret) throw new Error('Order fulfillment is not configured');
+	const url = new URL(value);
+	if (url.protocol !== 'https:') throw new Error('Order fulfillment URL must use HTTPS');
+	return { secret, url: url.toString() };
+};
+
+const deliverFulfillment = async (event, session) => {
+	const { secret, url } = getFulfillmentUrl();
+	const body = JSON.stringify({
+		eventId: event.id,
+		sessionId: session.id,
+		amountTotal: session.amount_total,
+		currency: session.currency,
+		customerEmail: session.customer_details?.email || null,
+		metadata: session.metadata || {},
+	});
+	const signature = crypto.createHmac('sha256', secret).update(body).digest('hex');
+	const response = await fetch(url, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Idempotency-Key': session.id,
+			'X-Softhe-Signature': signature,
+		},
+		body,
+	});
+	if (!response.ok) throw new Error(`Fulfillment delivery failed with status ${response.status}`);
+};
+
+const fulfillPaidSession = async (event) => {
+	const session = event.data.object;
+	if (!['paid', 'no_payment_required'].includes(session.payment_status)) return 'payment-pending';
+	const key = `stripe:fulfilled:${session.id}`;
+	const claimed = await claimKey(key, 'processing', 600);
+	if (!claimed) return 'duplicate';
+
+	try {
+		await deliverFulfillment(event, session);
+		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
+		return 'fulfilled';
+	} catch (error) {
+		await deleteKey(key).catch(() => {});
+		throw error;
+	}
+};
+
 async function stripeWebhook(req, res) {
 	if (req.method !== 'POST') {
 		res.setHeader('Allow', 'POST');
@@ -35,7 +98,12 @@ async function stripeWebhook(req, res) {
 		return res.status(503).json({ error: 'Stripe webhook is not configured' });
 	}
 
-	const payload = await readRawBody(req);
+	let payload;
+	try {
+		payload = await readRawBody(req);
+	} catch (error) {
+		return res.status(413).json({ error: error.message });
+	}
 	if (!verifyStripeSignature(payload, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET)) {
 		return res.status(400).json({ error: 'Invalid Stripe signature' });
 	}
@@ -47,14 +115,13 @@ async function stripeWebhook(req, res) {
 		return res.status(400).json({ error: 'Invalid JSON payload' });
 	}
 
-	if (event.type === 'checkout.session.completed') {
-		const session = event.data.object;
-		console.info('Stripe checkout completed', {
-			sessionId: session.id,
-			paymentStatus: session.payment_status,
-			amountTotal: session.amount_total,
-			customerEmail: session.customer_details?.email || null,
-		});
+	if (['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
+		try {
+			const status = await fulfillPaidSession(event);
+			return res.status(200).json({ received: true, status });
+		} catch (error) {
+			return res.status(503).json({ error: error.message });
+		}
 	} else if (event.type === 'checkout.session.expired') {
 		console.info('Stripe checkout expired', { sessionId: event.data.object.id });
 	}
@@ -65,3 +132,7 @@ async function stripeWebhook(req, res) {
 module.exports = stripeWebhook;
 module.exports.config = { api: { bodyParser: false } };
 module.exports.verifyStripeSignature = verifyStripeSignature;
+module.exports.readRawBody = readRawBody;
+module.exports.deliverFulfillment = deliverFulfillment;
+module.exports.fulfillPaidSession = fulfillPaidSession;
+module.exports.getFulfillmentUrl = getFulfillmentUrl;

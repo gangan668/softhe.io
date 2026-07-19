@@ -1,12 +1,19 @@
 import { createRequire } from 'node:module';
 import crypto from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+import { PRODUCTS as clientProducts } from '../data/products';
 
 const require = createRequire(import.meta.url);
-const { createStripeForm, getDiscountRate, normalizeItems } = require('../../../api/create-checkout-session.js');
+const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getPublicOrigin, isStripeCheckoutUrl, normalizeItems } = require('../../../api/create-checkout-session.js');
 const { verifyStripeSignature } = require('../../../api/stripe-webhook.js');
 
 describe('server checkout validation', () => {
+	it('keeps client display prices aligned with server-authoritative prices', () => {
+		const clientPriceById = Object.fromEntries(clientProducts.map(({ id, price }) => [id, price * 100]));
+		const serverPriceById = Object.fromEntries(Object.entries(serverProducts).map(([id, product]) => [id, product.unitAmount]));
+		expect(clientPriceById).toEqual(serverPriceById);
+	});
+
 	it('rejects unknown products and invalid quantities', () => {
 		expect(() => normalizeItems([{ id: 'made-up', quantity: 1 }])).toThrow('Unknown product');
 		expect(() => normalizeItems([{ id: 'windows-10', quantity: 0 }])).toThrow('Invalid quantity');
@@ -24,6 +31,19 @@ describe('server checkout validation', () => {
 		expect(form.get('line_items[0][price_data][unit_amount]')).toBe('6175');
 		expect(form.get('line_items[1][price_data][unit_amount]')).toBe('4750');
 	});
+
+	it('uses only a configured public origin and allowlists Stripe redirect URLs', () => {
+		const previousOrigin = process.env.PUBLIC_SITE_URL;
+		process.env.PUBLIC_SITE_URL = 'https://shop.softhe.io/path';
+		expect(getPublicOrigin()).toBe('https://shop.softhe.io');
+		process.env.PUBLIC_SITE_URL = 'javascript:alert(1)';
+		expect(() => getPublicOrigin()).toThrow('valid HTTP(S) origin');
+		if (previousOrigin === undefined) delete process.env.PUBLIC_SITE_URL;
+		else process.env.PUBLIC_SITE_URL = previousOrigin;
+
+		expect(isStripeCheckoutUrl('https://checkout.stripe.com/c/pay/test')).toBe(true);
+		expect(isStripeCheckoutUrl('https://checkout.stripe.com.attacker.example/test')).toBe(false);
+	});
 });
 
 describe('Stripe webhook verification', () => {
@@ -37,5 +57,6 @@ describe('Stripe webhook verification', () => {
 
 		expect(verifyStripeSignature(payload, `t=${timestamp},v1=${signature}`, secret)).toBe(true);
 		expect(verifyStripeSignature(payload, `t=${timestamp},v1=${'0'.repeat(64)}`, secret)).toBe(false);
+		expect(verifyStripeSignature(payload, `t=not-a-number,v1=${signature}`, secret)).toBe(false);
 	});
 });

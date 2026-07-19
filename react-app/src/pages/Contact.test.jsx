@@ -5,16 +5,10 @@ import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import Contact from "./Contact";
 import useRateLimit from "../hooks/useRateLimit";
+import { submitContactForm } from "../utils/contact";
 
-// Mock EmailJS with a delay to simulate real API call
-vi.mock("@emailjs/browser", () => ({
-	default: {
-		send: vi.fn(() =>
-			new Promise((resolve) =>
-				setTimeout(() => resolve({ status: 200, text: "OK" }), 100)
-			)
-		),
-	},
+vi.mock("../utils/contact", () => ({
+	submitContactForm: vi.fn(() => Promise.resolve({ delivered: true })),
 }));
 
 // Mock the useRateLimit hook
@@ -46,6 +40,7 @@ describe("Contact Component", () => {
 	beforeEach(() => {
 		// Reset all mocks before each test
 		vi.clearAllMocks();
+		submitContactForm.mockResolvedValue({ delivered: true });
 
 		// Mock console methods to keep test output clean
 		vi.spyOn(console, "log").mockImplementation(() => { });
@@ -303,9 +298,14 @@ describe("Contact Component", () => {
 
 			const successMessage = await screen.findByRole("status", { name: /Thank you for your message/i }, { timeout: 3000 });
 			expect(successMessage).toBeInTheDocument();
+			expect(submitContactForm).toHaveBeenCalledWith(expect.objectContaining({
+				email: "john@example.com",
+				subject: "general",
+			}), "");
 		});
 
 		it("should disable submit button while submitting", async () => {
+			submitContactForm.mockImplementation(() => new Promise(() => {}));
 			const user = userEvent.setup();
 			renderContact();
 
@@ -331,6 +331,7 @@ describe("Contact Component", () => {
 		});
 
 		it("should show loading state during submission", async () => {
+			submitContactForm.mockImplementation(() => new Promise(() => {}));
 			const user = userEvent.setup();
 			renderContact();
 
@@ -538,6 +539,7 @@ describe("Contact Component", () => {
 
 	describe("Edge Cases", () => {
 		it("should handle rapid form submissions", async () => {
+			submitContactForm.mockImplementation(() => new Promise(() => {}));
 			const user = userEvent.setup();
 			renderContact();
 
@@ -560,6 +562,7 @@ describe("Contact Component", () => {
 
 			// Should handle gracefully (button disabled after first click)
 			expect(submitButton).toBeDisabled();
+			expect(submitContactForm).toHaveBeenCalledTimes(1);
 		});
 
 		it("should handle special characters in name", async () => {

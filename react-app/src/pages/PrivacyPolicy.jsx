@@ -26,6 +26,12 @@ function PrivacyPolicy() {
 									email address, subject, hardware information, and message content.
 								</p>
 								<p>
+									Contact submissions are processed by our server and delivered through EmailJS.
+									To prevent abuse, the server uses a keyed, pseudonymous hash of the caller's IP
+									address in Upstash Redis for short-lived rate limiting; the raw address is not
+									stored in that rate-limit record.
+								</p>
+								<p>
 									When you use the store, payment is handled through a Stripe-hosted Checkout Session.
 									Softhe.io does not store card numbers in this React application.
 								</p>

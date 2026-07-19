@@ -338,3 +338,10 @@ textarea:focus-visible {
 	opacity: 1;
 	transform: translateY(0);
 }
+.page-loader {
+	display: grid;
+	place-items: center;
+	min-height: 45vh;
+	color: var(--primary-color);
+	font-size: 1.5rem;
+}

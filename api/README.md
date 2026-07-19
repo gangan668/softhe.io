@@ -1,6 +1,10 @@
 # Serverless API
 
-This folder contains the production payment boundary for a Vercel-compatible deployment.
+This folder contains the production checkout, contact, rate-limit, and fulfillment boundaries for a Vercel-compatible deployment.
+
+## contact.js
+
+Validates contact submissions, pseudonymizes the caller address, enforces a durable three-per-minute limit through Upstash Redis, and sends through EmailJS without exposing EmailJS configuration to the browser.
 
 ## create-checkout-session.js
 
@@ -8,16 +12,28 @@ Creates a Stripe Checkout Session without exposing secret keys or authoritative 
 
 ## stripe-webhook.js
 
-Verifies Stripe's signed raw webhook payload and handles completed or expired Checkout Sessions. Configure the Stripe endpoint as `/api/stripe-webhook` and subscribe to:
+Verifies Stripe's signed raw webhook payload, durably deduplicates paid sessions, and signs delivery to the configured fulfillment endpoint. Configure `/api/stripe-webhook` and subscribe to:
 
 - `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
 - `checkout.session.expired`
 
 Required environment variables:
 
 - STRIPE_SECRET_KEY
 - STRIPE_WEBHOOK_SECRET
-- PUBLIC_SITE_URL, optional fallback origin
+- PUBLIC_SITE_URL, strongly recommended; defaults to `https://softhe.io`
+- UPSTASH_REDIS_REST_URL
+- UPSTASH_REDIS_REST_TOKEN
+- CONTACT_RATE_LIMIT_SECRET
+- EMAILJS_SERVICE_ID
+- EMAILJS_TEMPLATE_ID
+- EMAILJS_PUBLIC_KEY
+- EMAILJS_PRIVATE_KEY, optional
+- ORDER_FULFILLMENT_WEBHOOK_URL
+- ORDER_FULFILLMENT_WEBHOOK_SECRET
+
+`PUBLIC_SITE_URL` is the only source used for Stripe success and cancellation URLs. Request host headers are intentionally ignored.
 
 The React client optionally accepts `VITE_API_URL` when the API is hosted on another origin. Leave it unset when the site and functions share a Vercel deployment.
 

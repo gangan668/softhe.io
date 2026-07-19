@@ -31,11 +31,24 @@ const normalizeItems = (items) => {
 	return normalized;
 };
 
-const getOrigin = (req) => {
-	const forwardedHost = req.headers['x-forwarded-host'];
-	const forwardedProto = req.headers['x-forwarded-proto'] || 'https';
-	if (forwardedHost) return `${forwardedProto}://${forwardedHost}`;
-	return process.env.PUBLIC_SITE_URL || 'https://softhe.io';
+const getPublicOrigin = () => {
+	const configuredUrl = process.env.PUBLIC_SITE_URL || 'https://softhe.io';
+	try {
+		const url = new URL(configuredUrl);
+		if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Invalid protocol');
+		return url.origin;
+	} catch {
+		throw new Error('PUBLIC_SITE_URL must be a valid HTTP(S) origin');
+	}
+};
+
+const isStripeCheckoutUrl = (value) => {
+	try {
+		const url = new URL(value);
+		return url.protocol === 'https:' && url.hostname === 'checkout.stripe.com';
+	} catch {
+		return false;
+	}
 };
 
 const createStripeForm = (items, origin) => {
@@ -82,7 +95,13 @@ async function createCheckoutSession(req, res) {
 		return res.status(400).json({ error: error.message });
 	}
 
-	const { form, discountRate } = createStripeForm(items, getOrigin(req));
+	let form;
+	let discountRate;
+	try {
+		({ form, discountRate } = createStripeForm(items, getPublicOrigin()));
+	} catch (error) {
+		return res.status(503).json({ error: error.message });
+	}
 	try {
 		const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
 			method: 'POST',
@@ -94,7 +113,7 @@ async function createCheckoutSession(req, res) {
 		});
 
 		const data = await response.json();
-		if (!response.ok || !data.url) {
+		if (!response.ok || !isStripeCheckoutUrl(data.url)) {
 			return res.status(502).json({ error: data.error?.message || 'Stripe checkout failed' });
 		}
 
@@ -109,3 +128,5 @@ module.exports.PRODUCTS = PRODUCTS;
 module.exports.getDiscountRate = getDiscountRate;
 module.exports.normalizeItems = normalizeItems;
 module.exports.createStripeForm = createStripeForm;
+module.exports.getPublicOrigin = getPublicOrigin;
+module.exports.isStripeCheckoutUrl = isStripeCheckoutUrl;

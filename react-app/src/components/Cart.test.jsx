@@ -61,5 +61,23 @@ describe('Cart', () => {
 		await user.click(screen.getByRole('button', { name: /increase quantity/i }));
 
 		expect(screen.getByText('€130')).toBeInTheDocument();
+
+		await user.click(screen.getByRole('button', { name: /decrease quantity/i }));
+		expect(screen.getAllByText('€65').length).toBeGreaterThanOrEqual(1);
+
+		await user.click(screen.getByRole('button', { name: /remove custom windows 10 iso/i }));
+		expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
+	});
+
+	it('rehydrates trusted product data instead of stored display values', () => {
+		renderCart([
+			{ id: 'windows-10', name: 'Spoofed product', price: 1, quantity: 99 },
+			{ id: 'unknown', name: 'Unknown product', price: 1, quantity: 1 },
+		]);
+
+		expect(screen.getByText('Custom Windows 10 ISO')).toBeInTheDocument();
+		expect(screen.queryByText('Spoofed product')).not.toBeInTheDocument();
+		expect(screen.queryByText('Unknown product')).not.toBeInTheDocument();
+		expect(screen.getAllByText('€650').length).toBeGreaterThanOrEqual(1);
 	});
 });

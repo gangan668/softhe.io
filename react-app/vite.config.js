@@ -3,8 +3,7 @@ import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
-	// Set base path for GitHub Pages deployment
-	// Using '/' for custom domain (softhe.io)
+	// The custom domain is served from the deployment root.
 	base: '/',
 	plugins: [react()],
 	test: {
@@ -17,6 +16,12 @@ export default defineConfig(() => ({
 		coverage: {
 			provider: "v8",
 			reporter: ["text", "json", "html"],
+			thresholds: {
+				statements: 80,
+				branches: 80,
+				functions: 80,
+				lines: 80,
+			},
 			exclude: [
 				"node_modules/",
 				"src/test/",

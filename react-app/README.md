@@ -63,7 +63,9 @@ npm install
 cp .env.example .env
 ```
 
-Then edit `.env` and add your EmailJS credentials. See [ENV_VARIABLES.md](./ENV_VARIABLES.md) for detailed instructions.
+The browser build only needs optional public analytics settings. Contact, checkout, and
+fulfillment credentials are server-only variables documented in
+[`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
 
 ### Development
 
@@ -98,18 +100,15 @@ npm run preview
 - **React 19**: Latest React features and hooks
 - **React Router v7**: Client-side routing
 - **Vite**: Fast build tool and dev server
-- **EmailJS**: Email service for contact form
+- **Vercel functions**: Server-side contact, checkout, and Stripe webhook boundaries
+- **EmailJS**: Server-side email delivery for the contact form
 - **CSS**: Custom CSS with CSS variables for theming
 
 ## Environment Variables
 
-The application requires environment variables for the contact form functionality. See [ENV_VARIABLES.md](./ENV_VARIABLES.md) for:
-
-- Setting up EmailJS credentials
-- Local development configuration
-- Production deployment setup
-- Security best practices
-- Troubleshooting guide
+Production requires the server variables listed in
+[`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md). Never prefix Stripe, Redis,
+EmailJS private, rate-limit, or fulfillment secrets with `VITE_`.
 
 ## Features Implemented
 
@@ -190,13 +189,7 @@ npm run test:coverage
 
 ## Deployment
 
-This project is configured for GitHub Pages deployment. See [DEPLOYMENT.md](../docs/DEPLOYMENT.md) for detailed deployment instructions.
-
-```bash
-npm run deploy
-```
-
-**Important**: Ensure environment variables are set as GitHub repository secrets before deploying.
+Production uses a Vercel-compatible serverless deployment because checkout, contact delivery, durable rate limiting, and Stripe fulfillment require `/api` functions. See [DEPLOYMENT.md](../docs/DEPLOYMENT.md).
 
 ## Documentation
 
