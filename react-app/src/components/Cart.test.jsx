@@ -25,8 +25,26 @@ describe('Cart', () => {
 	it('renders the empty cart state', () => {
 		renderCart();
 
+		expect(screen.getByRole('dialog', { name: /shopping cart/i })).toHaveAttribute('aria-modal', 'true');
+		expect(screen.getByRole('button', { name: /close cart/i })).toHaveFocus();
 		expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
 		expect(screen.getByRole('link', { name: /browse products/i })).toHaveAttribute('href', '/store');
+	});
+
+	it('dismisses with Escape', async () => {
+		const user = userEvent.setup();
+		const onClose = vi.fn();
+		localStorage.setItem('softhe_cart', '[]');
+		render(
+			<MemoryRouter>
+				<CartProvider>
+					<Cart isOpen={true} onClose={onClose} />
+				</CartProvider>
+			</MemoryRouter>,
+		);
+
+		await user.keyboard('{Escape}');
+		expect(onClose).toHaveBeenCalledOnce();
 	});
 
 	it('falls back to an empty cart when stored cart data is invalid', () => {

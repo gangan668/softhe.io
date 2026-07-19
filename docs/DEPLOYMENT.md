@@ -38,6 +38,10 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `VITE_APP_URL` | Canonical production URL used by SEO metadata |
 | `VITE_GA_MEASUREMENT_ID` | Optional GA4 measurement ID |
 | `VITE_API_URL` | Optional separate API origin; leave unset for same-origin Vercel functions |
+| `VITE_ERROR_REPORTING_ENDPOINT` | Optional same-origin or CSP-approved HTTPS JSON error collector |
+| `VITE_LEGAL_NAME` | Public legal name of the service operator/controller |
+| `VITE_LEGAL_ADDRESS` | Public postal address required by the operator's jurisdiction |
+| `VITE_VAT_ID` | VAT identifier when applicable |
 
 Never expose Redis, Stripe, EmailJS private, rate-limit, or fulfillment secrets with a `VITE_` prefix.
 
@@ -53,4 +57,14 @@ npm run test:coverage -- --run
 npm run build
 ```
 
-Then verify a contact submission, a Stripe test purchase, webhook fulfillment, and duplicate webhook delivery in the deployed preview environment.
+Then verify all of the following in a deployed preview environment before moving the domain:
+
+- route-specific title, description, canonical, Open Graph image, sitemap, and a true HTTP 404 for an unknown path;
+- desktop and mobile navigation, keyboard focus, cart and cookie dialog focus trapping, and browser console errors;
+- a contact submission and EmailJS receipt, including a rate-limit response;
+- a Stripe test purchase, checkout-session verification, success/cancel messaging, and cart retention/clearing behavior;
+- signed fulfillment with authoritative product IDs and quantities, duplicate webhook delivery, and a retry/failure path;
+- analytics consent and withdrawal, plus a deliberate test error arriving at the configured monitoring endpoint;
+- the final legal name, postal address, VAT details, payment methods, refund wording, and service terms.
+
+Do not enable live Stripe mode until this checklist passes and the fulfillment receiver has recorded an end-to-end test order.

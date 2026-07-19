@@ -124,6 +124,11 @@
 	display: none;
 	flex-direction: column;
 	cursor: pointer;
+	padding: 8px;
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
 }
 
 .bar {

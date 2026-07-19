@@ -30,6 +30,8 @@ describe('server checkout validation', () => {
 		expect(discountRate).toBe(0.05);
 		expect(form.get('line_items[0][price_data][unit_amount]')).toBe('6175');
 		expect(form.get('line_items[1][price_data][unit_amount]')).toBe('4750');
+		expect(form.get('metadata[order_schema]')).toBe('1');
+		expect(JSON.parse(form.get('metadata[order_items]'))).toEqual(items);
 	});
 
 	it('uses only a configured public origin and allowlists Stripe redirect URLs', () => {

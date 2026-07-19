@@ -1,32 +1,7 @@
+import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { guides } from '../data/guides';
 import './Guides.css';
-
-const guides = [
-	{
-		title: 'CS2 Optimization Checklist',
-		slug: 'cs2-optimization-checklist',
-		description: 'A practical checklist for reducing overhead, checking launch settings, keeping drivers clean, and validating FPS changes in Counter-Strike 2.',
-		points: ['Validate baseline FPS first', 'Reduce startup and overlay noise', 'Compare frame pacing after each change'],
-	},
-	{
-		title: 'Windows 10 vs Windows 11 for Gaming',
-		slug: 'windows-10-vs-11-gaming',
-		description: 'How to choose between a lean Windows 10 build and a current Windows 11 setup when compatibility, latency, and feature support matter.',
-		points: ['Match the OS to hardware age', 'Keep security and driver support in view', 'Avoid changing OS without a rollback plan'],
-	},
-	{
-		title: 'BIOS Optimization for Stable FPS',
-		slug: 'bios-optimization-stable-fps',
-		description: 'What BIOS tuning can improve, what it should not touch blindly, and why memory stability matters more than aggressive settings.',
-		points: ['Document current BIOS settings', 'Tune memory carefully', 'Stress test before calling changes done'],
-	},
-	{
-		title: 'Gaming PC Latency Basics',
-		slug: 'gaming-pc-latency-basics',
-		description: 'A plain-English guide to input latency, frame time consistency, background tasks, and the checks worth doing before buying new hardware.',
-		points: ['Separate FPS from latency', 'Watch frame time spikes', 'Measure changes with repeatable tests'],
-	},
-];
 
 function Guides() {
 	return (
@@ -61,16 +36,18 @@ function Guides() {
 					<div className="container">
 						<div className="guides-grid">
 							{guides.map((guide) => (
-								<article className="guide-card" id={guide.slug} key={guide.slug}>
-									<span className="section-kicker">Guide</span>
-									<h2>{guide.title}</h2>
-									<p>{guide.description}</p>
-									<ul>
+							<article className="guide-card" key={guide.slug}>
+								<span className="section-kicker">Guide</span>
+								<h2>{guide.title}</h2>
+								<p>{guide.description}</p>
+								<p className="guide-reading-time">{guide.readingTime}</p>
+								<ul>
 										{guide.points.map((point) => (
 											<li key={point}>{point}</li>
-										))}
-									</ul>
-								</article>
+									))}
+								</ul>
+								<Link className="guide-link" to={`/guides/${guide.slug}`}>Read guide <span aria-hidden="true">→</span></Link>
+							</article>
 							))}
 						</div>
 					</div>

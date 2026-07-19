@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
@@ -9,6 +9,7 @@ import './Checkout.css';
 function Checkout() {
 	const { cart, removeFromCart, updateQuantity, getCartTotal } = useCart();
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [isStartingCheckout, setIsStartingCheckout] = useState(false);
 	const [checkoutError, setCheckoutError] = useState('');
 
@@ -65,6 +66,12 @@ function Checkout() {
 
 				<section className="checkout-content">
 					<div className="container">
+						{new URLSearchParams(location.search).get('checkout') === 'cancelled' && (
+							<div className="checkout-error checkout-cancelled" role="status">
+								<i className="fas fa-circle-info" aria-hidden="true"></i>
+								<span>Payment was cancelled. Nothing was charged, and your cart has been kept.</span>
+							</div>
+						)}
 						<div className="checkout-grid">
 							{/* Order Summary */}
 							<div className="order-summary">

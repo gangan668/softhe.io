@@ -9,10 +9,10 @@ import { createCheckoutSession } from '../utils/checkout';
 vi.mock('../utils/checkout', () => ({ createCheckoutSession: vi.fn() }));
 vi.mock('../utils/analytics', () => ({ trackEvent: vi.fn() }));
 
-const renderCheckout = (cart) => {
+const renderCheckout = (cart, initialEntry = '/checkout') => {
 	localStorage.setItem('softhe_cart', JSON.stringify(cart));
 	return render(
-		<MemoryRouter initialEntries={['/checkout']}>
+		<MemoryRouter initialEntries={[initialEntry]}>
 			<CartProvider>
 				<Routes>
 					<Route path="/checkout" element={<Checkout />} />
@@ -92,6 +92,13 @@ describe('Checkout', () => {
 
 		await user.click(screen.getByRole('button', { name: /remove custom windows 10 iso/i }));
 		expect(await screen.findByText('Store Redirect')).toBeInTheDocument();
+	});
+
+	it('keeps the cart and explains a cancelled Stripe payment', () => {
+		renderCheckout([{ id: 'windows-10', quantity: 1 }], '/checkout?checkout=cancelled');
+
+		expect(screen.getByRole('status')).toHaveTextContent(/nothing was charged, and your cart has been kept/i);
+		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([{ id: 'windows-10', quantity: 1 }]);
 	});
 });
 

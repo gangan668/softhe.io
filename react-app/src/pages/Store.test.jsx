@@ -3,11 +3,14 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { CartProvider } from '../context/CartProvider';
+import { verifyCheckoutSession } from '../utils/checkout';
 import Store from './Store';
 
-const renderStore = () =>
+vi.mock('../utils/checkout', () => ({ verifyCheckoutSession: vi.fn() }));
+
+const renderStore = (initialEntry = '/store') =>
 	render(
-		<MemoryRouter>
+		<MemoryRouter initialEntries={[initialEntry]}>
 			<CartProvider>
 				<Store />
 			</CartProvider>
@@ -49,5 +52,35 @@ describe('Store', () => {
 
 		expect(screen.getByRole('button', { name: /added to cart/i })).toBeInTheDocument();
 		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toHaveLength(1);
+	});
+
+	it('clears the cart only after the server verifies a paid session', async () => {
+		localStorage.setItem('softhe_cart', JSON.stringify([{ id: 'windows-10', quantity: 1 }]));
+		verifyCheckoutSession.mockResolvedValue({
+			id: 'cs_test_12345678',
+			paid: true,
+			status: 'complete',
+			amountTotal: 6500,
+			currency: 'eur',
+			items: [{ id: 'windows-10', quantity: 1 }],
+		});
+		renderStore('/store?checkout=success&session_id=cs_test_12345678');
+
+		expect(await screen.findByText('Order confirmed')).toBeInTheDocument();
+		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([]);
+	});
+
+	it('keeps the cart while payment is unverified or processing', async () => {
+		localStorage.setItem('softhe_cart', JSON.stringify([{ id: 'windows-10', quantity: 1 }]));
+		verifyCheckoutSession.mockResolvedValue({
+			id: 'cs_test_12345678',
+			paid: false,
+			status: 'processing',
+			items: [{ id: 'windows-10', quantity: 1 }],
+		});
+		renderStore('/store?checkout=success&session_id=cs_test_12345678');
+
+		expect(await screen.findByText(/payment is still processing/i)).toBeInTheDocument();
+		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([{ id: 'windows-10', quantity: 1 }]);
 	});
 });

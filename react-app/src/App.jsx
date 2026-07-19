@@ -14,12 +14,15 @@ const Home = lazy(() => import('./pages/Home'));
 const Services = lazy(() => import('./pages/Services'));
 const Store = lazy(() => import('./pages/Store'));
 const Guides = lazy(() => import('./pages/Guides'));
+const GuideDetail = lazy(() => import('./pages/GuideDetail'));
 const Performance = lazy(() => import('./pages/Performance'));
 const Contact = lazy(() => import('./pages/Contact'));
 const FAQ = lazy(() => import('./pages/FAQ'));
 const Checkout = lazy(() => import('./pages/Checkout'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
+const Terms = lazy(() => import('./pages/Terms'));
+const LegalNotice = lazy(() => import('./pages/LegalNotice'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function RouteTracker() {
@@ -56,11 +59,14 @@ function App() {
 									<Route path="/store" element={<Store />} />
 									<Route path="/performance" element={<Performance />} />
 									<Route path="/guides" element={<Guides />} />
+									<Route path="/guides/:slug" element={<GuideDetail />} />
 									<Route path="/contact" element={<Contact />} />
 									<Route path="/faq" element={<FAQ />} />
 									<Route path="/checkout" element={<Checkout />} />
 									<Route path="/privacy-policy" element={<PrivacyPolicy />} />
 									<Route path="/cookie-policy" element={<CookiePolicy />} />
+									<Route path="/terms" element={<Terms />} />
+									<Route path="/legal-notice" element={<LegalNotice />} />
 									<Route path="*" element={<NotFound />} />
 									</Routes>
 								</Suspense>

@@ -10,6 +10,7 @@ function SEO({
 	ogImage,
 	canonicalUrl,
 	structuredData,
+	noIndex = false,
 	type = 'website'
 }) {
 	const location = useLocation();
@@ -43,19 +44,20 @@ function SEO({
 		// Standard meta tags
 		updateMetaTag('description', description);
 		updateMetaTag('keywords', keywords);
+		updateMetaTag('robots', noIndex ? 'noindex, nofollow' : 'index, follow');
 
 		// Open Graph tags
 		updateMetaTag('og:title', ogTitle || title, true);
 		updateMetaTag('og:description', ogDescription || description, true);
 		updateMetaTag('og:type', type, true);
 		updateMetaTag('og:url', fullUrl, true);
-		updateMetaTag('og:image', ogImage || `${baseUrl}/images/terminal-solid.svg`, true);
+		updateMetaTag('og:image', ogImage || `${baseUrl}/images/social-share.png`, true);
 
 		// Twitter Card tags
 		updateMetaTag('twitter:card', 'summary_large_image');
 		updateMetaTag('twitter:title', ogTitle || title);
 		updateMetaTag('twitter:description', ogDescription || description);
-		updateMetaTag('twitter:image', ogImage || `${baseUrl}/images/terminal-solid.svg`);
+		updateMetaTag('twitter:image', ogImage || `${baseUrl}/images/social-share.png`);
 		updateMetaTag('twitter:site', '@SoftheCS');
 		updateMetaTag('twitter:creator', '@SoftheCS');
 
@@ -83,7 +85,7 @@ function SEO({
 			structuredDataElement.remove();
 		}
 
-	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, type, location.pathname, fullUrl, baseUrl]);
+	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, noIndex, type, location.pathname, fullUrl, baseUrl]);
 
 	return null; // This component doesn't render anything
 }

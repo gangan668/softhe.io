@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
 import { PRODUCTS as products } from '../data/products';
+import { verifyCheckoutSession } from '../utils/checkout';
 import './Store.css';
 
 function Store() {
-	const { addToCart } = useCart();
+	const { addToCart, clearCart } = useCart();
 	const navigate = useNavigate();
+	const [searchParams] = useSearchParams();
+	const checkoutQuery = searchParams.get('checkout');
+	const checkoutSessionId = searchParams.get('session_id');
 	const [addedToCart, setAddedToCart] = useState(null);
 	const [quizChoice, setQuizChoice] = useState('windows-10');
+	const [checkoutStatus, setCheckoutStatus] = useState(null);
 
 	useEffect(() => {
 		trackEvent('view_item_list', {
@@ -23,6 +28,44 @@ function Store() {
 			})),
 		});
 	}, []);
+
+	useEffect(() => {
+		if (checkoutQuery !== 'success') return undefined;
+		const sessionId = checkoutSessionId;
+		if (!sessionId) {
+			setCheckoutStatus({ type: 'error', message: 'We could not verify this checkout. Your cart has been kept.' });
+			return undefined;
+		}
+
+		let active = true;
+		setCheckoutStatus({ type: 'pending', message: 'Verifying your payment with Stripe…' });
+		verifyCheckoutSession(sessionId)
+			.then((session) => {
+				if (!active) return;
+				if (session.paid && session.status === 'complete') {
+					clearCart();
+					setCheckoutStatus({
+						type: 'success',
+						message: 'Payment confirmed. Your order is being prepared and a confirmation will be sent to you.',
+					});
+					trackEvent('purchase', {
+						transaction_id: session.id,
+						value: typeof session.amountTotal === 'number' ? session.amountTotal / 100 : undefined,
+						currency: session.currency?.toUpperCase() || 'EUR',
+						items: session.items?.map((item) => ({ item_id: item.id, quantity: item.quantity })),
+					});
+				} else {
+					setCheckoutStatus({
+						type: 'pending',
+						message: 'Your payment is still processing. Your cart has been kept; refresh this page to check again.',
+					});
+				}
+			})
+			.catch((error) => {
+				if (active) setCheckoutStatus({ type: 'error', message: `${error.message} Your cart has been kept.` });
+			});
+		return () => { active = false; };
+	}, [checkoutQuery, checkoutSessionId, clearCart]);
 
 	const handleAddToCart = (product) => {
 		addToCart(product);
@@ -88,6 +131,14 @@ function Store() {
 				}}
 			/>
 			<div className="store-page">
+				{checkoutStatus && (
+					<div className={`checkout-result checkout-result-${checkoutStatus.type}`} role={checkoutStatus.type === 'error' ? 'alert' : 'status'}>
+						<div className="container">
+							<strong>{checkoutStatus.type === 'success' ? 'Order confirmed' : checkoutStatus.type === 'error' ? 'Verification needed' : 'Checking your order'}</strong>
+							<span>{checkoutStatus.message}</span>
+						</div>
+					</div>
+				)}
 				<section className="page-header">
 					<div className="container">
 						<h1>Store</h1>

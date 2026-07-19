@@ -337,6 +337,24 @@ describe("Navbar Component", () => {
 			await user.click(hamburger);
 			expect(hamburger).toHaveClass("active");
 		});
+
+		it("exposes mobile menu state and closes it with Escape", async () => {
+			const user = userEvent.setup();
+			renderNavbar();
+			const hamburger = document.querySelector(".hamburger");
+
+			expect(hamburger.tagName).toBe("BUTTON");
+			expect(hamburger).toHaveAttribute("aria-label", "Open navigation menu");
+			expect(hamburger).toHaveAttribute("aria-controls", "primary-navigation");
+			expect(hamburger).toHaveAttribute("aria-expanded", "false");
+			await user.click(hamburger);
+			expect(hamburger).toHaveAttribute("aria-expanded", "true");
+			expect(screen.getByRole("link", { name: "Home" })).toHaveFocus();
+
+			await user.keyboard("{Escape}");
+			expect(hamburger).toHaveAttribute("aria-expanded", "false");
+			expect(hamburger).toHaveFocus();
+		});
 	});
 
 	describe("Logo Functionality", () => {

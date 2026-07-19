@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createCheckoutSession } from './checkout';
+import { createCheckoutSession, verifyCheckoutSession } from './checkout';
 
 describe('createCheckoutSession', () => {
 	it('sends only product identifiers and quantities to the server', async () => {
@@ -37,5 +37,29 @@ describe('createCheckoutSession', () => {
 
 		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], fetchImpl))
 			.rejects.toThrow('Checkout could not be started');
+	});
+});
+
+describe('verifyCheckoutSession', () => {
+	it('returns server-verified payment state', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ id: 'cs_test_12345678', paid: true, status: 'complete' }),
+		});
+		await expect(verifyCheckoutSession('cs_test_12345678', fetchImpl)).resolves.toEqual(
+			expect.objectContaining({ paid: true, status: 'complete' }),
+		);
+		expect(fetchImpl).toHaveBeenCalledWith(
+			'/api/checkout-session?session_id=cs_test_12345678',
+			expect.objectContaining({ headers: { Accept: 'application/json' } }),
+		);
+	});
+
+	it('does not turn a failed verification into success', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({
+			ok: false,
+			json: async () => ({ error: 'Checkout session could not be verified' }),
+		});
+		await expect(verifyCheckoutSession('cs_test_12345678', fetchImpl)).rejects.toThrow('could not be verified');
 	});
 });

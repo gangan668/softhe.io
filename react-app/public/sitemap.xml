@@ -25,6 +25,10 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url><loc>https://softhe.io/guides/cs2-optimization-checklist</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://softhe.io/guides/windows-10-vs-11-gaming</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://softhe.io/guides/bios-optimization-stable-fps</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://softhe.io/guides/gaming-pc-latency-basics</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url>
     <loc>https://softhe.io/contact</loc>
     <changefreq>yearly</changefreq>
@@ -45,4 +49,6 @@
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
+  <url><loc>https://softhe.io/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://softhe.io/legal-notice</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>

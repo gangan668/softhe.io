@@ -53,6 +53,14 @@
 	text-decoration: none;
 }
 
+.legal-revision { font-size: 0.9rem; }
+.legal-configuration-note { border-left: 3px solid #f6b94a; padding: 0.75rem 1rem; background: rgba(246, 185, 74, 0.08); }
+.legal-card address { color: var(--text-secondary); white-space: pre-line; font-style: normal; line-height: 1.75; }
+.legal-table-wrap { overflow-x: auto; }
+.legal-card table { width: 100%; border-collapse: collapse; min-width: 620px; }
+.legal-card th, .legal-card td { padding: 0.8rem; border: 1px solid var(--border-color); text-align: left; vertical-align: top; color: var(--text-secondary); }
+.legal-card th { color: var(--text-primary); }
+
 .not-found-card {
 	text-align: center;
 }

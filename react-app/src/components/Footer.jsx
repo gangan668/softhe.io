@@ -42,6 +42,8 @@ function Footer() {
 						<ul>
 							<li><Link to="/privacy-policy">Privacy Policy</Link></li>
 							<li><Link to="/cookie-policy">Cookie Policy</Link></li>
+							<li><Link to="/terms">Terms of Service</Link></li>
+							<li><Link to="/legal-notice">Legal Notice</Link></li>
 							<li>
 								<button type="button" className="footer-link-button" onClick={openCookieSettings}>
 									Cookie Settings
@@ -64,7 +66,7 @@ function Footer() {
 					</div>
 				</div>
 				<div className="footer-bottom">
-					<p>&copy; 2025 Softhe.io. All rights reserved.</p>
+					<p>&copy; {new Date().getFullYear()} Softhe.io. All rights reserved.</p>
 				</div>
 			</div>
 		</footer>

@@ -418,3 +418,32 @@
 		flex-direction: column;
 	}
 }
+.checkout-result {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(64, 120, 255, 0.12);
+}
+
+.checkout-result .container {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+}
+
+.checkout-result-success {
+	background: rgba(53, 210, 143, 0.14);
+	color: var(--success-color);
+}
+
+.checkout-result-error {
+	background: rgba(255, 91, 91, 0.13);
+	color: #ffaaaa;
+}
+
+@media (max-width: 600px) {
+	.checkout-result .container {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+}

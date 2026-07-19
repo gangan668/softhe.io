@@ -1,10 +1,21 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 import { trackEvent } from '../utils/analytics';
 import './Cart.css';
 
 function Cart({ isOpen, onClose }) {
 	const { cart, removeFromCart, updateQuantity, getCartTotal, getCartCount } = useCart();
+	const dialogRef = useRef(null);
+	const closeButtonRef = useRef(null);
+	useDialogFocus({
+		dialogRef,
+		isOpen,
+		onDismiss: onClose,
+		initialFocusRef: closeButtonRef,
+		backgroundSelector: '.navbar, #main-content, .footer',
+	});
 
 	const handleCheckout = () => {
 		if (cart.length === 0) return;
@@ -30,32 +41,36 @@ function Cart({ isOpen, onClose }) {
 			{/* Cart Sidebar */}
 			<div
 				className={`cart-sidebar ${isOpen ? 'open' : ''}`}
+				ref={dialogRef}
 				role="dialog"
 				aria-modal="true"
-				aria-label="Shopping cart"
+				aria-labelledby="cart-title"
 				aria-hidden={!isOpen}
+				tabIndex={-1}
+				inert={isOpen ? undefined : ''}
 			>
 				<div className="cart-header">
-					<h2>
-						<i className="fas fa-shopping-cart"></i>
+					<h2 id="cart-title">
+						<i className="fas fa-shopping-cart" aria-hidden="true"></i>
 						Shopping Cart
 						{getCartCount() > 0 && (
 							<span className="cart-count-badge">{getCartCount()}</span>
 						)}
 					</h2>
 					<button
+						ref={closeButtonRef}
 						className="cart-close-btn"
 						onClick={onClose}
 						aria-label="Close cart"
 					>
-						<i className="fas fa-times"></i>
+						<i className="fas fa-times" aria-hidden="true"></i>
 					</button>
 				</div>
 
 				<div className="cart-content">
 					{cart.length === 0 ? (
 						<div className="cart-empty">
-							<i className="fas fa-shopping-cart"></i>
+							<i className="fas fa-shopping-cart" aria-hidden="true"></i>
 							<p>Your cart is empty</p>
 							<Link to="/store" className="btn btn-primary" onClick={onClose}>
 								Browse Products
@@ -67,7 +82,7 @@ function Cart({ isOpen, onClose }) {
 								{cart.map((item) => (
 									<div key={item.id} className="cart-item">
 										<div className="cart-item-icon">
-											<i className={item.icon}></i>
+											<i className={item.icon} aria-hidden="true"></i>
 										</div>
 										<div className="cart-item-details">
 											<h3>{item.name}</h3>
@@ -75,18 +90,18 @@ function Cart({ isOpen, onClose }) {
 											<div className="cart-item-quantity">
 												<button
 													onClick={() => updateQuantity(item.id, item.quantity - 1)}
-													aria-label="Decrease quantity"
-													className="quantity-btn"
-												>
-													<i className="fas fa-minus"></i>
+											aria-label="Decrease quantity"
+											className="quantity-btn"
+										>
+											<i className="fas fa-minus" aria-hidden="true"></i>
 												</button>
 												<span className="quantity-display">{item.quantity}</span>
 												<button
 													onClick={() => updateQuantity(item.id, item.quantity + 1)}
-													aria-label="Increase quantity"
-													className="quantity-btn"
-												>
-													<i className="fas fa-plus"></i>
+											aria-label="Increase quantity"
+											className="quantity-btn"
+										>
+											<i className="fas fa-plus" aria-hidden="true"></i>
 												</button>
 											</div>
 										</div>
@@ -95,7 +110,7 @@ function Cart({ isOpen, onClose }) {
 											onClick={() => removeFromCart(item.id)}
 											aria-label={`Remove ${item.name} from cart`}
 										>
-											<i className="fas fa-trash"></i>
+											<i className="fas fa-trash" aria-hidden="true"></i>
 										</button>
 									</div>
 								))}
@@ -109,7 +124,7 @@ function Cart({ isOpen, onClose }) {
 
 								{cart.length > 1 && (
 									<div className="bundle-discount-notice">
-										<i className="fas fa-tag"></i>
+										<i className="fas fa-tag" aria-hidden="true"></i>
 										<span>Multiple items selected!</span>
 									</div>
 								)}
@@ -118,12 +133,12 @@ function Cart({ isOpen, onClose }) {
 									className="btn btn-primary btn-checkout"
 									onClick={handleCheckout}
 								>
-									<i className="fas fa-lock"></i>
+									<i className="fas fa-lock" aria-hidden="true"></i>
 									Proceed to Checkout
 								</button>
 
 								<p className="secure-notice">
-									<i className="fas fa-shield-alt"></i>
+									<i className="fas fa-shield-alt" aria-hidden="true"></i>
 									Secure checkout powered by Stripe
 								</p>
 							</div>

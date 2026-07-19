@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const contact = require('../../../api/contact.js');
+const checkoutSession = require('../../../api/checkout-session.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
 
@@ -98,13 +99,54 @@ describe('Stripe fulfillment', () => {
 		vi.stubGlobal('fetch', fetchMock);
 		const event = {
 			id: 'evt_1',
-			data: { object: { id: 'cs_1', payment_status: 'paid', amount_total: 6500, currency: 'eur', metadata: {} } },
+			data: { object: {
+				id: 'cs_1',
+				payment_status: 'paid',
+				amount_total: 6500,
+				currency: 'eur',
+				metadata: { order_schema: '1', order_items: '[{"id":"windows-10","quantity":1}]' },
+			} },
 		};
 
 		await expect(fulfillPaidSession(event)).resolves.toBe('fulfilled');
 		expect(fetchMock.mock.calls[1][0]).toBe('https://fulfillment.example/orders');
 		expect(fetchMock.mock.calls[1][1].headers['Idempotency-Key']).toBe('cs_1');
 		expect(fetchMock.mock.calls[1][1].headers['X-Softhe-Signature']).toMatch(/^[a-f0-9]{64}$/);
+		expect(JSON.parse(fetchMock.mock.calls[1][1].body).items).toEqual([
+			{ id: 'windows-10', quantity: 1 },
+		]);
+	});
+});
+
+describe('checkout session verification', () => {
+	beforeEach(() => {
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+	});
+
+	it('returns paid status only for a server-created Softhe order', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({
+			id: 'cs_test_12345678',
+			payment_status: 'paid',
+			status: 'complete',
+			amount_total: 6500,
+			currency: 'eur',
+			metadata: { order_schema: '1', order_items: '[{"id":"windows-10","quantity":1}]' },
+		})));
+		const response = createResponse();
+		await checkoutSession({ method: 'GET', query: { session_id: 'cs_test_12345678' } }, response);
+
+		expect(response.statusCode).toBe(200);
+		expect(response.payload).toEqual(expect.objectContaining({ paid: true, status: 'complete' }));
+		expect(response.payload.items).toEqual([{ id: 'windows-10', quantity: 1 }]);
+	});
+
+	it('rejects malformed IDs before calling Stripe', async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await checkoutSession({ method: 'GET', query: { session_id: '../customers' } }, response);
+		expect(response.statusCode).toBe(400);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });
 
@@ -114,5 +156,6 @@ afterEach(() => {
 		'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'CONTACT_RATE_LIMIT_SECRET',
 		'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
+		'STRIPE_SECRET_KEY',
 	]) delete process.env[key];
 });

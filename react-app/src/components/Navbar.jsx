@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useCart } from "../context/useCart";
 import "./Navbar.css";
 
 function Navbar({ onCartClick }) {
 	const [isOpen, setIsOpen] = useState(false);
+	const menuButtonRef = useRef(null);
+	const firstLinkRef = useRef(null);
 	const { getCartCount } = useCart();
 	const cartCount = getCartCount();
 
@@ -16,15 +18,29 @@ function Navbar({ onCartClick }) {
 		setIsOpen(false);
 	};
 
+	useEffect(() => {
+		if (!isOpen) return undefined;
+		firstLinkRef.current?.focus();
+		const handleEscape = (event) => {
+			if (event.key === "Escape") {
+				setIsOpen(false);
+				menuButtonRef.current?.focus();
+			}
+		};
+		document.addEventListener("keydown", handleEscape);
+		return () => document.removeEventListener("keydown", handleEscape);
+	}, [isOpen]);
+
 	return (
 		<nav className="navbar">
 			<div className="nav-container">
 				<div className="nav-logo">
 					<Link to="/">Softhe.io</Link>
 				</div>
-				<ul className={"nav-menu " + (isOpen ? "active" : "")}>
+				<ul id="primary-navigation" className={"nav-menu " + (isOpen ? "active" : "")}>
 					<li className="nav-item">
 						<NavLink
+							ref={firstLinkRef}
 							to="/"
 							end
 							className={({ isActive }) =>
@@ -107,19 +123,24 @@ function Navbar({ onCartClick }) {
 					onClick={onCartClick}
 					aria-label={`Shopping cart with ${cartCount} items`}
 				>
-					<i className="fas fa-shopping-cart"></i>
+					<i className="fas fa-shopping-cart" aria-hidden="true"></i>
 					{cartCount > 0 && (
 						<span className="cart-badge">{cartCount}</span>
 					)}
 				</button>
-				<div
+				<button
+					ref={menuButtonRef}
+					type="button"
 					className={"hamburger " + (isOpen ? "active" : "")}
 					onClick={toggleMenu}
+					aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+					aria-expanded={isOpen}
+					aria-controls="primary-navigation"
 				>
-					<span className="bar"></span>
-					<span className="bar"></span>
-					<span className="bar"></span>
-				</div>
+					<span className="bar" aria-hidden="true"></span>
+					<span className="bar" aria-hidden="true"></span>
+					<span className="bar" aria-hidden="true"></span>
+				</button>
 			</div>
 		</nav>
 	);

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PRODUCT_BY_ID } from '../data/products';
 import { hydrateCart, MAX_CART_QUANTITY, normalizeCartQuantity } from '../utils/cart';
 import { CartContext } from './CartContext';
@@ -54,7 +54,7 @@ export function CartProvider({ children }) {
 			: item));
 	};
 
-	const clearCart = () => setCart([]);
+	const clearCart = useCallback(() => setCart([]), []);
 	const getCartTotal = () => cart.reduce((total, item) => total + item.price * item.quantity, 0);
 	const getCartCount = () => cart.reduce((count, item) => count + item.quantity, 0);
 

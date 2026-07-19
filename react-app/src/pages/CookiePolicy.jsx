@@ -19,6 +19,7 @@ function CookiePolicy() {
 				<section className="legal-content">
 					<div className="container">
 						<div className="legal-card">
+							<p className="legal-revision">Last updated: 19 July 2026</p>
 							<section>
 								<h2>Essential Storage</h2>
 								<p>
@@ -46,6 +47,8 @@ function CookiePolicy() {
 									Use the cookie settings link in the footer to reset your analytics preference.
 								</p>
 							</section>
+							<section><h2>Storage summary</h2><div className="legal-table-wrap"><table><thead><tr><th>Storage</th><th>Purpose</th><th>Type</th><th>Duration</th></tr></thead><tbody><tr><td>softhe_cart</td><td>Remember cart contents</td><td>Essential local storage</td><td>Until cleared</td></tr><tr><td>softhe_cookie_consent</td><td>Remember analytics choice</td><td>Essential local storage</td><td>Until reset</td></tr><tr><td>Google Analytics identifiers</td><td>Audience measurement</td><td>Optional cookies</td><td>Per analytics configuration</td></tr></tbody></table></div></section>
+							<section><h2>Legal basis</h2><p>Essential storage is used to provide requested cart and consent functionality. Optional analytics storage is used only after consent and can be withdrawn through Cookie Settings.</p></section>
 						</div>
 					</div>
 				</section>

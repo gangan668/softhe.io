@@ -9,6 +9,7 @@ function NotFound() {
 				title="Page Not Found | Softhe.io"
 				description="The requested Softhe.io page could not be found."
 				canonicalUrl="https://softhe.io/404"
+				noIndex
 			/>
 			<div className="not-found-page">
 				<section className="page-header">

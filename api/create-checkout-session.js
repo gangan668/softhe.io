@@ -64,6 +64,10 @@ const createStripeForm = (items, origin) => {
 	form.append('metadata[item_count]', String(itemCount));
 	form.append('metadata[product_count]', String(items.length));
 	form.append('metadata[bundle_discount_percent]', String(discountRate * 100));
+	// Session metadata is set only after server-side cart validation. Stripe includes
+	// it in the signed webhook event, making this the authoritative fulfillment list.
+	form.append('metadata[order_schema]', '1');
+	form.append('metadata[order_items]', JSON.stringify(items));
 
 	items.forEach((item, index) => {
 		const product = PRODUCTS[item.id];

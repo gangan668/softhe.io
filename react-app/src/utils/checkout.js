@@ -24,3 +24,15 @@ export const createCheckoutSession = async (cart, fetchImpl = fetch) => {
 	}
 	return data;
 };
+
+export const verifyCheckoutSession = async (sessionId, fetchImpl = fetch) => {
+	const response = await fetchImpl(
+		`${getApiBaseUrl()}/api/checkout-session?session_id=${encodeURIComponent(sessionId)}`,
+		{ headers: { Accept: 'application/json' } },
+	);
+	const data = await response.json().catch(() => ({}));
+	if (!response.ok) {
+		throw new Error(data.error || 'Checkout could not be verified. Please try again.');
+	}
+	return data;
+};

@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const { claimKey, deleteKey, setKey } = require('./_lib/redis');
+const { normalizeItems } = require('./create-checkout-session');
 
 const MAX_WEBHOOK_BYTES = 1024 * 1024;
 
@@ -49,14 +50,29 @@ const getFulfillmentUrl = () => {
 	return { secret, url: url.toString() };
 };
 
+const getOrderItems = (session) => {
+	if (session.metadata?.order_schema !== '1' || !session.metadata?.order_items) {
+		throw new Error('Checkout session is missing authoritative order items');
+	}
+	try {
+		return normalizeItems(JSON.parse(session.metadata.order_items));
+	} catch {
+		throw new Error('Checkout session has invalid authoritative order items');
+	}
+};
+
 const deliverFulfillment = async (event, session) => {
 	const { secret, url } = getFulfillmentUrl();
+	const items = getOrderItems(session);
 	const body = JSON.stringify({
 		eventId: event.id,
 		sessionId: session.id,
 		amountTotal: session.amount_total,
 		currency: session.currency,
 		customerEmail: session.customer_details?.email || null,
+		customerId: session.customer || null,
+		paymentIntentId: session.payment_intent || null,
+		items,
 		metadata: session.metadata || {},
 	});
 	const signature = crypto.createHmac('sha256', secret).update(body).digest('hex');
@@ -136,3 +152,4 @@ module.exports.readRawBody = readRawBody;
 module.exports.deliverFulfillment = deliverFulfillment;
 module.exports.fulfillPaidSession = fulfillPaidSession;
 module.exports.getFulfillmentUrl = getFulfillmentUrl;
+module.exports.getOrderItems = getOrderItems;

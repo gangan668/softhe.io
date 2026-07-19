@@ -250,9 +250,27 @@ describe("CookieConsent Component", () => {
 			render(<CookieConsent />);
 
 			await waitFor(() => {
-				const banner = document.querySelector(".cookie-consent");
-				expect(banner).toBeInTheDocument();
+				const banner = screen.getByRole("dialog", { name: /we value your privacy/i });
+				expect(banner).toHaveAttribute("aria-modal", "true");
+				expect(banner).toHaveAttribute("aria-describedby", "cookie-consent-description");
+				expect(screen.getByRole("button", { name: /decline cookies/i })).toHaveFocus();
 			}, { timeout: 3000 });
+		});
+
+		it("dismisses with Escape and restores focus", async () => {
+			const user = userEvent.setup();
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
+			const trigger = document.createElement("button");
+			trigger.textContent = "Prior action";
+			document.body.appendChild(trigger);
+			trigger.focus();
+			render(<CookieConsent />);
+
+			await screen.findByRole("dialog", { name: /we value your privacy/i }, { timeout: 3000 });
+			await user.keyboard("{Escape}");
+			expect(screen.queryByRole("dialog", { name: /we value your privacy/i })).not.toBeInTheDocument();
+			expect(trigger).toHaveFocus();
+			trigger.remove();
 		});
 	});
 
