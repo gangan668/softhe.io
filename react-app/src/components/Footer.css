@@ -81,6 +81,19 @@
   color: var(--primary-color);
 }
 
+.brand-icon {
+  width: 1.05em;
+  height: 1.05em;
+  display: block;
+  flex: 0 0 auto;
+  fill: currentColor;
+}
+
+.social-links .brand-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .footer-bottom {
   text-align: center;
   padding-top: 2rem;
