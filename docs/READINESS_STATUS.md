@@ -32,6 +32,8 @@ Last verified: 2026-07-21 (Europe/Berlin)
 - `/api/health` correctly returns HTTP 503 `configuration-required` until the real legal identity and provider configuration are supplied.
 - Automatic GitHub integration is not connected yet, and the generated Preview URL is protected by Vercel authentication.
 - The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29781642536` passed the page, header, and true-404 checks before failing on the expected HTTP 503 health gate.
+- The scheduled smoke also pins the candidate source commit and public release fingerprint; once
+  health is ready, an unexpected alias movement will fail monitoring.
 
 ## External launch blockers
 

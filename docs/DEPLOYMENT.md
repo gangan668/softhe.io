@@ -121,6 +121,9 @@ The GitHub Pages workflow is manual-only and retained as a static, commerce-disa
 
 - Run the scheduled production smoke against `/api/health`; alert on any non-200 response or failed readiness check.
 - Set the GitHub Actions variables `REQUIRE_APP_MARKER=true`, `REQUIRE_SECURITY_HEADERS=true`, and `REQUIRE_SERVERLESS_API=true` when the smoke target is a Vercel Preview or after the production cutover. Their temporary `false` defaults only keep the legacy GitHub Pages smoke useful before migration.
+- Set `EXPECTED_RELEASE_SOURCE_COMMIT` and `EXPECTED_RELEASE_FINGERPRINT` to the values
+  reported by the approved deployment. The scheduled smoke then detects a project or production
+  alias that has moved to an unexpected release.
 - Route Vercel structured errors to an alert destination and test browser-error ingestion before promotion.
 - Alert on contact and withdrawal delivery failures, Stripe webhook non-2xx responses, fulfillment retries, and orders that remain in a processing state.
 - Record a mobile and desktop Core Web Vitals baseline from the preview. Investigate LCP, INP, or CLS regressions before promotion.
