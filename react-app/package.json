@@ -5,13 +5,15 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
+		"prebuild": "node scripts/validate-production-config.js",
 		"build": "vite build && node scripts/postbuild.js",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
-		"predeploy": "vite build && node scripts/postbuild.js"
+		"predeploy": "vite build && node scripts/postbuild.js",
+		"smoke:production": "node scripts/production-smoke.js"
 	},
 	"dependencies": {
 		"react": "^19.1.1",

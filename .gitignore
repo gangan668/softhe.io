@@ -19,6 +19,8 @@ react-app/build/
 coverage/
 react-app/coverage/
 *.lcov
+react-app/playwright-report/
+react-app/test-results/
 
 # Logs
 logs/

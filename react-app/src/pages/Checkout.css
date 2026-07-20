@@ -240,6 +240,26 @@
 	transform: none;
 }
 
+.checkout-consent {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	gap: 0.7rem;
+	align-items: start;
+	margin: 1rem 0;
+	color: var(--text-secondary);
+	font-size: 0.86rem;
+	line-height: 1.5;
+}
+
+.checkout-consent input {
+	margin-top: 0.22rem;
+	accent-color: var(--primary-color);
+}
+
+.checkout-consent a {
+	color: var(--primary-color);
+}
+
 .checkout-error {
 	display: grid;
 	grid-template-columns: auto 1fr;

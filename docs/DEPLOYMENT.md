@@ -42,6 +42,14 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `VITE_LEGAL_NAME` | Public legal name of the service operator/controller |
 | `VITE_LEGAL_ADDRESS` | Public postal address required by the operator's jurisdiction |
 | `VITE_VAT_ID` | VAT identifier when applicable |
+| `VITE_BUSINESS_REGISTRATION_ID` | Public business registration identifier when applicable |
+| `VITE_LEGAL_JURISDICTION` | Operator country and state/region |
+| `VITE_EDITORIAL_RESPONSIBLE_NAME` | Person legally responsible for editorial content when required |
+| `VITE_DISPUTE_AUTHORITY` | Competent dispute-resolution or supervisory body when required |
+| `VITE_DISPUTE_AUTHORITY_URL` | Public URL for that body |
+| `VITE_COMMERCE_ENABLED` | Set to `true` only after checkout, fulfillment, and legal readiness pass |
+| `VITE_CONTACT_FORM_ENABLED` | Set to `true` only after contact delivery and rate limiting pass |
+| `VITE_REQUIRE_PRODUCTION_CONFIG` | Set to `true` on the serverless production deployment to fail incomplete builds |
 
 Never expose Redis, Stripe, EmailJS private, rate-limit, or fulfillment secrets with a `VITE_` prefix.
 

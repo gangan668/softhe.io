@@ -218,37 +218,37 @@ function Performance() {
 									1.1ms
 								</div>
 								<div className="table-cell improvement">
-									-36% reduction
+									-27% reduction
 								</div>
 							</div>
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
-									<i className="fas fa-microchip"></i>
-									CPU Usage (Gaming)
+									<i className="fas fa-list"></i>
+									Idle Processes
 								</div>
-								<div className="table-cell stock-value">75-90%</div>
+								<div className="table-cell stock-value">111</div>
 								<div className="table-cell optimized-value">
-									45-65%
+									31
 								</div>
 								<div className="table-cell improvement">
-									-30% usage
+									-72%
 								</div>
 							</div>
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
-									<i className="fas fa-hdd"></i>
-									Boot Time
+									<i className="fas fa-memory"></i>
+									Idle Memory
 								</div>
 								<div className="table-cell stock-value">
-									~30 seconds
+									2.5 GB
 								</div>
 								<div className="table-cell optimized-value">
-									~15 seconds
+									0.8 GB
 								</div>
 								<div className="table-cell improvement">
-									~65% faster
+									-68%
 								</div>
 							</div>
 						</div>
@@ -257,8 +257,9 @@ function Performance() {
 							<i className="fas fa-circle-info" aria-hidden="true"></i>
 							<p>
 								Results depend on hardware, installed software, game settings, drivers, and
-								starting system condition. Use these screenshots as proof of the tested setup,
-								not a universal guarantee for every PC.
+								starting system condition. The current material documents one test set rather
+								than a controlled multi-system study; exact hardware and procedure should be
+								published with the next benchmark update.
 							</p>
 						</div>
 					</div>

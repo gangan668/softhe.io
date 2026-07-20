@@ -33,6 +33,12 @@ Required environment variables:
 - ORDER_FULFILLMENT_WEBHOOK_URL
 - ORDER_FULFILLMENT_WEBHOOK_SECRET
 
+## health.js and browser-errors.js
+
+`GET /api/health` reports whether every required production integration is configured without exposing secret values. Use it as the cutover and uptime readiness check.
+
+`POST /api/browser-errors` accepts bounded, rate-limited client error reports and writes structured records to server logs. Configure `VITE_ERROR_REPORTING_ENDPOINT=/api/browser-errors` on the serverless deployment, then connect the host logs to the chosen alerting destination.
+
 `PUBLIC_SITE_URL` is the only source used for Stripe success and cancellation URLs. Request host headers are intentionally ignored.
 
 The React client optionally accepts `VITE_API_URL` when the API is hosted on another origin. Leave it unset when the site and functions share a Vercel deployment.

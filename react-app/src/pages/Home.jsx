@@ -83,7 +83,7 @@ function Home() {
 									<div className="metric-bar">
 										<span>Frame time</span>
 										<div className="bar-track"><span style={{ width: '64%' }}></span></div>
-										<strong>-36%</strong>
+										<strong>-27%</strong>
 									</div>
 									<div className="metric-bar">
 										<span>Processes</span>
@@ -119,7 +119,7 @@ function Home() {
 							<span>Average FPS in tested CS2 run</span>
 						</div>
 						<div>
-							<strong>-36%</strong>
+							<strong>-27%</strong>
 							<span>Frame time reduction</span>
 						</div>
 						<div>

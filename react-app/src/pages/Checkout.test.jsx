@@ -74,6 +74,7 @@ describe('Checkout', () => {
 		renderCheckout([{ id: 'windows-10', quantity: 1 }]);
 
 		const button = screen.getByRole('button', { name: /pay securely with stripe/i });
+		await user.click(screen.getByRole('checkbox', { name: /agree to the terms/i }));
 		await user.click(button);
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('Checkout is temporarily unavailable');

@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const contact = require('../../../api/contact.js');
+const health = require('../../../api/health.js');
+const browserErrors = require('../../../api/browser-errors.js');
 const checkoutSession = require('../../../api/checkout-session.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
@@ -45,6 +47,31 @@ describe('durable Redis helpers', () => {
 		const command = JSON.parse(fetchMock.mock.calls[0][1].body);
 		expect(command[0]).toBe('EVAL');
 		expect(command).toContain('rate:key');
+	});
+});
+
+describe('production health API', () => {
+	it('reports missing server configuration without exposing values', async () => {
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.status).toBe('configuration-required');
+		expect(response.payload.missing).toContain('STRIPE_SECRET_KEY');
+		expect(response.payload).not.toHaveProperty('values');
+		expect(response.headers['Cache-Control']).toBe('no-store');
+	});
+
+	it('reports ready when every required variable exists', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(200);
+		expect(response.payload).toEqual(expect.objectContaining({
+			status: 'ready',
+			missing: [],
+		}));
 	});
 });
 
@@ -157,5 +184,31 @@ afterEach(() => {
 		'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
 		'STRIPE_SECRET_KEY',
+		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 	]) delete process.env[key];
+});
+
+describe('browser error reporting API', () => {
+	beforeEach(() => {
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
+		process.env.CONTACT_RATE_LIMIT_SECRET = 'rate-secret';
+	});
+
+	it('sanitizes and accepts a bounded browser error', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: 1 })));
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = createResponse();
+		await browserErrors({
+			method: 'POST',
+			headers: { 'x-forwarded-for': '203.0.113.20' },
+			body: { message: 'Failure\u0000message', stack: 'stack', url: 'https://softhe.io/store' },
+		}, response);
+
+		expect(response.statusCode).toBe(202);
+		expect(consoleError).toHaveBeenCalledWith('browser_error', expect.objectContaining({
+			message: 'Failure message',
+		}));
+		consoleError.mockRestore();
+	});
 });

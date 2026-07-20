@@ -4,6 +4,7 @@ import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
 import { createCheckoutSession } from '../utils/checkout';
+import { commerceEnabled } from '../utils/runtimeConfig';
 import './Checkout.css';
 
 function Checkout() {
@@ -12,6 +13,7 @@ function Checkout() {
 	const location = useLocation();
 	const [isStartingCheckout, setIsStartingCheckout] = useState(false);
 	const [checkoutError, setCheckoutError] = useState('');
+	const [termsAccepted, setTermsAccepted] = useState(false);
 
 	useEffect(() => {
 		// Redirect to store if cart is empty
@@ -21,6 +23,10 @@ function Checkout() {
 	}, [cart.length, navigate]);
 
 	const handleCheckout = async () => {
+		if (!commerceEnabled) {
+			setCheckoutError('Online checkout is not active yet. Contact support before ordering.');
+			return;
+		}
 		setIsStartingCheckout(true);
 		setCheckoutError('');
 		trackEvent('begin_checkout', {
@@ -66,6 +72,12 @@ function Checkout() {
 
 				<section className="checkout-content">
 					<div className="container">
+						{!commerceEnabled && (
+							<div className="checkout-error checkout-cancelled" role="status">
+								<i className="fas fa-circle-info" aria-hidden="true"></i>
+								<span>Secure checkout is being activated. Contact support before placing an order.</span>
+							</div>
+						)}
 						{new URLSearchParams(location.search).get('checkout') === 'cancelled' && (
 							<div className="checkout-error checkout-cancelled" role="status">
 								<i className="fas fa-circle-info" aria-hidden="true"></i>
@@ -169,13 +181,26 @@ function Checkout() {
 									</div>
 								</div>
 
+								<label className="checkout-consent">
+									<input
+										type="checkbox"
+										checked={termsAccepted}
+										onChange={(event) => setTermsAccepted(event.target.checked)}
+										disabled={!commerceEnabled || isStartingCheckout}
+									/>
+									<span>
+										I agree to the <Link to="/terms">Terms of Service</Link> and refund information,
+										and understand that digital delivery or service preparation may begin after payment.
+									</span>
+								</label>
+
 								<button
 									className="btn btn-primary btn-checkout-full"
 									onClick={handleCheckout}
-									disabled={isStartingCheckout}
+									disabled={isStartingCheckout || !commerceEnabled || !termsAccepted}
 								>
 									<i className={isStartingCheckout ? 'fas fa-spinner fa-spin' : 'fas fa-lock'}></i>
-									{isStartingCheckout ? 'Opening secure checkout...' : 'Pay Securely with Stripe'}
+									{!commerceEnabled ? 'Checkout not yet active' : isStartingCheckout ? 'Opening secure checkout...' : 'Pay Securely with Stripe'}
 								</button>
 
 								{checkoutError && (
@@ -200,15 +225,9 @@ function Checkout() {
 									</div>
 								</div>
 
-								<div className="accepted-payments">
-									<p>We accept:</p>
-									<div className="payment-icons">
-										<i className="fab fa-cc-visa"></i>
-										<i className="fab fa-cc-mastercard"></i>
-										<i className="fab fa-cc-amex"></i>
-										<i className="fab fa-cc-paypal"></i>
-									</div>
-								</div>
+							<div className="accepted-payments">
+								<p>Available payment methods are displayed by Stripe and can vary by country and device.</p>
+							</div>
 
 								<Link to="/store" className="continue-shopping">
 									<i className="fas fa-arrow-left"></i>

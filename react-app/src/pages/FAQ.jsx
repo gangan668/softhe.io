@@ -164,34 +164,28 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							Performance improvements vary based on your hardware and current
-							setup, but typical results include:
+						Performance improvements vary based on hardware, software, drivers,
+						game settings, and the starting condition of the system. The current
+						published sample shows:
 						</p>
 						<ul>
 							<li>
-								<strong>FPS Increase:</strong> 30-50% average FPS boost (up to
-								100+ FPS in some cases)
+								<strong>CS2 average FPS:</strong> 670 to 932 on the tested setup
 							</li>
 							<li>
-								<strong>Frame Time Consistency:</strong> 40-60% improvement in
-								1% and 0.1% lows
+								<strong>CS2 1% low:</strong> 355 to 498 FPS in the published screenshots
 							</li>
 							<li>
-								<strong>Input Lag Reduction:</strong> 5-15ms lower end-to-end
-								latency
+								<strong>Idle processes:</strong> 111 to 31 in the Task Manager sample
 							</li>
 							<li>
-								<strong>Resource Usage:</strong> 70-80% fewer background
-								processes
-							</li>
-							<li>
-								<strong>Boot Time:</strong> 40-60% faster startup times
+								<strong>Idle memory:</strong> 2.5 GB to 0.8 GB in the Task Manager sample
 							</li>
 						</ul>
 						<p>
-							<strong>Note:</strong> Systems that are currently unoptimized or
-							bloated see the most dramatic improvements. High-end systems
-							already running clean setups may see more modest gains.
+							<strong>Note:</strong> These are single-system observations, not a
+							guarantee. Review the benchmark page and ask about compatibility
+							before purchasing.
 						</p>
 					</div>
 				),
@@ -504,7 +498,7 @@ function FAQ() {
 							<li>
 								<strong>Email Support:</strong>{" "}
 								<a href="mailto:support@softhe.io">support@softhe.io</a>{" "}
-								(response within 2-4 hours)
+								(response time varies with request volume)
 							</li>
 							<li>
 								<strong>Discord Support:</strong>{" "}
@@ -515,7 +509,7 @@ function FAQ() {
 								>
 									@softhecs
 								</a>{" "}
-								(fastest response)
+								(availability varies)
 							</li>
 							<li>
 								<strong>Documentation:</strong> Detailed guides and video
@@ -531,8 +525,8 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							All customers receive lifetime support for their purchased
-							products.
+							Support scope and duration follow the purchased product and the
+							terms shown at checkout.
 						</p>
 					</div>
 				),
@@ -541,24 +535,22 @@ function FAQ() {
 				question: "How quickly do you respond to support requests?",
 				answer: (
 					<div>
-						<p>Our typical response times are:</p>
+					<p>Response times vary with request volume and availability:</p>
 						<ul>
 							<li>
-								<strong>Discord:</strong> 15-30 minutes during business hours
-								(fastest)
+								<strong>Discord:</strong> monitored when support is available
 							</li>
 							<li>
-								<strong>Email:</strong> 2-4 hours during business hours
+								<strong>Email:</strong> primary channel for traceable requests
 							</li>
 							<li>
-								<strong>After Hours:</strong> Within 12 hours
+								<strong>Complex requests:</strong> may require additional diagnostic time
 							</li>
 							<li>
-								<strong>Premium Support:</strong> Priority response during
-								available support hours
+								<strong>Paid support:</strong> handled according to the purchased service scope
 							</li>
 						</ul>
-						<p>Business hours: Monday-Sunday, 9 AM - 10 PM CET</p>
+					<p>Do not rely on a guaranteed response deadline unless it is stated in your order.</p>
 					</div>
 				),
 			},

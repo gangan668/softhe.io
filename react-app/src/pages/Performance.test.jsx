@@ -14,7 +14,7 @@ describe('Performance', () => {
 		expect(screen.getByRole('heading', { name: /performance proof/i })).toBeInTheDocument();
 		expect(screen.getByText(/Counter-Strike 2 FPS comparison/i)).toBeInTheDocument();
 		expect(screen.getByText(/Windows Task Manager resource usage/i)).toBeInTheDocument();
-		expect(screen.getByText(/not a universal guarantee/i)).toBeInTheDocument();
+		expect(screen.getByText(/rather than a controlled multi-system study/i)).toBeInTheDocument();
 	});
 
 	it('keeps task manager screenshots matched to the right labels', () => {

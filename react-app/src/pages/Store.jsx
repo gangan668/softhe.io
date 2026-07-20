@@ -5,6 +5,7 @@ import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
 import { PRODUCTS as products } from '../data/products';
 import { verifyCheckoutSession } from '../utils/checkout';
+import { commerceEnabled } from '../utils/runtimeConfig';
 import './Store.css';
 
 function Store() {
@@ -80,6 +81,7 @@ function Store() {
 	};
 
 	const handleBuyNow = (product) => {
+		if (!commerceEnabled) return;
 		addToCart(product);
 		trackEvent('begin_checkout', {
 			item_id: product.id,
@@ -131,6 +133,14 @@ function Store() {
 				}}
 			/>
 			<div className="store-page">
+				{!commerceEnabled && (
+					<div className="checkout-result checkout-result-pending" role="status">
+						<div className="container">
+							<strong>Online checkout is being prepared</strong>
+							<span>Products remain available to review. Contact support before ordering while secure checkout is being activated.</span>
+						</div>
+					</div>
+				)}
 				{checkoutStatus && (
 					<div className={`checkout-result checkout-result-${checkoutStatus.type}`} role={checkoutStatus.type === 'error' ? 'alert' : 'status'}>
 						<div className="container">
@@ -270,9 +280,10 @@ function Store() {
 											<button
 												onClick={() => handleBuyNow(product)}
 												className="btn btn-primary"
+												disabled={!commerceEnabled}
 											>
 												<i className="fas fa-bolt"></i>
-												Buy Now
+												{commerceEnabled ? 'Buy Now' : 'Checkout coming soon'}
 											</button>
 										</div>
 									</div>
@@ -285,7 +296,7 @@ function Store() {
 								<i className="fas fa-lock" aria-hidden="true"></i>
 								<div>
 									<strong>Server-validated checkout</strong>
-									<span>Product prices and quantities are verified before Stripe opens.</span>
+									<span>{commerceEnabled ? 'Product prices and quantities are verified before Stripe opens.' : 'Checkout activates only after server and legal readiness checks pass.'}</span>
 								</div>
 							</div>
 							<div className="assurance-item">

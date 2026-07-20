@@ -3,6 +3,7 @@ import useRateLimit from "../hooks/useRateLimit";
 import SEO from '../components/SEO';
 import { trackFormSubmission } from '../utils/analytics';
 import { submitContactForm } from '../utils/contact';
+import { contactFormEnabled } from '../utils/runtimeConfig';
 import "./Contact.css";
 
 function Contact() {
@@ -96,6 +97,13 @@ function Contact() {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		if (!contactFormEnabled) {
+			setSubmitStatus({
+				type: "error",
+				message: "The web form is not active yet. Please email support@softhe.io instead.",
+			});
+			return;
+		}
 
 		// Honeypot check - if filled, it's a bot
 		if (honeypot) {
@@ -211,7 +219,7 @@ function Contact() {
 												support@softhe.io
 											</a>
 											<span className="response-time">
-												Response within 2-4 hours
+												Response times vary with request volume
 											</span>
 										</div>
 									</div>
@@ -234,7 +242,7 @@ function Contact() {
 												@softhecs
 											</a>
 											<span className="response-time">
-												Usually online 12-20 GMT+2
+												Availability varies
 											</span>
 										</div>
 									</div>
@@ -260,6 +268,12 @@ function Contact() {
 										Have a specific question? Fill out the form
 										below and we'll get back to you quickly.
 									</p>
+									{!contactFormEnabled && (
+										<div className="rate-limit-warning" role="status">
+											<i className="fas fa-circle-info" aria-hidden="true"></i>
+											<div><p>The web form is being activated. Please use <a href="mailto:support@softhe.io">support@softhe.io</a> for now.</p></div>
+										</div>
+									)}
 
 									{/* Rate Limit Warning */}
 									{rateLimit.isBlocked && (
@@ -529,7 +543,7 @@ function Contact() {
 											type="submit"
 											className="btn btn-primary form-submit"
 											disabled={
-												isSubmitting || rateLimit.isBlocked
+												isSubmitting || rateLimit.isBlocked || !contactFormEnabled
 											}
 										>
 											{isSubmitting ? (
@@ -540,7 +554,7 @@ function Contact() {
 											) : (
 												<>
 													<i className="fas fa-paper-plane"></i>
-													Send Message
+													{contactFormEnabled ? 'Send Message' : 'Use email support'}
 												</>
 											)}
 										</button>
