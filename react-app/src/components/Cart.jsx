@@ -47,7 +47,7 @@ function Cart({ isOpen, onClose }) {
 				aria-labelledby="cart-title"
 				aria-hidden={!isOpen}
 				tabIndex={-1}
-				inert={isOpen ? undefined : ''}
+				inert={isOpen ? undefined : true}
 			>
 				<div className="cart-header">
 					<h2 id="cart-title">

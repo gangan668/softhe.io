@@ -31,6 +31,19 @@ describe('Cart', () => {
 		expect(screen.getByRole('link', { name: /browse products/i })).toHaveAttribute('href', '/store');
 	});
 
+	it('keeps the closed cart inert', () => {
+		localStorage.setItem('softhe_cart', '[]');
+		const { container } = render(
+			<MemoryRouter>
+				<CartProvider>
+					<Cart isOpen={false} onClose={vi.fn()} />
+				</CartProvider>
+			</MemoryRouter>,
+		);
+
+		expect(container.querySelector('.cart-sidebar')).toHaveAttribute('inert');
+	});
+
 	it('dismisses with Escape', async () => {
 		const user = userEvent.setup();
 		const onClose = vi.fn();

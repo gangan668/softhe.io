@@ -8,7 +8,7 @@ Last verified: 2026-07-20 (Europe/Berlin)
 - Enabled and disabled browser profiles are self-contained. `npm run e2e:all` builds each profile and runs 48 enabled-state plus 4 fail-closed desktop/mobile tests.
 - The current local gate passes: dependency audit, lint, 233 unit tests, coverage, strict builds, browser tests, and the asset budget.
 - The homepage benchmark image now preserves its 969×226 source ratio instead of rendering inside a forced 16:9 frame.
-- The working tree contains a broad production-hardening change set that has not yet been reviewed, committed, or pushed as a release candidate.
+- The production-hardening work is committed on `main`; the next repository action is to publish and review a release candidate containing the final runtime cleanup and status updates.
 
 ## Live environment
 
@@ -16,7 +16,7 @@ Last verified: 2026-07-20 (Europe/Berlin)
 - The live checkout and contact form are disabled.
 - `https://softhe.io/api/health` returns 404 because GitHub Pages cannot host the serverless API.
 - The live response does not include the Vercel security headers defined in `vercel.json`.
-- GitHub Pages is configured as a manual-only legacy rollback workflow in the current working tree, but that workflow change is not live until the change set is reviewed and published.
+- GitHub Pages is configured as a manual-only legacy rollback workflow. The public site remains on the older Pages deployment until a validated Vercel release is promoted.
 
 ## External launch blockers
 
@@ -29,4 +29,4 @@ Last verified: 2026-07-20 (Europe/Berlin)
 
 ## Next release action
 
-Review the existing working-tree diff, publish it on a release branch, connect that branch to a Vercel Preview, and run `npm run smoke:production` with `PRODUCTION_BASE_URL` set to the Preview origin. Do not move DNS or enable commerce while `/api/health` is unavailable or incomplete.
+Publish and review the release candidate, connect it to a Vercel Preview, and run `npm run smoke:production` with `PRODUCTION_BASE_URL` set to the Preview origin. Do not move DNS or enable commerce while `/api/health` is unavailable or incomplete.
