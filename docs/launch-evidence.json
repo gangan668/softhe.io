@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "candidate": {
     "origin": "https://softhe-io.vercel.app",
-    "deploymentId": "dpl_6EhNELP8xB8guFGsP1So7r83cLok",
-    "commitSha": "e1f5ba6",
-    "releaseFingerprint": "pending",
-    "strictSmokeRun": "https://github.com/gangan668/softhe.io/actions/runs/29781642536",
-    "verifiedAt": "2026-07-21T00:00:00+02:00"
+    "deploymentId": "dpl_2wivqTZS8j2YnPe7GiJsJGM96fRb",
+    "commitSha": "75e1ff40cdcc86172a597db182d1ca1941b07a10",
+    "releaseFingerprint": "softhe-20260721-75e1ff4-d95140eb254f443d817a8b73ebb92cb6",
+    "strictSmokeRun": "pending",
+    "verifiedAt": "2026-07-21T00:18:05+02:00"
   },
   "evidence": {
     "legal.operator-identity": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },

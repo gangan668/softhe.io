@@ -25,6 +25,9 @@ Last verified: 2026-07-21 (Europe/Berlin)
 ## Vercel release candidate
 
 - The `softhe-io` Vercel project and a release-candidate deployment now exist; the stable project domain is `https://softhe-io.vercel.app` and the custom production domain has not moved.
+- The current candidate is deployment `dpl_2wivqTZS8j2YnPe7GiJsJGM96fRb`, sourced from
+  commit `75e1ff40cdcc86172a597db182d1ca1941b07a10`. `/api/health` reports the matching
+  public release fingerprint, preventing the project alias from silently changing candidate identity.
 - Vercel serves the application and serverless routes with the configured security headers, while contact and commerce remain disabled.
 - `/api/health` correctly returns HTTP 503 `configuration-required` until the real legal identity and provider configuration are supplied.
 - Automatic GitHub integration is not connected yet, and the generated Preview URL is protected by Vercel authentication.
