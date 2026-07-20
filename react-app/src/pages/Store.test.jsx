@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { CartProvider } from '../context/CartProvider';
@@ -76,7 +76,9 @@ describe('Store', () => {
 		renderStore('/store?checkout=success&session_id=cs_test_12345678');
 
 		expect(await screen.findByText('Order confirmed')).toBeInTheDocument();
-		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([]);
+		await waitFor(() => {
+			expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([]);
+		});
 	});
 
 	it('keeps the cart while payment is unverified or processing', async () => {
