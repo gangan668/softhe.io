@@ -6,7 +6,7 @@ Last verified: 2026-07-20 (Europe/Berlin)
 
 - The application remains fail-closed by default: contact and commerce require explicit feature flags plus a configured legal identity.
 - Enabled and disabled browser profiles are self-contained. `npm run e2e:all` builds each profile and runs 48 enabled-state plus 4 fail-closed desktop/mobile tests.
-- The current local gate passes: dependency audit, lint, 233 unit tests, coverage, strict builds, browser tests, and the asset budget.
+- The current local gate passes: dependency audit, lint, 234 unit tests, coverage, strict builds, browser tests, and the asset budget.
 - The homepage benchmark image now preserves its 969×226 source ratio instead of rendering inside a forced 16:9 frame.
 - The production-hardening work is committed on `main`; draft PR #3 contains the final runtime cleanup and status updates on `agent/release-candidate`.
 
@@ -24,6 +24,7 @@ Last verified: 2026-07-20 (Europe/Berlin)
 - Vercel serves the application and serverless routes with the configured security headers, while contact and commerce remain disabled.
 - `/api/health` correctly returns HTTP 503 `configuration-required` until the real legal identity and provider configuration are supplied.
 - Automatic GitHub integration is not connected yet, and the generated Preview URL is protected by Vercel authentication.
+- The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29781642536` passed the page, header, and true-404 checks before failing on the expected HTTP 503 health gate.
 
 ## External launch blockers
 
@@ -32,7 +33,7 @@ Last verified: 2026-07-20 (Europe/Berlin)
 - Real Swedish operator identity, VAT status, legal/accounting approval, and final benchmark methodology/evidence are still required.
 - EmailJS, Upstash, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and monitoring alerts require end-to-end evidence in their provider systems.
 - DNS promotion, live-commerce enablement, and rollback rehearsal must wait until every item in `COMMERCIAL_LAUNCH_CHECKLIST.md` is evidenced.
-- The production smoke workflow keeps its app-marker, serverless, and security-header requirements disabled while the public host is GitHub Pages; set all three requirement variables to `true` for Vercel Preview validation and at cutover.
+- The production smoke workflow now enforces its app-marker, serverless, and security-header requirements against the Vercel candidate; it will stay red until `/api/health` reports ready.
 
 ## Next release action
 
