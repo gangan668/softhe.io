@@ -97,8 +97,9 @@ Then verify all of the following in a deployed preview environment before moving
 
 Record references, timestamps, and named verifiers in `docs/launch-evidence.json`. Once every
 entry is backed by evidence, run `npm run evidence:verify` and dispatch the manual
-**Commercial Release Gate** workflow with the exact candidate origin. The workflow binds the
-manifest to the checked-out commit before it runs the strict production smoke.
+**Commercial Release Gate** workflow with the candidate's immutable deployment origin and its
+deployed source commit. The evidence record may be committed afterward; the workflow binds the
+manifest to the declared candidate before it runs the strict production smoke.
 
 ## Promotion and rollback
 

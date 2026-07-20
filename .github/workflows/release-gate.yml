@@ -4,7 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       candidate_url:
-        description: HTTPS origin of the exact release candidate
+        description: Immutable HTTPS origin of the exact release candidate
+        required: true
+        type: string
+      candidate_commit:
+        description: Source commit deployed at the candidate origin
         required: true
         type: string
       evidence_file:
@@ -40,7 +44,7 @@ jobs:
         env:
           LAUNCH_EVIDENCE_FILE: ../${{ inputs.evidence_file }}
           EVIDENCE_EXPECTED_ORIGIN: ${{ inputs.candidate_url }}
-          EVIDENCE_EXPECTED_COMMIT: ${{ github.sha }}
+          EVIDENCE_EXPECTED_COMMIT: ${{ inputs.candidate_commit }}
 
       - name: Run strict production smoke
         run: npm run smoke:production
