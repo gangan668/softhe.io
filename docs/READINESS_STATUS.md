@@ -31,7 +31,7 @@ Last verified: 2026-07-21 (Europe/Berlin)
 - Vercel serves the application and serverless routes with the configured security headers, while contact and commerce remain disabled.
 - `/api/health` correctly returns HTTP 503 `configuration-required` until the real legal identity and provider configuration are supplied.
 - Automatic GitHub integration is not connected yet, and the generated Preview URL is protected by Vercel authentication.
-- The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29781642536` passed the page, header, and true-404 checks before failing on the expected HTTP 503 health gate.
+- The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29783624440` passed the page, header, and true-404 checks, confirmed the expected candidate commit and fingerprint in the health response, then failed on the intentional HTTP 503 configuration gate.
 - The scheduled smoke also pins the candidate source commit and public release fingerprint; once
   health is ready, an unexpected alias movement will fail monitoring.
 
