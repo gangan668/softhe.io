@@ -2,6 +2,11 @@
 
 This checklist is intentionally fail-closed. Check an item only when evidence exists in the named system. Live commerce remains disabled until every **Launch blocker** is complete.
 
+Record the evidence for every item in [`launch-evidence.json`](launch-evidence.json). The file
+deliberately starts with pending entries and the manual **Commercial Release Gate** workflow
+rejects missing, placeholder, stale-candidate, or unapproved evidence before it runs the strict
+production smoke. Validate it locally from `react-app` with `npm run evidence:verify`.
+
 ## Launch blockers
 
 - [ ] Vercel Preview has all server and client variables configured and `VITE_REQUIRE_PRODUCTION_CONFIG=true`.
@@ -17,6 +22,7 @@ This checklist is intentionally fail-closed. Check an item only when evidence ex
 - [ ] Security headers, route metadata, browser console, and true 404 behavior were manually reviewed on Preview.
 - [ ] Uptime, browser error, contact/withdrawal delivery, Stripe webhook, and fulfillment alerts were triggered in a test.
 - [ ] Last known-good Vercel deployment and DNS rollback instructions are recorded for the release.
+- [ ] The Commercial Release Gate passes for the exact deployment origin and commit being promoted.
 
 ## Evidence quality
 

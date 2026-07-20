@@ -95,6 +95,11 @@ Then verify all of the following in a deployed preview environment before moving
 - the final legal name, postal address, VAT details, payment methods, refund wording, and service terms.
 - `/api/health` returning HTTP 200 with every readiness check true and the production smoke workflow passing security-header and true-404 checks.
 
+Record references, timestamps, and named verifiers in `docs/launch-evidence.json`. Once every
+entry is backed by evidence, run `npm run evidence:verify` and dispatch the manual
+**Commercial Release Gate** workflow with the exact candidate origin. The workflow binds the
+manifest to the checked-out commit before it runs the strict production smoke.
+
 ## Promotion and rollback
 
 The current rollback targets and DNS records are maintained in [`ROLLBACK.md`](ROLLBACK.md).

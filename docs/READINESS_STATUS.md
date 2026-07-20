@@ -1,12 +1,16 @@
 # Production readiness status
 
-Last verified: 2026-07-20 (Europe/Berlin)
+Last verified: 2026-07-21 (Europe/Berlin)
 
 ## Repository state
 
 - The application remains fail-closed by default: contact and commerce require explicit feature flags plus a configured legal identity.
 - Enabled and disabled browser profiles are self-contained. `npm run e2e:all` builds each profile and runs 48 enabled-state plus 4 fail-closed desktop/mobile tests.
-- The current local gate passes: dependency audit, lint, 234 unit tests, coverage, strict builds, browser tests, and the asset budget.
+- The current local gate passes: dependency audit, lint, the full unit and coverage suites,
+  strict builds, browser tests, and the asset budget.
+- A committed launch-evidence manifest and manual Commercial Release Gate now bind legal,
+  provider, monitoring, benchmark, approval, rollback, deployment-origin, and commit evidence
+  to the strict production smoke before promotion.
 - The homepage benchmark image now preserves its 969×226 source ratio instead of rendering inside a forced 16:9 frame.
 - The production-hardening work is committed on `main`; draft PR #3 contains the final runtime cleanup and status updates on `agent/release-candidate`.
 
@@ -34,6 +38,8 @@ Last verified: 2026-07-20 (Europe/Berlin)
 - EmailJS, Upstash, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and monitoring alerts require end-to-end evidence in their provider systems.
 - DNS promotion, live-commerce enablement, and rollback rehearsal must wait until every item in `COMMERCIAL_LAUNCH_CHECKLIST.md` is evidenced.
 - The production smoke workflow now enforces its app-marker, serverless, and security-header requirements against the Vercel candidate; it will stay red until `/api/health` reports ready.
+- `docs/launch-evidence.json` remains deliberately pending. Its verifier rejects every
+  unevidenced item, so the Commercial Release Gate cannot pass or promote the current candidate.
 
 ## Next release action
 

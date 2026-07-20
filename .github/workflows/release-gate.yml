@@ -1,0 +1,51 @@
+name: Commercial Release Gate
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_url:
+        description: HTTPS origin of the exact release candidate
+        required: true
+        type: string
+      evidence_file:
+        description: Committed launch-evidence manifest
+        required: true
+        default: docs/launch-evidence.json
+        type: string
+
+jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: react-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: react-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify committed launch evidence
+        run: npm run evidence:verify
+        env:
+          LAUNCH_EVIDENCE_FILE: ../${{ inputs.evidence_file }}
+          EVIDENCE_EXPECTED_ORIGIN: ${{ inputs.candidate_url }}
+          EVIDENCE_EXPECTED_COMMIT: ${{ github.sha }}
+
+      - name: Run strict production smoke
+        run: npm run smoke:production
+        env:
+          PRODUCTION_BASE_URL: ${{ inputs.candidate_url }}
+          REQUIRE_APP_MARKER: 'true'
+          REQUIRE_SECURITY_HEADERS: 'true'
+          REQUIRE_SERVERLESS_API: 'true'

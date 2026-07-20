@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "candidate": {
+    "origin": "https://softhe-io.vercel.app",
+    "deploymentId": "dpl_6EhNELP8xB8guFGsP1So7r83cLok",
+    "commitSha": "e1f5ba6",
+    "strictSmokeRun": "https://github.com/gangan668/softhe.io/actions/runs/29781642536",
+    "verifiedAt": "2026-07-21T00:00:00+02:00"
+  },
+  "evidence": {
+    "legal.operator-identity": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "legal.counsel-approval": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "legal.accounting-approval": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "benchmark.methodology-and-raw-runs": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "ui.responsive-review": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "emailjs.contact-delivery": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "emailjs.order-delivery": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "emailjs.withdrawal-acknowledgement": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "emailjs.withdrawal-operator-notification": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "upstash.rate-limit-record": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "upstash.withdrawal-record-and-retention": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "upstash.stripe-idempotency-record": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "stripe.completed-test-order": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "stripe.duplicate-webhook": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "stripe.async-payment-event": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "fulfillment.accepted-order": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "fulfillment.deduplicated-order": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "fulfillment.retry-and-reconciliation": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "monitoring.uptime-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "monitoring.browser-error-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "monitoring.delivery-failure-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "monitoring.stripe-webhook-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "monitoring.fulfillment-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "rollback.dns-export": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "rollback.rehearsal": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "approval.release-owner": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "approval.rollback-owner": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] }
+  }
+}

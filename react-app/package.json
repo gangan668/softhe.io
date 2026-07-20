@@ -15,6 +15,7 @@
 		"e2e": "node scripts/run-e2e.js enabled",
 		"e2e:disabled": "node scripts/run-e2e.js disabled",
 		"e2e:all": "npm run e2e && npm run e2e:disabled",
+		"evidence:verify": "node scripts/validate-launch-evidence.js",
 		"smoke:production": "node scripts/production-smoke.js",
 		"budget": "node scripts/check-performance-budget.js"
 	},
