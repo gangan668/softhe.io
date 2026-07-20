@@ -97,6 +97,8 @@ Then verify all of the following in a deployed preview environment before moving
 
 ## Promotion and rollback
 
+The current rollback targets and DNS records are maintained in [`ROLLBACK.md`](ROLLBACK.md).
+
 1. Obtain Swedish legal and accounting sign-off on the configured identity, VAT treatment, digital-content/service withdrawal wording, receipts, and complaints path.
 2. Confirm the preview test order appears in Stripe, Upstash, the fulfillment receiver, and the customer mailbox.
 3. Keep `VITE_COMMERCE_ENABLED=false` until the sign-offs and test order are recorded. Contact may be enabled independently after its delivery and abuse tests pass.
