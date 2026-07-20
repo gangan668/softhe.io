@@ -7,6 +7,7 @@ const validManifest = () => ({
 		origin: 'https://softhe-io.vercel.app',
 		deploymentId: 'dpl_release_candidate',
 		commitSha: '0123456789abcdef0123456789abcdef01234567',
+		releaseFingerprint: 'release-2026-07-21-abcdef',
 		strictSmokeRun: 'https://github.com/example/project/actions/runs/1234',
 		verifiedAt: '2026-07-21T08:00:00Z',
 	},
@@ -24,6 +25,7 @@ describe('launch evidence validation', () => {
 		expect(validateLaunchEvidence(manifest, {
 			origin: manifest.candidate.origin,
 			commitSha: manifest.candidate.commitSha,
+			releaseFingerprint: manifest.candidate.releaseFingerprint,
 		})).toEqual([]);
 	});
 
@@ -41,9 +43,11 @@ describe('launch evidence validation', () => {
 		const errors = validateLaunchEvidence(validManifest(), {
 			origin: 'https://softhe.io',
 			commitSha: 'abcdef0',
+			releaseFingerprint: 'different-release',
 		});
 		expect(errors).toContain('candidate.origin does not match EVIDENCE_EXPECTED_ORIGIN (https://softhe.io)');
 		expect(errors).toContain('candidate.commitSha does not match EVIDENCE_EXPECTED_COMMIT (abcdef0)');
+		expect(errors).toContain('candidate.releaseFingerprint does not match EVIDENCE_EXPECTED_RELEASE_FINGERPRINT');
 	});
 
 	it('rejects placeholders even when an item is marked passed', () => {

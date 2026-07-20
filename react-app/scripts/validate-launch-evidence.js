@@ -63,6 +63,7 @@ export const validateLaunchEvidence = (manifest, expected = {}) => {
 	if (!validHttpsOrigin(candidate.origin)) errors.push('candidate.origin must be an HTTPS origin without a path');
 	if (!meaningful(candidate.deploymentId)) errors.push('candidate.deploymentId is required');
 	if (!/^[a-f0-9]{7,40}$/i.test(candidate.commitSha || '')) errors.push('candidate.commitSha must be a 7-40 character Git commit SHA');
+	if (!meaningful(candidate.releaseFingerprint)) errors.push('candidate.releaseFingerprint is required');
 	if (!meaningful(candidate.strictSmokeRun)) errors.push('candidate.strictSmokeRun is required');
 	if (!validTimestamp(candidate.verifiedAt)) errors.push('candidate.verifiedAt must be an ISO timestamp');
 
@@ -71,6 +72,9 @@ export const validateLaunchEvidence = (manifest, expected = {}) => {
 	}
 	if (expected.commitSha && candidate.commitSha !== expected.commitSha) {
 		errors.push(`candidate.commitSha does not match EVIDENCE_EXPECTED_COMMIT (${expected.commitSha})`);
+	}
+	if (expected.releaseFingerprint && candidate.releaseFingerprint !== expected.releaseFingerprint) {
+		errors.push('candidate.releaseFingerprint does not match EVIDENCE_EXPECTED_RELEASE_FINGERPRINT');
 	}
 
 	const evidence = manifest.evidence || {};
@@ -102,6 +106,7 @@ const run = async () => {
 	const errors = validateLaunchEvidence(manifest, {
 		origin: process.env.EVIDENCE_EXPECTED_ORIGIN,
 		commitSha: process.env.EVIDENCE_EXPECTED_COMMIT,
+		releaseFingerprint: process.env.EVIDENCE_EXPECTED_RELEASE_FINGERPRINT,
 	});
 	if (errors.length) {
 		throw new Error(`Launch evidence is incomplete:\n- ${errors.join('\n- ')}`);

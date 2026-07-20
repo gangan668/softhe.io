@@ -5,8 +5,9 @@ This checklist is intentionally fail-closed. Check an item only when evidence ex
 Record the evidence for every item in [`launch-evidence.json`](launch-evidence.json). The file
 deliberately starts with pending entries and the manual **Commercial Release Gate** workflow
 rejects missing, placeholder, stale-candidate, or unapproved evidence before it runs the strict
-production smoke. The manifest identifies the deployed source commit rather than the later commit
-that records its evidence. Validate it locally from `react-app` with `npm run evidence:verify`.
+production smoke. The manifest identifies the deployed source commit and public release fingerprint
+rather than the later commit that records its evidence. The strict smoke confirms both through
+`/api/health`. Validate it locally from `react-app` with `npm run evidence:verify`.
 
 ## Launch blockers
 
@@ -23,7 +24,7 @@ that records its evidence. Validate it locally from `react-app` with `npm run ev
 - [ ] Security headers, route metadata, browser console, and true 404 behavior were manually reviewed on Preview.
 - [ ] Uptime, browser error, contact/withdrawal delivery, Stripe webhook, and fulfillment alerts were triggered in a test.
 - [ ] Last known-good Vercel deployment and DNS rollback instructions are recorded for the release.
-- [ ] The Commercial Release Gate passes for the immutable deployment origin and source commit being promoted.
+- [ ] The Commercial Release Gate passes for the deployment origin, source commit, and release fingerprint being promoted.
 
 ## Evidence quality
 

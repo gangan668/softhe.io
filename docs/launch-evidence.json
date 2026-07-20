@@ -4,6 +4,7 @@
     "origin": "https://softhe-io.vercel.app",
     "deploymentId": "dpl_6EhNELP8xB8guFGsP1So7r83cLok",
     "commitSha": "e1f5ba6",
+    "releaseFingerprint": "pending",
     "strictSmokeRun": "https://github.com/gangan668/softhe.io/actions/runs/29781642536",
     "verifiedAt": "2026-07-21T00:00:00+02:00"
   },

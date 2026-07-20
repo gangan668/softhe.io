@@ -4,11 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       candidate_url:
-        description: Immutable HTTPS origin of the exact release candidate
+        description: HTTPS origin serving the release candidate
         required: true
         type: string
       candidate_commit:
         description: Source commit deployed at the candidate origin
+        required: true
+        type: string
+      release_fingerprint:
+        description: Public release fingerprint reported by /api/health
         required: true
         type: string
       evidence_file:
@@ -45,6 +49,7 @@ jobs:
           LAUNCH_EVIDENCE_FILE: ../${{ inputs.evidence_file }}
           EVIDENCE_EXPECTED_ORIGIN: ${{ inputs.candidate_url }}
           EVIDENCE_EXPECTED_COMMIT: ${{ inputs.candidate_commit }}
+          EVIDENCE_EXPECTED_RELEASE_FINGERPRINT: ${{ inputs.release_fingerprint }}
 
       - name: Run strict production smoke
         run: npm run smoke:production
@@ -53,3 +58,5 @@ jobs:
           REQUIRE_APP_MARKER: 'true'
           REQUIRE_SECURITY_HEADERS: 'true'
           REQUIRE_SERVERLESS_API: 'true'
+          EXPECTED_RELEASE_SOURCE_COMMIT: ${{ inputs.candidate_commit }}
+          EXPECTED_RELEASE_FINGERPRINT: ${{ inputs.release_fingerprint }}

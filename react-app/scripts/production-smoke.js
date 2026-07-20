@@ -4,6 +4,8 @@ const baseUrl = (process.env.PRODUCTION_BASE_URL || 'https://softhe.io').replace
 const requireAppMarker = process.env.REQUIRE_APP_MARKER === 'true';
 const requireSecurityHeaders = process.env.REQUIRE_SECURITY_HEADERS === 'true';
 const requireServerlessApi = process.env.REQUIRE_SERVERLESS_API === 'true';
+const expectedReleaseCommit = process.env.EXPECTED_RELEASE_SOURCE_COMMIT?.trim();
+const expectedReleaseFingerprint = process.env.EXPECTED_RELEASE_FINGERPRINT?.trim();
 
 const assert = (condition, message) => {
 	if (!condition) throw new Error(message);
@@ -47,6 +49,12 @@ if (requireServerlessApi) {
 	const health = JSON.parse(healthText);
 	assert(health.status === 'ready', `/api/health is not ready: ${healthText.slice(0, 300)}`);
 	assert(Object.values(health.checks || {}).every(Boolean), `/api/health has incomplete checks: ${healthText.slice(0, 300)}`);
+	if (expectedReleaseCommit) {
+		assert(health.release?.sourceCommit === expectedReleaseCommit, `/api/health reports source commit ${health.release?.sourceCommit || 'missing'}, expected ${expectedReleaseCommit}`);
+	}
+	if (expectedReleaseFingerprint) {
+		assert(health.release?.fingerprint === expectedReleaseFingerprint, '/api/health reports an unexpected release fingerprint');
+	}
 }
 
 console.log(`Production smoke checks passed for ${baseUrl}.`);

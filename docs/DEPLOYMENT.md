@@ -40,6 +40,8 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `EMAILJS_PRIVATE_KEY` | Optional EmailJS private key |
 | `WITHDRAWAL_RETENTION_DAYS` | Optional withdrawal-record retention, default 400 days |
 | `EXTERNAL_REQUEST_TIMEOUT_MS` | Optional outbound API timeout, default 8000 ms and clamped to 1000–30000 ms |
+| `RELEASE_SOURCE_COMMIT` | Public source commit identifier reported by `/api/health` for release binding |
+| `RELEASE_FINGERPRINT` | Public, unique release identifier reported by `/api/health` for release binding |
 | `ORDER_FULFILLMENT_WEBHOOK_URL` | HTTPS endpoint that provisions or records paid orders |
 | `ORDER_FULFILLMENT_WEBHOOK_SECRET` | HMAC key shared with the fulfillment endpoint |
 
@@ -97,9 +99,11 @@ Then verify all of the following in a deployed preview environment before moving
 
 Record references, timestamps, and named verifiers in `docs/launch-evidence.json`. Once every
 entry is backed by evidence, run `npm run evidence:verify` and dispatch the manual
-**Commercial Release Gate** workflow with the candidate's immutable deployment origin and its
-deployed source commit. The evidence record may be committed afterward; the workflow binds the
-manifest to the declared candidate before it runs the strict production smoke.
+**Commercial Release Gate** workflow with the candidate origin, deployed source commit, and
+release fingerprint. Set `RELEASE_SOURCE_COMMIT` and a freshly generated
+`RELEASE_FINGERPRINT` on that deployment. The evidence record may be committed afterward; the
+workflow confirms both values through `/api/health` before promotion, so a mutable alias cannot
+silently move the gate to a different deployment.
 
 ## Promotion and rollback
 

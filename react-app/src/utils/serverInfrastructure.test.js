@@ -54,6 +54,8 @@ describe('durable Redis helpers', () => {
 
 describe('production health API', () => {
 	it('reports missing server configuration without exposing values', async () => {
+		process.env.RELEASE_SOURCE_COMMIT = '0123456789abcdef';
+		process.env.RELEASE_FINGERPRINT = 'release-test-fingerprint';
 		const response = createResponse();
 		await health({ method: 'GET' }, response);
 
@@ -61,6 +63,10 @@ describe('production health API', () => {
 		expect(response.payload.status).toBe('configuration-required');
 		expect(response.payload.missing).toContain('STRIPE_SECRET_KEY');
 		expect(response.payload).not.toHaveProperty('values');
+		expect(response.payload.release).toEqual({
+			sourceCommit: '0123456789abcdef',
+			fingerprint: 'release-test-fingerprint',
+		});
 		expect(response.headers['Cache-Control']).toBe('no-store');
 	});
 
@@ -399,6 +405,7 @@ afterEach(() => {
 		'STRIPE_SECRET_KEY',
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
+		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT',
 	]) delete process.env[key];
 });
 

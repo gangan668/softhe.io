@@ -57,6 +57,10 @@ async function health(req, res) {
 	res.setHeader('Cache-Control', 'no-store');
 	return res.status(configuration.ready ? 200 : 503).json({
 		status: configuration.ready ? 'ready' : 'configuration-required',
+		release: {
+			sourceCommit: process.env.RELEASE_SOURCE_COMMIT || null,
+			fingerprint: process.env.RELEASE_FINGERPRINT || null,
+		},
 		checks: {
 			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
 			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
