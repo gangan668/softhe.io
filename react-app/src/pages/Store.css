@@ -1,3 +1,11 @@
+.store-page {
+	padding-top: 70px;
+}
+
+.store-page > .page-header {
+	padding-top: 60px;
+}
+
 .store {
 	padding: 72px 0 86px;
 }
@@ -310,6 +318,15 @@
 	pointer-events: none;
 }
 
+.product-unavailable {
+	grid-column: 1 / -1;
+	padding: 0.75rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-sm);
+	color: var(--text-secondary);
+	text-align: center;
+}
+
 
 .store-assurance {
 	display: grid;
@@ -429,6 +446,13 @@
 	align-items: center;
 	padding-top: 1rem;
 	padding-bottom: 1rem;
+}
+
+.status-contact-link {
+	margin-left: auto;
+	color: currentColor;
+	font-weight: 800;
+	white-space: nowrap;
 }
 
 .checkout-result-success {

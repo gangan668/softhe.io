@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { absoluteUrl } from '../config/site';
 
 function SEO({
 	title,
@@ -14,8 +15,7 @@ function SEO({
 	type = 'website'
 }) {
 	const location = useLocation();
-	const baseUrl = import.meta.env.VITE_APP_URL || 'https://softhe.io';
-	const fullUrl = `${baseUrl}${location.pathname}`;
+	const fullUrl = absoluteUrl(location.pathname);
 
 	useEffect(() => {
 		// Update document title
@@ -28,13 +28,11 @@ function SEO({
 			if (!content) return;
 
 			const attribute = property ? 'property' : 'name';
-			const attributeValue = property ? name : name;
-
-			let element = document.querySelector(`meta[${attribute}="${attributeValue}"]`);
+			let element = document.querySelector(`meta[${attribute}="${name}"]`);
 
 			if (!element) {
 				element = document.createElement('meta');
-				element.setAttribute(attribute, attributeValue);
+				element.setAttribute(attribute, name);
 				document.head.appendChild(element);
 			}
 
@@ -51,13 +49,13 @@ function SEO({
 		updateMetaTag('og:description', ogDescription || description, true);
 		updateMetaTag('og:type', type, true);
 		updateMetaTag('og:url', fullUrl, true);
-		updateMetaTag('og:image', ogImage || `${baseUrl}/images/social-share.png`, true);
+		updateMetaTag('og:image', ogImage || absoluteUrl('/images/social-share.png'), true);
 
 		// Twitter Card tags
 		updateMetaTag('twitter:card', 'summary_large_image');
 		updateMetaTag('twitter:title', ogTitle || title);
 		updateMetaTag('twitter:description', ogDescription || description);
-		updateMetaTag('twitter:image', ogImage || `${baseUrl}/images/social-share.png`);
+		updateMetaTag('twitter:image', ogImage || absoluteUrl('/images/social-share.png'));
 		updateMetaTag('twitter:site', '@SoftheCS');
 		updateMetaTag('twitter:creator', '@SoftheCS');
 
@@ -85,7 +83,7 @@ function SEO({
 			structuredDataElement.remove();
 		}
 
-	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, noIndex, type, location.pathname, fullUrl, baseUrl]);
+	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, noIndex, type, fullUrl]);
 
 	return null; // This component doesn't render anything
 }

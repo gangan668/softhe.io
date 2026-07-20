@@ -1,4 +1,5 @@
 import React from 'react';
+import { siteConfig } from '../config/site';
 import { reportError } from '../utils/monitoring';
 import './ErrorBoundary.css';
 
@@ -105,8 +106,8 @@ class ErrorBoundary extends React.Component {
 
 						<div className="error-support">
 							<p>If the problem persists, please contact our support team:</p>
-							<a href="mailto:support@softhe.io" className="support-link">
-								<i className="fas fa-envelope"></i> support@softhe.io
+							<a href={`mailto:${siteConfig.supportEmail}`} className="support-link">
+								<i className="fas fa-envelope"></i> {siteConfig.supportEmail}
 							</a>
 						</div>
 					</div>

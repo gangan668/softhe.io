@@ -24,4 +24,6 @@ jobs:
         run: node scripts/production-smoke.js
         env:
           PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL || 'https://softhe.io' }}
+          REQUIRE_APP_MARKER: ${{ vars.REQUIRE_APP_MARKER || 'false' }}
+          REQUIRE_SECURITY_HEADERS: ${{ vars.REQUIRE_SECURITY_HEADERS || 'false' }}
           REQUIRE_SERVERLESS_API: ${{ vars.REQUIRE_SERVERLESS_API || 'false' }}

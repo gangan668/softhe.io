@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+      - name: Audit dependency tree
+        run: npm audit --audit-level=high
 
       - name: Lint
         run: npm run lint
@@ -36,3 +36,23 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_REQUIRE_PRODUCTION_CONFIG: 'true'
+          VITE_APP_URL: https://preview.softhe.io
+          VITE_LEGAL_NAME: Softhe CI Test Operator
+          VITE_LEGAL_ADDRESS: Testgatan 1, 111 11 Stockholm, Sweden
+          VITE_BUSINESS_REGISTRATION_ID: 000000-0000
+          VITE_LEGAL_JURISDICTION: Sweden
+          VITE_VAT_STATUS: not-registered
+          VITE_SUPPORT_EMAIL: support@softhe.io
+          VITE_BENCHMARK_HARDWARE: CI benchmark fixture hardware
+          VITE_BENCHMARK_SOFTWARE: CI BIOS, drivers, and Windows fixture
+          VITE_BENCHMARK_SCENARIO: CI game settings and repeated capture procedure
+          VITE_BENCHMARK_CAPTURE_DATE: '2026-07-20'
+          VITE_BENCHMARK_RUN_COUNT: '3'
+          VITE_BENCHMARK_SUMMARY_METHOD: median
+          VITE_COMMERCE_ENABLED: 'false'
+          VITE_CONTACT_FORM_ENABLED: 'false'
+
+      - name: Enforce initial asset budget
+        run: npm run budget

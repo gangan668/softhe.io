@@ -1,4 +1,5 @@
 import SEO from '../components/SEO';
+import { absoluteUrl } from '../config/site';
 import './Legal.css';
 
 function CookiePolicy() {
@@ -7,7 +8,7 @@ function CookiePolicy() {
 			<SEO
 				title="Cookie Policy | Softhe.io"
 				description="Cookie policy for Softhe.io, including essential storage and optional analytics cookies."
-				canonicalUrl="https://softhe.io/cookie-policy"
+				canonicalUrl={absoluteUrl('/cookie-policy')}
 			/>
 			<div className="legal-page">
 				<section className="page-header">
@@ -35,7 +36,7 @@ function CookiePolicy() {
 								</p>
 							</section>
 							<section>
-								<h2>Payment Links</h2>
+								<h2>Third-Party Checkout</h2>
 								<p>
 									Stripe Checkout may set its own cookies after you leave Softhe.io.
 									Review Stripe's privacy and cookie information during checkout.

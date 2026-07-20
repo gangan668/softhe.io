@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { PRODUCTS as clientProducts } from '../data/products';
 
 const require = createRequire(import.meta.url);
-const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getPublicOrigin, isStripeCheckoutUrl, normalizeItems } = require('../../../api/create-checkout-session.js');
+const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getPublicOrigin, isStripeCheckoutUrl, normalizeItems, validateLegalAcceptance } = require('../../../api/create-checkout-session.js');
 const { verifyStripeSignature } = require('../../../api/stripe-webhook.js');
 
 describe('server checkout validation', () => {
@@ -17,6 +17,15 @@ describe('server checkout validation', () => {
 	it('rejects unknown products and invalid quantities', () => {
 		expect(() => normalizeItems([{ id: 'made-up', quantity: 1 }])).toThrow('Unknown product');
 		expect(() => normalizeItems([{ id: 'windows-10', quantity: 0 }])).toThrow('Invalid quantity');
+	});
+
+	it('requires explicit terms and early-delivery withdrawal acknowledgement', () => {
+		expect(() => validateLegalAcceptance({ termsAccepted: true })).toThrow(/withdrawal information/i);
+		expect(validateLegalAcceptance({
+			termsAccepted: true,
+			earlyPerformanceRequested: true,
+			withdrawalAcknowledged: true,
+		})).toEqual(expect.objectContaining({ termsAccepted: true, withdrawalAcknowledged: true }));
 	});
 
 	it('applies bundle pricing to authoritative server prices', () => {

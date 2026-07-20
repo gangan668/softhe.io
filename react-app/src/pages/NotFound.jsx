@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { absoluteUrl } from '../config/site';
 import './Legal.css';
 
 function NotFound() {
@@ -8,7 +9,7 @@ function NotFound() {
 			<SEO
 				title="Page Not Found | Softhe.io"
 				description="The requested Softhe.io page could not be found."
-				canonicalUrl="https://softhe.io/404"
+				canonicalUrl={absoluteUrl('/404')}
 				noIndex
 			/>
 			<div className="not-found-page">

@@ -157,6 +157,17 @@
 	transition: var(--transition);
 }
 
+.contact-offline-action {
+	display: grid;
+	gap: 1rem;
+	justify-items: start;
+	padding: 1.25rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-md);
+	background: rgba(255, 255, 255, 0.025);
+	color: var(--text-secondary);
+}
+
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {

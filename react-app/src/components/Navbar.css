@@ -149,9 +149,12 @@
 		position: fixed;
 		left: -100%;
 		top: 70px;
+		bottom: 0;
 		flex-direction: column;
-		background-color: rgba(8, 10, 15, 0.96);
+		background-color: #080a0f;
 		width: 100%;
+		min-height: calc(100dvh - 70px);
+		overflow-y: auto;
 		text-align: center;
 		transition: var(--transition);
 		box-shadow: var(--shadow);

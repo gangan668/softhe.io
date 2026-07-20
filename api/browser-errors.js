@@ -45,7 +45,8 @@ async function browserErrors(req, res) {
 		console.error('browser_error', error);
 		return res.status(202).json({ accepted: true });
 	} catch (reportingError) {
-		return res.status(503).json({ error: reportingError.message });
+		console.error('browser_error_ingestion_failed', { message: reportingError.message });
+		return res.status(503).json({ error: 'Error reporting is temporarily unavailable' });
 	}
 }
 

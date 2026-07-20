@@ -21,18 +21,36 @@ function Navbar({ onCartClick }) {
 	useEffect(() => {
 		if (!isOpen) return undefined;
 		firstLinkRef.current?.focus();
-		const handleEscape = (event) => {
+		const previousOverflow = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+		const handleKeyDown = (event) => {
 			if (event.key === "Escape") {
 				setIsOpen(false);
 				menuButtonRef.current?.focus();
+				return;
+			}
+			if (event.key !== "Tab") return;
+			const links = [...document.querySelectorAll("#primary-navigation a")];
+			if (!links.length) return;
+			const first = links[0];
+			const last = links[links.length - 1];
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
 			}
 		};
-		document.addEventListener("keydown", handleEscape);
-		return () => document.removeEventListener("keydown", handleEscape);
+		document.addEventListener("keydown", handleKeyDown);
+		return () => {
+			document.body.style.overflow = previousOverflow;
+			document.removeEventListener("keydown", handleKeyDown);
+		};
 	}, [isOpen]);
 
 	return (
-		<nav className="navbar">
+		<nav className="navbar" aria-label="Primary navigation">
 			<div className="nav-container">
 				<div className="nav-logo">
 					<Link to="/">Softhe.io</Link>

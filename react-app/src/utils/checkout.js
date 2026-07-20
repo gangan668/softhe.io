@@ -1,4 +1,4 @@
-const getApiBaseUrl = () => import.meta.env.VITE_API_URL?.replace(/\/$/, '') || '';
+import { apiFetch, readJson } from './api';
 
 export const isStripeCheckoutUrl = (value) => {
 	try {
@@ -9,16 +9,17 @@ export const isStripeCheckoutUrl = (value) => {
 	}
 };
 
-export const createCheckoutSession = async (cart, fetchImpl = fetch) => {
-	const response = await fetchImpl(`${getApiBaseUrl()}/api/create-checkout-session`, {
+export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = fetch) => {
+	const response = await apiFetch('/api/create-checkout-session', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({
 			items: cart.map(({ id, quantity }) => ({ id, quantity })),
+			legalAcceptance,
 		}),
-	});
+	}, fetchImpl);
 
-	const data = await response.json().catch(() => ({}));
+	const data = await readJson(response);
 	if (!response.ok || !isStripeCheckoutUrl(data.url)) {
 		throw new Error(data.error || 'Checkout could not be started. Please try again.');
 	}
@@ -26,11 +27,12 @@ export const createCheckoutSession = async (cart, fetchImpl = fetch) => {
 };
 
 export const verifyCheckoutSession = async (sessionId, fetchImpl = fetch) => {
-	const response = await fetchImpl(
-		`${getApiBaseUrl()}/api/checkout-session?session_id=${encodeURIComponent(sessionId)}`,
+	const response = await apiFetch(
+		`/api/checkout-session?session_id=${encodeURIComponent(sessionId)}`,
 		{ headers: { Accept: 'application/json' } },
+		fetchImpl,
 	);
-	const data = await response.json().catch(() => ({}));
+	const data = await readJson(response);
 	if (!response.ok) {
 		throw new Error(data.error || 'Checkout could not be verified. Please try again.');
 	}

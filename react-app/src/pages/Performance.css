@@ -260,6 +260,71 @@
 	line-height: 1.65;
 }
 
+.benchmark-methodology {
+	margin: 72px 0 24px;
+	padding: 32px;
+	border: 1px solid rgba(124, 92, 255, 0.24);
+	border-radius: 20px;
+	background: rgba(17, 20, 29, 0.78);
+}
+
+.methodology-heading {
+	max-width: 760px;
+	margin-bottom: 28px;
+}
+
+.methodology-heading h2 {
+	margin: 8px 0 10px;
+}
+
+.methodology-heading p,
+.methodology-grid dd,
+.methodology-warning {
+	color: var(--text-secondary);
+}
+
+.methodology-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+	margin: 0;
+}
+
+.methodology-grid div {
+	padding: 18px;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.025);
+}
+
+.methodology-grid dt {
+	margin-bottom: 7px;
+	color: var(--text-primary);
+	font-weight: 700;
+}
+
+.methodology-grid dd {
+	margin: 0;
+	line-height: 1.55;
+}
+
+.methodology-warning {
+	margin: 20px 0 0;
+	padding: 14px 16px;
+	border-left: 3px solid #f5b942;
+	background: rgba(245, 185, 66, 0.08);
+}
+
+@media (max-width: 700px) {
+	.benchmark-methodology {
+		padding: 22px;
+	}
+
+	.methodology-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 @media (max-width: 980px) {
 	.performance-stats,
 	.fps-images {

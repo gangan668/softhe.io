@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { createCheckoutSession, verifyCheckoutSession } from './checkout';
 
 describe('createCheckoutSession', () => {
+	const legalAcceptance = { termsAccepted: true, earlyPerformanceRequested: true, withdrawalAcknowledged: true };
+
 	it('sends only product identifiers and quantities to the server', async () => {
 		const fetchImpl = vi.fn().mockResolvedValue({
 			ok: true,
@@ -10,11 +12,11 @@ describe('createCheckoutSession', () => {
 
 		const result = await createCheckoutSession([
 			{ id: 'windows-10', name: 'Untrusted name', price: 1, quantity: 2 },
-		], fetchImpl);
+		], legalAcceptance, fetchImpl);
 
 		expect(fetchImpl).toHaveBeenCalledWith('/api/create-checkout-session', expect.objectContaining({
 			method: 'POST',
-			body: JSON.stringify({ items: [{ id: 'windows-10', quantity: 2 }] }),
+			body: JSON.stringify({ items: [{ id: 'windows-10', quantity: 2 }], legalAcceptance }),
 		}));
 		expect(result.url).toBe('https://checkout.stripe.com/test');
 	});
@@ -25,7 +27,7 @@ describe('createCheckoutSession', () => {
 			json: async () => ({ error: 'Stripe checkout is not configured' }),
 		});
 
-		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], fetchImpl))
+		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl))
 			.rejects.toThrow('Stripe checkout is not configured');
 	});
 
@@ -35,7 +37,7 @@ describe('createCheckoutSession', () => {
 			json: async () => ({ url: 'https://attacker.example/checkout' }),
 		});
 
-		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], fetchImpl))
+		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl))
 			.rejects.toThrow('Checkout could not be started');
 	});
 });

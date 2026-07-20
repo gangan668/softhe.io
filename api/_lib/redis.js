@@ -1,3 +1,5 @@
+const { fetchWithTimeout } = require('./fetch');
+
 const getRedisConfig = () => ({
 	url: process.env.UPSTASH_REDIS_REST_URL?.replace(/\/$/, ''),
 	token: process.env.UPSTASH_REDIS_REST_TOKEN,
@@ -7,14 +9,14 @@ const redisCommand = async (command, fetchImpl = fetch) => {
 	const { url, token } = getRedisConfig();
 	if (!url || !token) throw new Error('Durable storage is not configured');
 
-	const response = await fetchImpl(url, {
+	const response = await fetchWithTimeout(url, {
 		method: 'POST',
 		headers: {
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
 		},
 		body: JSON.stringify(command),
-	});
+	}, fetchImpl);
 	const data = await response.json().catch(() => ({}));
 	if (!response.ok || data.error) throw new Error(data.error || 'Durable storage request failed');
 	return data.result;

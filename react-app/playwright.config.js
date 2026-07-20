@@ -1,7 +1,18 @@
 import process from 'process';
+import { createServer } from 'node:net';
 import { defineConfig, devices } from '@playwright/test';
 
-const previewPort = process.env.PLAYWRIGHT_PORT || '4173';
+const allocatePort = () => new Promise((resolve, reject) => {
+	const server = createServer();
+	server.once('error', reject);
+	server.listen(0, '127.0.0.1', () => {
+		const { port } = server.address();
+		server.close((error) => error ? reject(error) : resolve(String(port)));
+	});
+});
+
+const previewPort = process.env.PLAYWRIGHT_PORT || await allocatePort();
+process.env.PLAYWRIGHT_PORT = previewPort;
 const previewUrl = `http://127.0.0.1:${previewPort}`;
 
 export default defineConfig({
@@ -16,7 +27,7 @@ export default defineConfig({
 	webServer: {
 		command: `npm run preview -- --host 127.0.0.1 --port ${previewPort}`,
 		url: previewUrl,
-		reuseExistingServer: !process.env.CI,
+		reuseExistingServer: false,
 		timeout: 120000,
 	},
 	projects: [

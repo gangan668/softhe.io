@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import Cart from './components/Cart';
 import CookieConsent from './components/CookieConsent';
@@ -10,7 +10,7 @@ import { trackPageView } from './utils/analytics';
 import { initMonitoring } from './utils/monitoring';
 import './App.css';
 
-const Home = lazy(() => import('./pages/Home'));
+import Home from './pages/Home';
 const Services = lazy(() => import('./pages/Services'));
 const Store = lazy(() => import('./pages/Store'));
 const Guides = lazy(() => import('./pages/Guides'));
@@ -23,11 +23,24 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const CookiePolicy = lazy(() => import('./pages/CookiePolicy'));
 const Terms = lazy(() => import('./pages/Terms'));
 const LegalNotice = lazy(() => import('./pages/LegalNotice'));
+const Withdrawal = lazy(() => import('./pages/Withdrawal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 function RouteTracker() {
 	const location = useLocation();
-	useEffect(() => trackPageView(location.pathname), [location.pathname]);
+	const isInitialRoute = useRef(true);
+	useEffect(() => {
+		trackPageView(location.pathname);
+		window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+		if (isInitialRoute.current) {
+			isInitialRoute.current = false;
+			return undefined;
+		}
+		const focusTimer = window.setTimeout(() => {
+			document.getElementById('main-content')?.focus({ preventScroll: true });
+		}, 0);
+		return () => window.clearTimeout(focusTimer);
+	}, [location.pathname]);
 	return null;
 }
 
@@ -49,8 +62,9 @@ function App() {
 				<CartProvider>
 					<RouteTracker />
 					<div className="App">
+						<a className="skip-link" href="#main-content">Skip to main content</a>
 						<Navbar onCartClick={() => setIsCartOpen((open) => !open)} />
-						<main id="main-content">
+						<main id="main-content" tabIndex="-1">
 							<ErrorBoundary>
 								<Suspense fallback={<PageLoader />}>
 									<Routes>
@@ -67,6 +81,7 @@ function App() {
 									<Route path="/cookie-policy" element={<CookiePolicy />} />
 									<Route path="/terms" element={<Terms />} />
 									<Route path="/legal-notice" element={<LegalNotice />} />
+									<Route path="/withdrawal" element={<Withdrawal />} />
 									<Route path="*" element={<NotFound />} />
 									</Routes>
 								</Suspense>

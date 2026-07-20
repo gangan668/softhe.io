@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { siteConfig } from '../config/site';
 import './Footer.css';
 
 const BRAND_PATHS = {
@@ -29,16 +30,16 @@ function Footer() {
 						<h3>Softhe.io</h3>
 						<p>PC optimization products and support for competitive gaming setups.</p>
 						<div className="social-links">
-							<a href="https://x.com/SoftheCS" target="_blank" rel="noreferrer" aria-label="X (formerly Twitter)">
+							<a href={siteConfig.social.twitter} target="_blank" rel="noreferrer" aria-label="X (formerly Twitter)">
 								<BrandIcon name="x" />
 							</a>
-							<a href="https://discord.com/users/softhecs" target="_blank" rel="noreferrer" aria-label="Discord">
+							<a href={siteConfig.social.discord} target="_blank" rel="noreferrer" aria-label="Discord">
 								<BrandIcon name="discord" />
 							</a>
-							<a href="https://github.com/Softhe" target="_blank" rel="noreferrer" aria-label="GitHub">
+							<a href={siteConfig.social.github} target="_blank" rel="noreferrer" aria-label="GitHub">
 								<BrandIcon name="github" />
 							</a>
-							<a href="https://www.youtube.com/@softhe" target="_blank" rel="noreferrer" aria-label="YouTube">
+							<a href={siteConfig.social.youtube} target="_blank" rel="noreferrer" aria-label="YouTube">
 								<BrandIcon name="youtube" />
 							</a>
 						</div>
@@ -59,6 +60,7 @@ function Footer() {
 							<li><Link to="/cookie-policy">Cookie Policy</Link></li>
 							<li><Link to="/terms">Terms of Service</Link></li>
 							<li><Link to="/legal-notice">Legal Notice</Link></li>
+							<li><Link to="/withdrawal">Withdraw from an Order</Link></li>
 							<li>
 								<button type="button" className="footer-link-button" onClick={openCookieSettings}>
 									Cookie Settings
@@ -71,11 +73,11 @@ function Footer() {
 						<ul>
 							<li>
 								<i className="fas fa-envelope"></i>
-								<a href="mailto:support@softhe.io">support@softhe.io</a>
+								<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>
 							</li>
 							<li>
 								<BrandIcon name="discord" />
-								<a href="https://discord.com/users/softhecs" target="_blank" rel="noreferrer">@softhecs</a>
+								<a href={siteConfig.social.discord} target="_blank" rel="noreferrer">@softhecs</a>
 							</li>
 						</ul>
 					</div>

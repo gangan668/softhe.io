@@ -1,4 +1,5 @@
 const { normalizeItems } = require('./create-checkout-session');
+const { fetchWithTimeout } = require('./_lib/fetch');
 
 const CHECKOUT_SESSION_ID = /^cs_(?:test_|live_)?[A-Za-z0-9]{8,}$/;
 
@@ -26,7 +27,7 @@ async function checkoutSession(req, res) {
 	}
 
 	try {
-		const response = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
+		const response = await fetchWithTimeout(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
 			headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
 		});
 		const session = await response.json();
@@ -47,7 +48,8 @@ async function checkoutSession(req, res) {
 			amountTotal: session.amount_total,
 			currency: session.currency,
 		});
-	} catch {
+	} catch (error) {
+		console.error('checkout_session_verification_failed', { sessionId, message: error.message });
 		return res.status(502).json({ error: 'Unable to verify checkout. Please try again.' });
 	}
 }

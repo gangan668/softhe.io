@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SEO from "../components/SEO";
+import { absoluteUrl, siteConfig } from "../config/site";
 import { trackEvent } from "../utils/analytics";
 import "./FAQ.css";
 
@@ -402,7 +403,7 @@ function FAQ() {
 						</ul>
 						<p>
 							To request a refund, email{" "}
-							<a href="mailto:support@softhe.io">support@softhe.io</a> with your
+							<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a> with your
 							order number. Refunds are typically processed within 3-5 business
 							days.
 						</p>
@@ -497,7 +498,7 @@ function FAQ() {
 						<ul>
 							<li>
 								<strong>Email Support:</strong>{" "}
-								<a href="mailto:support@softhe.io">support@softhe.io</a>{" "}
+								<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>{" "}
 								(response time varies with request volume)
 							</li>
 							<li>
@@ -718,7 +719,7 @@ function FAQ() {
 				title="FAQ - Frequently Asked Questions | Softhe.io"
 				description="Find answers to common questions about PC optimization, custom Windows ISOs, BIOS tuning, and our services at Softhe.io."
 				keywords="PC optimization FAQ, Windows ISO questions, BIOS tuning help, gaming optimization FAQ"
-				canonicalUrl="https://softhe.io/faq"
+				canonicalUrl={absoluteUrl('/faq')}
 			/>
 
 			<section className="page-header">

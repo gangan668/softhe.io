@@ -1,0 +1,33 @@
+# Commercial launch checklist
+
+This checklist is intentionally fail-closed. Check an item only when evidence exists in the named system. Live commerce remains disabled until every **Launch blocker** is complete.
+
+## Launch blockers
+
+- [ ] Vercel Preview has all server and client variables configured and `VITE_REQUIRE_PRODUCTION_CONFIG=true`.
+- [ ] `GET /api/health` returns HTTP 200 with `status: ready` and all checks true.
+- [ ] Registered Swedish operator name, organisation number, postal address, jurisdiction, VAT status, and support contact are configured.
+- [ ] Swedish counsel/accounting approved the Legal Notice, Privacy Policy, Terms, withdrawal flow, checkout consent, price/VAT presentation, and receipts.
+- [ ] EmailJS contact, order, withdrawal acknowledgement, and operator-notification templates delivered successfully.
+- [ ] Upstash contains rate-limit, Stripe idempotency, and withdrawal request records with the intended retention.
+- [ ] Stripe test order completed, including a duplicated webhook and an asynchronous-payment event.
+- [ ] The fulfillment receiver accepted, deduplicated, retried, and reconciled the test order.
+- [ ] Order confirmation includes items, total/currency and VAT treatment, terms, withdrawal link, support, and fulfillment status.
+- [ ] `npm run lint`, coverage, strict build, asset budget, isolated desktop/mobile E2E, dependency audit, and production smoke all pass.
+- [ ] Security headers, route metadata, browser console, and true 404 behavior were manually reviewed on Preview.
+- [ ] Uptime, browser error, contact/withdrawal delivery, Stripe webhook, and fulfillment alerts were triggered in a test.
+- [ ] Last known-good Vercel deployment and DNS rollback instructions are recorded for the release.
+
+## Evidence quality
+
+- [ ] Benchmark page names the exact hardware, BIOS, drivers, Windows/game versions, settings, and capture date.
+- [ ] Stock and optimized results use at least three repeated runs and report medians, FPS, and 1% lows.
+- [ ] Raw screenshots are published and claims are limited to the documented test configuration.
+- [ ] Layouts are approved at 320, 390, 768, 1280, and 1440 pixels.
+
+## Promotion
+
+- [ ] Contact is enabled only after its independent delivery, privacy, rate-limit, spam, and failure-message checks pass.
+- [ ] `VITE_COMMERCE_ENABLED=true` is applied only after every launch blocker above is complete.
+- [ ] Production smoke passes immediately after DNS cutover.
+- [ ] GitHub Pages automatic deployment remains retired.

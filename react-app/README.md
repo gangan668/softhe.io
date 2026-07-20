@@ -1,208 +1,39 @@
-# Softhe.io - React Application
+# Softhe.io React application
 
-This is a React-based rewrite of the Softhe.io website, built with Vite and React Router.
+The browser application is built with React 19, React Router, and Vite. Production also depends on the Vercel functions in the repository-level `api/` directory; a static-only deployment cannot provide checkout, contact delivery, withdrawal acknowledgements, or fulfillment.
 
-## Features
-
-- **Modern React Stack**: Built with React 19, React Router, and Vite
-- **Fully Responsive**: Mobile-first design that works on all devices
-- **Multi-page Navigation**: 
-  - Home
-  - Services
-  - Store
-  - Performance
-  - Contact
-- **Component-based Architecture**: Reusable components for scalability
-- **Performance Optimized**: Fast loading and smooth animations
-
-## Project Structure
-
-```
-react-app/
-├── public/
-│   └── images/          # Static images and assets
-├── src/
-│   ├── components/      # Reusable React components
-│   │   ├── Navbar.jsx
-│   │   ├── Navbar.css
-│   │   ├── Footer.jsx
-│   │   └── Footer.css
-│   ├── pages/          # Page components
-│   │   ├── Home.jsx & Home.css
-│   │   ├── Services.jsx & Services.css
-│   │   ├── Store.jsx & Store.css
-│   │   ├── Performance.jsx & Performance.css
-│   │   └── Contact.jsx & Contact.css
-│   ├── App.jsx         # Main app component with routing
-│   ├── App.css         # Global styles
-│   ├── main.jsx        # Entry point
-│   └── index.css       # Base styles
-└── index.html          # HTML template
-
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-1. Install dependencies:
+## Local development
 
 ```bash
-cd react-app
-npm install
-```
-
-2. Set up environment variables:
-
-```bash
-cp .env.example .env
-```
-
-The browser build only needs optional public analytics settings. Contact, checkout, and
-fulfillment credentials are server-only variables documented in
-[`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md).
-
-### Development
-
-Start the development server:
-
-```bash
+npm ci
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`
+Copy `.env.example` to `.env.local` when local feature or content configuration is needed. Secret Stripe, Redis, EmailJS, fulfillment, and monitoring values belong in the serverless environment and must never use a `VITE_` prefix.
 
-### Build
-
-Build for production:
+## Quality commands
 
 ```bash
+npm run lint
+npm run test:coverage -- --run
 npm run build
+npm run budget
+npm run e2e:all
+npm audit --omit=dev --audit-level=high
 ```
 
-The built files will be in the `dist/` directory.
+Playwright allocates one free preview port for the run, refuses to reuse another service, and verifies the Softhe.io application marker before testing routes.
 
-### Preview
+## Production behavior
 
-Preview the production build locally:
+- `VITE_REQUIRE_PRODUCTION_CONFIG=true` rejects incomplete legal, benchmark, and feature configuration at build time.
+- Contact and commerce default to disabled.
+- Commerce is enabled only after legal identity, VAT, Stripe, Redis, EmailJS, fulfillment, and monitoring readiness checks pass.
+- `/api/health` is the production readiness endpoint.
+- The GitHub Pages workflow is a manual, commerce-disabled legacy rollback only.
 
-```bash
-npm run preview
-```
+Use the canonical repository documentation:
 
-## Key Technologies
-
-- **React 19**: Latest React features and hooks
-- **React Router v7**: Client-side routing
-- **Vite**: Fast build tool and dev server
-- **Vercel functions**: Server-side contact, checkout, and Stripe webhook boundaries
-- **EmailJS**: Server-side email delivery for the contact form
-- **CSS**: Custom CSS with CSS variables for theming
-
-## Environment Variables
-
-Production requires the server variables listed in
-[`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md). Never prefix Stripe, Redis,
-EmailJS private, rate-limit, or fulfillment secrets with `VITE_`.
-
-## Features Implemented
-
-### Navigation
-- Fixed navbar with responsive hamburger menu
-- Active link highlighting
-- Smooth scrolling
-
-### Pages
-
-#### Home
-- Hero section with call-to-action buttons
-- Performance metrics display
-- Feature cards
-- CTA section
-
-#### Services
-- Detailed service listings
-- Pricing information
-- Process workflow visualization
-
-#### Store
-- Product grid layout
-- Product badges
-- Direct Stripe payment links
-
-#### Performance
-- Before/after screenshot comparisons
-- FPS comparison charts
-- Detailed performance metrics table
-
-#### Contact
-- Contact information display
-- Interactive contact form with validation
-- Rate limiting and bot protection
-- EmailJS integration for email delivery
-- Multiple contact methods
-
-### Components
-- **Navbar**: Responsive navigation with mobile menu
-- **Footer**: Site-wide footer with social links and contact info
-
-## Styling
-
-The application uses CSS custom properties (CSS variables) for consistent theming:
-
-- Primary color: #6366f1 (Indigo)
-- Background: #0f0f23 (Dark blue)
-- Surface: #1a1a2e (Dark gray)
-- Text: #ffffff (White) and #a1a1aa (Gray)
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-
-## Testing
-
-Run the test suite:
-
-```bash
-npm run test
-```
-
-Run tests with UI:
-
-```bash
-npm run test:ui
-```
-
-Generate coverage report:
-
-```bash
-npm run test:coverage
-```
-
-## Deployment
-
-Production uses a Vercel-compatible serverless deployment because checkout, contact delivery, durable rate limiting, and Stripe fulfillment require `/api` functions. See [DEPLOYMENT.md](../docs/DEPLOYMENT.md).
-
-## Documentation
-
-- [ENV_VARIABLES.md](./ENV_VARIABLES.md) - Environment variable configuration
-- [QUICKSTART.md](../docs/QUICKSTART.md) - Quick start guide
-- [DEPLOYMENT.md](../docs/DEPLOYMENT.md) - Deployment instructions
-- [TEST_COVERAGE.md](../docs/TEST_COVERAGE.md) - Testing documentation
-
-## Future Enhancements
-
-- Add animations with Framer Motion
-- Implement dark/light theme toggle
-- Add blog/news section
-- Integrate with backend API
-- Add user authentication
-- Implement shopping cart functionality
+- [`../docs/DEPLOYMENT.md`](../docs/DEPLOYMENT.md) — Vercel configuration, verification, monitoring, and rollback
+- [`../docs/COMMERCIAL_LAUNCH_CHECKLIST.md`](../docs/COMMERCIAL_LAUNCH_CHECKLIST.md) — launch blockers and evidence requirements
+- [`../api/README.md`](../api/README.md) — serverless endpoint contracts and server variables

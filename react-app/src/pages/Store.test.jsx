@@ -54,6 +54,15 @@ describe('Store', () => {
 		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toHaveLength(1);
 	});
 
+	it('starts the buy-now path with a server-authoritative cart item', async () => {
+		const user = userEvent.setup();
+		renderStore();
+		await user.click(screen.getAllByRole('button', { name: /buy now/i })[0]);
+		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([
+			expect.objectContaining({ id: 'windows-10', quantity: 1 }),
+		]);
+	});
+
 	it('clears the cart only after the server verifies a paid session', async () => {
 		localStorage.setItem('softhe_cart', JSON.stringify([{ id: 'windows-10', quantity: 1 }]));
 		verifyCheckoutSession.mockResolvedValue({
@@ -82,5 +91,15 @@ describe('Store', () => {
 
 		expect(await screen.findByText(/payment is still processing/i)).toBeInTheDocument();
 		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([{ id: 'windows-10', quantity: 1 }]);
+	});
+
+	it('shows safe verification errors for missing and rejected sessions', async () => {
+		const firstRender = renderStore('/store?checkout=success');
+		expect(await screen.findByText(/could not verify this checkout/i)).toBeInTheDocument();
+		firstRender.unmount();
+
+		verifyCheckoutSession.mockRejectedValue(new Error('Verification service unavailable.'));
+		renderStore('/store?checkout=success&session_id=cs_test_12345678');
+		expect(await screen.findByText(/Verification service unavailable/i)).toBeInTheDocument();
 	});
 });

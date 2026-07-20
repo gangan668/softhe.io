@@ -14,6 +14,7 @@ function Checkout() {
 	const [isStartingCheckout, setIsStartingCheckout] = useState(false);
 	const [checkoutError, setCheckoutError] = useState('');
 	const [termsAccepted, setTermsAccepted] = useState(false);
+	const [earlyPerformanceAccepted, setEarlyPerformanceAccepted] = useState(false);
 
 	useEffect(() => {
 		// Redirect to store if cart is empty
@@ -37,7 +38,11 @@ function Checkout() {
 		});
 
 		try {
-			const { url } = await createCheckoutSession(cart);
+			const { url } = await createCheckoutSession(cart, {
+				termsAccepted,
+				earlyPerformanceRequested: earlyPerformanceAccepted,
+				withdrawalAcknowledged: earlyPerformanceAccepted,
+			});
 			window.location.assign(url);
 		} catch (error) {
 			setCheckoutError(error.message);
@@ -175,8 +180,8 @@ function Checkout() {
 										</div>
 									)}
 
-									<div className="summary-row total">
-										<span>Total</span>
+								<div className="summary-row total">
+										<span>Total (EUR, VAT treatment shown on receipt)</span>
 										<span>€{total.toFixed(2)}</span>
 									</div>
 								</div>
@@ -194,10 +199,25 @@ function Checkout() {
 									</span>
 								</label>
 
+								<label className="checkout-consent">
+									<input
+										type="checkbox"
+										checked={earlyPerformanceAccepted}
+										onChange={(event) => setEarlyPerformanceAccepted(event.target.checked)}
+										disabled={!commerceEnabled || isStartingCheckout}
+									/>
+									<span>
+										I expressly request digital delivery or service preparation to begin before the
+										14-day withdrawal period ends, and acknowledge that the right of withdrawal can
+										be reduced or lost after delivery or full performance. I have reviewed the{' '}
+										<Link to="/withdrawal">withdrawal information</Link>.
+									</span>
+								</label>
+
 								<button
 									className="btn btn-primary btn-checkout-full"
 									onClick={handleCheckout}
-									disabled={isStartingCheckout || !commerceEnabled || !termsAccepted}
+									disabled={isStartingCheckout || !commerceEnabled || !termsAccepted || !earlyPerformanceAccepted}
 								>
 									<i className={isStartingCheckout ? 'fas fa-spinner fa-spin' : 'fas fa-lock'}></i>
 									{!commerceEnabled ? 'Checkout not yet active' : isStartingCheckout ? 'Opening secure checkout...' : 'Pay Securely with Stripe'}
@@ -221,7 +241,7 @@ function Checkout() {
 									</div>
 									<div className="feature">
 										<i className="fas fa-undo"></i>
-										<span>14-Day Refund Window</span>
+										<span>Withdrawal and refund information</span>
 									</div>
 								</div>
 
@@ -258,7 +278,7 @@ function Checkout() {
 								<div className="trust-badge">
 									<i className="fas fa-check-circle"></i>
 									<h4>Clear Refund Window</h4>
-									<p>14-day refund policy documented in the FAQ</p>
+									<p>Withdrawal, complaint, and refund information remains available after purchase</p>
 								</div>
 							</div>
 						</div>

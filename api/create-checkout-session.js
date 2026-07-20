@@ -1,8 +1,14 @@
+const { assertCommerceConfiguration } = require('./_lib/config');
+const { fetchWithTimeout } = require('./_lib/fetch');
+
 const PRODUCTS = {
 	'windows-10': { name: 'Custom Windows 10 ISO', unitAmount: 6500 },
 	'windows-11': { name: 'Custom Windows 11 ISO', unitAmount: 7500 },
 	'bios-optimization': { name: 'BIOS Optimization Service', unitAmount: 5000 },
 };
+
+const TERMS_VERSION = '2026-07-20';
+const WITHDRAWAL_NOTICE_VERSION = '2026-07-20';
 
 const getDiscountRate = (itemCount) => (itemCount >= 3 ? 0.1 : itemCount >= 2 ? 0.05 : 0);
 
@@ -51,7 +57,29 @@ const isStripeCheckoutUrl = (value) => {
 	}
 };
 
-const createStripeForm = (items, origin) => {
+const validateLegalAcceptance = (legalAcceptance = {}) => {
+	if (legalAcceptance.termsAccepted !== true) {
+		throw new Error('Terms of Service must be accepted');
+	}
+	if (legalAcceptance.earlyPerformanceRequested !== true || legalAcceptance.withdrawalAcknowledged !== true) {
+		throw new Error('Early delivery and withdrawal information must be acknowledged');
+	}
+	return {
+		termsAccepted: true,
+		earlyPerformanceRequested: true,
+		withdrawalAcknowledged: true,
+	};
+};
+
+const getVatStatus = () => {
+	const vatStatus = process.env.VAT_STATUS;
+	if (!['registered', 'not-registered', 'exempt'].includes(vatStatus)) {
+		throw new Error('VAT status is not configured');
+	}
+	return vatStatus;
+};
+
+const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), vatStatus = 'not-registered') => {
 	const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 	const discountRate = getDiscountRate(items.length);
 	const form = new URLSearchParams();
@@ -61,6 +89,8 @@ const createStripeForm = (items, origin) => {
 	form.append('allow_promotion_codes', 'true');
 	form.append('billing_address_collection', 'auto');
 	form.append('invoice_creation[enabled]', 'true');
+	form.append('customer_creation', 'always');
+	if (vatStatus === 'registered') form.append('automatic_tax[enabled]', 'true');
 	form.append('metadata[item_count]', String(itemCount));
 	form.append('metadata[product_count]', String(items.length));
 	form.append('metadata[bundle_discount_percent]', String(discountRate * 100));
@@ -68,6 +98,13 @@ const createStripeForm = (items, origin) => {
 	// it in the signed webhook event, making this the authoritative fulfillment list.
 	form.append('metadata[order_schema]', '1');
 	form.append('metadata[order_items]', JSON.stringify(items));
+	form.append('metadata[terms_version]', TERMS_VERSION);
+	form.append('metadata[withdrawal_notice_version]', WITHDRAWAL_NOTICE_VERSION);
+	form.append('metadata[terms_accepted]', 'true');
+	form.append('metadata[early_performance_requested]', 'true');
+	form.append('metadata[withdrawal_acknowledged]', 'true');
+	form.append('metadata[legal_acceptance_recorded_at]', acceptedAt);
+	form.append('metadata[vat_status]', vatStatus);
 
 	items.forEach((item, index) => {
 		const product = PRODUCTS[item.id];
@@ -75,6 +112,7 @@ const createStripeForm = (items, origin) => {
 		form.append(`line_items[${index}][quantity]`, String(item.quantity));
 		form.append(`line_items[${index}][price_data][currency]`, 'eur');
 		form.append(`line_items[${index}][price_data][unit_amount]`, String(discountedUnitAmount));
+		if (vatStatus === 'registered') form.append(`line_items[${index}][price_data][tax_behavior]`, 'inclusive');
 		form.append(`line_items[${index}][price_data][product_data][name]`, product.name);
 		form.append(`line_items[${index}][price_data][product_data][metadata][product_id]`, item.id);
 	});
@@ -91,10 +129,16 @@ async function createCheckoutSession(req, res) {
 	if (!process.env.STRIPE_SECRET_KEY) {
 		return res.status(503).json({ error: 'Stripe checkout is not configured' });
 	}
+	try {
+		assertCommerceConfiguration();
+	} catch (error) {
+		return res.status(503).json({ error: error.message });
+	}
 
 	let items;
 	try {
 		items = normalizeItems(req.body?.items);
+		validateLegalAcceptance(req.body?.legalAcceptance);
 	} catch (error) {
 		return res.status(400).json({ error: error.message });
 	}
@@ -102,12 +146,12 @@ async function createCheckoutSession(req, res) {
 	let form;
 	let discountRate;
 	try {
-		({ form, discountRate } = createStripeForm(items, getPublicOrigin()));
+		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), new Date().toISOString(), getVatStatus()));
 	} catch (error) {
 		return res.status(503).json({ error: error.message });
 	}
 	try {
-		const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+		const response = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
 			method: 'POST',
 			headers: {
 				Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
@@ -118,19 +162,29 @@ async function createCheckoutSession(req, res) {
 
 		const data = await response.json();
 		if (!response.ok || !isStripeCheckoutUrl(data.url)) {
-			return res.status(502).json({ error: data.error?.message || 'Stripe checkout failed' });
+			console.error('checkout_session_creation_failed', {
+				status: response.status,
+				type: data.error?.type || null,
+				code: data.error?.code || null,
+			});
+			return res.status(502).json({ error: 'Checkout could not be started. Please try again.' });
 		}
 
 		return res.status(200).json({ url: data.url, id: data.id, discountRate });
-	} catch {
+	} catch (error) {
+		console.error('checkout_session_creation_failed', { status: null, message: error.message });
 		return res.status(502).json({ error: 'Unable to reach Stripe. Please try again.' });
 	}
 }
 
 module.exports = createCheckoutSession;
 module.exports.PRODUCTS = PRODUCTS;
+module.exports.TERMS_VERSION = TERMS_VERSION;
+module.exports.WITHDRAWAL_NOTICE_VERSION = WITHDRAWAL_NOTICE_VERSION;
 module.exports.getDiscountRate = getDiscountRate;
 module.exports.normalizeItems = normalizeItems;
 module.exports.createStripeForm = createStripeForm;
 module.exports.getPublicOrigin = getPublicOrigin;
+module.exports.getVatStatus = getVatStatus;
 module.exports.isStripeCheckoutUrl = isStripeCheckoutUrl;
+module.exports.validateLegalAcceptance = validateLegalAcceptance;

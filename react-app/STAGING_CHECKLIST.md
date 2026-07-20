@@ -1,21 +1,30 @@
-# Staging Checklist
+# Preview promotion checklist
 
-Use this checklist before promoting a build to production.
+Use the Vercel Preview deployment for every item. A local build is useful evidence but is not a substitute for validating the deployed serverless environment.
 
 ## Automated gates
 
-- GitHub Actions CI passes lint, unit tests, and build.
-- E2E Smoke Tests pass on desktop and mobile Chromium.
-- Staging Build Artifact is generated from the target branch.
+- [ ] Production dependency audit reports zero high-severity vulnerabilities.
+- [ ] Lint and the ≥80% unit-coverage gate pass.
+- [ ] Strict production build and initial asset budget pass.
+- [ ] Isolated desktop/mobile Playwright tests pass and confirm the Softhe.io marker.
+- [ ] Production smoke passes against Preview, including `/api/health`, security headers, route metadata, withdrawal, and a true 404.
 
-## Manual gates
+## Transactional gates
 
-- Open the staging artifact or staging URL and verify navigation, mobile menu, cart, checkout, contact, FAQ, guides, and 404 fallback.
-- Confirm the Stripe payment links open the expected products.
-- Confirm bundle checkout language still says manual invoicing unless the serverless endpoint is deployed.
-- Confirm EmailJS environment variables are set for the staging environment.
-- Confirm analytics consent behavior before checking GA events.
+- [ ] Contact delivery, rate limiting, spam handling, and failure messages are verified.
+- [ ] A withdrawal request creates an Upstash record and sends both timestamped customer and operator messages.
+- [ ] A Stripe test order records consent metadata and reaches the real fulfillment receiver.
+- [ ] Asynchronous payment, duplicate webhook, email failure, and fulfillment retry behavior are verified.
+- [ ] The order confirmation contains items, total, VAT treatment, seller identity, terms, withdrawal instructions, support, and fulfillment state.
+
+## Manual review
+
+- [ ] Legal identity, VAT presentation, prices, delivery timing, compatibility, complaints, and withdrawal language match counsel-approved values.
+- [ ] Home, store, checkout, contact, withdrawal, legal, benchmark, cart, menu, cookie dialog, guides, and 404 pages are reviewed at 320, 390, 768, 1280, and 1440 pixels.
+- [ ] Keyboard navigation, focus restoration, browser console, network failures, and error ingestion are reviewed.
+- [ ] Benchmark configuration identifies the exact setup, at least three repeated runs, median aggregation, raw evidence, FPS, and 1% lows.
 
 ## Promotion decision
 
-Promote only after the build artifact and manual checks match the intended release scope.
+Keep `VITE_COMMERCE_ENABLED=false` until every commercial launch blocker in `../docs/COMMERCIAL_LAUNCH_CHECKLIST.md` has evidence. Record the last known-good Vercel deployment and DNS rollback target before promotion.

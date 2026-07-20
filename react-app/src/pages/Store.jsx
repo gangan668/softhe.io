@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { absoluteUrl } from '../config/site';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
@@ -126,7 +127,7 @@ function Store() {
 								price: product.price,
 								priceCurrency: "EUR",
 								availability: "https://schema.org/InStock",
-								url: `https://softhe.io/store#${product.id}`,
+								url: `${absoluteUrl('/store')}#${product.id}`,
 							},
 						},
 					})),
@@ -137,7 +138,8 @@ function Store() {
 					<div className="checkout-result checkout-result-pending" role="status">
 						<div className="container">
 							<strong>Online checkout is being prepared</strong>
-							<span>Products remain available to review. Contact support before ordering while secure checkout is being activated.</span>
+							<span>Products remain available to review while secure checkout is being activated.</span>
+							<Link to="/contact" className="status-contact-link">Ask about an order</Link>
 						</div>
 					</div>
 				)}
@@ -173,8 +175,8 @@ function Store() {
 									<span>Secure hosted checkout</span>
 								</div>
 								<div>
-									<strong>14 days</strong>
-									<span>Refund window in FAQ</span>
+									<strong>Withdrawal</strong>
+									<span>Online request available</span>
 								</div>
 								<div>
 									<strong>Support</strong>
@@ -261,6 +263,8 @@ function Store() {
 											))}
 										</ul>
 										<div className="product-actions">
+											{commerceEnabled ? (
+												<>
 											<button
 												onClick={() => handleAddToCart(product)}
 												className={`btn ${addedToCart === product.id ? 'btn-success' : 'btn-secondary'}`}
@@ -280,11 +284,14 @@ function Store() {
 											<button
 												onClick={() => handleBuyNow(product)}
 												className="btn btn-primary"
-												disabled={!commerceEnabled}
 											>
 												<i className="fas fa-bolt"></i>
-												{commerceEnabled ? 'Buy Now' : 'Checkout coming soon'}
+												Buy Now
 											</button>
+												</>
+											) : (
+												<span className="product-unavailable" role="status">Ordering temporarily unavailable</span>
+											)}
 										</div>
 									</div>
 								</div>

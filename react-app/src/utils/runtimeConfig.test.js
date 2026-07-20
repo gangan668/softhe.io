@@ -29,12 +29,30 @@ describe('runtime production configuration', () => {
 			MODE: 'production',
 			VITE_COMMERCE_ENABLED: 'true',
 			VITE_CONTACT_FORM_ENABLED: 'true',
-			VITE_LEGAL_NAME: 'Softhe GmbH',
-			VITE_LEGAL_ADDRESS: 'Example Street 1',
+			VITE_LEGAL_NAME: 'Softhe AB',
+			VITE_LEGAL_ADDRESS: 'Example Street 1, Stockholm, Sweden',
+			VITE_BUSINESS_REGISTRATION_ID: '000000-0000',
+			VITE_LEGAL_JURISDICTION: 'Sweden',
+			VITE_VAT_STATUS: 'registered',
+			VITE_VAT_ID: 'SE000000000001',
+			VITE_SUPPORT_EMAIL: 'support@example.com',
 		})).toEqual({
 			commerceEnabled: true,
 			contactFormEnabled: true,
 			legalIdentityConfigured: true,
+		});
+	});
+
+	it('does not enable production data collection or commerce without complete legal identity', () => {
+		expect(readRuntimeConfig({
+			MODE: 'production',
+			VITE_COMMERCE_ENABLED: 'true',
+			VITE_CONTACT_FORM_ENABLED: 'true',
+			VITE_LEGAL_NAME: 'Incomplete operator',
+		})).toEqual({
+			commerceEnabled: false,
+			contactFormEnabled: false,
+			legalIdentityConfigured: false,
 		});
 	});
 

@@ -86,4 +86,9 @@ export const routeMetadata = [
 		title: 'Legal Notice | Softhe.io',
 		description: 'Operator and contact information for the Softhe.io website and services.',
 	},
+	{
+		path: '/withdrawal',
+		title: 'Online Withdrawal Request | Softhe.io',
+		description: 'Submit a withdrawal request for an eligible Softhe.io distance contract and receive a timestamped acknowledgement.',
+	},
 ];

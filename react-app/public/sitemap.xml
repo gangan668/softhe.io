@@ -51,4 +51,5 @@
   </url>
   <url><loc>https://softhe.io/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://softhe.io/legal-notice</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://softhe.io/withdrawal</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
 </urlset>

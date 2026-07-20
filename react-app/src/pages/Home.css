@@ -209,9 +209,7 @@
 
 .hero-screenshot {
 	width: 100%;
-	aspect-ratio: 16 / 9;
-	object-fit: contain;
-	background: #2b2d31;
+	height: auto;
 	border-radius: var(--radius-md);
 	border: 1px solid var(--border-color);
 	display: block;

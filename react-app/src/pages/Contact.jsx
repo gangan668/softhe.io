@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useRateLimit from "../hooks/useRateLimit";
 import SEO from '../components/SEO';
+import { siteConfig } from '../config/site';
 import { trackFormSubmission } from '../utils/analytics';
 import { submitContactForm } from '../utils/contact';
 import { contactFormEnabled } from '../utils/runtimeConfig';
@@ -100,7 +101,7 @@ function Contact() {
 		if (!contactFormEnabled) {
 			setSubmitStatus({
 				type: "error",
-				message: "The web form is not active yet. Please email support@softhe.io instead.",
+				message: `The web form is not active yet. Please email ${siteConfig.supportEmail} instead.`,
 			});
 			return;
 		}
@@ -162,7 +163,7 @@ function Contact() {
 			console.error("Form submission error:", error);
 			setSubmitStatus({
 				type: "error",
-				message: error.message || "An error occurred. Please contact support@softhe.io",
+				message: error.message || `An error occurred. Please contact ${siteConfig.supportEmail}`,
 			});
 		} finally {
 			setIsSubmitting(false);
@@ -213,10 +214,10 @@ function Contact() {
 												inquiries
 											</p>
 											<a
-												href="mailto:support@softhe.io"
+											href={`mailto:${siteConfig.supportEmail}`}
 												className="contact-link"
 											>
-												support@softhe.io
+											{siteConfig.supportEmail}
 											</a>
 											<span className="response-time">
 												Response times vary with request volume
@@ -234,7 +235,7 @@ function Contact() {
 												Real-time chat and community support
 											</p>
 											<a
-												href="https://discord.com/users/softhecs"
+											href={siteConfig.social.discord}
 												className="contact-link"
 												target="_blank"
 												rel="noreferrer"
@@ -268,13 +269,6 @@ function Contact() {
 										Have a specific question? Fill out the form
 										below and we'll get back to you quickly.
 									</p>
-									{!contactFormEnabled && (
-										<div className="rate-limit-warning" role="status">
-											<i className="fas fa-circle-info" aria-hidden="true"></i>
-											<div><p>The web form is being activated. Please use <a href="mailto:support@softhe.io">support@softhe.io</a> for now.</p></div>
-										</div>
-									)}
-
 									{/* Rate Limit Warning */}
 									{rateLimit.isBlocked && (
 										<div className="rate-limit-warning" role="alert" aria-live="polite">
@@ -302,6 +296,7 @@ function Contact() {
 											</div>
 										)}
 
+									{contactFormEnabled ? (
 									<form
 										className="contact-form"
 										onSubmit={handleSubmit}
@@ -542,9 +537,7 @@ function Contact() {
 										<button
 											type="submit"
 											className="btn btn-primary form-submit"
-											disabled={
-												isSubmitting || rateLimit.isBlocked || !contactFormEnabled
-											}
+											disabled={isSubmitting || rateLimit.isBlocked}
 										>
 											{isSubmitting ? (
 												<>
@@ -554,17 +547,26 @@ function Contact() {
 											) : (
 												<>
 													<i className="fas fa-paper-plane"></i>
-													{contactFormEnabled ? 'Send Message' : 'Use email support'}
+													Send Message
 												</>
 											)}
 										</button>
 
 										<p className="form-note">
 											<i className="fas fa-lock"></i>
-										Your message is processed by EmailJS and
-										delivered to our support inbox.
+											Your message is processed by EmailJS and
+											delivered to our support inbox.
 										</p>
 									</form>
+									) : (
+										<div className="contact-offline-action">
+											<p>The online form is unavailable until its delivery and privacy checks pass.</p>
+											<a className="btn btn-primary" href={`mailto:${siteConfig.supportEmail}`}>
+												<i className="fas fa-envelope" aria-hidden="true"></i>
+												Email support
+											</a>
+										</div>
+									)}
 								</div>
 							</div>
 						</div>

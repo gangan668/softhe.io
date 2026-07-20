@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { absoluteUrl, siteConfig } from '../config/site';
 import './Home.css';
 
 function Home() {
@@ -11,21 +12,21 @@ function Home() {
 				keywords="pc optimization, gaming optimization, fps boost, custom windows iso, bios optimization, esports performance, competitive gaming, windows optimization, gaming pc tuning"
 				ogTitle="Softhe.io - PC Optimization for Competitive Gaming"
 				ogDescription="Lean Windows builds, BIOS tuning, and benchmark-led optimization services for gaming PCs."
-				ogImage="https://softhe.io/images/cs2-optimized-fps.webp"
+				ogImage={absoluteUrl('/images/cs2-optimized-fps.webp')}
 				structuredData={{
 					"@context": "https://schema.org",
 					"@type": "Organization",
-					name: "Softhe.io",
-					url: "https://softhe.io",
-					logo: "https://softhe.io/images/terminal-solid.svg",
+					name: siteConfig.name,
+					url: siteConfig.url,
+					logo: absoluteUrl('/images/terminal-solid.svg'),
 					sameAs: [
-						"https://x.com/SoftheCS",
-						"https://github.com/Softhe",
-						"https://www.youtube.com/@softhe",
+						siteConfig.social.twitter,
+						siteConfig.social.github,
+						siteConfig.social.youtube,
 					],
 					contactPoint: {
 						"@type": "ContactPoint",
-						email: "support@softhe.io",
+						email: siteConfig.supportEmail,
 						contactType: "Customer Support",
 					},
 				}}
@@ -100,8 +101,10 @@ function Home() {
 									src="/images/cs2-optimized-fps.webp"
 									alt="Counter-Strike 2 optimized FPS benchmark"
 									className="hero-screenshot"
-									width="1024"
-									height="576"
+									width="969"
+									height="226"
+									decoding="async"
+									fetchPriority="high"
 								/>
 							</div>
 							<div className="floating-metric">
@@ -139,9 +142,8 @@ function Home() {
 							<span className="section-kicker">Evidence first</span>
 							<h2>Show the difference before asking people to buy.</h2>
 							<p>
-								The strongest page on the site is the benchmark page. Phase 1 brings that proof
-								into the homepage so visitors immediately see what changed and where the numbers
-								come from.
+								The benchmark page documents the measured comparison so visitors can see what
+								changed, how the result was produced, and which limitations apply.
 							</p>
 							<Link to="/performance" className="text-link">
 								Review full performance data
@@ -158,7 +160,7 @@ function Home() {
 								<strong>932 FPS</strong>
 							</div>
 							<div className="comparison-footnote">
-								Same hardware comparison from the current benchmark screenshots.
+								Results from the documented test configuration; individual systems will vary.
 							</div>
 						</div>
 					</div>

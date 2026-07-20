@@ -29,13 +29,5 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
-      - name: Build
-        run: npm run build
-        env:
-          VITE_APP_URL: https://softhe.io
-          VITE_GA_MEASUREMENT_ID: G-XXXXXXXXXX
-          VITE_COMMERCE_ENABLED: 'true'
-          VITE_CONTACT_FORM_ENABLED: 'true'
-
-      - name: Run browser smoke tests
-        run: npx playwright test
+      - name: Run enabled and fail-closed browser smoke tests
+        run: npm run e2e:all

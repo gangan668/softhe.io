@@ -1,4 +1,6 @@
 import SEO from '../components/SEO';
+import { absoluteUrl } from '../config/site';
+import { benchmarkEvidenceComplete, benchmarkMethodology } from '../data/benchmark';
 import "./Performance.css";
 
 function Performance() {
@@ -10,7 +12,7 @@ function Performance() {
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="Performance Benchmarks - +40% FPS Improvement"
 				ogDescription="Benchmark screenshots showing 670 FPS stock vs 932 FPS optimized in Counter-Strike 2 on the tested setup."
-				ogImage="https://softhe.io/images/cs2-optimized-fps.webp"
+				ogImage={absoluteUrl('/images/cs2-optimized-fps.webp')}
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -71,6 +73,8 @@ function Performance() {
 											className="fps-screenshot"
 											width="1024"
 											height="576"
+											loading="lazy"
+											decoding="async"
 										/>
 										<div className="fps-details">
 											<span>1% Low: 355 FPS</span>
@@ -93,6 +97,8 @@ function Performance() {
 											className="fps-screenshot"
 											width="1024"
 											height="576"
+											loading="lazy"
+											decoding="async"
 										/>
 										<div className="fps-details">
 											<span>1% Low: 498 FPS</span>
@@ -138,6 +144,8 @@ function Performance() {
 											className="fps-screenshot"
 											width="1024"
 											height="768"
+											loading="lazy"
+											decoding="async"
 										/>
 										<div className="fps-details">
 											<span>RAM: 2.5 GB</span>
@@ -161,6 +169,8 @@ function Performance() {
 											className="fps-screenshot"
 											width="1024"
 											height="768"
+											loading="lazy"
+											decoding="async"
 										/>
 										<div className="fps-details">
 											<span>RAM: 0.8 GB</span>
@@ -253,13 +263,37 @@ function Performance() {
 							</div>
 						</div>
 
+						<section className="benchmark-methodology" aria-labelledby="benchmark-methodology-title">
+							<div className="methodology-heading">
+								<span className="section-kicker">Evidence</span>
+								<h2 id="benchmark-methodology-title">Benchmark methodology</h2>
+								<p>
+									These results describe the documented test configuration only. They are not a
+									guarantee of results on other hardware or workloads.
+								</p>
+							</div>
+							<dl className="methodology-grid">
+								<div><dt>Hardware</dt><dd>{benchmarkMethodology.hardware}</dd></div>
+								<div><dt>Software</dt><dd>{benchmarkMethodology.software}</dd></div>
+								<div><dt>Scenario</dt><dd>{benchmarkMethodology.scenario}</dd></div>
+								<div><dt>Captured</dt><dd>{benchmarkMethodology.captureDate}</dd></div>
+								<div><dt>Repeated runs</dt><dd>{benchmarkMethodology.runCount ?? 'Pending publication'}</dd></div>
+								<div><dt>Summary</dt><dd>{benchmarkMethodology.summaryMethod}</dd></div>
+							</dl>
+							{!benchmarkEvidenceComplete && (
+								<p className="methodology-warning" role="note">
+									Full reproducibility details and raw run evidence have not yet been published.
+									Treat these figures as preliminary product evidence.
+								</p>
+							)}
+						</section>
+
 						<div className="method-note">
 							<i className="fas fa-circle-info" aria-hidden="true"></i>
 							<p>
-								Results depend on hardware, installed software, game settings, drivers, and
-								starting system condition. The current material documents one test set rather
-								than a controlled multi-system study; exact hardware and procedure should be
-								published with the next benchmark update.
+								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
+								workload. Raw screenshots should accompany each published run set, including
+								median FPS and 1% lows from at least three repeated stock and optimized runs.
 							</p>
 						</div>
 					</div>

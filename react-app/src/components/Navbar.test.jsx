@@ -355,6 +355,23 @@ describe("Navbar Component", () => {
 			expect(hamburger).toHaveAttribute("aria-expanded", "false");
 			expect(hamburger).toHaveFocus();
 		});
+
+		it("contains keyboard focus within the open mobile menu", async () => {
+			const user = userEvent.setup();
+			renderNavbar();
+			const hamburger = document.querySelector(".hamburger");
+			await user.click(hamburger);
+
+			expect(document.body.style.overflow).toBe("hidden");
+			expect(screen.getByRole("link", { name: "Home" })).toHaveFocus();
+			await user.keyboard("{Shift>}{Tab}{/Shift}");
+			expect(screen.getByRole("link", { name: "FAQ" })).toHaveFocus();
+			await user.keyboard("{Tab}");
+			expect(screen.getByRole("link", { name: "Home" })).toHaveFocus();
+			await user.keyboard("a");
+			await user.click(hamburger);
+			expect(document.body.style.overflow).toBe("");
+		});
 	});
 
 	describe("Logo Functionality", () => {

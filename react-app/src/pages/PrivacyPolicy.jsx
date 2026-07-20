@@ -1,15 +1,16 @@
 import SEO from '../components/SEO';
+import { absoluteUrl, siteConfig } from '../config/site';
 import './Legal.css';
 
 function PrivacyPolicy() {
-	const legalName = import.meta.env.VITE_LEGAL_NAME || 'Softhe.io';
-	const legalAddress = import.meta.env.VITE_LEGAL_ADDRESS || '';
+	const { name: legalName, address: legalAddress, registrationId } = siteConfig.legal;
+	const { supportEmail } = siteConfig;
 	return (
 		<>
 			<SEO
 				title="Privacy Policy | Softhe.io"
 				description="Privacy information for Softhe.io, including contact forms, analytics consent, Stripe Checkout, and data handling."
-				canonicalUrl="https://softhe.io/privacy-policy"
+				canonicalUrl={absoluteUrl('/privacy-policy')}
 			/>
 			<div className="legal-page">
 				<section className="page-header">
@@ -24,7 +25,8 @@ function PrivacyPolicy() {
 							<p className="legal-revision">Last updated: 20 July 2026</p>
 							<section>
 								<h2>Controller</h2>
-								<p>{legalName} is the controller for information processed through this website. Contact: <a href="mailto:support@softhe.io">support@softhe.io</a>.</p>
+								<p>{legalName} is the controller for information processed through this website. Contact: <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.</p>
+								{registrationId && <p>Swedish organisation number: {registrationId}.</p>}
 								{legalAddress ? <address>{legalAddress}</address> : <p className="legal-configuration-note">A complete controller address must be configured before commercial production launch.</p>}
 							</section>
 							<section>
@@ -43,6 +45,7 @@ function PrivacyPolicy() {
 									When you use the store, payment is handled through a Stripe-hosted Checkout Session.
 									Softhe.io does not store card numbers in this React application.
 								</p>
+								<p>When you submit the online withdrawal function, we collect the order reference, purchaser email, selected items, optional comments, request time, and a pseudonymous idempotency identifier. Upstash stores the request record and EmailJS sends the acknowledgement and operator notification.</p>
 								<p>
 									If browser error reporting is enabled, technical error details, the affected page URL,
 									timestamp, and limited diagnostic context may be sent to our server. The server uses
@@ -67,13 +70,13 @@ function PrivacyPolicy() {
 								</ul>
 							</section>
 							<section><h2>Recipients and international processing</h2><p>Service providers may include Stripe for payments, EmailJS for contact delivery, Upstash for short-lived rate limiting and webhook state, Vercel for hosting, and Google Analytics when consented. Some providers may process information outside the European Economic Area using an adequacy decision, standard contractual clauses, or another lawful transfer mechanism described in their privacy information.</p></section>
-							<section><h2>Retention</h2><p>Contact messages are retained only as long as needed to respond and maintain an appropriate support record. Order, payment, refund, and accounting records are retained for applicable contractual, tax, and legal periods. Rate-limit entries are short lived; webhook idempotency records are retained only as needed to prevent duplicate fulfillment. Browser error records are retained only as long as needed to diagnose and prevent recurring failures. Analytics retention follows the configured analytics property.</p></section>
-							<section><h2>Your rights</h2><p>Depending on applicable law, you may request access, correction, deletion, restriction, portability, or objection, and may withdraw consent without affecting earlier lawful processing. You may also complain to the competent data-protection authority. Requests can be sent to the address below; identity verification may be required.</p></section>
+							<section><h2>Retention</h2><p>Contact messages are retained only as long as needed to respond and maintain an appropriate support record. Order, payment, refund, and accounting records are retained for applicable contractual, tax, and legal periods. Withdrawal records are retained for the configured legal-evidence period, currently up to 400 days unless law or a dispute requires longer. Rate-limit entries are short lived; webhook idempotency records are retained only as needed to prevent duplicate fulfillment. Browser error records are retained only as long as needed to diagnose and prevent recurring failures. Analytics retention follows the configured analytics property.</p></section>
+							<section><h2>Your rights</h2><p>Depending on applicable law, you may request access, correction, deletion, restriction, portability, or objection, and may withdraw consent without affecting earlier lawful processing. You may complain to the <a href="https://www.imy.se/en/" target="_blank" rel="noreferrer">Swedish Authority for Privacy Protection (IMY)</a> or another competent data-protection authority. Requests can be sent to the address below; identity verification may be required.</p></section>
 							<section><h2>Required and optional information</h2><p>Contact and order fields identified as required are needed to answer a request or deliver a purchase. Optional analytics can be declined without losing access to the site or store.</p></section>
 							<section>
 								<h2>Contact</h2>
 								<p>
-									For privacy questions, email <a href="mailto:support@softhe.io">support@softhe.io</a>.
+									For privacy questions, email <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.
 								</p>
 							</section>
 						</div>

@@ -12,8 +12,11 @@
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
-		"predeploy": "vite build && node scripts/postbuild.js",
-		"smoke:production": "node scripts/production-smoke.js"
+		"e2e": "node scripts/run-e2e.js enabled",
+		"e2e:disabled": "node scripts/run-e2e.js disabled",
+		"e2e:all": "npm run e2e && npm run e2e:disabled",
+		"smoke:production": "node scripts/production-smoke.js",
+		"budget": "node scripts/check-performance-budget.js"
 	},
 	"dependencies": {
 		"react": "^19.1.1",
@@ -26,8 +29,6 @@
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.1.0",
 		"@testing-library/user-event": "^14.5.2",
-		"@types/react": "^19.1.16",
-		"@types/react-dom": "^19.1.9",
 		"@vitejs/plugin-react": "^5.0.4",
 		"@vitest/coverage-v8": "^4.0.10",
 		"@vitest/ui": "^4.0.10",

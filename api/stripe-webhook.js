@@ -1,6 +1,9 @@
 const crypto = require('node:crypto');
 const { claimKey, deleteKey, setKey } = require('./_lib/redis');
-const { normalizeItems } = require('./create-checkout-session');
+const { getPublicOrigin, normalizeItems, PRODUCTS } = require('./create-checkout-session');
+const { sendEmailTemplate } = require('./_lib/emailjs');
+const { assertCommerceConfiguration } = require('./_lib/config');
+const { fetchWithTimeout } = require('./_lib/fetch');
 
 const MAX_WEBHOOK_BYTES = 1024 * 1024;
 
@@ -76,7 +79,7 @@ const deliverFulfillment = async (event, session) => {
 		metadata: session.metadata || {},
 	});
 	const signature = crypto.createHmac('sha256', secret).update(body).digest('hex');
-	const response = await fetch(url, {
+	const response = await fetchWithTimeout(url, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
@@ -88,6 +91,29 @@ const deliverFulfillment = async (event, session) => {
 	if (!response.ok) throw new Error(`Fulfillment delivery failed with status ${response.status}`);
 };
 
+const sendOrderConfirmation = async (session) => {
+	assertCommerceConfiguration();
+	const items = getOrderItems(session);
+	const customerEmail = session.customer_details?.email;
+	if (!customerEmail) throw new Error('Paid checkout is missing a customer email');
+	const origin = getPublicOrigin();
+	await sendEmailTemplate(process.env.EMAILJS_ORDER_TEMPLATE_ID, {
+		to_email: customerEmail,
+		order_reference: session.id,
+		items: items.map((item) => `${PRODUCTS[item.id].name} × ${item.quantity}`).join(', '),
+		amount_total: typeof session.amount_total === 'number' ? (session.amount_total / 100).toFixed(2) : '',
+		currency: String(session.currency || 'eur').toUpperCase(),
+		vat_treatment: session.metadata?.vat_status || process.env.VAT_STATUS || 'not stated',
+		vat_id: process.env.VAT_ID || 'Not applicable',
+		terms_url: `${origin}/terms`,
+		withdrawal_url: `${origin}/withdrawal`,
+		support_email: process.env.SUPPORT_EMAIL,
+		legal_name: process.env.LEGAL_NAME,
+		business_registration_id: process.env.BUSINESS_REGISTRATION_ID,
+		fulfillment_status: 'Payment confirmed; fulfillment is being prepared',
+	});
+};
+
 const fulfillPaidSession = async (event) => {
 	const session = event.data.object;
 	if (!['paid', 'no_payment_required'].includes(session.payment_status)) return 'payment-pending';
@@ -97,6 +123,7 @@ const fulfillPaidSession = async (event) => {
 
 	try {
 		await deliverFulfillment(event, session);
+		await sendOrderConfirmation(session);
 		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
 		return 'fulfilled';
 	} catch (error) {
@@ -136,7 +163,12 @@ async function stripeWebhook(req, res) {
 			const status = await fulfillPaidSession(event);
 			return res.status(200).json({ received: true, status });
 		} catch (error) {
-			return res.status(503).json({ error: error.message });
+			console.error('stripe_fulfillment_failed', {
+				eventId: event.id || null,
+				sessionId: event.data?.object?.id || null,
+				message: error.message,
+			});
+			return res.status(503).json({ error: 'Fulfillment temporarily unavailable' });
 		}
 	} else if (event.type === 'checkout.session.expired') {
 		console.info('Stripe checkout expired', { sessionId: event.data.object.id });
@@ -153,3 +185,4 @@ module.exports.deliverFulfillment = deliverFulfillment;
 module.exports.fulfillPaidSession = fulfillPaidSession;
 module.exports.getFulfillmentUrl = getFulfillmentUrl;
 module.exports.getOrderItems = getOrderItems;
+module.exports.sendOrderConfirmation = sendOrderConfirmation;

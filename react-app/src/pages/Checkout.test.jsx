@@ -75,13 +75,19 @@ describe('Checkout', () => {
 
 		const button = screen.getByRole('button', { name: /pay securely with stripe/i });
 		await user.click(screen.getByRole('checkbox', { name: /agree to the terms/i }));
+		await user.click(screen.getByRole('checkbox', { name: /request digital delivery or service preparation/i }));
 		await user.click(button);
 
 		expect(await screen.findByRole('alert')).toHaveTextContent('Checkout is temporarily unavailable');
 		expect(button).toBeEnabled();
-		expect(createCheckoutSession).toHaveBeenCalledWith([
-			expect.objectContaining({ id: 'windows-10', quantity: 1 }),
-		]);
+		expect(createCheckoutSession).toHaveBeenCalledWith(
+			[expect.objectContaining({ id: 'windows-10', quantity: 1 })],
+			expect.objectContaining({
+				termsAccepted: true,
+				earlyPerformanceRequested: true,
+				withdrawalAcknowledged: true,
+			}),
+		);
 	});
 
 	it('updates and removes checkout items', async () => {

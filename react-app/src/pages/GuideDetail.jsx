@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { absoluteUrl, siteConfig } from '../config/site';
 import { findGuide } from '../data/guides';
 import './Guides.css';
 
@@ -9,7 +10,7 @@ function GuideDetail() {
 
 	if (!guide) return <Navigate to="/404" replace />;
 
-	const canonicalUrl = `https://softhe.io/guides/${guide.slug}`;
+	const canonicalUrl = absoluteUrl(`/guides/${guide.slug}`);
 	return (
 		<>
 			<SEO
@@ -23,7 +24,7 @@ function GuideDetail() {
 					headline: guide.title,
 					description: guide.description,
 					mainEntityOfPage: canonicalUrl,
-					publisher: { '@type': 'Organization', name: 'Softhe.io', url: 'https://softhe.io' },
+					publisher: { '@type': 'Organization', name: siteConfig.name, url: siteConfig.url },
 				}}
 			/>
 			<article className="guide-detail">

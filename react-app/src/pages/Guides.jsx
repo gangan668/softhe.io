@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { absoluteUrl } from '../config/site';
 import { guides } from '../data/guides';
 import './Guides.css';
 
@@ -19,7 +20,7 @@ function Guides() {
 					itemListElement: guides.map((guide, index) => ({
 						'@type': 'ListItem',
 						position: index + 1,
-						url: `https://softhe.io/guides#${guide.slug}`,
+						url: `${absoluteUrl('/guides')}#${guide.slug}`,
 						name: guide.title,
 					})),
 				}}
