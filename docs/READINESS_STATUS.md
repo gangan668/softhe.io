@@ -41,6 +41,10 @@ Last verified: 2026-07-21 (Europe/Berlin)
 
 - Upstash and EmailJS values are configured for both Vercel Preview and Production. Their
   delivery, retention, and idempotency evidence is still pending.
+- Direct provider tests for the contact, order, withdrawal-acknowledgement, and withdrawal-operator
+  templates returned EmailJS HTTP 403 on 2026-07-21 because account-level API access from
+  non-browser environments is disabled. Enable that EmailJS security setting before rerunning
+  server-origin delivery tests; do not treat template configuration alone as delivery evidence.
 - Stripe, fulfillment, and the real legal identity values documented in `DEPLOYMENT.md` are not configured.
 - GitHub integration must be authorized if automatic pull-request Preview deployments are required.
 - Real Swedish operator identity, VAT status, legal/accounting approval, and final benchmark methodology/evidence are still required.
