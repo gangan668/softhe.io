@@ -35,9 +35,10 @@ Last verified: 2026-07-21 (Europe/Berlin)
   and the fulfillment webhook URL and secret. The sole-trader identifier remains server-side and
   must not be added to a public `VITE_` variable or committed documentation.
 - Automatic GitHub integration is not connected yet. The authenticated `Softhe` GitHub account
-  can push to `gangan668/softhe.io`, but Vercel's GitHub App is installed on the collaborator
-  account rather than the repository owner's account, so Vercel cannot attach that repository.
-  The generated Preview URL is also protected by Vercel authentication.
+  can push to `gangan668/softhe.io`, and the Vercel GitHub App is now installed on the owner
+  account with access restricted to `softhe.io`. However, the Vercel user remains linked to the
+  `Softhe` GitHub sign-in identity, so both the dashboard and CLI still reject attaching the
+  owner namespace. The generated Preview URL is also protected by Vercel authentication.
 - The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29802155580` passed the page, header, and true-404 checks, confirmed the expected candidate commit and fingerprint in the health response, then failed on the intentional HTTP 503 configuration gate.
 - The scheduled smoke also pins the candidate source commit and public release fingerprint; once
   health is ready, an unexpected alias movement will fail monitoring.
@@ -51,8 +52,9 @@ Last verified: 2026-07-21 (Europe/Berlin)
   credential or treat template configuration alone as delivery evidence without explicit approval
   and a successful server-origin delivery test.
 - Stripe and fulfillment values documented in `DEPLOYMENT.md` are not configured.
-- The Vercel GitHub App must be installed by `gangan668`, or an explicitly approved token-based
-  GitHub Actions deployment must be configured, if automatic pull-request Preview deployments are required.
+- The Vercel GitHub sign-in identity must be switched from `Softhe` to `gangan668`, or an
+  explicitly approved token-based GitHub Actions deployment must be configured, if automatic
+  pull-request Preview deployments are required.
 - Real Swedish operator identity, VAT status, legal/accounting approval, and final benchmark methodology/evidence are still required.
 - EmailJS, Upstash, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and monitoring alerts require end-to-end evidence in their provider systems.
 - DNS promotion, live-commerce enablement, and rollback rehearsal must wait until every item in `COMMERCIAL_LAUNCH_CHECKLIST.md` is evidenced.
