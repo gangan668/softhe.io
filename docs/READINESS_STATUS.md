@@ -25,19 +25,23 @@ Last verified: 2026-07-21 (Europe/Berlin)
 ## Vercel release candidate
 
 - The `softhe-io` Vercel project and a release-candidate deployment now exist; the stable project domain is `https://softhe-io.vercel.app` and the custom production domain has not moved.
-- The current candidate is deployment `dpl_2wivqTZS8j2YnPe7GiJsJGM96fRb`, sourced from
-  commit `75e1ff40cdcc86172a597db182d1ca1941b07a10`. `/api/health` reports the matching
+- The current candidate is deployment `dpl_H2dX91FeyYMUJpEdxnrbesTUNVkV`, sourced from
+  commit `e44fbc79e5f3ba47b17e21e0259552cf4cc3a15c`. `/api/health` reports the matching
   public release fingerprint, preventing the project alias from silently changing candidate identity.
 - Vercel serves the application and serverless routes with the configured security headers, while contact and commerce remain disabled.
-- `/api/health` correctly returns HTTP 503 `configuration-required` until the real legal identity and provider configuration are supplied.
+- `/api/health` correctly returns HTTP 503 `configuration-required`. Upstash storage now passes,
+  and the remaining missing values are the four legal-identity/VAT fields, two Stripe values,
+  and the fulfillment webhook URL and secret.
 - Automatic GitHub integration is not connected yet, and the generated Preview URL is protected by Vercel authentication.
-- The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29783624440` passed the page, header, and true-404 checks, confirmed the expected candidate commit and fingerprint in the health response, then failed on the intentional HTTP 503 configuration gate.
+- The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29790241297` passed the page, header, and true-404 checks, confirmed the expected candidate commit and fingerprint in the health response, then failed on the intentional HTTP 503 configuration gate.
 - The scheduled smoke also pins the candidate source commit and public release fingerprint; once
   health is ready, an unexpected alias movement will fail monitoring.
 
 ## External launch blockers
 
-- The checkout is linked to the Vercel project, but the real legal identity and transactional-provider values documented in `DEPLOYMENT.md` are not configured.
+- Upstash and EmailJS values are configured for both Vercel Preview and Production. Their
+  delivery, retention, and idempotency evidence is still pending.
+- Stripe, fulfillment, and the real legal identity values documented in `DEPLOYMENT.md` are not configured.
 - GitHub integration must be authorized if automatic pull-request Preview deployments are required.
 - Real Swedish operator identity, VAT status, legal/accounting approval, and final benchmark methodology/evidence are still required.
 - EmailJS, Upstash, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and monitoring alerts require end-to-end evidence in their provider systems.

@@ -1,13 +1,13 @@
 # Production rollback record
 
-Last verified: 2026-07-20 (Europe/Berlin)
+Last verified: 2026-07-21 (Europe/Berlin)
 
 ## Known deployment targets
 
 | Role | Origin or identifier | Evidence |
 | --- | --- | --- |
 | Current public production | `https://softhe.io` on GitHub Pages | Pages run `29711027437`, commit `5417994f898fed04707e4c39b26e2a7eafac8f12` |
-| Vercel release candidate | `https://softhe-io.vercel.app` | Deployment `dpl_2wivqTZS8j2YnPe7GiJsJGM96fRb`; source `75e1ff40cdcc86172a597db182d1ca1941b07a10`; contact and commerce disabled |
+| Vercel release candidate | `https://softhe-io.vercel.app` | Deployment `dpl_H2dX91FeyYMUJpEdxnrbesTUNVkV`; source `e44fbc79e5f3ba47b17e21e0259552cf4cc3a15c`; fingerprint `softhe-20260721011202-e44fbc7-8145c7bf5a3f4700`; contact and commerce disabled |
 
 The custom domain still points to GitHub Pages. Do not change the records below until the
 Vercel health endpoint is ready and the commercial launch checklist is complete.
