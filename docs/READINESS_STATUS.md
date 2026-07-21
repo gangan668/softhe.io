@@ -25,7 +25,7 @@ Last verified: 2026-07-21 (Europe/Berlin)
 ## Vercel release candidate
 
 - The `softhe-io` Vercel project and a release-candidate deployment now exist; the stable project domain is `https://softhe-io.vercel.app` and the custom production domain has not moved.
-- The current candidate is deployment `dpl_GcYxZonCruvCzdFHThER9QxScWsh`, sourced from
+- The current candidate is deployment `dpl_EXmsJm8uNKmexoAXpKtrm5cMMRfg`, sourced from
   commit `30dc920f6ba08145c74aa00573ebfdec02374a46`. `/api/health` reports the matching
   public release fingerprint, preventing the project alias from silently changing candidate identity.
 - Vercel serves the application and serverless routes with the configured security headers, while contact and commerce remain disabled.
@@ -49,15 +49,19 @@ Last verified: 2026-07-21 (Europe/Berlin)
 
 ## External launch blockers
 
-- Upstash and EmailJS values are configured for both Vercel Preview and Production. Their
-  delivery, retention, and idempotency evidence is still pending.
-- EmailJS non-browser API access is enabled, but direct provider tests return HTTP 403 because the
-  account uses strict mode and no private key has been configured in Vercel. Do not copy that
-  credential or treat template configuration alone as delivery evidence without explicit approval
-  and a successful server-origin delivery test.
+- Upstash and EmailJS provider credentials are scoped to Vercel Production. Retention and
+  idempotency evidence is still pending.
+- EmailJS non-browser API access and strict mode are enabled. The EmailJS key pair was rotated,
+  the new private key was stored as a sensitive Production-only Vercel variable, and the previous
+  key was revoked. The Gmail service authorization was also renewed with the explicit send scope.
+  A direct provider request returned HTTP 200, and a server-origin request to the production
+  `/api/contact` route returned HTTP 200 with `delivered: true`. No credential values are stored
+  in the repository or this evidence document.
 - Stripe and fulfillment values documented in `DEPLOYMENT.md` are not configured.
-- Real Swedish operator identity, VAT status, legal/accounting approval, and final benchmark methodology/evidence are still required.
-- EmailJS, Upstash, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and monitoring alerts require end-to-end evidence in their provider systems.
+- The Swedish operator identity and non-VAT status are configured. Legal/accounting approval and
+  final benchmark methodology/evidence are still required.
+- Upstash retention, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and
+  monitoring alerts require end-to-end evidence in their provider systems.
 - DNS promotion, live-commerce enablement, and rollback rehearsal must wait until every item in `COMMERCIAL_LAUNCH_CHECKLIST.md` is evidenced.
 - The production smoke workflow now enforces its app-marker, serverless, and security-header requirements against the Vercel candidate; it will stay red until `/api/health` reports ready.
 - `docs/launch-evidence.json` remains deliberately pending. Its verifier rejects every
@@ -65,4 +69,7 @@ Last verified: 2026-07-21 (Europe/Berlin)
 
 ## Next release action
 
-Populate the Vercel project with verified legal, benchmark, and provider values, enable strict production configuration, and run `npm run smoke:production` with `PRODUCTION_BASE_URL` set to the Vercel origin. Do not move DNS or enable commerce while `/api/health` is unavailable or incomplete.
+Configure and verify the two Stripe values plus the fulfillment webhook URL and secret, then collect
+the remaining legal, benchmark, withdrawal, retention, monitoring, and rollback evidence. Run
+`npm run smoke:production` with `PRODUCTION_BASE_URL` set to the Vercel origin. Do not move DNS or
+enable commerce while `/api/health` remains incomplete.
