@@ -37,7 +37,12 @@ Last verified: 2026-07-21 (Europe/Berlin)
 - Automatic GitHub integration is connected to `gangan668/softhe.io`. The Vercel GitHub App is
   installed on the owner account with access restricted to `softhe.io`, the Vercel GitHub
   sign-in identity is `gangan668`, and both the dashboard and CLI confirm the project link.
+  Commit `81bbafedfd0d0a44232d406c7bf3b05d1fc1a02c` automatically produced Ready Preview
+  deployment `dpl_Ech2JZZLv5qjJgR1A96qcd7pUphs`, proving the Git trigger and source attribution.
   The generated Preview URL remains protected by Vercel authentication.
+- Provider secrets remain scoped to Production. The first Git Preview therefore returns the
+  expected fail-closed HTTP 503 with EmailJS and Upstash listed as missing; Production secrets
+  are not copied into pull-request deployments merely to make Preview health appear ready.
 - The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29802155580` passed the page, header, and true-404 checks, confirmed the expected candidate commit and fingerprint in the health response, then failed on the intentional HTTP 503 configuration gate.
 - The scheduled smoke also pins the candidate source commit and public release fingerprint; once
   health is ready, an unexpected alias movement will fail monitoring.
