@@ -34,7 +34,10 @@ Last verified: 2026-07-21 (Europe/Berlin)
   VAT status is configured as not registered. The remaining missing values are two Stripe values
   and the fulfillment webhook URL and secret. The sole-trader identifier remains server-side and
   must not be added to a public `VITE_` variable or committed documentation.
-- Automatic GitHub integration is not connected yet, and the generated Preview URL is protected by Vercel authentication.
+- Automatic GitHub integration is not connected yet. The authenticated `Softhe` GitHub account
+  can push to `gangan668/softhe.io`, but Vercel's GitHub App is installed on the collaborator
+  account rather than the repository owner's account, so Vercel cannot attach that repository.
+  The generated Preview URL is also protected by Vercel authentication.
 - The scheduled production-smoke variables now target the Vercel project domain with application-marker, security-header, and serverless requirements enabled. Run `29802155580` passed the page, header, and true-404 checks, confirmed the expected candidate commit and fingerprint in the health response, then failed on the intentional HTTP 503 configuration gate.
 - The scheduled smoke also pins the candidate source commit and public release fingerprint; once
   health is ready, an unexpected alias movement will fail monitoring.
@@ -43,12 +46,13 @@ Last verified: 2026-07-21 (Europe/Berlin)
 
 - Upstash and EmailJS values are configured for both Vercel Preview and Production. Their
   delivery, retention, and idempotency evidence is still pending.
-- Direct provider tests for the contact, order, withdrawal-acknowledgement, and withdrawal-operator
-  templates returned EmailJS HTTP 403 on 2026-07-21 because account-level API access from
-  non-browser environments is disabled. Enable that EmailJS security setting before rerunning
-  server-origin delivery tests; do not treat template configuration alone as delivery evidence.
+- EmailJS non-browser API access is enabled, but direct provider tests return HTTP 403 because the
+  account uses strict mode and no private key has been configured in Vercel. Do not copy that
+  credential or treat template configuration alone as delivery evidence without explicit approval
+  and a successful server-origin delivery test.
 - Stripe and fulfillment values documented in `DEPLOYMENT.md` are not configured.
-- GitHub integration must be authorized if automatic pull-request Preview deployments are required.
+- The Vercel GitHub App must be installed by `gangan668`, or an explicitly approved token-based
+  GitHub Actions deployment must be configured, if automatic pull-request Preview deployments are required.
 - Real Swedish operator identity, VAT status, legal/accounting approval, and final benchmark methodology/evidence are still required.
 - EmailJS, Upstash, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and monitoring alerts require end-to-end evidence in their provider systems.
 - DNS promotion, live-commerce enablement, and rollback rehearsal must wait until every item in `COMMERCIAL_LAUNCH_CHECKLIST.md` is evidenced.
