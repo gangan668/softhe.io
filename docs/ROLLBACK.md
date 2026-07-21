@@ -7,7 +7,7 @@ Last verified: 2026-07-21 (Europe/Berlin)
 | Role | Origin or identifier | Evidence |
 | --- | --- | --- |
 | Current public production | `https://softhe.io` on GitHub Pages | Pages run `29711027437`, commit `5417994f898fed04707e4c39b26e2a7eafac8f12` |
-| Vercel release candidate | `https://softhe-io.vercel.app` | Deployment `dpl_GcYxZonCruvCzdFHThER9QxScWsh`; source `30dc920f6ba08145c74aa00573ebfdec02374a46`; fingerprint `softhe-20260721064541-30dc920-69a95053c80247db`; contact and commerce disabled |
+| Vercel release candidate | `https://softhe-io.vercel.app` | Deployment `dpl_EXmsJm8uNKmexoAXpKtrm5cMMRfg`; source `30dc920f6ba08145c74aa00573ebfdec02374a46`; fingerprint `softhe-20260721064541-30dc920-69a95053c80247db`; contact and commerce disabled |
 
 The custom domain still points to GitHub Pages. Do not change the records below until the
 Vercel health endpoint is ready and the commercial launch checklist is complete.

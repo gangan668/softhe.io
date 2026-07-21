@@ -49,19 +49,21 @@ Last verified: 2026-07-21 (Europe/Berlin)
 
 ## External launch blockers
 
-- Upstash and EmailJS provider credentials are scoped to Vercel Production. Retention and
-  idempotency evidence is still pending.
+- Upstash and EmailJS provider credentials are scoped to Vercel Production. Contact rate limiting,
+  withdrawal retention, and withdrawal idempotency have production evidence. Stripe idempotency
+  remains pending until Stripe test credentials are configured.
 - EmailJS non-browser API access and strict mode are enabled. The EmailJS key pair was rotated,
   the new private key was stored as a sensitive Production-only Vercel variable, and the previous
   key was revoked. The Gmail service authorization was also renewed with the explicit send scope.
-  A direct provider request returned HTTP 200, and a server-origin request to the production
-  `/api/contact` route returned HTTP 200 with `delivered: true`. No credential values are stored
-  in the repository or this evidence document.
+  Direct contact and order-template provider requests returned HTTP 200. Server-origin production
+  tests proved contact delivery and its HTTP 429 rate limit, withdrawal acknowledgement plus
+  operator notification, duplicate suppression, and a retained Upstash record with the intended
+  roughly 400-day TTL. No credential values are stored in the repository or evidence documents.
 - Stripe and fulfillment values documented in `DEPLOYMENT.md` are not configured.
 - The Swedish operator identity and non-VAT status are configured. Legal/accounting approval and
   final benchmark methodology/evidence are still required.
-- Upstash retention, Stripe test mode, withdrawal delivery, fulfillment idempotency/retries, and
-  monitoring alerts require end-to-end evidence in their provider systems.
+- Stripe test mode, Stripe idempotency, fulfillment idempotency/retries, and monitoring alerts
+  require end-to-end evidence in their provider systems.
 - DNS promotion, live-commerce enablement, and rollback rehearsal must wait until every item in `COMMERCIAL_LAUNCH_CHECKLIST.md` is evidenced.
 - The production smoke workflow now enforces its app-marker, serverless, and security-header requirements against the Vercel candidate; it will stay red until `/api/health` reports ready.
 - `docs/launch-evidence.json` remains deliberately pending. Its verifier rejects every

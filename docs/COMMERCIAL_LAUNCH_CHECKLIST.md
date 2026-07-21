@@ -13,9 +13,9 @@ rather than the later commit that records its evidence. The strict smoke confirm
 
 - [ ] Vercel Preview has all server and client variables configured and `VITE_REQUIRE_PRODUCTION_CONFIG=true`.
 - [ ] `GET /api/health` returns HTTP 200 with `status: ready` and all checks true.
-- [ ] Registered Swedish operator name, organisation number, postal address, jurisdiction, VAT status, and support contact are configured.
+- [x] Registered Swedish operator name, sole-trader identifier, postal address, jurisdiction, VAT status, and support contact are configured.
 - [ ] Swedish counsel/accounting approved the Legal Notice, Privacy Policy, Terms, withdrawal flow, checkout consent, price/VAT presentation, and receipts.
-- [ ] EmailJS contact, order, withdrawal acknowledgement, and operator-notification templates delivered successfully.
+- [x] EmailJS contact, order, withdrawal acknowledgement, and operator-notification templates delivered successfully.
 - [ ] Upstash contains rate-limit, Stripe idempotency, and withdrawal request records with the intended retention.
 - [ ] Stripe test order completed, including a duplicated webhook and an asynchronous-payment event.
 - [ ] The fulfillment receiver accepted, deduplicated, retried, and reconciled the test order.
