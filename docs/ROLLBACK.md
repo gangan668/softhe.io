@@ -12,6 +12,20 @@ Last verified: 2026-07-21 (Europe/Berlin)
 The custom domain still points to GitHub Pages. Do not change the records below until the
 Vercel health endpoint is ready and the commercial launch checklist is complete.
 
+## Public resolver baseline
+
+Observed at `2026-07-21T02:30:00+02:00` from the release workstation:
+
+- `https://softhe.io/` returned HTTP 200 with `Server: GitHub.com`.
+- A deliberately missing path returned HTTP 404.
+- The apex resolved to the four GitHub Pages IPv4 and four IPv6 addresses recorded below.
+- `www.softhe.io` did not return an A, AAAA, or CNAME answer from the workstation resolver.
+- `https://softhe-io.vercel.app/` returned HTTP 200, the expected Content-Security-Policy,
+  `X-Content-Type-Options: nosniff`, and a true HTTP 404 for the same missing-path probe.
+
+This is a public-resolution baseline, not the required DNS-provider zone export. Capture the
+provider export, TTLs, account/zone identifier, and approver immediately before cutover.
+
 ## Current GitHub Pages DNS target
 
 The apex currently resolves to GitHub Pages:
