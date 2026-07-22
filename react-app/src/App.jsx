@@ -6,6 +6,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import { CartProvider } from './context/CartProvider';
+import { AuthProvider } from './context/AuthProvider';
+import ProtectedRoute from './components/ProtectedRoute';
 import { trackPageView } from './utils/analytics';
 import { initMonitoring } from './utils/monitoring';
 import './App.css';
@@ -25,6 +27,10 @@ const Terms = lazy(() => import('./pages/Terms'));
 const LegalNotice = lazy(() => import('./pages/LegalNotice'));
 const Withdrawal = lazy(() => import('./pages/Withdrawal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Account = lazy(() => import('./pages/Account'));
+const Admin = lazy(() => import('./pages/Admin'));
 
 function RouteTracker() {
 	const location = useLocation();
@@ -59,6 +65,7 @@ function App() {
 	return (
 		<ErrorBoundary>
 			<Router>
+				<AuthProvider>
 				<CartProvider>
 					<RouteTracker />
 					<div className="App">
@@ -82,6 +89,12 @@ function App() {
 									<Route path="/terms" element={<Terms />} />
 									<Route path="/legal-notice" element={<LegalNotice />} />
 									<Route path="/withdrawal" element={<Withdrawal />} />
+									<Route path="/login" element={<AuthPage mode="login" />} />
+									<Route path="/register" element={<AuthPage mode="register" />} />
+									<Route path="/forgot-password" element={<AuthPage mode="forgot" />} />
+									<Route path="/reset-password" element={<ResetPassword />} />
+									<Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+									<Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
 									<Route path="*" element={<NotFound />} />
 									</Routes>
 								</Suspense>
@@ -92,6 +105,7 @@ function App() {
 					</div>
 					<CookieConsent />
 				</CartProvider>
+				</AuthProvider>
 			</Router>
 		</ErrorBoundary>
 	);

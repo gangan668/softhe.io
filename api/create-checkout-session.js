@@ -1,5 +1,6 @@
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
+const { verifyUser } = require('./_lib/supabase');
 
 const PRODUCTS = {
 	'windows-10': { name: 'Custom Windows 10 ISO', unitAmount: 6500 },
@@ -79,7 +80,7 @@ const getVatStatus = () => {
 	return vatStatus;
 };
 
-const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), vatStatus = 'not-registered') => {
+const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), vatStatus = 'not-registered', customer = null) => {
 	const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 	const discountRate = getDiscountRate(items.length);
 	const form = new URLSearchParams();
@@ -90,6 +91,11 @@ const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), 
 	form.append('billing_address_collection', 'auto');
 	form.append('invoice_creation[enabled]', 'true');
 	form.append('customer_creation', 'always');
+	if (customer) {
+		form.append('customer_email', customer.email);
+		form.append('client_reference_id', customer.id);
+		form.append('metadata[portal_user_id]', customer.id);
+	}
 	if (vatStatus === 'registered') form.append('automatic_tax[enabled]', 'true');
 	form.append('metadata[item_count]', String(itemCount));
 	form.append('metadata[product_count]', String(items.length));
@@ -146,7 +152,9 @@ async function createCheckoutSession(req, res) {
 	let form;
 	let discountRate;
 	try {
-		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), new Date().toISOString(), getVatStatus()));
+		const customer = await verifyUser(req, { required: false });
+		if (customer && !customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before linking this order' });
+		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), new Date().toISOString(), getVatStatus(), customer));
 	} catch (error) {
 		return res.status(503).json({ error: error.message });
 	}

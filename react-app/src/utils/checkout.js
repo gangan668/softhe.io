@@ -9,10 +9,10 @@ export const isStripeCheckoutUrl = (value) => {
 	}
 };
 
-export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = fetch) => {
+export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = fetch, accessToken = null) => {
 	const response = await apiFetch('/api/create-checkout-session', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers: { 'Content-Type': 'application/json', ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
 		body: JSON.stringify({
 			items: cart.map(({ id, quantity }) => ({ id, quantity })),
 			legalAcceptance,

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useCart } from "../context/useCart";
+import { useAuth } from "../context/useAuth";
 import "./Navbar.css";
 
 function Navbar({ onCartClick }) {
@@ -9,6 +10,7 @@ function Navbar({ onCartClick }) {
 	const firstLinkRef = useRef(null);
 	const { getCartCount } = useCart();
 	const cartCount = getCartCount();
+	const { user } = useAuth();
 
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
@@ -136,6 +138,7 @@ function Navbar({ onCartClick }) {
 						</NavLink>
 					</li>
 				</ul>
+				<Link className="nav-account-link" to={user ? "/account" : "/login"} onClick={closeMenu}>{user ? "Account" : "Login"}</Link>
 				<button
 					className="cart-icon-btn"
 					onClick={onCartClick}

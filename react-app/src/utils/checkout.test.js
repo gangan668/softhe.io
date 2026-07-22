@@ -31,6 +31,15 @@ describe('createCheckoutSession', () => {
 			.rejects.toThrow('Stripe checkout is not configured');
 	});
 
+	it('links checkout with an authenticated bearer token without adding user ids to the body', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'cs_test', url: 'https://checkout.stripe.com/test' }) });
+		await createCheckoutSession([{ id: 'windows-11', quantity: 1 }], legalAcceptance, fetchImpl, 'verified-session-token');
+		expect(fetchImpl).toHaveBeenCalledWith('/api/create-checkout-session', expect.objectContaining({
+			headers: { 'Content-Type': 'application/json', Authorization: 'Bearer verified-session-token' },
+			body: JSON.stringify({ items: [{ id: 'windows-11', quantity: 1 }], legalAcceptance }),
+		}));
+	});
+
 	it('rejects a successful response that does not point to Stripe Checkout', async () => {
 		const fetchImpl = vi.fn().mockResolvedValue({
 			ok: true,

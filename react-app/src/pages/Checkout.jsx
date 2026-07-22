@@ -5,6 +5,7 @@ import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
 import { createCheckoutSession } from '../utils/checkout';
 import { commerceEnabled } from '../utils/runtimeConfig';
+import { useAuth } from '../context/useAuth';
 import './Checkout.css';
 
 function Checkout() {
@@ -15,6 +16,7 @@ function Checkout() {
 	const [checkoutError, setCheckoutError] = useState('');
 	const [termsAccepted, setTermsAccepted] = useState(false);
 	const [earlyPerformanceAccepted, setEarlyPerformanceAccepted] = useState(false);
+	const { session } = useAuth();
 
 	useEffect(() => {
 		// Redirect to store if cart is empty
@@ -38,11 +40,14 @@ function Checkout() {
 		});
 
 		try {
-			const { url } = await createCheckoutSession(cart, {
+			const legalAcceptance = {
 				termsAccepted,
 				earlyPerformanceRequested: earlyPerformanceAccepted,
 				withdrawalAcknowledged: earlyPerformanceAccepted,
-			});
+			};
+			const { url } = session?.access_token
+				? await createCheckoutSession(cart, legalAcceptance, fetch, session.access_token)
+				: await createCheckoutSession(cart, legalAcceptance);
 			window.location.assign(url);
 		} catch (error) {
 			setCheckoutError(error.message);

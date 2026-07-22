@@ -322,8 +322,8 @@ describe("Navbar Component", () => {
 		it("should have accessible links", () => {
 			renderNavbar();
 			const links = screen.getAllByRole("link");
-			// 7 nav links + 1 logo link = 8 total
-			expect(links.length).toBe(8);
+			// 7 nav links + logo + customer account link
+			expect(links.length).toBe(9);
 		});
 
 		it("should have clickable hamburger button", async () => {

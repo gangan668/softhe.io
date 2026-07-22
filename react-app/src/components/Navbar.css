@@ -21,6 +21,16 @@
 	height: 70px;
 }
 
+.nav-account-link {
+	color: var(--primary-color);
+	text-decoration: none;
+	font-weight: 750;
+	padding: 9px 14px;
+	border: 1px solid rgba(66, 232, 196, 0.3);
+	border-radius: 999px;
+	white-space: nowrap;
+}
+
 .nav-logo a {
 	font-size: 1.5rem;
 	font-weight: 700;
