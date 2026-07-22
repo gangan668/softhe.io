@@ -24,6 +24,68 @@ test.describe('public website smoke tests', () => {
 		await expect(page.getByRole('button', { name: /added to cart/i })).toBeVisible();
 	});
 
+	test('cart quantity, removal, and close controls work', async ({ page }) => {
+		await page.goto('/store');
+		await page.getByRole('button', { name: /add to cart/i }).first().click();
+		await page.getByRole('button', { name: /shopping cart with 1 item/i }).click();
+		const cart = page.getByRole('dialog', { name: /shopping cart/i });
+		await expect(cart).toBeVisible();
+		await cart.getByRole('button', { name: /increase quantity/i }).click();
+		await expect(cart.locator('.quantity-display')).toHaveText('2');
+		await cart.getByRole('button', { name: /decrease quantity/i }).click();
+		await expect(cart.locator('.quantity-display')).toHaveText('1');
+		await cart.getByRole('button', { name: /remove .* from cart/i }).click();
+		await expect(cart.getByText('Your cart is empty')).toBeVisible();
+		await cart.getByRole('button', { name: /close cart/i }).click();
+		await expect(cart).toBeHidden();
+	});
+
+	test('FAQ category, accordion, search, and empty result controls work', async ({ page }) => {
+		await page.goto('/faq');
+		await page.locator('.category-btn').filter({ hasText: 'Technical' }).click();
+		const question = page.getByRole('button', { name: /how much performance improvement/i });
+		await question.click();
+		await expect(question.locator('xpath=..')).toHaveClass(/active/);
+		await page.locator('.category-btn').filter({ hasText: 'All Questions' }).click();
+		await page.getByPlaceholder('Search for answers...').fill('refund');
+		await expect(page.getByRole('button', { name: /refund/i }).first()).toBeVisible();
+		await page.getByPlaceholder('Search for answers...').fill('no-match-phrase-12345');
+		await expect(page.getByRole('heading', { name: 'No results found' })).toBeVisible();
+	});
+
+	test('every header and footer internal destination resolves', async ({ page }) => {
+		const destinations = [
+			['Home', '/', 'header'], ['Services', '/services', 'header'], ['Store', '/store', 'header'],
+			['Performance', '/performance', 'header'], ['Guides', '/guides', 'header'], ['Contact', '/contact', 'header'],
+			['FAQ', '/faq', 'header'], ['Privacy Policy', '/privacy-policy', 'footer'], ['Cookie Policy', '/cookie-policy', 'footer'],
+			['Terms of Service', '/terms', 'footer'], ['Legal Notice', '/legal-notice', 'footer'],
+			['Withdraw from an Order', '/withdrawal', 'footer'],
+		];
+		for (const [name, destination, location] of destinations) {
+			await page.goto('/');
+			if (location === 'header' && (page.viewportSize()?.width ?? 0) < 768) {
+				await page.getByRole('button', { name: /open navigation menu/i }).click();
+			}
+			const container = location === 'header' ? page.locator('nav') : page.locator('footer');
+			const link = container.getByRole('link', { name, exact: true }).first();
+			await link.click();
+			await expect(page).toHaveURL(new RegExp(`${destination === '/' ? '/$' : `${destination}$`}`));
+			await expect(page.locator('h1').first()).toBeVisible();
+		}
+	});
+
+	test('outbound links are HTTPS, mailto, or explicitly local', async ({ page }) => {
+		await page.goto('/');
+		const invalidLinks = await page.locator('a[href]').evaluateAll((links) => links
+			.map((link) => link.getAttribute('href'))
+			.filter((href) => href && !href.startsWith('/') && !href.startsWith('#') && !href.startsWith('https://') && !href.startsWith('mailto:')));
+		expect(invalidLinks).toEqual([]);
+		const externalLinks = page.locator('a[target="_blank"]');
+		for (let index = 0; index < await externalLinks.count(); index += 1) {
+			await expect(externalLinks.nth(index)).toHaveAttribute('rel', /(?:noopener|noreferrer)/);
+		}
+	});
+
 	test('unknown route shows the not found page through SPA fallback', async ({ page }) => {
 		await page.goto('/this-route-does-not-exist');
 		await expect(page.locator('h1').first()).toBeVisible();
@@ -124,5 +186,37 @@ test.describe('public website smoke tests', () => {
 		expect(navbarBox).not.toBeNull();
 		expect(bannerBox).not.toBeNull();
 		expect(bannerBox.y).toBeGreaterThanOrEqual(navbarBox.y + navbarBox.height - 1);
+	});
+});
+
+test.describe('cookie consent controls', () => {
+	test.beforeEach(async ({ page }) => {
+		await page.addInitScript(() => localStorage.removeItem('softhe_analytics_consent'));
+	});
+
+	test('details, accept, persistence, and settings reopening work', async ({ page }) => {
+		await page.goto('/');
+		const dialog = page.getByRole('dialog', { name: /we value your privacy/i });
+		await expect(dialog).toBeVisible();
+		await dialog.getByRole('button', { name: /show cookie details/i }).click();
+		await expect(dialog.getByText('Essential Cookies')).toBeVisible();
+		await dialog.getByRole('button', { name: /accept cookies/i }).click();
+		await expect(dialog).toBeHidden();
+		await expect.poll(() => page.evaluate(() => localStorage.getItem('softhe_analytics_consent'))).toBe('true');
+		await page.reload();
+		await expect(dialog).toBeHidden();
+		await page.getByRole('button', { name: 'Cookie Settings' }).click();
+		await expect(dialog).toBeVisible();
+	});
+
+	test('decline persists and can be changed later', async ({ page }) => {
+		await page.goto('/');
+		const dialog = page.getByRole('dialog', { name: /we value your privacy/i });
+		await dialog.getByRole('button', { name: /decline cookies/i }).click();
+		await expect.poll(() => page.evaluate(() => localStorage.getItem('softhe_analytics_consent'))).toBe('false');
+		await page.reload();
+		await expect(dialog).toBeHidden();
+		await page.getByRole('button', { name: 'Cookie Settings' }).click();
+		await expect(dialog).toBeVisible();
 	});
 });

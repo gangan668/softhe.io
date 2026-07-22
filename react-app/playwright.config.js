@@ -22,7 +22,9 @@ export default defineConfig({
 	reporter: process.env.CI ? [['html'], ['list']] : 'list',
 	use: {
 		baseURL: previewUrl,
-		trace: 'on-first-retry',
+		trace: 'retain-on-failure',
+		screenshot: 'only-on-failure',
+		video: 'retain-on-failure',
 	},
 	webServer: {
 		command: `npm run preview -- --host 127.0.0.1 --port ${previewPort}`,

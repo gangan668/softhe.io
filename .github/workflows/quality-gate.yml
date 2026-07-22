@@ -1,0 +1,56 @@
+name: Main Branch Quality Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: react-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: react-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit high-severity dependencies
+        run: npm audit --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests with coverage
+        run: npm run test:coverage -- --run
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Strict builds and browser tests
+        run: npm run e2e:all
+
+      - name: Asset performance budget
+        run: npm run budget
+
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-evidence
+          path: |
+            react-app/playwright-report/
+            react-app/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
