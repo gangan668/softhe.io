@@ -86,6 +86,9 @@ const deliverFulfillment = async (event, session) => {
 			'Content-Type': 'application/json',
 			'Idempotency-Key': session.id,
 			'X-Softhe-Signature': signature,
+			...(process.env.ORDER_FULFILLMENT_BYPASS_SECRET
+				? { 'x-vercel-protection-bypass': process.env.ORDER_FULFILLMENT_BYPASS_SECRET }
+				: {}),
 		},
 		body,
 	});

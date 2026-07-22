@@ -21,7 +21,7 @@ After deploying the schema and server variables, an allowlisted administrator ca
 
 ## Preview payment receiver
 
-`/api/test-fulfillment` is a non-production test harness for Stripe fulfillment evidence. It returns 404 unless Vercel reports the Preview environment and `FULFILLMENT_TEST_MODE=true`. Configure `ORDER_FULFILLMENT_WEBHOOK_URL` to the Preview endpoint, use the same `ORDER_FULFILLMENT_WEBHOOK_SECRET` as the checkout sender, and set a separate random `FULFILLMENT_TEST_EVIDENCE_TOKEN` for evidence reads.
+`/api/test-fulfillment` is a non-production test harness for Stripe fulfillment evidence. It returns 404 unless Vercel reports the Preview environment and `FULFILLMENT_TEST_MODE=true`. Configure `ORDER_FULFILLMENT_WEBHOOK_URL` to the Preview endpoint, use the same `ORDER_FULFILLMENT_WEBHOOK_SECRET` as the checkout sender, and set a separate random `FULFILLMENT_TEST_EVIDENCE_TOKEN` for evidence reads. When Vercel Deployment Protection is enabled, create a Preview protection-bypass secret and store it server-side as `ORDER_FULFILLMENT_BYPASS_SECRET`; fulfillment requests include it only when configured.
 
 Set `FULFILLMENT_TEST_FAIL_FIRST=true` only for the retry test. The first delivery for each new Checkout Session returns HTTP 503; a later Stripe retry is accepted. Accepted records and attempt counts are stored in Preview Upstash for 30 days by default. The stored record omits customer email. Query a test result with `GET /api/test-fulfillment?session_id=...` and the evidence bearer token. The endpoint is intentionally unavailable in Production even if the feature flag is accidentally copied.
 

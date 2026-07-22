@@ -301,6 +301,7 @@ describe('Stripe fulfillment', () => {
 	});
 
 	it('durably claims and delivers a paid session once', async () => {
+		process.env.ORDER_FULFILLMENT_BYPASS_SECRET = 'preview-bypass-secret';
 		const fetchMock = vi.fn()
 			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
 			.mockResolvedValueOnce(jsonResponse({}, true, 200))
@@ -323,6 +324,7 @@ describe('Stripe fulfillment', () => {
 		expect(fetchMock.mock.calls[1][0]).toBe('https://fulfillment.example/orders');
 		expect(fetchMock.mock.calls[1][1].headers['Idempotency-Key']).toBe('cs_1');
 		expect(fetchMock.mock.calls[1][1].headers['X-Softhe-Signature']).toMatch(/^[a-f0-9]{64}$/);
+		expect(fetchMock.mock.calls[1][1].headers['x-vercel-protection-bypass']).toBe('preview-bypass-secret');
 		expect(JSON.parse(fetchMock.mock.calls[1][1].body).items).toEqual([
 			{ id: 'windows-10', quantity: 1 },
 		]);
@@ -485,6 +487,7 @@ afterEach(() => {
 		'EMAILJS_ORDER_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
 		'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
+		'ORDER_FULFILLMENT_BYPASS_SECRET',
 		'FULFILLMENT_TEST_MODE', 'FULFILLMENT_TEST_FAIL_FIRST', 'FULFILLMENT_TEST_RETENTION_DAYS',
 		'FULFILLMENT_TEST_EVIDENCE_TOKEN', 'VERCEL_ENV',
 		'STRIPE_SECRET_KEY',
