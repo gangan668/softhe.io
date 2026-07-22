@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import crypto from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
@@ -10,6 +11,7 @@ const checkoutSession = require('../../../api/checkout-session.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
+const testFulfillment = require('../../../api/test-fulfillment.js');
 
 const jsonResponse = (result, ok = true, status = 200) => ({
 	ok,
@@ -362,6 +364,87 @@ describe('Stripe fulfillment', () => {
 	});
 });
 
+describe('Preview fulfillment test receiver', () => {
+	const secret = 'preview-fulfillment-secret';
+	const order = {
+		sessionId: 'cs_test_12345678', amountTotal: 6500, currency: 'eur', paymentIntentId: 'pi_test',
+		customerEmail: 'customer@example.com', items: [{ id: 'windows-10', quantity: 1 }],
+	};
+	const request = (body = order, headers = {}) => {
+		const payload = Buffer.from(JSON.stringify(body));
+		return {
+			method: 'POST', body: payload,
+			headers: {
+				'idempotency-key': body.sessionId,
+				'x-softhe-signature': crypto.createHmac('sha256', secret).update(payload).digest('hex'),
+				...headers,
+			},
+		};
+	};
+
+	beforeEach(() => {
+		process.env.VERCEL_ENV = 'preview';
+		process.env.FULFILLMENT_TEST_MODE = 'true';
+		process.env.ORDER_FULFILLMENT_WEBHOOK_SECRET = secret;
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
+	});
+
+	it('is unavailable outside an explicitly enabled Preview', async () => {
+		process.env.VERCEL_ENV = 'production';
+		const response = createResponse();
+		await testFulfillment(request(), response);
+		expect(response.statusCode).toBe(404);
+	});
+
+	it('rejects invalid signatures before durable storage', async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await testFulfillment(request(order, { 'x-softhe-signature': '0'.repeat(64) }), response);
+		expect(response.statusCode).toBe(401);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it('accepts and durably records a valid order without customer email', async () => {
+		const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ result: ['accepted', '1'] }));
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await testFulfillment(request(), response);
+		expect(response.statusCode).toBe(202);
+		expect(response.payload).toEqual({ accepted: true, duplicate: false, attempts: 1 });
+		const command = JSON.parse(fetchMock.mock.calls[0][1].body);
+		expect(command[0]).toBe('EVAL');
+		expect(command.join(' ')).not.toContain('customer@example.com');
+	});
+
+	it('reports duplicate deliveries and fail-first retries', async () => {
+		const fetchMock = vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ result: ['retry', '1'] }))
+			.mockResolvedValueOnce(jsonResponse({ result: ['duplicate', '3'] }));
+		vi.stubGlobal('fetch', fetchMock);
+		process.env.FULFILLMENT_TEST_FAIL_FIRST = 'true';
+		const retryResponse = createResponse();
+		await testFulfillment(request(), retryResponse);
+		expect(retryResponse.statusCode).toBe(503);
+		expect(retryResponse.payload.retry).toBe(true);
+		const duplicateResponse = createResponse();
+		await testFulfillment(request(), duplicateResponse);
+		expect(duplicateResponse.payload).toEqual({ accepted: true, duplicate: true, attempts: 3 });
+	});
+
+	it('requires a separate bearer token to read evidence', async () => {
+		process.env.FULFILLMENT_TEST_EVIDENCE_TOKEN = 'evidence-token';
+		const unauthorized = createResponse();
+		await testFulfillment({ method: 'GET', headers: {}, query: { session_id: order.sessionId } }, unauthorized);
+		expect(unauthorized.statusCode).toBe(401);
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: [JSON.stringify({ sessionId: order.sessionId }), '2'] })));
+		const response = createResponse();
+		await testFulfillment({ method: 'GET', headers: { authorization: 'Bearer evidence-token' }, query: { session_id: order.sessionId } }, response);
+		expect(response.payload).toEqual({ order: { sessionId: order.sessionId }, attempts: 2 });
+	});
+});
+
 describe('checkout session verification', () => {
 	beforeEach(() => {
 		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
@@ -402,6 +485,8 @@ afterEach(() => {
 		'EMAILJS_ORDER_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
 		'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
+		'FULFILLMENT_TEST_MODE', 'FULFILLMENT_TEST_FAIL_FIRST', 'FULFILLMENT_TEST_RETENTION_DAYS',
+		'FULFILLMENT_TEST_EVIDENCE_TOKEN', 'VERCEL_ENV',
 		'STRIPE_SECRET_KEY',
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
