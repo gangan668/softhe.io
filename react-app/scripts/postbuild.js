@@ -33,7 +33,7 @@ const renderRoute = (template, route) => {
 	const description = escapeAttribute(route.description);
 	let html = replaceTag(template, /<title>.*?<\/title>/i, `<title>${title}</title>`);
 	html = replaceTag(html, /<meta\s+name=["']description["'][^>]*>/i, `<meta name="description" content="${description}">`);
-	html = replaceTag(html, /<meta\s+name=["']robots["'][^>]*>/i, '<meta name="robots" content="index, follow">');
+	html = replaceTag(html, /<meta\s+name=["']robots["'][^>]*>/i, `<meta name="robots" content="${route.robots || 'index, follow'}">`);
 	html = html.replace(/<link\s+rel=["']canonical["'][^>]*>/i, `<link rel="canonical" href="${canonical}">`);
 	html = replaceTag(html, /<meta\s+property=["']og:title["'][^>]*>/i, `<meta property="og:title" content="${title}">`);
 	html = replaceTag(html, /<meta\s+property=["']og:description["'][^>]*>/i, `<meta property="og:description" content="${description}">`);
