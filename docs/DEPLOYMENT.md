@@ -33,6 +33,7 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `CONTACT_RATE_LIMIT_SECRET` | HMAC key used to pseudonymize contact-form IP addresses |
 | `EMAILJS_SERVICE_ID` | EmailJS service used by the server function |
 | `EMAILJS_TEMPLATE_ID` | EmailJS contact template |
+| `EMAILJS_TICKET_TEMPLATE_ID` | Customer/staff ticket reply notification template |
 | `EMAILJS_ORDER_TEMPLATE_ID` | Durable customer order-confirmation template |
 | `EMAILJS_WITHDRAWAL_TEMPLATE_ID` | Timestamped customer withdrawal acknowledgement |
 | `EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID` | Operator withdrawal notification |

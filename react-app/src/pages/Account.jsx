@@ -46,12 +46,12 @@ export default function Account() {
 	const createTicket = async (event) => {
 		event.preventDefault(); const { data: id, error } = await supabase.rpc('create_ticket', { ticket_subject: newTicket.subject, ticket_category: newTicket.category, first_message: newTicket.message });
 		if (error) return setStatus((s) => ({ ...s, error: error.message }));
-		setNewTicket({ subject: '', category: 'general', message: '' }); await notifyTicketReply(session, { ticketId: id }); await load(); setTab('tickets'); setStatus((s) => ({ ...s, message: `Ticket ${String(id).slice(0, 8)} created.` }));
+		setNewTicket({ subject: '', category: 'general', message: '' }); const notified = await notifyTicketReply(session, { ticketId: id }); await load(); setTab('tickets'); setStatus((s) => ({ ...s, error: notified ? '' : 'Ticket saved, but the email notification could not be sent.', message: `Ticket ${String(id).slice(0, 8)} created.` }));
 	};
 	const sendReply = async (event) => {
 		event.preventDefault(); if (!selectedTicket || !reply.trim()) return;
 		const { data: message, error } = await supabase.from('ticket_messages').insert({ ticket_id: selectedTicket.id, author_id: user.id, body: reply.trim() }).select('id').single();
-		if (error) return setStatus((s) => ({ ...s, error: error.message })); setReply(''); await notifyTicketReply(session, { messageId: message.id }); await openTicket(selectedTicket); await load();
+		if (error) return setStatus((s) => ({ ...s, error: error.message })); setReply(''); const notified = await notifyTicketReply(session, { messageId: message.id }); await openTicket(selectedTicket); await load(); setStatus((s) => ({ ...s, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
 	};
 	const signOut = () => supabase.auth.signOut();
 	const updatePassword = async (event) => { event.preventDefault(); const password = new FormData(event.currentTarget).get('password'); const { error } = await supabase.auth.updateUser({ password }); setStatus((s) => ({ ...s, error: error?.message || '', message: error ? '' : 'Password updated.' })); event.currentTarget.reset(); };

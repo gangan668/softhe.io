@@ -19,7 +19,8 @@ async function ticketNotification(req, res) {
 		if (!isStaff && ticket.user_id !== user.id) return res.status(403).json({ error: 'Ticket access denied' });
 		const owner = (await adminRequest(`profiles?id=eq.${ticket.user_id}&select=email,full_name`))?.[0];
 		const recipient = isStaff ? owner?.email : process.env.SUPPORT_EMAIL;
-		if (!recipient || !process.env.EMAILJS_TICKET_TEMPLATE_ID) return res.status(200).json({ notified: false });
+		if (!recipient) return res.status(502).json({ error: 'Ticket notification recipient is unavailable' });
+		if (!process.env.EMAILJS_TICKET_TEMPLATE_ID) return res.status(503).json({ error: 'Ticket notifications are not configured' });
 		await sendEmailTemplate(process.env.EMAILJS_TICKET_TEMPLATE_ID, {
 			to_email: recipient, customer_name: owner?.full_name || owner?.email || 'Customer', ticket_id: ticket.id,
 			ticket_subject: ticket.subject, ticket_status: ticket.status, reply_preview: message.body.slice(0, 500),

@@ -8,6 +8,7 @@ const withdrawal = require('../../../api/withdrawal.js');
 const health = require('../../../api/health.js');
 const browserErrors = require('../../../api/browser-errors.js');
 const checkoutSession = require('../../../api/checkout-session.js');
+const ticketNotification = require('../../../api/ticket-notification.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
@@ -86,6 +87,44 @@ describe('production health API', () => {
 			status: 'ready',
 			missing: [],
 		}));
+	});
+
+	it('does not report ticket notifications ready without their template', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		delete process.env.EMAILJS_TICKET_TEMPLATE_ID;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.checks.tickets).toBe(false);
+		expect(response.payload.missing).toContain('EMAILJS_TICKET_TEMPLATE_ID');
+	});
+});
+
+describe('ticket notification API', () => {
+	it('fails closed when the ticket notification template is missing', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		vi.stubGlobal('fetch', vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ id: 'staff', email: 'staff@example.com' }))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: 'Reply' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
+			.mockResolvedValueOnce(jsonResponse([{ role: 'staff' }]))
+			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }])));
+		const response = createResponse();
+		await ticketNotification({
+			method: 'POST',
+			headers: { authorization: 'Bearer token' },
+			body: { messageId: 'message' },
+		}, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.error).toMatch(/not configured/i);
 	});
 });
 
@@ -484,6 +523,7 @@ afterEach(() => {
 	for (const key of [
 		'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'CONTACT_RATE_LIMIT_SECRET',
 		'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY',
+		'EMAILJS_TICKET_TEMPLATE_ID',
 		'EMAILJS_ORDER_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
 		'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
@@ -491,6 +531,7 @@ afterEach(() => {
 		'FULFILLMENT_TEST_MODE', 'FULFILLMENT_TEST_FAIL_FIRST', 'FULFILLMENT_TEST_RETENTION_DAYS',
 		'FULFILLMENT_TEST_EVIDENCE_TOKEN', 'VERCEL_ENV',
 		'STRIPE_SECRET_KEY',
+		'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
 		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT',

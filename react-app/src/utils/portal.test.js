@@ -17,4 +17,9 @@ describe('notifyTicketReply', () => {
 			body: JSON.stringify({ messageId: 'message' }),
 		}));
 	});
+
+	it('reports a failed notification response', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({ ok: false });
+		await expect(notifyTicketReply({ access_token: 'token' }, { messageId: 'message' }, fetchImpl)).resolves.toBe(false);
+	});
 });
