@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
+import { getAuthErrorMessage } from '../utils/authErrors';
 import './Portal.css';
 
 const copy = {
@@ -27,7 +28,7 @@ export default function AuthPage({ mode }) {
 		if (mode === 'register') result = await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName }, emailRedirectTo: `${window.location.origin}/login` } });
 		else if (mode === 'forgot') result = await supabase.auth.resetPasswordForEmail(form.email, { redirectTo: `${window.location.origin}/reset-password` });
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-		if (result.error) return setStatus({ loading: false, error: result.error.message, message: '' });
+		if (result.error) return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
 		if (mode === 'login') navigate(location.state?.from || '/account', { replace: true });
 		else setStatus({ loading: false, error: '', message: mode === 'register' ? 'Check your email to verify your account.' : 'Check your email for the reset link.' });
 	};
