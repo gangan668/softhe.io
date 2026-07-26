@@ -156,7 +156,7 @@ async function createCheckoutSession(req, res) {
 		if (customer && !customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before linking this order' });
 		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), new Date().toISOString(), getVatStatus(), customer));
 	} catch (error) {
-		return res.status(503).json({ error: error.message });
+		return res.status(error.statusCode || 503).json({ error: error.message });
 	}
 	try {
 		const response = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
