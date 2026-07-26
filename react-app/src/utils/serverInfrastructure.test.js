@@ -103,6 +103,21 @@ describe('production health API', () => {
 		expect(response.payload.checks.tickets).toBe(false);
 		expect(response.payload.missing).toContain('EMAILJS_TICKET_TEMPLATE_ID');
 	});
+
+	it('rejects masked secret placeholders as invalid configuration', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		process.env.EMAILJS_PRIVATE_KEY = 'Encrypted';
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.checks.tickets).toBe(false);
+		expect(response.payload.invalid).toContain('EMAILJS_PRIVATE_KEY');
+	});
 });
 
 describe('ticket notification API', () => {

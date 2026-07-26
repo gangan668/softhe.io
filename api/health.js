@@ -15,6 +15,7 @@ const REQUIRED_CONFIGURATION = [
 	'EMAILJS_SERVICE_ID',
 	'EMAILJS_TEMPLATE_ID',
 	'EMAILJS_PUBLIC_KEY',
+	'EMAILJS_PRIVATE_KEY',
 	'EMAILJS_TICKET_TEMPLATE_ID',
 	'EMAILJS_ORDER_TEMPLATE_ID',
 	'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
@@ -25,7 +26,8 @@ const REQUIRED_CONFIGURATION = [
 
 const getConfigurationStatus = (environment = process.env) => {
 	const missing = REQUIRED_CONFIGURATION.filter((key) => !environment[key]?.trim());
-	const invalid = [];
+	const invalid = REQUIRED_CONFIGURATION.filter((key) =>
+		/^(?:encrypted|masked|redacted)$/i.test(environment[key]?.trim() || ''));
 	if (environment.VAT_STATUS && !['registered', 'not-registered', 'exempt'].includes(environment.VAT_STATUS)) {
 		invalid.push('VAT_STATUS');
 	}
@@ -43,7 +45,8 @@ const getConfigurationStatus = (environment = process.env) => {
 	} catch {
 		invalid.push('PUBLIC_SITE_URL');
 	}
-	return { ready: missing.length === 0 && invalid.length === 0, missing, invalid };
+	const uniqueInvalid = [...new Set(invalid)];
+	return { ready: missing.length === 0 && uniqueInvalid.length === 0, missing, invalid: uniqueInvalid };
 };
 
 async function health(req, res) {
@@ -64,11 +67,11 @@ async function health(req, res) {
 		},
 		checks: {
 			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
-			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
-			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
-			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
+			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
+			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
+			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
 			storage: readyFor(storageKeys),
-			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', 'EMAILJS_ORDER_TEMPLATE_ID']),
+			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID']),
 		},
 		missing: configuration.missing,
 		invalid: configuration.invalid,

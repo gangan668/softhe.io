@@ -38,7 +38,7 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `EMAILJS_WITHDRAWAL_TEMPLATE_ID` | Timestamped customer withdrawal acknowledgement |
 | `EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID` | Operator withdrawal notification |
 | `EMAILJS_PUBLIC_KEY` | EmailJS account public key |
-| `EMAILJS_PRIVATE_KEY` | Optional EmailJS private key |
+| `EMAILJS_PRIVATE_KEY` | Required EmailJS private key for server-side Strict Mode |
 | `WITHDRAWAL_RETENTION_DAYS` | Optional withdrawal-record retention, default 400 days |
 | `EXTERNAL_REQUEST_TIMEOUT_MS` | Optional outbound API timeout, default 8000 ms and clamped to 1000–30000 ms |
 | `RELEASE_SOURCE_COMMIT` | Public source commit identifier reported by `/api/health` for release binding |
