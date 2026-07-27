@@ -12,6 +12,7 @@
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
+		"audit:ci": "node scripts/audit-policy.js",
 		"e2e": "node scripts/run-e2e.js enabled",
 		"e2e:disabled": "node scripts/run-e2e.js disabled",
 		"e2e:all": "npm run e2e && npm run e2e:disabled",
@@ -22,10 +23,10 @@
 	"dependencies": {
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
-		"react-router-dom": "^7.18.1"
+		"react-router-dom": "7.18.1"
 	},
 	"devDependencies": {
-		"@eslint/js": "^9.36.0",
+		"@eslint/js": "10.0.1",
 		"@playwright/test": "1.61.1",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/react": "^16.1.0",
@@ -33,9 +34,9 @@
 		"@vitejs/plugin-react": "^5.0.4",
 		"@vitest/coverage-v8": "^4.0.10",
 		"@vitest/ui": "^4.0.10",
-		"eslint": "^9.36.0",
-		"eslint-plugin-react-hooks": "^5.2.0",
-		"eslint-plugin-react-refresh": "^0.4.22",
+		"eslint": "10.8.0",
+		"eslint-plugin-react-hooks": "7.1.1",
+		"eslint-plugin-react-refresh": "0.5.3",
 		"globals": "^16.4.0",
 		"jsdom": "^25.0.1",
 		"vite": "^7.1.7",

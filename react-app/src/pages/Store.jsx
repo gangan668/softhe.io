@@ -18,6 +18,13 @@ function Store() {
 	const [addedToCart, setAddedToCart] = useState(null);
 	const [quizChoice, setQuizChoice] = useState('windows-10');
 	const [checkoutStatus, setCheckoutStatus] = useState(null);
+	const checkoutDisplayStatus = checkoutStatus ?? (
+		checkoutQuery === 'success'
+			? checkoutSessionId
+				? { type: 'pending', message: 'Verifying your payment with Stripe…' }
+				: { type: 'error', message: 'We could not verify this checkout. Your cart has been kept.' }
+			: null
+	);
 
 	useEffect(() => {
 		trackEvent('view_item_list', {
@@ -34,13 +41,9 @@ function Store() {
 	useEffect(() => {
 		if (checkoutQuery !== 'success') return undefined;
 		const sessionId = checkoutSessionId;
-		if (!sessionId) {
-			setCheckoutStatus({ type: 'error', message: 'We could not verify this checkout. Your cart has been kept.' });
-			return undefined;
-		}
+		if (!sessionId) return undefined;
 
 		let active = true;
-		setCheckoutStatus({ type: 'pending', message: 'Verifying your payment with Stripe…' });
 		verifyCheckoutSession(sessionId)
 			.then((session) => {
 				if (!active) return;
@@ -143,11 +146,11 @@ function Store() {
 						</div>
 					</div>
 				)}
-				{checkoutStatus && (
-					<div className={`checkout-result checkout-result-${checkoutStatus.type}`} role={checkoutStatus.type === 'error' ? 'alert' : 'status'}>
+				{checkoutDisplayStatus && (
+					<div className={`checkout-result checkout-result-${checkoutDisplayStatus.type}`} role={checkoutDisplayStatus.type === 'error' ? 'alert' : 'status'}>
 						<div className="container">
-							<strong>{checkoutStatus.type === 'success' ? 'Order confirmed' : checkoutStatus.type === 'error' ? 'Verification needed' : 'Checking your order'}</strong>
-							<span>{checkoutStatus.message}</span>
+							<strong>{checkoutDisplayStatus.type === 'success' ? 'Order confirmed' : checkoutDisplayStatus.type === 'error' ? 'Verification needed' : 'Checking your order'}</strong>
+							<span>{checkoutDisplayStatus.message}</span>
 						</div>
 					</div>
 				)}
