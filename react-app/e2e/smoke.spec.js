@@ -194,6 +194,17 @@ test.describe('cookie consent controls', () => {
 		await page.addInitScript(() => localStorage.removeItem('softhe_analytics_consent'));
 	});
 
+	test('page remains scrollable before a consent choice is made', async ({ page }) => {
+		await page.goto('/');
+		await expect(page.getByRole('dialog', { name: /we value your privacy/i })).toBeVisible();
+		await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+		await expect(page.locator('.App')).not.toHaveAttribute('inert', '');
+
+		const initialScroll = await page.evaluate(() => window.scrollY);
+		await page.mouse.wheel(0, 700);
+		await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll);
+	});
+
 	test('details, accept, persistence, and settings reopening work', async ({ page }) => {
 		await page.goto('/');
 		const dialog = page.getByRole('dialog', { name: /we value your privacy/i });
