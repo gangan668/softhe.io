@@ -19,10 +19,12 @@ npm run test:coverage -- --run
 npm run build
 npm run budget
 npm run e2e:all
-npm audit --omit=dev --audit-level=high
+npm run audit:ci
 ```
 
 Playwright allocates one free preview port for the run, refuses to reuse another service, and verifies the Softhe.io application marker before testing routes.
+The audit command fails on every high-severity finding except the narrowly scoped React Router
+RSC advisory documented in [`../docs/SECURITY_EXCEPTIONS.md`](../docs/SECURITY_EXCEPTIONS.md).
 
 ## Production behavior
 

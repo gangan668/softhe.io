@@ -35,12 +35,13 @@ if (isStrict) {
 		&& !/^SE\d{12}$/.test(process.env.VITE_VAT_ID || '');
 	const invalidCaptureDate = !/^\d{4}-\d{2}-\d{2}$/.test(process.env.VITE_BENCHMARK_CAPTURE_DATE || '')
 		|| Number.isNaN(Date.parse(`${process.env.VITE_BENCHMARK_CAPTURE_DATE}T00:00:00Z`));
-	let invalidAppUrl = false;
-	try {
-		invalidAppUrl = new URL(process.env.VITE_APP_URL).protocol !== 'https:';
-	} catch {
-		invalidAppUrl = true;
-	}
+	const invalidAppUrl = (() => {
+		try {
+			return new URL(process.env.VITE_APP_URL).protocol !== 'https:';
+		} catch {
+			return true;
+		}
+	})();
 	const placeholderPatterns = {
 		VITE_LEGAL_NAME: /^your\s/i,
 		VITE_LEGAL_ADDRESS: /^street and number/i,
