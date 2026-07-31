@@ -1,5 +1,37 @@
 # Customer portal Preview test evidence
 
+## Pre-merge remediation verification — 2026-07-31
+
+- Merge candidate `8500ad2` includes the Wouter routing adapter, bounded JWT
+  refresh/retry behavior, explicit client denial for `stripe_webhook_events`, and a
+  durable checkout-idempotency timestamp fix discovered during preview testing.
+- Verified Preview deployment:
+  `https://softhe-i1zgp4yd0-suportsofthe-9420s-projects.vercel.app`.
+- `/api/health` returned `ready`, with portal, checkout, contact, tickets,
+  withdrawal, storage, and fulfillment readiness all `true`; no configuration
+  values or secret prefixes were returned.
+- Public browser checks passed for login, registration, recovery, protected account
+  and admin redirects, 404 handling, and back/forward navigation. The browser
+  console contained no warnings or errors.
+- Response headers retain a project-specific Supabase CSP, frame denial, HSTS,
+  `nosniff`, strict referrer policy, restricted permissions, and Preview no-indexing.
+- A forged Stripe webhook signature was rejected. A sandbox guest Checkout Session
+  was created without payment, and replaying the identical request with the same
+  idempotency key returned the same Checkout Session
+  `cs_test_b1Zi5JeKJdLOKzK6tpzSickRUZV8qUQr8O9gGz4GLUKtNvIW5HmkMmXI3Y`.
+- Transactional two-customer tests proved own-row access, cross-customer denial,
+  anonymous denial, role-escalation denial, privileged-claim denial, webhook-record
+  denial, cross-ticket denial, and ticket-message injection denial. Synthetic data
+  was rolled back.
+- `npm audit --audit-level=high` reported zero vulnerabilities. Lint, 270 tests
+  (3 skipped), coverage thresholds, production-enabled and fail-closed Playwright
+  suites (66 tests), build/configuration validation, built-asset secret scanning,
+  and the performance budget passed.
+- Supabase Security Advisor's webhook-policy warning is resolved. Its only remaining
+  warning is leaked-password protection, which the dashboard marks as available only
+  on Pro plans and above; the current organization is on Free. This is an explicit
+  merge blocker until the project is upgraded and the control is enabled.
+
 Verified on 2026-07-27 (Europe/Berlin) against branch `customer-portal-test`.
 No passwords, tokens, private keys, customer message bodies, or service credentials are
 recorded in this document.
