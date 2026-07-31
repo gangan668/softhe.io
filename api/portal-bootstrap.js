@@ -1,4 +1,4 @@
-const { adminRequest, getBearerToken, getConfig, isAdminEmail, verifyUser } = require('./_lib/supabase');
+const { adminRequest, getBearerToken, getConfig, isAdminEmail, verifyActiveUser, verifyUser } = require('./_lib/supabase');
 const { clientIp, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 const { fetchWithTimeout } = require('./_lib/fetch');
 
@@ -24,13 +24,27 @@ const revokeStaff = async (req, res) => {
 	return res.status(200).json({ revoked: true });
 };
 
+const setAccountStatus = async (req, res) => {
+	const actor = await verifyActiveUser(req);
+	if (!actor.email_confirmed_at || !isAdminEmail(actor.email)) return res.status(403).json({ error: 'Staff access required' });
+	const role = (await adminRequest(`user_roles?user_id=eq.${encodeURIComponent(actor.id)}&select=role,expires_at,revoked_at`))?.[0];
+	if (role?.role !== 'admin' || role.revoked_at || new Date(role.expires_at) <= new Date()) return res.status(403).json({ error: 'Administrator access required' });
+	await enforceRateLimit('account-status', actor.id, 20, 3600);
+	const targetUser = String(req.body?.targetUser || '');
+	const status = String(req.body?.status || '');
+	if (!/^[0-9a-f-]{36}$/i.test(targetUser) || !['active','suspended'].includes(status) || targetUser === actor.id) return res.status(400).json({ error: 'Valid target account and status are required' });
+	await adminRequest('rpc/set_portal_account_status', { method: 'POST', body: { target_user: targetUser, actor_user: actor.id, new_status: status } });
+	return res.status(200).json({ updated: true, status });
+};
+
 async function portalBootstrap(req, res) {
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 	try {
 		jsonOnly(req);
 		if (req.query?.action === 'revoke-others') return await revokeOtherSessions(req, res);
 		if (req.query?.action === 'revoke-staff') return await revokeStaff(req, res);
-		const user = await verifyUser(req);
+		if (req.query?.action === 'account-status') return await setAccountStatus(req, res);
+		const user = await verifyActiveUser(req);
 		if (!user.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before using the portal' });
 		await Promise.all([
 			enforceRateLimit('bootstrap:user', user.id, 10, 60),

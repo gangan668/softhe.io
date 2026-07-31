@@ -24,13 +24,15 @@ export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = f
 	if (!response.ok || !isStripeCheckoutUrl(data.url)) {
 		throw new Error(data.error || 'Checkout could not be started. Please try again.');
 	}
+	if (data.id && data.receiptToken && typeof sessionStorage !== 'undefined') sessionStorage.setItem(`softhe:checkout:${data.id}`, data.receiptToken);
 	return data;
 };
 
-export const verifyCheckoutSession = async (sessionId, fetchImpl = fetch) => {
+export const verifyCheckoutSession = async (sessionId, fetchImpl = fetch, accessToken = null) => {
+	const receipt = typeof sessionStorage === 'undefined' ? null : sessionStorage.getItem(`softhe:checkout:${sessionId}`);
 	const response = await apiFetch(
 		`/api/checkout-session?session_id=${encodeURIComponent(sessionId)}`,
-		{ headers: { Accept: 'application/json' } },
+		{ headers: { Accept: 'application/json', ...(receipt ? { 'X-Checkout-Receipt': receipt } : {}), ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) } },
 		fetchImpl,
 	);
 	const data = await readJson(response);

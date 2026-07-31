@@ -125,6 +125,7 @@ describe('ticket notification API', () => {
 		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
 		vi.stubGlobal('fetch', vi.fn()
 			.mockResolvedValueOnce(jsonResponse({ id: 'staff', email: 'staff@example.com' }))
+			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: 'Reply' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
 			.mockResolvedValueOnce(jsonResponse([{ role: 'staff' }]))
@@ -529,6 +530,7 @@ describe('Preview fulfillment test receiver', () => {
 describe('checkout session verification', () => {
 	beforeEach(() => {
 		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		process.env.CHECKOUT_RECEIPT_SECRET = 'receipt-secret';
 	});
 
 	it('returns paid status only for a server-created Softhe order', async () => {
@@ -541,7 +543,8 @@ describe('checkout session verification', () => {
 			metadata: { order_schema: '1', order_items: '[{"id":"windows-10","quantity":1}]' },
 		})));
 		const response = createResponse();
-		await checkoutSession({ method: 'GET', query: { session_id: 'cs_test_12345678' } }, response);
+		const receipt = crypto.createHmac('sha256', process.env.CHECKOUT_RECEIPT_SECRET).update('cs_test_12345678').digest('base64url');
+		await checkoutSession({ method: 'GET', headers: { 'x-checkout-receipt': receipt }, query: { session_id: 'cs_test_12345678' } }, response);
 
 		expect(response.statusCode).toBe(200);
 		expect(response.payload).toEqual(expect.objectContaining({ paid: true, status: 'complete' }));
@@ -571,6 +574,7 @@ afterEach(() => {
 		'FULFILLMENT_TEST_MODE', 'FULFILLMENT_TEST_FAIL_FIRST', 'FULFILLMENT_TEST_RETENTION_DAYS',
 		'FULFILLMENT_TEST_EVIDENCE_TOKEN', 'VERCEL_ENV',
 		'STRIPE_SECRET_KEY',
+		'CHECKOUT_RECEIPT_SECRET', 'PORTAL_RATE_LIMIT_SECRET',
 		'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',

@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { incrementWithExpiry, claimKey } = require('./redis');
+const { incrementWithExpiry, claimKey, deleteKey } = require('./redis');
 
 const jsonOnly = (req, maxBytes = 16384) => {
 	if (!String(req.headers?.['content-type'] || '').toLowerCase().startsWith('application/json')) {
@@ -27,6 +27,21 @@ const enforceRateLimit = async (bucket, identity, limit, ttlSeconds) => {
 };
 
 const acquireLock = (name, ttlSeconds) => claimKey(`portal:lock:${name}`, crypto.randomUUID(), ttlSeconds);
+const releaseLock = (name) => deleteKey(`portal:lock:${name}`);
+
+const receiptToken = (sessionId) => {
+	const secret = process.env.CHECKOUT_RECEIPT_SECRET;
+	if (!secret) throw Object.assign(new Error('Checkout receipt verification is not configured'), { statusCode: 503 });
+	return crypto.createHmac('sha256', secret).update(String(sessionId)).digest('base64url');
+};
+
+const verifyReceiptToken = (sessionId, supplied) => {
+	if (typeof supplied !== 'string') return false;
+	const expected = receiptToken(sessionId);
+	const left = Buffer.from(supplied);
+	const right = Buffer.from(expected);
+	return left.length === right.length && crypto.timingSafeEqual(left, right);
+};
 
 const sendPublicError = (res, error, fallback = 'Request could not be completed') => {
 	const status = Number(error?.statusCode) || 500;
@@ -34,4 +49,4 @@ const sendPublicError = (res, error, fallback = 'Request could not be completed'
 	return res.status(status).json({ error: error?.publicMessage || (status < 500 ? error?.message : fallback) });
 };
 
-module.exports = { acquireLock, clientIp, enforceRateLimit, jsonOnly, requestId, sendPublicError };
+module.exports = { acquireLock, clientIp, enforceRateLimit, jsonOnly, receiptToken, releaseLock, requestId, sendPublicError, verifyReceiptToken };

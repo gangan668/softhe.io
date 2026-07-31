@@ -1,7 +1,7 @@
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
-const { verifyUser } = require('./_lib/supabase');
-const { clientIp, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
+const { verifyActiveUser } = require('./_lib/supabase');
+const { clientIp, enforceRateLimit, jsonOnly, receiptToken, sendPublicError } = require('./_lib/portal-security');
 const { claimKey, redisCommand } = require('./_lib/redis');
 
 const PRODUCTS = {
@@ -168,7 +168,7 @@ async function createCheckoutSession(req, res) {
 	let form;
 	let discountRate;
 	try {
-		const customer = await verifyUser(req, { required: false });
+		const customer = await verifyActiveUser(req, { required: false });
 		if (customer && !customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before linking this order' });
 		const [, , acceptedAt] = await Promise.all([
 			enforceRateLimit('checkout:actor', customer?.id || clientIp(req), 10, 600),
@@ -200,7 +200,7 @@ async function createCheckoutSession(req, res) {
 			return res.status(502).json({ error: 'Checkout could not be started. Please try again.' });
 		}
 
-		return res.status(200).json({ url: data.url, id: data.id, discountRate });
+		return res.status(200).json({ url: data.url, id: data.id, discountRate, receiptToken: receiptToken(data.id) });
 	} catch (error) {
 		console.error('checkout_session_creation_failed', { status: null, message: error.message });
 		return sendPublicError(res, Object.assign(error, { statusCode: 502 }), 'Unable to reach Stripe. Please try again.');

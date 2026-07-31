@@ -45,6 +45,16 @@ const adminRequest = async (path, { method = 'GET', body, headers = {} } = {}) =
 	return response.json().catch(() => null);
 };
 
+const verifyActiveUser = async (req, options) => {
+	const user = await verifyUser(req, options);
+	if (!user) return null;
+	const profile = (await adminRequest(`profiles?id=eq.${encodeURIComponent(user.id)}&select=account_status`))?.[0];
+	if (!profile || profile.account_status !== 'active') {
+		throw Object.assign(new Error('Account is unavailable'), { statusCode: 403, publicMessage: 'This account is not active.' });
+	}
+	return user;
+};
+
 const authAdminRequest = async (path, { method = 'POST', body } = {}) => {
 	const { url, serviceKey } = getConfig();
 	if (!serviceKey) throw new Error('Customer portal server access is not configured');
@@ -65,4 +75,4 @@ const portalServerConfigured = () => Boolean(
 	&& process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, verifyUser };
+module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, verifyActiveUser, verifyUser };

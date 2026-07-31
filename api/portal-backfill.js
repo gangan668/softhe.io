@@ -1,5 +1,5 @@
 const { fetchWithTimeout } = require('./_lib/fetch');
-const { adminRequest, isAdminEmail, verifyUser } = require('./_lib/supabase');
+const { adminRequest, isAdminEmail, verifyActiveUser } = require('./_lib/supabase');
 const { persistPaidOrder } = require('./stripe-webhook');
 const { acquireLock, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 
@@ -7,7 +7,7 @@ async function portalBackfill(req, res) {
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 	try {
 		jsonOnly(req);
-		const user = await verifyUser(req);
+		const user = await verifyActiveUser(req);
 		if (!user.email_confirmed_at || !isAdminEmail(user.email)) return res.status(403).json({ error: 'Staff access required' });
 		const role = (await adminRequest(`user_roles?user_id=eq.${encodeURIComponent(user.id)}&select=role,expires_at,revoked_at`))?.[0];
 		if (!['staff','admin'].includes(role?.role) || role.revoked_at || new Date(role.expires_at) <= new Date()) return res.status(403).json({ error: 'Staff access required' });

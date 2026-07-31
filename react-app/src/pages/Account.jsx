@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
-import { notifyTicketReply } from '../utils/portal';
+import { notifyTicketReply, writeTicket } from '../utils/portal';
 import { runPortalQueriesWithSessionRecovery } from '../utils/portalSession';
 import './Portal.css';
 
@@ -59,14 +59,12 @@ export default function Account() {
 		setStatus((s) => ({ ...s, error: error?.message || '', message: error ? '' : 'Profile saved.' })); if (!error) load();
 	};
 	const createTicket = async (event) => {
-		event.preventDefault(); const { data: id, error } = await supabase.rpc('create_ticket', { ticket_subject: newTicket.subject, ticket_category: newTicket.category, first_message: newTicket.message });
-		if (error) return setStatus((s) => ({ ...s, error: error.message }));
+		event.preventDefault(); let id; try { ({ id } = await writeTicket(session, { action: 'create', subject: newTicket.subject, category: newTicket.category, message: newTicket.message })); } catch (error) { return setStatus((s) => ({ ...s, error: error.message })); }
 		setNewTicket({ subject: '', category: 'general', message: '' }); const notified = await notifyTicketReply(session, { ticketId: id }); await load(); setTab('tickets'); setStatus((s) => ({ ...s, error: notified ? '' : 'Ticket saved, but the email notification could not be sent.', message: `Ticket ${String(id).slice(0, 8)} created.` }));
 	};
 	const sendReply = async (event) => {
 		event.preventDefault(); if (!selectedTicket || !reply.trim()) return;
-		const { data: message, error } = await supabase.from('ticket_messages').insert({ ticket_id: selectedTicket.id, author_id: user.id, body: reply.trim() }).select('id').single();
-		if (error) return setStatus((s) => ({ ...s, error: error.message })); setReply(''); const notified = await notifyTicketReply(session, { messageId: message.id }); await openTicket(selectedTicket); await load(); setStatus((s) => ({ ...s, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
+		let message; try { message = await writeTicket(session, { action: 'message', ticketId: selectedTicket.id, message: reply.trim() }); } catch (error) { return setStatus((s) => ({ ...s, error: error.message })); } setReply(''); const notified = await notifyTicketReply(session, { messageId: message.id }); await openTicket(selectedTicket); await load(); setStatus((s) => ({ ...s, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
 	};
 	const signOut = async () => { setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); await supabase.auth.signOut(); navigate('/login', { replace: true }); };
 	const updatePassword = async (event) => {

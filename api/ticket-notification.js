@@ -1,12 +1,12 @@
 const { sendEmailTemplate } = require('./_lib/emailjs');
-const { adminRequest, verifyUser } = require('./_lib/supabase');
-const { acquireLock, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
+const { adminRequest, verifyActiveUser } = require('./_lib/supabase');
+const { acquireLock, enforceRateLimit, jsonOnly, releaseLock, sendPublicError } = require('./_lib/portal-security');
 
 async function ticketNotification(req, res) {
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 	try {
 		jsonOnly(req);
-		const user = await verifyUser(req);
+		const user = await verifyActiveUser(req);
 		const messageId = typeof req.body?.messageId === 'string' ? req.body.messageId : '';
 		const ticketId = typeof req.body?.ticketId === 'string' ? req.body.ticketId : '';
 		const messageQuery = messageId
@@ -27,11 +27,12 @@ async function ticketNotification(req, res) {
 			enforceRateLimit('ticket:user', user.id, 20, 3600),
 			enforceRateLimit('ticket:thread', ticket.id, 5, 600),
 		]);
-		if (!(await acquireLock(`ticket-notification:${message.id}`, 30 * 24 * 3600))) return res.status(200).json({ notified: true, duplicate: true });
-		await sendEmailTemplate(process.env.EMAILJS_TICKET_TEMPLATE_ID, {
+		const lockName = `ticket-notification:${message.id}`;
+		if (!(await acquireLock(lockName, 30 * 24 * 3600))) return res.status(200).json({ notified: true, duplicate: true });
+		try { await sendEmailTemplate(process.env.EMAILJS_TICKET_TEMPLATE_ID, {
 			to_email: recipient, customer_name: owner?.full_name || owner?.email || 'Customer', ticket_id: ticket.id,
 			ticket_subject: ticket.subject, ticket_status: ticket.status, reply_preview: message.body.slice(0, 500),
-		});
+		}); } catch (error) { await releaseLock(lockName).catch(() => {}); throw error; }
 		return res.status(200).json({ notified: true, duplicate: false });
 	} catch (error) { return sendPublicError(res, error, 'Ticket notification could not be sent'); }
 }

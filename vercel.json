@@ -6,6 +6,8 @@
 	"rewrites": [
 		{ "source": "/api/session-revoke-others", "destination": "/api/portal-bootstrap?action=revoke-others" },
 		{ "source": "/api/staff/revoke", "destination": "/api/portal-bootstrap?action=revoke-staff" }
+		,{ "source": "/api/tickets/write", "destination": "/api/ticket-write" }
+		,{ "source": "/api/staff/account-status", "destination": "/api/portal-bootstrap?action=account-status" }
 	],
 	"headers": [
 		{
