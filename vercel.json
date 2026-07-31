@@ -3,6 +3,10 @@
 	"outputDirectory": "react-app/dist",
 	"cleanUrls": true,
 	"trailingSlash": false,
+	"rewrites": [
+		{ "source": "/api/session-revoke-others", "destination": "/api/portal-bootstrap?action=revoke-others" },
+		{ "source": "/api/staff/revoke", "destination": "/api/portal-bootstrap?action=revoke-staff" }
+	],
 	"headers": [
 		{
 			"source": "/(.*)",
