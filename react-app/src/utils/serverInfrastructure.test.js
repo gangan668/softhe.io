@@ -25,6 +25,7 @@ const createResponse = () => {
 	response.setHeader = vi.fn((key, value) => { response.headers[key] = value; });
 	response.status = vi.fn((status) => { response.statusCode = status; return response; });
 	response.json = vi.fn((payload) => { response.payload = payload; return response; });
+	response.end = vi.fn(() => response);
 	return response;
 };
 
@@ -167,6 +168,7 @@ describe('server configuration guards', () => {
 
 describe('contact API', () => {
 	beforeEach(() => {
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
 		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
 		process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
 		process.env.CONTACT_RATE_LIMIT_SECRET = 'rate-secret';
@@ -177,6 +179,32 @@ describe('contact API', () => {
 		process.env.LEGAL_ADDRESS = 'Testgatan 1, Stockholm, Sweden';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
+	});
+
+	it('allows the public site to preflight cross-origin submissions', async () => {
+		const response = createResponse();
+		await contact({
+			method: 'OPTIONS',
+			headers: { origin: 'https://softhe.io' },
+		}, response);
+
+		expect(response.statusCode).toBe(204);
+		expect(response.headers['Access-Control-Allow-Origin']).toBe('https://softhe.io');
+		expect(response.headers['Access-Control-Allow-Methods']).toContain('POST');
+		expect(response.end).toHaveBeenCalled();
+	});
+
+	it('rejects submissions from untrusted browser origins', async () => {
+		const response = createResponse();
+		await contact({
+			method: 'POST',
+			headers: { origin: 'https://malicious.example' },
+			body: {},
+		}, response);
+
+		expect(response.statusCode).toBe(403);
+		expect(response.payload.error).toBe('Origin not allowed');
+		expect(response.headers).not.toHaveProperty('Access-Control-Allow-Origin');
 	});
 
 	it('validates submissions before external calls', async () => {

@@ -11,7 +11,9 @@ export const apiFetch = async (path, options = {}, fetchImpl = fetch) => {
 	try {
 		return await fetchImpl(`${getApiBaseUrl()}${path}`, { ...options, signal: controller.signal });
 	} catch (error) {
-		if (error.name === 'AbortError') throw new Error('The request timed out. Please try again.');
+		if (error.name === 'AbortError') {
+			throw new Error('The request timed out. Please try again.', { cause: error });
+		}
 		throw error;
 	} finally {
 		window.clearTimeout(timeout);

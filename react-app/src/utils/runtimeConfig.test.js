@@ -43,7 +43,7 @@ describe('runtime production configuration', () => {
 		});
 	});
 
-	it('does not enable production data collection or commerce without complete legal identity', () => {
+	it('keeps commerce closed but allows the independently configured contact service', () => {
 		expect(readRuntimeConfig({
 			MODE: 'production',
 			VITE_COMMERCE_ENABLED: 'true',
@@ -51,7 +51,7 @@ describe('runtime production configuration', () => {
 			VITE_LEGAL_NAME: 'Incomplete operator',
 		})).toEqual({
 			commerceEnabled: false,
-			contactFormEnabled: false,
+			contactFormEnabled: true,
 			legalIdentityConfigured: false,
 		});
 	});

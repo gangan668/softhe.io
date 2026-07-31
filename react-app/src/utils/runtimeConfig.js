@@ -15,7 +15,10 @@ export const readRuntimeConfig = (environment = {}) => {
 
 	return {
 		commerceEnabled: requested('VITE_COMMERCE_ENABLED') && productionFeaturesAllowed,
-		contactFormEnabled: requested('VITE_CONTACT_FORM_ENABLED') && productionFeaturesAllowed,
+		// Contact delivery is independently guarded by the server-side operator,
+		// provider, and rate-limit configuration. Do not require browser-visible
+		// business identifiers just to expose the support form.
+		contactFormEnabled: requested('VITE_CONTACT_FORM_ENABLED'),
 		legalIdentityConfigured,
 	};
 };
