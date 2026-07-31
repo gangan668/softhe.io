@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
 import { notifyTicketReply } from '../utils/portal';
@@ -10,6 +10,7 @@ const formatDate = (value) => new Intl.DateTimeFormat(undefined, { dateStyle: 'm
 
 export default function Account() {
 	const { user, session, staff, supabase } = useAuth();
+	const navigate = useNavigate();
 	const [tab, setTab] = useState('overview');
 	const [data, setData] = useState({ profile: null, orders: [], tickets: [], activity: [] });
 	const [selectedTicket, setSelectedTicket] = useState(null);
@@ -53,8 +54,19 @@ export default function Account() {
 		const { data: message, error } = await supabase.from('ticket_messages').insert({ ticket_id: selectedTicket.id, author_id: user.id, body: reply.trim() }).select('id').single();
 		if (error) return setStatus((s) => ({ ...s, error: error.message })); setReply(''); const notified = await notifyTicketReply(session, { messageId: message.id }); await openTicket(selectedTicket); await load(); setStatus((s) => ({ ...s, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
 	};
-	const signOut = () => supabase.auth.signOut();
-	const updatePassword = async (event) => { event.preventDefault(); const password = new FormData(event.currentTarget).get('password'); const { error } = await supabase.auth.updateUser({ password }); setStatus((s) => ({ ...s, error: error?.message || '', message: error ? '' : 'Password updated.' })); event.currentTarget.reset(); };
+	const signOut = async () => { setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); await supabase.auth.signOut(); navigate('/login', { replace: true }); };
+	const updatePassword = async (event) => {
+		event.preventDefault();
+		const lastSignIn = Date.parse(user.last_sign_in_at || '');
+		if (!Number.isFinite(lastSignIn) || Date.now() - lastSignIn > 15 * 60 * 1000) return setStatus((s) => ({ ...s, error: 'Please sign out and sign in again before changing your password.', message: '' }));
+		const password = new FormData(event.currentTarget).get('password');
+		const { error } = await supabase.auth.updateUser({ password });
+		if (!error) {
+			const response = await fetch('/api/session-revoke-others', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: '{}' });
+			if (!response.ok) return setStatus((s) => ({ ...s, error: 'Password changed, but other sessions could not be revoked. Please sign out of all devices.', message: '' }));
+		}
+		setStatus((s) => ({ ...s, error: error?.message || '', message: error ? '' : 'Password updated and other sessions revoked.' })); event.currentTarget.reset();
+	};
 
 	const profile = data.profile || {}; const address = profile.billing_address || {};
 	return <div className="portal-page"><SEO title="Customer account | Softhe.io" description="Manage your Softhe.io profile, orders, support tickets, and account history." />

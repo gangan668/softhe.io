@@ -414,3 +414,6 @@ textarea:focus-visible {
 	color: var(--primary-color);
 	font-size: 1.5rem;
 }
+.bar-width-64 { width: 64%; }
+.bar-width-28 { width: 28%; }
+.bar-width-32 { width: 32%; }

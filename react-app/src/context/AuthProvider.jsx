@@ -24,11 +24,15 @@ export function AuthProvider({ children }) {
 
 	useEffect(() => {
 		if (!session?.access_token) return;
-		fetch('/api/portal-bootstrap', { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}` } })
+		let active = true;
+		const bootstrap = () => fetch('/api/portal-bootstrap', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: '{}' })
 			.then((response) => response.ok ? response.json() : null)
-			.then((data) => setStaff(Boolean(data?.staff)))
-			.catch(() => setStaff(false))
-			.finally(() => setStaffCheckedUserId(sessionUserId));
+			.then((data) => { if (active) setStaff(Boolean(data?.staff)); })
+			.catch(() => { if (active) setStaff(false); })
+			.finally(() => { if (active) setStaffCheckedUserId(sessionUserId); });
+		bootstrap();
+		const refresh = window.setInterval(bootstrap, 10 * 60 * 1000);
+		return () => { active = false; window.clearInterval(refresh); };
 	}, [session?.access_token, sessionUserId]);
 
 	const value = useMemo(() => ({ configured: portalConfigured, session, user: session?.user || null, loading, staff, staffCheckedUserId, supabase }), [session, loading, staff, staffCheckedUserId, supabase]);

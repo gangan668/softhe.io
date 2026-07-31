@@ -83,17 +83,17 @@ function Home() {
 								<div className="metric-bars">
 									<div className="metric-bar">
 										<span>Frame time</span>
-										<div className="bar-track"><span style={{ width: '64%' }}></span></div>
+										<div className="bar-track"><span className="bar-width-64"></span></div>
 										<strong>-27%</strong>
 									</div>
 									<div className="metric-bar">
 										<span>Processes</span>
-										<div className="bar-track"><span style={{ width: '28%' }}></span></div>
+										<div className="bar-track"><span className="bar-width-28"></span></div>
 										<strong>-72%</strong>
 									</div>
 									<div className="metric-bar">
 										<span>RAM idle use</span>
-										<div className="bar-track"><span style={{ width: '32%' }}></span></div>
+										<div className="bar-track"><span className="bar-width-32"></span></div>
 										<strong>0.8 GB</strong>
 									</div>
 								</div>

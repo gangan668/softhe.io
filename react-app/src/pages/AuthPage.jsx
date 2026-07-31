@@ -28,9 +28,10 @@ export default function AuthPage({ mode }) {
 		if (mode === 'register') result = await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName }, emailRedirectTo: `${window.location.origin}/login` } });
 		else if (mode === 'forgot') result = await supabase.auth.resetPasswordForEmail(form.email, { redirectTo: `${window.location.origin}/reset-password` });
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
-		if (result.error) return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
+		if (result.error && mode === 'login') return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
+		if (result.error) return setStatus({ loading: false, error: '', message: mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
 		if (mode === 'login') navigate(location.state?.from || '/account', { replace: true });
-		else setStatus({ loading: false, error: '', message: mode === 'register' ? 'Check your email to verify your account.' : 'Check your email for the reset link.' });
+		else setStatus({ loading: false, error: '', message: mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
 	};
 
 	return <div className="portal-page auth-page"><SEO title={`${copy[mode][0]} | Softhe.io`} description={copy[mode][1]} />

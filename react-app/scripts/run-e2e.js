@@ -25,6 +25,9 @@ const environment = {
 	VITE_BENCHMARK_SUMMARY_METHOD: 'median',
 	VITE_COMMERCE_ENABLED: featureEnabled,
 	VITE_CONTACT_FORM_ENABLED: featureEnabled,
+	STRIPE_SECRET_KEY: 'sk_test_e2e_fixture_only',
+	STRIPE_WEBHOOK_SECRET: 'whsec_e2e_fixture_only',
+	PUBLIC_SITE_URL: 'https://softhe.io',
 };
 
 const npmCli = process.env.npm_execpath;

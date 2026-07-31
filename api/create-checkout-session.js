@@ -1,6 +1,7 @@
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { verifyUser } = require('./_lib/supabase');
+const { clientIp, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 
 const PRODUCTS = {
 	'windows-10': { name: 'Custom Windows 10 ISO', unitAmount: 6500 },
@@ -135,6 +136,9 @@ async function createCheckoutSession(req, res) {
 	if (!process.env.STRIPE_SECRET_KEY) {
 		return res.status(503).json({ error: 'Stripe checkout is not configured' });
 	}
+	try { jsonOnly(req, 32768); } catch (error) { return sendPublicError(res, error); }
+	const idempotencyKey = String(req.headers?.['idempotency-key'] || '').trim();
+	if (!/^[A-Za-z0-9_-]{20,100}$/.test(idempotencyKey)) return res.status(400).json({ error: 'A valid idempotency key is required' });
 	try {
 		assertCommerceConfiguration();
 	} catch (error) {
@@ -154,9 +158,13 @@ async function createCheckoutSession(req, res) {
 	try {
 		const customer = await verifyUser(req, { required: false });
 		if (customer && !customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before linking this order' });
+		await Promise.all([
+			enforceRateLimit('checkout:actor', customer?.id || clientIp(req), 10, 600),
+			enforceRateLimit('checkout:ip', clientIp(req), 10, 600),
+		]);
 		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), new Date().toISOString(), getVatStatus(), customer));
 	} catch (error) {
-		return res.status(error.statusCode || 503).json({ error: error.message });
+		return sendPublicError(res, error, 'Checkout could not be started. Please try again.');
 	}
 	try {
 		const response = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
@@ -164,6 +172,7 @@ async function createCheckoutSession(req, res) {
 			headers: {
 				Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
 				'Content-Type': 'application/x-www-form-urlencoded',
+				'Idempotency-Key': idempotencyKey,
 			},
 			body: form,
 		});
@@ -181,7 +190,7 @@ async function createCheckoutSession(req, res) {
 		return res.status(200).json({ url: data.url, id: data.id, discountRate });
 	} catch (error) {
 		console.error('checkout_session_creation_failed', { status: null, message: error.message });
-		return res.status(502).json({ error: 'Unable to reach Stripe. Please try again.' });
+		return sendPublicError(res, Object.assign(error, { statusCode: 502 }), 'Unable to reach Stripe. Please try again.');
 	}
 }
 

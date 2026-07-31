@@ -5,8 +5,9 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"prebuild": "node scripts/validate-production-config.js",
-		"build": "vite build && node scripts/postbuild.js",
+		"prebuild": "node scripts/validate-production-config.js && node scripts/validate-server-config.js",
+		"build": "vite build && node scripts/postbuild.js && node scripts/scan-secrets.js",
+		"security:scan": "node scripts/scan-secrets.js",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test": "vitest",
@@ -23,7 +24,7 @@
 		"@supabase/supabase-js": "^2.110.8",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
-		"react-router-dom": "^7.18.1"
+		"react-router-dom": "7.18.2"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.36.0",

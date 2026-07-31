@@ -64,7 +64,7 @@ describe('production health API', () => {
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.status).toBe('configuration-required');
-		expect(response.payload.missing).toContain('STRIPE_SECRET_KEY');
+		expect(response.payload.checks.checkout).toBe(false);
 		expect(response.payload).not.toHaveProperty('values');
 		expect(response.payload.release).toEqual({
 			sourceCommit: '0123456789abcdef',
@@ -83,10 +83,7 @@ describe('production health API', () => {
 		await health({ method: 'GET' }, response);
 
 		expect(response.statusCode).toBe(200);
-		expect(response.payload).toEqual(expect.objectContaining({
-			status: 'ready',
-			missing: [],
-		}));
+		expect(response.payload).toEqual(expect.objectContaining({ status: 'ready' }));
 	});
 
 	it('does not report ticket notifications ready without their template', async () => {
@@ -101,7 +98,7 @@ describe('production health API', () => {
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.tickets).toBe(false);
-		expect(response.payload.missing).toContain('EMAILJS_TICKET_TEMPLATE_ID');
+		expect(response.payload).not.toHaveProperty('missing');
 	});
 
 	it('rejects masked secret placeholders as invalid configuration', async () => {
@@ -116,7 +113,7 @@ describe('production health API', () => {
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.tickets).toBe(false);
-		expect(response.payload.invalid).toContain('EMAILJS_PRIVATE_KEY');
+		expect(response.payload).not.toHaveProperty('invalid');
 	});
 });
 
@@ -134,7 +131,7 @@ describe('ticket notification API', () => {
 		const response = createResponse();
 		await ticketNotification({
 			method: 'POST',
-			headers: { authorization: 'Bearer token' },
+			headers: { authorization: 'Bearer token', 'content-type': 'application/json' },
 			body: { messageId: 'message' },
 		}, response);
 

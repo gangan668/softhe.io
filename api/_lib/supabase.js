@@ -45,6 +45,17 @@ const adminRequest = async (path, { method = 'GET', body, headers = {} } = {}) =
 	return response.json().catch(() => null);
 };
 
+const authAdminRequest = async (path, { method = 'POST', body } = {}) => {
+	const { url, serviceKey } = getConfig();
+	if (!serviceKey) throw new Error('Customer portal server access is not configured');
+	const response = await fetchWithTimeout(`${url}/auth/v1/admin/${path}`, {
+		method, headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+		body: body === undefined ? undefined : JSON.stringify(body),
+	});
+	if (!response.ok) throw new Error(`Authentication administration failed (${response.status})`);
+	return response.status === 204 ? null : response.json().catch(() => null);
+};
+
 const isAdminEmail = (email) => new Set((process.env.ADMIN_EMAIL_ALLOWLIST || '')
 	.split(',').map((value) => value.trim().toLowerCase()).filter(Boolean)).has(String(email).toLowerCase());
 
@@ -54,4 +65,4 @@ const portalServerConfigured = () => Boolean(
 	&& process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-module.exports = { adminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, verifyUser };
+module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, verifyUser };
