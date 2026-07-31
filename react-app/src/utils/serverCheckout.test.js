@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { PRODUCTS as clientProducts } from '../data/products';
 
 const require = createRequire(import.meta.url);
-const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getPublicOrigin, isStripeCheckoutUrl, normalizeItems, validateLegalAcceptance } = require('../../../api/create-checkout-session.js');
+const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getIdempotentAcceptedAt, getPublicOrigin, isStripeCheckoutUrl, normalizeItems, validateLegalAcceptance } = require('../../../api/create-checkout-session.js');
 const { verifyStripeSignature } = require('../../../api/stripe-webhook.js');
 
 describe('server checkout validation', () => {
@@ -54,6 +54,22 @@ describe('server checkout validation', () => {
 
 		expect(isStripeCheckoutUrl('https://checkout.stripe.com/c/pay/test')).toBe(true);
 		expect(isStripeCheckoutUrl('https://checkout.stripe.com.attacker.example/test')).toBe(false);
+	});
+
+	it('reuses the original legal-acceptance time for checkout retries', async () => {
+		const stored = new Map();
+		const store = {
+			claimKey: async (key, value) => {
+				if (stored.has(key)) return false;
+				stored.set(key, value);
+				return true;
+			},
+			redisCommand: async ([command, key]) => command === 'GET' ? stored.get(key) : null,
+		};
+		const first = await getIdempotentAcceptedAt('same-checkout-key-1234', new Date('2026-07-31T19:00:00.000Z'), store);
+		const retry = await getIdempotentAcceptedAt('same-checkout-key-1234', new Date('2026-07-31T19:05:00.000Z'), store);
+
+		expect(retry).toBe(first);
 	});
 });
 
