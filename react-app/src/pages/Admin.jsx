@@ -8,7 +8,10 @@ export default function Admin() {
 	const { supabase, user, session } = useAuth();
 	const [tickets, setTickets] = useState([]); const [orders, setOrders] = useState([]); const [profiles, setProfiles] = useState([]); const [selected, setSelected] = useState(null); const [messages, setMessages] = useState([]); const [reply, setReply] = useState(''); const [error, setError] = useState('');
 	const load = useCallback(async () => { const [t, o, p] = await Promise.all([supabase.from('tickets').select('*').order('updated_at', { ascending: false }), supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(100), supabase.from('profiles').select('id,email,full_name,account_status,created_at').order('created_at', { ascending: false }).limit(100)]); setTickets(t.data || []); setOrders(o.data || []); setProfiles(p.data || []); setError(t.error?.message || o.error?.message || p.error?.message || ''); }, [supabase]);
-	useEffect(() => { load(); }, [load]);
+	useEffect(() => {
+		const timer = window.setTimeout(() => { void load(); }, 0);
+		return () => window.clearTimeout(timer);
+	}, [load]);
 	const open = async (ticket) => { setSelected(ticket); const result = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticket.id).order('created_at'); setMessages(result.data || []); };
 	const updateStatus = async (status) => { const { error: updateError } = await supabase.from('tickets').update({ status, updated_at: new Date().toISOString() }).eq('id', selected.id); if (updateError) setError(updateError.message); else { setSelected({ ...selected, status }); load(); } };
 	const send = async (event) => { event.preventDefault(); const { data: message, error: sendError } = await supabase.from('ticket_messages').insert({ ticket_id: selected.id, author_id: user.id, body: reply.trim() }).select('id').single(); if (sendError) return setError(sendError.message); setReply(''); const notified = await notifyTicketReply(session, { messageId: message.id }); await open(selected); await load(); setError(notified ? '' : 'Reply saved, but the email notification could not be sent.'); };

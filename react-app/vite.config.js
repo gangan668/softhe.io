@@ -1,11 +1,17 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath, URL } from "node:url";
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
 	// The custom domain is served from the deployment root.
 	base: '/',
 	plugins: [react()],
+	resolve: {
+		alias: {
+			"react-router-dom": fileURLToPath(new URL("./src/lib/router.jsx", import.meta.url)),
+		},
+	},
 	test: {
 		globals: true,
 		environment: "jsdom",

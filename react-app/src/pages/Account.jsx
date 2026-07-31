@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
 import { notifyTicketReply } from '../utils/portal';
+import { runPortalQueriesWithSessionRecovery } from '../utils/portalSession';
 import './Portal.css';
 
 const tabs = ['overview', 'orders', 'tickets', 'history', 'security'];
@@ -21,17 +22,30 @@ export default function Account() {
 
 	const load = useCallback(async () => {
 		setStatus((s) => ({ ...s, loading: true, error: '' }));
-		const [profile, orders, tickets, activity] = await Promise.all([
+		const runQueries = () => Promise.all([
 			supabase.from('profiles').select('*').eq('id', user.id).single(),
 			supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false }),
 			supabase.from('tickets').select('*').order('updated_at', { ascending: false }),
 			supabase.from('activity_events').select('*').order('created_at', { ascending: false }).limit(100),
 		]);
-		const error = [profile, orders, tickets, activity].find((result) => result.error)?.error;
+		const recovered = await runPortalQueriesWithSessionRecovery(supabase, runQueries);
+		const [profile, orders, tickets, activity] = recovered.results;
+		const error = recovered.error;
+		if (recovered.sessionInvalid) {
+			setData({ profile: null, orders: [], tickets: [], activity: [] });
+			setMessages([]);
+			setSelectedTicket(null);
+			await supabase.auth.signOut({ scope: 'local' });
+			navigate('/login', { replace: true, state: { authError: error.message } });
+			return;
+		}
 		setData({ profile: profile.data, orders: orders.data || [], tickets: tickets.data || [], activity: activity.data || [] });
 		setStatus({ loading: false, error: error?.message || '', message: '' });
-	}, [supabase, user.id]);
-	useEffect(() => { load(); }, [load]);
+	}, [navigate, supabase, user.id]);
+	useEffect(() => {
+		const timer = window.setTimeout(() => { void load(); }, 0);
+		return () => window.clearTimeout(timer);
+	}, [load]);
 
 	const openTicket = async (ticket) => {
 		setSelectedTicket(ticket);

@@ -16,7 +16,7 @@ export default function AuthPage({ mode }) {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const [form, setForm] = useState({ email: '', password: '', fullName: '' });
-	const [status, setStatus] = useState({ loading: false, error: '', message: '' });
+	const [status, setStatus] = useState({ loading: false, error: location.state?.authError || '', message: '' });
 	if (user && mode !== 'forgot') return <Navigate to="/account" replace />;
 	const update = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
 
