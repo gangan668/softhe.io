@@ -11,8 +11,12 @@ describe('authentication error messages', () => {
 		);
 	});
 
-	it('preserves useful provider errors and handles an empty error', () => {
-		expect(getAuthErrorMessage({ message: 'Invalid login credentials' })).toBe('Invalid login credentials');
-		expect(getAuthErrorMessage()).toMatch(/could not be completed/i);
+	it('does not expose provider details or account existence', () => {
+		expect(getAuthErrorMessage({ message: 'Invalid login credentials' })).toBe('Sign-in could not be completed. Check your details and try again.');
+		expect(getAuthErrorMessage()).toBe('Sign-in could not be completed. Check your details and try again.');
+	});
+
+	it('uses a safe CAPTCHA prompt', () => {
+		expect(getAuthErrorMessage({ message: 'captcha verification process failed' })).toBe('Complete the security check and try again.');
 	});
 });

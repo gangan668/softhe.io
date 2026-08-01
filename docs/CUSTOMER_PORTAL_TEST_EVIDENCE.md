@@ -29,8 +29,26 @@
   and the performance budget passed.
 - Supabase Security Advisor's webhook-policy warning is resolved. Its only remaining
   warning is leaked-password protection, which the dashboard marks as available only
-  on Pro plans and above; the current organization is on Free. This is an explicit
-  merge blocker until the project is upgraded and the control is enabled.
+  on Pro plans and above; the current organization is on Free. On 2026-08-01 the
+  project owner explicitly accepted this residual warning for the Free-tier launch.
+
+## Free-tier authentication controls — 2026-08-01
+
+- Registration and password changes enforce at least 12 characters with uppercase,
+  lowercase, number, and symbol requirements in the portal. The equivalent Supabase
+  server-side password policy must remain enabled in Authentication settings.
+- Signup, login, and password-recovery requests send a Cloudflare Turnstile token to
+  Supabase and fail closed when CAPTCHA is enabled but unavailable. Supabase CAPTCHA
+  validation and the matching Turnstile secret must remain enabled in Authentication
+  attack-protection settings.
+- Customer-facing authentication failures are generic and do not disclose whether an
+  account exists. CAPTCHA-capacity errors remain actionable without exposing account
+  state or provider details.
+- Mandatory email verification, custom SMTP, Supabase authentication rate limits,
+  recent-authentication checks for password changes, local sign-out state clearing,
+  and other-session revocation remain required release controls.
+- The accepted leaked-password warning does not waive any other Security Advisor,
+  dependency, secret-scanning, tenant-isolation, or deployment-readiness gate.
 
 Verified on 2026-07-27 (Europe/Berlin) against branch `customer-portal-test`.
 No passwords, tokens, private keys, customer message bodies, or service credentials are

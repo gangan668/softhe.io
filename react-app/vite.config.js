@@ -41,12 +41,12 @@ export default defineConfig(() => ({
 			// Content Security Policy (relaxed for dev - no upgrade-insecure-requests)
 			"Content-Security-Policy": [
 				"default-src 'self' 'unsafe-inline' 'unsafe-eval'",
-				"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://buy.stripe.com https://js.stripe.com",
+				"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
 				"style-src 'self' 'unsafe-inline'",
 				"font-src 'self'",
 				"img-src 'self' data: https: http: blob:",
 				"connect-src 'self' ws: wss: http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com",
-				"frame-src 'self' https://buy.stripe.com https://js.stripe.com",
+				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
 				"object-src 'none'",
 				"base-uri 'self'",
 				"form-action 'self' https://buy.stripe.com",
@@ -89,12 +89,12 @@ export default defineConfig(() => ({
 			// Apply same security headers for preview (relaxed for local testing)
 			"Content-Security-Policy": [
 				"default-src 'self' 'unsafe-inline'",
-				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com",
+				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://challenges.cloudflare.com",
 				"style-src 'self' 'unsafe-inline'",
 				"font-src 'self'",
 				"img-src 'self' data: https: http: blob:",
 				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com https://api.emailjs.com",
-				"frame-src 'self' https://buy.stripe.com https://js.stripe.com",
+				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
 				"object-src 'none'",
 				"base-uri 'self'",
 				"form-action 'self' https://buy.stripe.com",

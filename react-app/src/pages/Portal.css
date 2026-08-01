@@ -12,6 +12,10 @@
 .auth-links { margin-top: 20px; display: flex; justify-content: space-between; gap: 16px; }
 .auth-links a, .auth-card > a { color: var(--primary-color); }
 .portal-form { display: grid; gap: 16px; }
+.portal-form small { color: var(--text-secondary); font-weight: 500; line-height: 1.4; }
+.captcha-box { min-height: 65px; display: grid; align-items: center; overflow: hidden; }
+.portal-form small { color: var(--text-secondary); font-weight: 500; line-height: 1.4; }
+.captcha-box { min-height: 65px; display: grid; align-items: center; overflow: hidden; }
 .portal-form label { display: grid; gap: 7px; color: var(--text-secondary); font-weight: 700; font-size: .9rem; }
 .portal-form input, .portal-form select, .portal-form textarea, .ticket-toolbar select, .conversation textarea { width: 100%; color: var(--text-primary); background: rgba(3,8,13,.72); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 14px; font: inherit; }
 .portal-form textarea, .conversation textarea { min-height: 120px; resize: vertical; }

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
 import { notifyTicketReply, writeTicket } from '../utils/portal';
+import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
 import { runPortalQueriesWithSessionRecovery } from '../utils/portalSession';
 import './Portal.css';
 
@@ -72,12 +73,13 @@ export default function Account() {
 		const lastSignIn = Date.parse(user.last_sign_in_at || '');
 		if (!Number.isFinite(lastSignIn) || Date.now() - lastSignIn > 15 * 60 * 1000) return setStatus((s) => ({ ...s, error: 'Please sign out and sign in again before changing your password.', message: '' }));
 		const password = new FormData(event.currentTarget).get('password');
+		if (!validateStrongPassword(password)) return setStatus((s) => ({ ...s, error: passwordRequirements, message: '' }));
 		const { error } = await supabase.auth.updateUser({ password });
 		if (!error) {
 			const response = await fetch('/api/session-revoke-others', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: '{}' });
 			if (!response.ok) return setStatus((s) => ({ ...s, error: 'Password changed, but other sessions could not be revoked. Please sign out of all devices.', message: '' }));
 		}
-		setStatus((s) => ({ ...s, error: error?.message || '', message: error ? '' : 'Password updated and other sessions revoked.' })); event.currentTarget.reset();
+		setStatus((s) => ({ ...s, error: error ? 'Password could not be updated. Sign in again and retry.' : '', message: error ? '' : 'Password updated and other sessions revoked.' })); event.currentTarget.reset();
 	};
 
 	const profile = data.profile || {}; const address = profile.billing_address || {};
@@ -89,6 +91,6 @@ export default function Account() {
 		{tab === 'orders' && <section className="portal-card"><h2>Orders</h2>{!data.orders.length ? <p>No linked orders yet. Guest purchases are claimed after your verified email matches the Stripe receipt.</p> : <div className="portal-list">{data.orders.map((order) => <article key={order.id}><div><strong>Order {order.stripe_session_id.slice(-10)}</strong><p>{formatDate(order.created_at)} · {order.status}</p><small>{order.order_items?.map((item) => `${item.product_name} × ${item.quantity}`).join(', ')}</small></div><strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: order.currency.toUpperCase() }).format(order.amount_total / 100)}</strong></article>)}</div>}</section>}
 		{tab === 'tickets' && <div className="portal-grid"><section className="portal-card"><h2>New ticket</h2><form className="portal-form" onSubmit={createTicket}><label>Subject<input value={newTicket.subject} onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })} minLength="3" maxLength="120" required /></label><label>Category<select value={newTicket.category} onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}><option value="general">General</option><option value="technical">Technical</option><option value="sales">Sales</option><option value="billing">Billing</option></select></label><label>Message<textarea value={newTicket.message} onChange={(e) => setNewTicket({ ...newTicket, message: e.target.value })} maxLength="4000" required /></label><button className="btn btn-primary">Create ticket</button></form></section><section className="portal-card"><h2>Your tickets</h2><div className="ticket-layout"><div className="ticket-list">{data.tickets.map((ticket) => <button key={ticket.id} onClick={() => openTicket(ticket)} className={selectedTicket?.id === ticket.id ? 'active' : ''}><strong>{ticket.subject}</strong><span>{ticket.status.replaceAll('_', ' ')}</span></button>)}</div>{selectedTicket && <div className="conversation"><h3>{selectedTicket.subject}</h3>{messages.map((message) => <div className={message.author_id === user.id ? 'message own' : 'message'} key={message.id}><p>{message.body}</p><small>{formatDate(message.created_at)}</small></div>)}{selectedTicket.status !== 'closed' && <form onSubmit={sendReply}><textarea value={reply} onChange={(e) => setReply(e.target.value)} maxLength="4000" aria-label="Reply" required /><button className="btn btn-primary">Send reply</button></form>}</div>}</div></section></div>}
 		{tab === 'history' && <section className="portal-card"><h2>Activity history</h2><div className="timeline">{data.activity.map((event) => <article key={event.id}><span></span><div><strong>{event.event_type.replaceAll('.', ' ')}</strong><p>{formatDate(event.created_at)}</p></div></article>)}</div></section>}
-		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><form className="portal-form" onSubmit={updatePassword}><label>New password<input name="password" type="password" minLength="8" autoComplete="new-password" required /></label><button className="btn btn-primary">Change password</button></form></section>}
+		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><form className="portal-form" onSubmit={updatePassword}><label>New password<input name="password" type="password" minLength="12" autoComplete="new-password" required /><small>{passwordRequirements}</small></label><button className="btn btn-primary">Change password</button></form></section>}
 	</div>;
 }
