@@ -159,6 +159,39 @@ describe('ticket notification API', () => {
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.error).toMatch(/not configured/i);
 	});
+	it('falls back to an idempotent Resend notification when EmailJS fails', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		process.env.SUPPORT_EMAIL = 'support@softhe.io';
+		process.env.PORTAL_RATE_LIMIT_SECRET = 'portal-rate-secret';
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+		process.env.EMAILJS_SERVICE_ID = 'service';
+		process.env.EMAILJS_PUBLIC_KEY = 'public';
+		process.env.EMAILJS_TICKET_TEMPLATE_ID = 'ticket-template';
+		process.env.RESEND_API_KEY = 're_test';
+		vi.stubGlobal('fetch', vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ id: 'customer', email: 'customer@example.com' }))
+			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: '<test>' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
+			.mockResolvedValueOnce(jsonResponse([]))
+			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }]))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
+			.mockResolvedValueOnce(new Response('', { status: 500 }))
+			.mockResolvedValueOnce(jsonResponse({ id: 'email-id' })));
+		const response = createResponse();
+		await ticketNotification({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json' }, body: { messageId: 'message' } }, response);
+
+		expect(response.statusCode).toBe(200);
+		const resendCall = fetch.mock.calls.find(([url]) => url === 'https://api.resend.com/emails');
+		expect(resendCall).toBeTruthy();
+		expect(resendCall[1].headers['Idempotency-Key']).toBe('ticket-notification/message');
+		expect(JSON.parse(resendCall[1].body).html).toContain('&lt;test&gt;');
+	});
 });
 
 describe('server configuration guards', () => {

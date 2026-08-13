@@ -1,4 +1,5 @@
 const { sendEmailTemplate } = require('./_lib/emailjs');
+const { sendTransactionalEmail } = require('./_lib/resend');
 const { userRequest, verifyActiveUser } = require('./_lib/supabase');
 const { acquireLock, enforceRateLimit, jsonOnly, releaseLock, sendPublicError } = require('./_lib/portal-security');
 
@@ -22,17 +23,35 @@ async function ticketNotification(req, res) {
 		const owner = (await userRequest(user, `profiles?id=eq.${ticket.user_id}&select=email,full_name`))?.[0];
 		const recipient = isStaff ? owner?.email : process.env.SUPPORT_EMAIL;
 		if (!recipient) return res.status(502).json({ error: 'Ticket notification recipient is unavailable' });
-		if (!process.env.EMAILJS_TICKET_TEMPLATE_ID) return res.status(503).json({ error: 'Ticket notifications are not configured' });
+		if (!process.env.EMAILJS_TICKET_TEMPLATE_ID && !process.env.RESEND_API_KEY) return res.status(503).json({ error: 'Ticket notifications are not configured' });
 		await Promise.all([
 			enforceRateLimit('ticket:user', user.id, 20, 3600),
 			enforceRateLimit('ticket:thread', ticket.id, 5, 600),
 		]);
 		const lockName = `ticket-notification:${message.id}`;
 		if (!(await acquireLock(lockName, 30 * 24 * 3600))) return res.status(200).json({ notified: true, duplicate: true });
-		try { await sendEmailTemplate(process.env.EMAILJS_TICKET_TEMPLATE_ID, {
-			to_email: recipient, customer_name: owner?.full_name || owner?.email || 'Customer', ticket_id: ticket.id,
-			ticket_subject: ticket.subject, ticket_status: ticket.status, reply_preview: message.body.slice(0, 500),
-		}); } catch (error) { await releaseLock(lockName).catch(() => {}); throw error; }
+		try {
+			const params = {
+				to_email: recipient, customer_name: owner?.full_name || owner?.email || 'Customer', ticket_id: ticket.id,
+				ticket_subject: ticket.subject, ticket_status: ticket.status, reply_preview: message.body.slice(0, 500),
+			};
+			try {
+				if (!process.env.EMAILJS_TICKET_TEMPLATE_ID) throw new Error('EmailJS ticket delivery is not configured');
+				await sendEmailTemplate(process.env.EMAILJS_TICKET_TEMPLATE_ID, params);
+			} catch (emailJsError) {
+				if (!process.env.RESEND_API_KEY) throw emailJsError;
+				const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+				const body = message.body.slice(0, 500);
+				await sendTransactionalEmail({
+					to: recipient,
+					replyTo: isStaff ? undefined : owner?.email,
+					subject: `[Softhe.io ticket] ${ticket.subject}`,
+					text: `Ticket: ${ticket.id}\nStatus: ${ticket.status}\n\n${body}`,
+					html: `<h1>Softhe.io support ticket</h1><p><strong>Ticket:</strong> ${escapeHtml(ticket.id)}</p><p><strong>Status:</strong> ${escapeHtml(ticket.status)}</p><p>${escapeHtml(body).replace(/\n/g, '<br>')}</p>`,
+					idempotencyKey: `ticket-notification/${message.id}`,
+				});
+			}
+		} catch (error) { await releaseLock(lockName).catch(() => {}); throw error; }
 		return res.status(200).json({ notified: true, duplicate: false });
 	} catch (error) { return sendPublicError(res, error, 'Ticket notification could not be sent'); }
 }
