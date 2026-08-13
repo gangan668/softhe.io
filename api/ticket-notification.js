@@ -1,5 +1,5 @@
 const { sendEmailTemplate } = require('./_lib/emailjs');
-const { adminRequest, verifyActiveUser } = require('./_lib/supabase');
+const { userRequest, verifyActiveUser } = require('./_lib/supabase');
 const { acquireLock, enforceRateLimit, jsonOnly, releaseLock, sendPublicError } = require('./_lib/portal-security');
 
 async function ticketNotification(req, res) {
@@ -12,14 +12,14 @@ async function ticketNotification(req, res) {
 		const messageQuery = messageId
 			? `ticket_messages?id=eq.${encodeURIComponent(messageId)}&author_id=eq.${user.id}&select=id,ticket_id,body,created_at`
 			: `ticket_messages?ticket_id=eq.${encodeURIComponent(ticketId)}&author_id=eq.${user.id}&select=id,ticket_id,body,created_at&order=created_at.desc&limit=1`;
-		const message = (await adminRequest(messageQuery))?.[0];
+		const message = (await userRequest(user, messageQuery))?.[0];
 		if (!message) return res.status(404).json({ error: 'Ticket message not found' });
-		const ticket = (await adminRequest(`tickets?id=eq.${message.ticket_id}&select=id,user_id,subject,status`))?.[0];
+		const ticket = (await userRequest(user, `tickets?id=eq.${message.ticket_id}&select=id,user_id,subject,status`))?.[0];
 		if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
-		const role = (await adminRequest(`user_roles?user_id=eq.${user.id}&select=role`))?.[0]?.role;
+		const role = (await userRequest(user, `user_roles?user_id=eq.${user.id}&select=role`))?.[0]?.role;
 		const isStaff = ['staff', 'admin'].includes(role);
 		if (!isStaff && ticket.user_id !== user.id) return res.status(403).json({ error: 'Ticket access denied' });
-		const owner = (await adminRequest(`profiles?id=eq.${ticket.user_id}&select=email,full_name`))?.[0];
+		const owner = (await userRequest(user, `profiles?id=eq.${ticket.user_id}&select=email,full_name`))?.[0];
 		const recipient = isStaff ? owner?.email : process.env.SUPPORT_EMAIL;
 		if (!recipient) return res.status(502).json({ error: 'Ticket notification recipient is unavailable' });
 		if (!process.env.EMAILJS_TICKET_TEMPLATE_ID) return res.status(503).json({ error: 'Ticket notifications are not configured' });
