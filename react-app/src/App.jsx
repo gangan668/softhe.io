@@ -92,6 +92,7 @@ function App() {
 									<Route path="/login" element={<AuthPage mode="login" />} />
 									<Route path="/register" element={<AuthPage mode="register" />} />
 									<Route path="/forgot-password" element={<AuthPage mode="forgot" />} />
+									<Route path="/resend-confirmation" element={<AuthPage mode="resend" />} />
 									<Route path="/reset-password" element={<ResetPassword />} />
 									<Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
 									<Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />

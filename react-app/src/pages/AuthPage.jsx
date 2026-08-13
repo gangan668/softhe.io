@@ -12,6 +12,7 @@ const copy = {
 	login: ['Welcome back', 'Sign in to view orders, tickets, and account history.'],
 	register: ['Create your account', 'Keep purchases and support conversations in one secure place.'],
 	forgot: ['Reset your password', 'We will email you a secure password-reset link.'],
+	resend: ['Resend confirmation', 'Request a new confirmation link for an account that has not been verified.'],
 };
 
 const captchaEnabled = import.meta.env.VITE_CAPTCHA_ENABLED === 'true';
@@ -38,15 +39,16 @@ export default function AuthPage({ mode }) {
 		const captchaOptions = captchaEnabled ? { captchaToken } : {};
 		if (mode === 'register') result = await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName }, emailRedirectTo: absoluteUrl('/login'), ...captchaOptions } });
 		else if (mode === 'forgot') result = await supabase.auth.resetPasswordForEmail(form.email, { redirectTo: absoluteUrl('/reset-password'), ...captchaOptions });
+		else if (mode === 'resend') result = await supabase.auth.resend({ type: 'signup', email: form.email, options: { emailRedirectTo: absoluteUrl('/login'), ...captchaOptions } });
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password, options: captchaOptions });
 		if (captchaEnabled) { captchaRef.current?.reset(); setCaptchaToken(''); }
 		if (result.error && mode === 'login') return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
 		if (result.error) {
 			const deliveryError = getAuthDeliveryErrorMessage(result.error);
-			return setStatus({ loading: false, error: deliveryError, message: deliveryError ? '' : mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
+			return setStatus({ loading: false, error: deliveryError, message: deliveryError ? '' : mode === 'forgot' ? 'If an account exists for this address, a reset email will arrive shortly.' : 'If this address is awaiting verification, a confirmation email will arrive shortly.' });
 		}
 		if (mode === 'login') navigate(location.state?.from || '/account', { replace: true });
-		else setStatus({ loading: false, error: '', message: mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
+		else setStatus({ loading: false, error: '', message: mode === 'forgot' ? 'If an account exists for this address, a reset email will arrive shortly.' : 'If this address is awaiting verification, a confirmation email will arrive shortly.' });
 	};
 
 	return <div className="portal-page auth-page"><SEO title={`${copy[mode][0]} | Softhe.io`} description={copy[mode][1]} />
@@ -54,12 +56,12 @@ export default function AuthPage({ mode }) {
 			<form onSubmit={submit} className="portal-form">
 				{mode === 'register' && <label>Full name<input name="fullName" value={form.fullName} onChange={update} autoComplete="name" required maxLength="100" /></label>}
 				<label>Email<input name="email" type="email" value={form.email} onChange={update} autoComplete="email" required /></label>
-				{mode !== 'forgot' && <label>Password<input name="password" type="password" value={form.password} onChange={update} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 8} required />{mode === 'register' && <small>{passwordRequirements}</small>}</label>}
+				{!['forgot', 'resend'].includes(mode) && <label>Password<input name="password" type="password" value={form.password} onChange={update} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 8} required />{mode === 'register' && <small>{passwordRequirements}</small>}</label>}
 				{captchaEnabled && captchaSiteKey && <div className="captcha-box"><Turnstile ref={captchaRef} siteKey={captchaSiteKey} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} onError={() => setCaptchaToken('')} options={{ theme: 'dark' }} /></div>}
 				{captchaEnabled && !captchaSiteKey && <div className="portal-error" role="alert">Security verification is not configured.</div>}
 				{status.error && <div className="portal-error" role="alert">{status.error}</div>}{status.message && <div className="portal-success" role="status">{status.message}</div>}
-				<button className="btn btn-primary" disabled={status.loading || loading || (captchaEnabled && (!captchaSiteKey || !captchaToken))}>{status.loading || loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : mode === 'register' ? 'Create account' : 'Send reset link'}</button>
+				<button className="btn btn-primary" disabled={status.loading || loading || (captchaEnabled && (!captchaSiteKey || !captchaToken))}>{status.loading || loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : mode === 'register' ? 'Create account' : mode === 'resend' ? 'Resend confirmation' : 'Send reset link'}</button>
 			</form>
-			<div className="auth-links">{mode !== 'login' && <Link to="/login">Back to login</Link>}{mode === 'login' && <><Link to="/forgot-password">Forgot password?</Link><Link to="/register">Create account</Link></>}</div>
+			<div className="auth-links">{mode !== 'login' && <Link to="/login">Back to login</Link>}{mode === 'login' && <><Link to="/forgot-password">Forgot password?</Link><Link to="/register">Create account</Link><Link to="/resend-confirmation">Resend confirmation</Link></>}</div>
 		</section></div>;
 }
