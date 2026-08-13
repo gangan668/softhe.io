@@ -3,7 +3,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
-import { getAuthErrorMessage } from '../utils/authErrors';
+import { getAuthDeliveryErrorMessage, getAuthErrorMessage } from '../utils/authErrors';
 import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
 import './Portal.css';
 
@@ -40,7 +40,10 @@ export default function AuthPage({ mode }) {
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password, options: captchaOptions });
 		if (captchaEnabled) { captchaRef.current?.reset(); setCaptchaToken(''); }
 		if (result.error && mode === 'login') return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
-		if (result.error) return setStatus({ loading: false, error: '', message: mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
+		if (result.error) {
+			const deliveryError = getAuthDeliveryErrorMessage(result.error);
+			return setStatus({ loading: false, error: deliveryError, message: deliveryError ? '' : mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
+		}
 		if (mode === 'login') navigate(location.state?.from || '/account', { replace: true });
 		else setStatus({ loading: false, error: '', message: mode === 'register' ? 'If this address can be registered, a verification email will arrive shortly.' : 'If an account exists for this address, a reset email will arrive shortly.' });
 	};
