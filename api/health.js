@@ -1,4 +1,5 @@
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
+const { adminRequest } = require('./_lib/supabase');
 
 const REQUIRED_CONFIGURATION = [
 	'PUBLIC_SITE_URL',
@@ -64,15 +65,20 @@ async function health(req, res) {
 	const configuration = getConfigurationStatus();
 	const readyFor = (keys) => !keys.some((key) => configuration.missing.includes(key) || configuration.invalid.includes(key));
 	const storageKeys = ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
+	let portalAccess = readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY']);
+	if (portalAccess) {
+		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
+	}
+	const ready = configuration.ready && portalAccess;
 	res.setHeader('Cache-Control', 'no-store');
-	return res.status(configuration.ready ? 200 : 503).json({
-		status: configuration.ready ? 'ready' : 'configuration-required',
+	return res.status(ready ? 200 : 503).json({
+		status: ready ? 'ready' : 'configuration-required',
 		release: {
 			sourceCommit: process.env.RELEASE_SOURCE_COMMIT || null,
 			fingerprint: process.env.RELEASE_FINGERPRINT || null,
 		},
 		checks: {
-			portal: readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY','ADMIN_EMAIL_ALLOWLIST',...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
+			portal: portalAccess && readyFor(['ADMIN_EMAIL_ALLOWLIST',...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
 			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
 			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
 			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),

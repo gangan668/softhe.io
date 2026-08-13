@@ -3,17 +3,27 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import process from 'node:process';
 
-export const requiredEvidenceIds = [
+export const stageOneEvidenceIds = [
 	'legal.operator-identity',
-	'legal.counsel-approval',
-	'legal.accounting-approval',
 	'benchmark.methodology-and-raw-runs',
 	'ui.responsive-review',
 	'emailjs.contact-delivery',
+	'upstash.rate-limit-record',
+	'monitoring.uptime-alert',
+	'monitoring.browser-error-alert',
+	'monitoring.delivery-failure-alert',
+	'rollback.dns-export',
+	'rollback.rehearsal',
+	'approval.release-owner',
+	'approval.rollback-owner',
+];
+
+export const commerceEvidenceIds = [
+	'legal.counsel-approval',
+	'legal.accounting-approval',
 	'emailjs.order-delivery',
 	'emailjs.withdrawal-acknowledgement',
 	'emailjs.withdrawal-operator-notification',
-	'upstash.rate-limit-record',
 	'upstash.withdrawal-record-and-retention',
 	'upstash.stripe-idempotency-record',
 	'stripe.completed-test-order',
@@ -22,16 +32,11 @@ export const requiredEvidenceIds = [
 	'fulfillment.accepted-order',
 	'fulfillment.deduplicated-order',
 	'fulfillment.retry-and-reconciliation',
-	'monitoring.uptime-alert',
-	'monitoring.browser-error-alert',
-	'monitoring.delivery-failure-alert',
 	'monitoring.stripe-webhook-alert',
 	'monitoring.fulfillment-alert',
-	'rollback.dns-export',
-	'rollback.rehearsal',
-	'approval.release-owner',
-	'approval.rollback-owner',
 ];
+
+export const requiredEvidenceIds = [...stageOneEvidenceIds, ...commerceEvidenceIds];
 
 const placeholderPattern = /^(?:pending|todo|tbd|unknown|replace|example|n\/a|none)(?:\b|:)/i;
 
@@ -78,7 +83,8 @@ export const validateLaunchEvidence = (manifest, expected = {}) => {
 	}
 
 	const evidence = manifest.evidence || {};
-	for (const id of requiredEvidenceIds) {
+	const requiredIds = expected.stage === 'stage-one' ? stageOneEvidenceIds : requiredEvidenceIds;
+	for (const id of requiredIds) {
 		const item = evidence[id];
 		if (!item || typeof item !== 'object') {
 			errors.push(`${id}: evidence entry is missing`);
@@ -107,6 +113,7 @@ const run = async () => {
 		origin: process.env.EVIDENCE_EXPECTED_ORIGIN,
 		commitSha: process.env.EVIDENCE_EXPECTED_COMMIT,
 		releaseFingerprint: process.env.EVIDENCE_EXPECTED_RELEASE_FINGERPRINT,
+		stage: process.env.LAUNCH_STAGE,
 	});
 	if (errors.length) {
 		throw new Error(`Launch evidence is incomplete:\n- ${errors.join('\n- ')}`);

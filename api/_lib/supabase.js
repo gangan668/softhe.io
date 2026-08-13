@@ -32,9 +32,10 @@ const verifyUser = async (req, { required = true } = {}) => {
 const adminRequest = async (path, { method = 'GET', body, headers = {} } = {}) => {
 	const { url, serviceKey } = getConfig();
 	if (!serviceKey) throw new Error('Customer portal server access is not configured');
+	const authorization = serviceKey.startsWith('sb_secret_') ? {} : { Authorization: `Bearer ${serviceKey}` };
 	const response = await fetchWithTimeout(`${url}/rest/v1/${path}`, {
 		method,
-		headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json', ...headers },
+		headers: { apikey: serviceKey, ...authorization, 'Content-Type': 'application/json', ...headers },
 		body: body === undefined ? undefined : JSON.stringify(body),
 	});
 	if (!response.ok) {
@@ -74,8 +75,9 @@ const verifyActiveUser = async (req, options) => {
 const authAdminRequest = async (path, { method = 'POST', body } = {}) => {
 	const { url, serviceKey } = getConfig();
 	if (!serviceKey) throw new Error('Customer portal server access is not configured');
+	const authorization = serviceKey.startsWith('sb_secret_') ? {} : { Authorization: `Bearer ${serviceKey}` };
 	const response = await fetchWithTimeout(`${url}/auth/v1/admin/${path}`, {
-		method, headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, 'Content-Type': 'application/json' },
+		method, headers: { apikey: serviceKey, ...authorization, 'Content-Type': 'application/json' },
 		body: body === undefined ? undefined : JSON.stringify(body),
 	});
 	if (!response.ok) throw new Error(`Authentication administration failed (${response.status})`);

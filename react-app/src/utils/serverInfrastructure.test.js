@@ -81,11 +81,26 @@ describe('production health API', () => {
 		process.env.VAT_STATUS = 'not-registered';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
 		const response = createResponse();
 		await health({ method: 'GET' }, response);
 
 		expect(response.statusCode).toBe(200);
 		expect(response.payload).toEqual(expect.objectContaining({ status: 'ready' }));
+	});
+
+	it('fails readiness when privileged portal access is rejected', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ message: 'Invalid API key' }, false, 401)));
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.checks.portal).toBe(false);
 	});
 
 	it('does not report ticket notifications ready without their template', async () => {

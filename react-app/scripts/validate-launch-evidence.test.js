@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { requiredEvidenceIds, validateLaunchEvidence } from './validate-launch-evidence.js';
+import { requiredEvidenceIds, stageOneEvidenceIds, validateLaunchEvidence } from './validate-launch-evidence.js';
 
 const validManifest = () => ({
 	schemaVersion: 1,
@@ -37,6 +37,14 @@ describe('launch evidence validation', () => {
 		const errors = validateLaunchEvidence(manifest);
 		expect(errors).toContain('stripe.duplicate-webhook: evidence entry is missing');
 		expect(errors).toContain('legal.counsel-approval: status must be passed');
+	});
+
+	it('allows commerce evidence to remain pending for a stage-one launch', () => {
+		const manifest = validManifest();
+		for (const id of requiredEvidenceIds.filter((id) => !stageOneEvidenceIds.includes(id))) {
+			manifest.evidence[id] = { status: 'pending', verifiedAt: '', verifiedBy: '', references: [] };
+		}
+		expect(validateLaunchEvidence(manifest, { stage: 'stage-one' })).toEqual([]);
 	});
 
 	it('rejects a manifest for a different deployment target or commit', () => {
