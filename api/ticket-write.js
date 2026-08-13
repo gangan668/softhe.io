@@ -2,6 +2,7 @@ const { adminRequest, verifyActiveUser } = require('./_lib/supabase');
 const { clientIp, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const TICKET_CATEGORIES = new Set(['general','sales','technical','billing']);
 
 async function ticketWrite(req, res) {
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -17,7 +18,7 @@ async function ticketWrite(req, res) {
 			const subject = String(req.body?.subject || '').trim();
 			const category = String(req.body?.category || '').trim().toLowerCase();
 			const message = String(req.body?.message || '').trim();
-			if (subject.length < 3 || subject.length > 160 || message.length < 3 || message.length > 5000 || !['general','order','technical','billing'].includes(category)) return res.status(400).json({ error: 'Invalid ticket details' });
+			if (subject.length < 3 || subject.length > 160 || message.length < 3 || message.length > 5000 || !TICKET_CATEGORIES.has(category)) return res.status(400).json({ error: 'Invalid ticket details' });
 			const id = await adminRequest('rpc/create_ticket_for_user', { method: 'POST', body: { ticket_user: user.id, ticket_subject: subject, ticket_category: category, first_message: message } });
 			return res.status(201).json({ id });
 		}
@@ -37,3 +38,4 @@ async function ticketWrite(req, res) {
 }
 
 module.exports = ticketWrite;
+module.exports.TICKET_CATEGORIES = TICKET_CATEGORIES;

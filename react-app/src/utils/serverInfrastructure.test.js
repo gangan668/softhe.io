@@ -9,6 +9,7 @@ const health = require('../../../api/health.js');
 const browserErrors = require('../../../api/browser-errors.js');
 const checkoutSession = require('../../../api/checkout-session.js');
 const ticketNotification = require('../../../api/ticket-notification.js');
+const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
@@ -119,6 +120,9 @@ describe('production health API', () => {
 });
 
 describe('ticket notification API', () => {
+	it('keeps the secured API categories aligned with the customer form', () => {
+		expect([...TICKET_CATEGORIES]).toEqual(['general', 'sales', 'technical', 'billing']);
+	});
 	it('fails closed when the ticket notification template is missing', async () => {
 		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
 		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';

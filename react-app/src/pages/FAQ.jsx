@@ -171,7 +171,7 @@ function FAQ() {
 						</p>
 						<ul>
 							<li>
-								<strong>CS2 average FPS:</strong> 670 to 932 on the tested setup
+								<strong>CS2 average FPS:</strong> 662 to 826 in the preliminary captures
 							</li>
 							<li>
 								<strong>CS2 1% low:</strong> 355 to 498 FPS in the published screenshots

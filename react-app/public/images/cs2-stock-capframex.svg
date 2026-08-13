@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="969" height="226" viewBox="0 0 969 226" role="img" aria-labelledby="title desc">
+  <title id="title">Stock Windows 11 CS2 CapFrameX result</title>
+  <desc id="desc">One 109-second preliminary capture measured 662.08 average FPS and 228.31 one-percent-low FPS.</desc>
+  <rect width="969" height="226" fill="#292929"/>
+  <text x="484.5" y="34" text-anchor="middle" fill="#f5f7fa" font-family="Arial,sans-serif" font-size="18" font-weight="700">Counter-Strike 2 — Stock Windows 11 Home</text>
+  <text x="26" y="92" fill="#dfe5eb" font-family="Arial,sans-serif" font-size="14">Average FPS</text>
+  <rect x="150" y="72" width="650" height="28" fill="#f79b32" rx="3"/>
+  <text x="812" y="92" fill="#f5f7fa" font-family="Arial,sans-serif" font-size="15" font-weight="700">662.08</text>
+  <text x="26" y="145" fill="#dfe5eb" font-family="Arial,sans-serif" font-size="14">1% low FPS</text>
+  <rect x="150" y="125" width="224" height="28" fill="#ffc21c" rx="3"/>
+  <text x="386" y="145" fill="#f5f7fa" font-family="Arial,sans-serif" font-size="15" font-weight="700">228.31</text>
+  <text x="484.5" y="197" text-anchor="middle" fill="#aeb8c3" font-family="Arial,sans-serif" font-size="13">CapFrameX 1.8.6.2 · 109 seconds · preliminary single capture</text>
+</svg>

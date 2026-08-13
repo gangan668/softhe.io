@@ -12,7 +12,7 @@ function Home() {
 				keywords="pc optimization, gaming optimization, fps boost, custom windows iso, bios optimization, esports performance, competitive gaming, windows optimization, gaming pc tuning"
 				ogTitle="Softhe.io - PC Optimization for Competitive Gaming"
 				ogDescription="Lean Windows builds, BIOS tuning, and benchmark-led optimization services for gaming PCs."
-				ogImage={absoluteUrl('/images/cs2-optimized-fps.webp')}
+				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 				structuredData={{
 					"@context": "https://schema.org",
 					"@type": "Organization",
@@ -70,13 +70,13 @@ function Home() {
 								<div className="fps-readout">
 									<div>
 										<span className="readout-label">Stock</span>
-										<strong>670</strong>
+										<strong>662</strong>
 										<span>avg FPS</span>
 									</div>
 									<div className="readout-divider"></div>
 									<div>
 										<span className="readout-label">Softhe.io</span>
-										<strong>932</strong>
+										<strong>826</strong>
 										<span>avg FPS</span>
 									</div>
 								</div>
@@ -84,7 +84,7 @@ function Home() {
 									<div className="metric-bar">
 										<span>Frame time</span>
 										<div className="bar-track"><span className="bar-width-64"></span></div>
-										<strong>-27%</strong>
+										<strong>-20%</strong>
 									</div>
 									<div className="metric-bar">
 										<span>Processes</span>
@@ -98,7 +98,7 @@ function Home() {
 									</div>
 								</div>
 								<img
-									src="/images/cs2-optimized-fps.webp"
+									src="/images/cs2-optimized-capframex.svg"
 									alt="Counter-Strike 2 optimized FPS benchmark"
 									className="hero-screenshot"
 									width="969"
@@ -118,11 +118,11 @@ function Home() {
 				<section className="proof-strip" aria-label="Optimization results">
 					<div className="container proof-grid">
 						<div>
-							<strong>+40%</strong>
+							<strong>+25%</strong>
 							<span>Average FPS in tested CS2 run</span>
 						</div>
 						<div>
-							<strong>-27%</strong>
+							<strong>-20%</strong>
 							<span>Frame time reduction</span>
 						</div>
 						<div>
@@ -153,11 +153,11 @@ function Home() {
 						<div className="comparison-card">
 							<div className="comparison-row">
 								<span>Stock Windows</span>
-								<strong className="negative">670 FPS</strong>
+								<strong className="negative">662 FPS</strong>
 							</div>
 							<div className="comparison-row featured">
 								<span>Softhe.io Optimized</span>
-								<strong>932 FPS</strong>
+								<strong>826 FPS</strong>
 							</div>
 							<div className="comparison-footnote">
 								Results from the documented test configuration; individual systems will vary.

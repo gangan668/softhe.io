@@ -10,9 +10,9 @@ function Performance() {
 				title="Performance Benchmarks - Real FPS Comparisons | Softhe.io"
 				description="Review benchmark screenshots and resource usage comparisons for a Softhe.io optimized setup, including CS2 FPS and Windows Task Manager examples."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
-				ogTitle="Performance Benchmarks - +40% FPS Improvement"
-				ogDescription="Benchmark screenshots showing 670 FPS stock vs 932 FPS optimized in Counter-Strike 2 on the tested setup."
-				ogImage={absoluteUrl('/images/cs2-optimized-fps.webp')}
+				ogTitle="Performance Benchmarks - CS2 Configuration Comparison"
+				ogDescription="Preliminary CapFrameX captures measured 662 FPS stock and 826 FPS optimized in Counter-Strike 2 on the tested platform."
+				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -25,7 +25,7 @@ function Performance() {
 						</p>
 						<div className="performance-stats">
 							<div>
-								<strong>670 to 932</strong>
+								<strong>662 to 826</strong>
 								<span>Average FPS in CS2 sample</span>
 							</div>
 							<div>
@@ -45,7 +45,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">In-game sample</span>
 							<h2 className="section-title">Counter-Strike 2 FPS comparison</h2>
-							<p>Same hardware, different optimization levels.</p>
+							<p>Same CPU, GPU, and motherboard; the optimized configuration also changes memory tuning, Windows edition, and GPU driver.</p>
 						</div>
 
 						<div className="fps-showcase">
@@ -53,7 +53,7 @@ function Performance() {
 								<div className="fps-header">
 									<h3>Counter-Strike 2 Performance</h3>
 									<p>
-										Same hardware, different optimization levels
+										Observed whole-configuration comparison
 									</p>
 								</div>
 
@@ -64,11 +64,11 @@ function Performance() {
 												Stock Windows
 											</span>
 											<span className="fps-value poor">
-												670 FPS
+												662 FPS
 											</span>
 										</div>
 										<img
-											src="/images/cs2-stock-fps.webp"
+											src="/images/cs2-stock-capframex.svg"
 											alt="Counter-Strike 2 Stock"
 											className="fps-screenshot"
 											width="1024"
@@ -77,7 +77,7 @@ function Performance() {
 											decoding="async"
 										/>
 										<div className="fps-details">
-											<span>1% Low: 355 FPS</span>
+											<span>1% Low: 228 FPS</span>
 											<span>Frame Time: 1.5ms</span>
 										</div>
 									</div>
@@ -88,11 +88,11 @@ function Performance() {
 												Softhe.io Optimized
 											</span>
 											<span className="fps-value excellent">
-												932 Average FPS
+												826 Average FPS
 											</span>
 										</div>
 										<img
-											src="/images/cs2-optimized-fps.webp"
+											src="/images/cs2-optimized-capframex.svg"
 											alt="Counter-Strike 2 Optimized"
 											className="fps-screenshot"
 											width="1024"
@@ -101,8 +101,8 @@ function Performance() {
 											decoding="async"
 										/>
 										<div className="fps-details">
-											<span>1% Low: 498 FPS</span>
-											<span>Frame Time: 1.1ms</span>
+											<span>1% Low: 287 FPS</span>
+											<span>Frame Time: 1.2ms</span>
 										</div>
 									</div>
 								</div>
@@ -208,13 +208,13 @@ function Performance() {
 									Frame Rate (CS2)
 								</div>
 								<div className="table-cell stock-value">
-									670 avg FPS
+									662 avg FPS
 								</div>
 								<div className="table-cell optimized-value">
-									932 avg FPS
+									826 avg FPS
 								</div>
 								<div className="table-cell improvement">
-									+40% avg
+									+25% avg
 								</div>
 							</div>
 
@@ -228,7 +228,7 @@ function Performance() {
 									1.1ms
 								</div>
 								<div className="table-cell improvement">
-									-27% reduction
+									-20% reduction
 								</div>
 							</div>
 
