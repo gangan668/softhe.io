@@ -110,6 +110,12 @@ export const routeMetadata = [
 		robots: 'noindex, nofollow',
 	},
 	{
+		path: '/resend-confirmation',
+		title: 'Resend Account Confirmation | Softhe.io',
+		description: 'Request a new confirmation link for an unverified Softhe.io customer account.',
+		robots: 'noindex, nofollow',
+	},
+	{
 		path: '/reset-password',
 		title: 'Choose a New Password | Softhe.io',
 		description: 'Choose a new password for your Softhe.io customer account.',
