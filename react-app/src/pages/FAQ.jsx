@@ -174,7 +174,7 @@ function FAQ() {
 								<strong>CS2 average FPS:</strong> 662 to 826 in the preliminary captures
 							</li>
 							<li>
-								<strong>CS2 1% low:</strong> 355 to 498 FPS in the published screenshots
+								<strong>CS2 1% low:</strong> 228 to 287 FPS in the preliminary CapFrameX captures
 							</li>
 							<li>
 								<strong>Idle processes:</strong> 111 to 31 in the Task Manager sample
