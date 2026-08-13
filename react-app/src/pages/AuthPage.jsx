@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { absoluteUrl } from '../config/site';
 import { useAuth } from '../context/useAuth';
 import { getAuthDeliveryErrorMessage, getAuthErrorMessage } from '../utils/authErrors';
 import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
@@ -35,8 +36,8 @@ export default function AuthPage({ mode }) {
 		setStatus({ loading: true, error: '', message: '' });
 		let result;
 		const captchaOptions = captchaEnabled ? { captchaToken } : {};
-		if (mode === 'register') result = await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName }, emailRedirectTo: `${window.location.origin}/login`, ...captchaOptions } });
-		else if (mode === 'forgot') result = await supabase.auth.resetPasswordForEmail(form.email, { redirectTo: `${window.location.origin}/reset-password`, ...captchaOptions });
+		if (mode === 'register') result = await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName }, emailRedirectTo: absoluteUrl('/login'), ...captchaOptions } });
+		else if (mode === 'forgot') result = await supabase.auth.resetPasswordForEmail(form.email, { redirectTo: absoluteUrl('/reset-password'), ...captchaOptions });
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password, options: captchaOptions });
 		if (captchaEnabled) { captchaRef.current?.reset(); setCaptchaToken(''); }
 		if (result.error && mode === 'login') return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
