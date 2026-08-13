@@ -1,5 +1,10 @@
 {
   "schemaVersion": 1,
+  "rawEvidenceArchive": {
+    "url": "https://github.com/gangan668/softhe.io/releases/download/benchmark-evidence-v74-2026-08-13/softhe-cs2-benchmark-evidence-v74-2026-08-13.zip",
+    "sha256": "7ffd5cfb4816fc581f359d96c0e9e6aa76f83c15a81a2aafe7bfae4b4c183de6",
+    "contents": "Four original CapFrameX JSON captures plus this evidence manifest"
+  },
   "captureDate": "2026-08-13",
   "summaryMethod": "median",
   "hardware": "AMD Ryzen 9 7900X; NVIDIA GeForce RTX 4070; ASUS ROG STRIX B650E-I GAMING WIFI; 32 GB DDR5 (6000 MT/s default, 6200 MT/s SoftheOS)",
