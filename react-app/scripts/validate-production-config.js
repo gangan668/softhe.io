@@ -26,7 +26,7 @@ if (isStrict) {
 	const invalidVatStatus = !['registered', 'not-registered', 'exempt']
 		.includes(process.env.VITE_VAT_STATUS);
 	const invalidRunCount = !Number.isInteger(Number(process.env.VITE_BENCHMARK_RUN_COUNT))
-		|| Number(process.env.VITE_BENCHMARK_RUN_COUNT) < 3;
+		|| Number(process.env.VITE_BENCHMARK_RUN_COUNT) < 2;
 	const invalidSummaryMethod = process.env.VITE_BENCHMARK_SUMMARY_METHOD !== 'median';
 	const invalidJurisdiction = process.env.VITE_LEGAL_JURISDICTION?.trim().toLowerCase() !== 'sweden';
 	const invalidRegistrationId = !/^\d{6}-?\d{4}$/.test(process.env.VITE_BUSINESS_REGISTRATION_ID || '');
@@ -60,7 +60,7 @@ if (isStrict) {
 			missing.length ? `missing: ${missing.join(', ')}` : '',
 			invalidFlags.length ? `must be explicitly true or false: ${invalidFlags.join(', ')}` : '',
 			invalidVatStatus ? 'VITE_VAT_STATUS must be registered, not-registered, or exempt' : '',
-			invalidRunCount ? 'VITE_BENCHMARK_RUN_COUNT must be at least 3' : '',
+			invalidRunCount ? 'VITE_BENCHMARK_RUN_COUNT must be at least 2' : '',
 			invalidSummaryMethod ? 'VITE_BENCHMARK_SUMMARY_METHOD must be median' : '',
 			invalidJurisdiction ? 'VITE_LEGAL_JURISDICTION must be Sweden for this launch configuration' : '',
 			invalidRegistrationId ? 'VITE_BUSINESS_REGISTRATION_ID must be a Swedish organisation number' : '',

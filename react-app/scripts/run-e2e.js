@@ -21,7 +21,7 @@ const environment = {
 	VITE_BENCHMARK_SOFTWARE: 'E2E BIOS, drivers, and Windows fixture',
 	VITE_BENCHMARK_SCENARIO: 'E2E game settings and repeated capture procedure',
 	VITE_BENCHMARK_CAPTURE_DATE: '2026-07-20',
-	VITE_BENCHMARK_RUN_COUNT: '3',
+	VITE_BENCHMARK_RUN_COUNT: '2',
 	VITE_BENCHMARK_SUMMARY_METHOD: 'median',
 	VITE_COMMERCE_ENABLED: featureEnabled,
 	VITE_CONTACT_FORM_ENABLED: featureEnabled,

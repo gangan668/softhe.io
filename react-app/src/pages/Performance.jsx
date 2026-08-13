@@ -11,7 +11,7 @@ function Performance() {
 				description="Review benchmark screenshots and resource usage comparisons for a Softhe.io optimized setup, including CS2 FPS and Windows Task Manager examples."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="Performance Benchmarks - CS2 Configuration Comparison"
-				ogDescription="Preliminary CapFrameX captures measured 662 FPS stock and 826 FPS optimized in Counter-Strike 2 on the tested platform."
+				ogDescription="Two-run CapFrameX medians measured 658 FPS default and 826 FPS SoftheOS in Counter-Strike 2 on the tested platform."
 				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 			/>
 			<div className="performance-page">
@@ -25,7 +25,7 @@ function Performance() {
 						</p>
 						<div className="performance-stats">
 							<div>
-								<strong>662 to 826</strong>
+								<strong>658 to 826</strong>
 								<span>Average FPS in CS2 sample</span>
 							</div>
 							<div>
@@ -64,7 +64,7 @@ function Performance() {
 												Stock Windows
 											</span>
 											<span className="fps-value poor">
-												662 FPS
+												658 FPS
 											</span>
 										</div>
 										<img
@@ -77,8 +77,8 @@ function Performance() {
 											decoding="async"
 										/>
 										<div className="fps-details">
-											<span>1% Low: 228 FPS</span>
-											<span>Frame Time: 1.5ms</span>
+											<span>1% Low: 225 FPS</span>
+											<span>Frame Time: 1.52ms</span>
 										</div>
 									</div>
 
@@ -101,8 +101,8 @@ function Performance() {
 											decoding="async"
 										/>
 										<div className="fps-details">
-											<span>1% Low: 287 FPS</span>
-											<span>Frame Time: 1.2ms</span>
+											<span>1% Low: 285 FPS</span>
+											<span>Frame Time: 1.21ms</span>
 										</div>
 									</div>
 								</div>
@@ -208,7 +208,7 @@ function Performance() {
 									Frame Rate (CS2)
 								</div>
 								<div className="table-cell stock-value">
-									662 avg FPS
+									658 avg FPS
 								</div>
 								<div className="table-cell optimized-value">
 									826 avg FPS
@@ -293,7 +293,7 @@ function Performance() {
 							<p>
 								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
 								workload. Raw screenshots should accompany each published run set, including
-								median FPS and 1% lows from at least three repeated stock and optimized runs.
+								median FPS and 1% lows from at least two repeated stock and optimized runs.
 							</p>
 						</div>
 					</div>

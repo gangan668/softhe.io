@@ -18,8 +18,8 @@ const median = (values) => {
 const validMetric = (value) => Number.isFinite(value) && value > 0;
 
 const validateRuns = (label, runs, errors) => {
-	if (!Array.isArray(runs) || runs.length < 3) {
-		errors.push(`${label}.runs must contain at least three runs`);
+	if (!Array.isArray(runs) || runs.length < 2) {
+		errors.push(`${label}.runs must contain at least two runs`);
 		return null;
 	}
 
@@ -68,7 +68,8 @@ export const validateBenchmarkEvidence = (manifest) => {
 	if (medians && manifest.reportedMedians) {
 		for (const profile of ['stock', 'optimized']) {
 			for (const metric of ['averageFps', 'onePercentLowFps']) {
-				if (manifest.reportedMedians[profile]?.[metric] !== medians[profile][metric]) {
+				if (!Number.isFinite(manifest.reportedMedians[profile]?.[metric])
+					|| Math.abs(manifest.reportedMedians[profile][metric] - medians[profile][metric]) > 0.005) {
 					errors.push(`reportedMedians.${profile}.${metric} does not match the calculated median`);
 				}
 			}

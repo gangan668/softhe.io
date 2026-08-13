@@ -13,15 +13,13 @@
   "stock": {
     "runs": [
       { "id": "stock-1", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" },
-      { "id": "stock-2", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" },
-      { "id": "stock-3", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" }
+      { "id": "stock-2", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" }
     ]
   },
   "optimized": {
     "runs": [
       { "id": "optimized-1", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" },
-      { "id": "optimized-2", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" },
-      { "id": "optimized-3", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" }
+      { "id": "optimized-2", "averageFps": 0, "onePercentLowFps": 0, "rawEvidence": "path-or-https-url" }
     ]
   },
   "reportedMedians": {

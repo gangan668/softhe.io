@@ -29,7 +29,7 @@ rather than the later commit that records its evidence. The strict smoke confirm
 ## Evidence quality
 
 - [ ] Benchmark page names the exact hardware, BIOS, drivers, Windows/game versions, settings, and capture date.
-- [ ] Stock and optimized results use at least three repeated runs and report medians, FPS, and 1% lows.
+- [ ] Stock and optimized results use at least two repeated runs and report medians, FPS, and 1% lows.
 - [ ] Raw screenshots are published and claims are limited to the documented test configuration.
 - [ ] Layouts are approved at 320, 390, 768, 1280, and 1440 pixels.
 

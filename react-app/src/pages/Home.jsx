@@ -70,7 +70,7 @@ function Home() {
 								<div className="fps-readout">
 									<div>
 										<span className="readout-label">Stock</span>
-										<strong>662</strong>
+										<strong>658</strong>
 										<span>avg FPS</span>
 									</div>
 									<div className="readout-divider"></div>
@@ -153,7 +153,7 @@ function Home() {
 						<div className="comparison-card">
 							<div className="comparison-row">
 								<span>Stock Windows</span>
-								<strong className="negative">662 FPS</strong>
+								<strong className="negative">658 FPS</strong>
 							</div>
 							<div className="comparison-row featured">
 								<span>Softhe.io Optimized</span>
