@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Cart from './components/Cart';
 import CookieConsent from './components/CookieConsent';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -10,6 +10,7 @@ import { AuthProvider } from './context/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import { trackPageView } from './utils/analytics';
 import { initMonitoring } from './utils/monitoring';
+import { getAuthCallbackError } from './utils/authCallback';
 import './App.css';
 
 import Home from './pages/Home';
@@ -50,6 +51,17 @@ function RouteTracker() {
 	return null;
 }
 
+function AuthCallbackErrorRedirect() {
+	const navigate = useNavigate();
+	useEffect(() => {
+		const authError = getAuthCallbackError(window.location.hash);
+		if (!authError) return;
+		window.history.replaceState(null, '', window.location.pathname + window.location.search);
+		navigate('/forgot-password', { replace: true, state: { authError } });
+	}, [navigate]);
+	return null;
+}
+
 function PageLoader() {
 	return (
 		<div className="page-loader" role="status" aria-label="Loading page">
@@ -67,6 +79,7 @@ function App() {
 			<Router>
 				<AuthProvider>
 				<CartProvider>
+					<AuthCallbackErrorRedirect />
 					<RouteTracker />
 					<div className="App">
 						<a className="skip-link" href="#main-content">Skip to main content</a>
