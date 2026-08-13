@@ -4,10 +4,30 @@ import { describe, expect, it } from 'vitest';
 import { PRODUCTS as clientProducts } from '../data/products';
 
 const require = createRequire(import.meta.url);
-const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getIdempotentAcceptedAt, getPublicOrigin, isStripeCheckoutUrl, normalizeItems, validateLegalAcceptance } = require('../../../api/create-checkout-session.js');
+const checkoutApi = require('../../../api/create-checkout-session.js');
+const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getIdempotentAcceptedAt, getPublicOrigin, isStripeCheckoutUrl, normalizeItems, validateLegalAcceptance } = checkoutApi;
 const { verifyStripeSignature } = require('../../../api/stripe-webhook.js');
 
 describe('server checkout validation', () => {
+	it('fails closed at the API boundary when commerce is disabled', async () => {
+		const previous = process.env.COMMERCE_ENABLED;
+		process.env.COMMERCE_ENABLED = 'false';
+		const response = {
+			statusCode: null,
+			payload: null,
+			setHeader() {},
+			status(code) { this.statusCode = code; return this; },
+			json(payload) { this.payload = payload; return this; },
+		};
+
+		await checkoutApi({ method: 'POST', headers: {}, body: {} }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload).toEqual({ error: 'Checkout is not available' });
+		if (previous === undefined) delete process.env.COMMERCE_ENABLED;
+		else process.env.COMMERCE_ENABLED = previous;
+	});
+
 	it('keeps client display prices aligned with server-authoritative prices', () => {
 		const clientPriceById = Object.fromEntries(clientProducts.map(({ id, price }) => [id, price * 100]));
 		const serverPriceById = Object.fromEntries(Object.entries(serverProducts).map(([id, product]) => [id, product.unitAmount]));

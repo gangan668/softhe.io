@@ -144,6 +144,9 @@ async function createCheckoutSession(req, res) {
 		res.setHeader('Allow', 'POST');
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
+	if (process.env.COMMERCE_ENABLED !== 'true') {
+		return res.status(503).json({ error: 'Checkout is not available' });
+	}
 
 	if (!process.env.STRIPE_SECRET_KEY) {
 		return res.status(503).json({ error: 'Stripe checkout is not configured' });
