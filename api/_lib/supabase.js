@@ -45,10 +45,26 @@ const adminRequest = async (path, { method = 'GET', body, headers = {} } = {}) =
 	return response.json().catch(() => null);
 };
 
+const userRequest = async (user, path, { method = 'GET', body, headers = {} } = {}) => {
+	const { url, publishableKey } = getConfig();
+	if (!user?.token) throw Object.assign(new Error('Authentication required'), { statusCode: 401 });
+	const response = await fetchWithTimeout(`${url}/rest/v1/${path}`, {
+		method,
+		headers: { apikey: publishableKey, Authorization: `Bearer ${user.token}`, 'Content-Type': 'application/json', ...headers },
+		body: body === undefined ? undefined : JSON.stringify(body),
+	});
+	if (!response.ok) {
+		const data = await response.json().catch(() => ({}));
+		throw Object.assign(new Error(data.message || data.error || `Customer data request failed (${response.status})`), { statusCode: response.status });
+	}
+	if (response.status === 204) return null;
+	return response.json().catch(() => null);
+};
+
 const verifyActiveUser = async (req, options) => {
 	const user = await verifyUser(req, options);
 	if (!user) return null;
-	const profile = (await adminRequest(`profiles?id=eq.${encodeURIComponent(user.id)}&select=account_status`))?.[0];
+	const profile = (await userRequest(user, `profiles?id=eq.${encodeURIComponent(user.id)}&select=account_status`))?.[0];
 	if (!profile || profile.account_status !== 'active') {
 		throw Object.assign(new Error('Account is unavailable'), { statusCode: 403, publicMessage: 'This account is not active.' });
 	}
@@ -75,4 +91,4 @@ const portalServerConfigured = () => Boolean(
 	&& process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, verifyActiveUser, verifyUser };
+module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, userRequest, verifyActiveUser, verifyUser };
