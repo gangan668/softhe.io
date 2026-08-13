@@ -55,7 +55,9 @@ function Navbar({ onCartClick }) {
 		<nav className="navbar" aria-label="Primary navigation">
 			<div className="nav-container">
 				<div className="nav-logo">
-					<Link to="/">Softhe.io</Link>
+					<Link to="/" aria-label="Softhe.io home">
+						<img src="/images/softhe-icon-192.png" alt="Softhe.io logo" width="48" height="48" />
+					</Link>
 				</div>
 				<ul id="primary-navigation" className={"nav-menu " + (isOpen ? "active" : "")}>
 					<li className="nav-item">

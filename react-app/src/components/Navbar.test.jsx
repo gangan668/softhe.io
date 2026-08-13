@@ -33,14 +33,14 @@ describe("Navbar Component", () => {
 			expect(screen.getByRole("navigation")).toBeInTheDocument();
 		});
 
-		it("should render the logo with text 'Softhe.io'", () => {
+		it("should render the Softhe.io logo", () => {
 			renderNavbar();
-			expect(screen.getByText("Softhe.io")).toBeInTheDocument();
+			expect(screen.getByAltText("Softhe.io logo")).toBeInTheDocument();
 		});
 
 		it("should render the logo as a link to home", () => {
 			renderNavbar();
-			const logo = screen.getByText("Softhe.io");
+			const logo = screen.getByRole("link", { name: "Softhe.io home" });
 			expect(logo).toHaveAttribute("href", "/");
 		});
 
@@ -379,7 +379,7 @@ describe("Navbar Component", () => {
 			const user = userEvent.setup();
 			renderNavbar("/services");
 
-			const logo = screen.getByText("Softhe.io");
+			const logo = screen.getByRole("link", { name: "Softhe.io home" });
 			await user.click(logo);
 
 			// Logo should link to home
@@ -391,7 +391,7 @@ describe("Navbar Component", () => {
 
 			routes.forEach((route) => {
 				const { unmount } = renderNavbar(route);
-				expect(screen.getByText("Softhe.io")).toBeInTheDocument();
+				expect(screen.getByAltText("Softhe.io logo")).toBeInTheDocument();
 				unmount();
 			});
 		});

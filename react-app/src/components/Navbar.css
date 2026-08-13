@@ -32,11 +32,25 @@
 }
 
 .nav-logo a {
-	font-size: 1.5rem;
-	font-weight: 700;
+	display: grid;
+	place-items: center;
 	text-decoration: none;
-	color: var(--text-primary);
-	letter-spacing: 0;
+	border-radius: 50%;
+}
+
+.nav-logo img {
+	display: block;
+	width: 48px;
+	height: 48px;
+	object-fit: contain;
+	filter: drop-shadow(0 0 10px rgba(65, 210, 232, 0.18));
+	transition: transform var(--transition), filter var(--transition);
+}
+
+.nav-logo a:hover img,
+.nav-logo a:focus-visible img {
+	transform: scale(1.06);
+	filter: drop-shadow(0 0 14px rgba(65, 210, 232, 0.34));
 }
 
 .nav-menu {
