@@ -1,30 +1,40 @@
 # Production rollback record
 
-Last verified: 2026-07-21 (Europe/Berlin)
+Last verified: 2026-08-13 (Europe/Berlin)
 
 ## Known deployment targets
 
 | Role | Origin or identifier | Evidence |
 | --- | --- | --- |
 | Current public production | `https://softhe.io` on GitHub Pages | Pages run `29711027437`, commit `5417994f898fed04707e4c39b26e2a7eafac8f12` |
-| Vercel release candidate | `https://softhe-io.vercel.app` | Deployment `dpl_EXmsJm8uNKmexoAXpKtrm5cMMRfg`; source `30dc920f6ba08145c74aa00573ebfdec02374a46`; fingerprint `softhe-20260721064541-30dc920-69a95053c80247db`; contact and commerce disabled |
+| Vercel release candidate | `https://softhe-4io0v8xpk-suportsofthe-9420s-projects.vercel.app` | Deployment `dpl_CH3LjgqSXQyEGDz2V8HVC7Aw74Se`; source `f2ba25e36f46ab4f5d6fd242c037219941e54c9d`; fingerprint `softhe-20260813-f2ba25e-stage1`; commerce disabled |
+| Preview rollback candidate | `https://softhe-28md2dy4z-suportsofthe-9420s-projects.vercel.app` | Deployment `dpl_EfhsJ1urLkqn1H9hXdn1zczq2vLW`; `/api/health` ready at rehearsal time |
 
 The custom domain still points to GitHub Pages. Do not change the records below until the
 Vercel health endpoint is ready and the commercial launch checklist is complete.
 
 ## Public resolver baseline
 
-Observed at `2026-07-21T02:30:00+02:00` from the release workstation:
+Observed again at `2026-08-13T10:13:00+02:00` from the release workstation:
 
 - `https://softhe.io/` returned HTTP 200 with `Server: GitHub.com`.
 - A deliberately missing path returned HTTP 404.
 - The apex resolved to the four GitHub Pages IPv4 and four IPv6 addresses recorded below.
+- The authoritative nameservers were `ns1.dyna-ns.net` and `ns2.dyna-ns.net`; the observed record TTL was 300 seconds.
 - `www.softhe.io` did not return an A, AAAA, or CNAME answer from the workstation resolver.
 - `https://softhe-io.vercel.app/` returned HTTP 200, the expected Content-Security-Policy,
   `X-Content-Type-Options: nosniff`, and a true HTTP 404 for the same missing-path probe.
 
 This is a public-resolution baseline, not the required DNS-provider zone export. Capture the
 provider export, TTLs, account/zone identifier, and approver immediately before cutover.
+
+## Preview rollback rehearsal
+
+On 2026-08-13, the stable `customer-portal-test` Preview alias was moved from deployment
+`dpl_CH3LjgqSXQyEGDz2V8HVC7Aw74Se` to prior ready deployment
+`dpl_EfhsJ1urLkqn1H9hXdn1zczq2vLW`, then restored to the candidate. Both immutable deployments
+returned `status: ready` with every `/api/health` check true. No production alias or DNS record
+was changed during this rehearsal.
 
 ## Current GitHub Pages DNS target
 
