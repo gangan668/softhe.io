@@ -84,8 +84,25 @@ const authAdminRequest = async (path, { method = 'POST', body } = {}) => {
 	return response.status === 204 ? null : response.json().catch(() => null);
 };
 
-const isAdminEmail = (email) => new Set((process.env.ADMIN_EMAIL_ALLOWLIST || '')
-	.split(',').map((value) => value.trim().toLowerCase()).filter(Boolean)).has(String(email).toLowerCase());
+const jwtClaims = (token) => {
+	try { return JSON.parse(Buffer.from(String(token).split('.')[1] || '', 'base64url').toString('utf8')); }
+	catch { return {}; }
+};
+
+const staffPortalEnabled = () => process.env.STAFF_PORTAL_ENABLED === 'true';
+
+const verifyStaff = async (req, { adminOnly = false } = {}) => {
+	if (!staffPortalEnabled()) throw Object.assign(new Error('Not found'), { statusCode: 404, publicMessage: 'Not found' });
+	const user = await verifyActiveUser(req);
+	if (!user.email_confirmed_at) throw Object.assign(new Error('Forbidden'), { statusCode: 403, publicMessage: 'Forbidden' });
+	const claims = jwtClaims(user.token);
+	if (claims.sub !== user.id || claims.aal !== 'aal2' || !/^[0-9a-f-]{36}$/i.test(String(claims.session_id || ''))) {
+		throw Object.assign(new Error('MFA required'), { statusCode: 403, publicMessage: 'Multi-factor authentication is required.' });
+	}
+	const access = (await adminRequest('rpc/verify_staff_access', { method: 'POST', body: { target_user: user.id, target_session: claims.session_id } }))?.[0];
+	if (!access || (adminOnly && access.role !== 'admin')) throw Object.assign(new Error('Forbidden'), { statusCode: 403, publicMessage: 'Forbidden' });
+	return { ...user, staffRole: access.role, staffExpiresAt: access.expires_at, sessionId: claims.session_id };
+};
 
 const portalServerConfigured = () => Boolean(
 	(process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL)
@@ -93,4 +110,4 @@ const portalServerConfigured = () => Boolean(
 	&& process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, isAdminEmail, portalServerConfigured, userRequest, verifyActiveUser, verifyUser };
+module.exports = { adminRequest, authAdminRequest, getBearerToken, getConfig, portalServerConfigured, staffPortalEnabled, userRequest, verifyActiveUser, verifyStaff, verifyUser };

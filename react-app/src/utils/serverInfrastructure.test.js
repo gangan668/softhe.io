@@ -9,6 +9,8 @@ const health = require('../../../api/health.js');
 const browserErrors = require('../../../api/browser-errors.js');
 const checkoutSession = require('../../../api/checkout-session.js');
 const ticketNotification = require('../../../api/ticket-notification.js');
+const portalBootstrap = require('../../../api/portal-bootstrap.js');
+const staffApi = require('../../../api/_lib/staff-handler.js');
 const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
@@ -191,6 +193,37 @@ describe('ticket notification API', () => {
 		expect(resendCall).toBeTruthy();
 		expect(resendCall[1].headers['Idempotency-Key']).toBe('ticket-notification/message');
 		expect(JSON.parse(resendCall[1].body).html).toContain('&lt;test&gt;');
+	});
+});
+
+describe('staff authorization boundary', () => {
+	it('keeps every staff endpoint unavailable unless explicitly enabled', async () => {
+		delete process.env.STAFF_PORTAL_ENABLED;
+		const response = createResponse();
+		await staffApi({ method: 'GET', headers: {}, query: { action: 'status' } }, response);
+		expect(response.statusCode).toBe(404);
+		expect(response.payload).toEqual({ error: 'Not found' });
+	});
+
+	it('never grants or renews a role during customer bootstrap', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		process.env.PORTAL_RATE_LIMIT_SECRET = 'rate-secret';
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+		const fetchMock = vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ id: '11111111-1111-4111-8111-111111111111', email: 'test@example.com', email_confirmed_at: '2026-08-13T00:00:00Z' }))
+			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse([]));
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await portalBootstrap({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json' }, body: {}, query: {} }, response);
+		expect(response.statusCode).toBe(200);
+		expect(fetchMock.mock.calls.some(([url]) => String(url).includes('user_roles'))).toBe(false);
+		expect(response.payload).not.toHaveProperty('staff');
 	});
 });
 
@@ -631,6 +664,7 @@ afterEach(() => {
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
 		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT',
+		'STAFF_PORTAL_ENABLED',
 	]) delete process.env[key];
 });
 

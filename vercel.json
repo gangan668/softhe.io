@@ -4,6 +4,7 @@
 	"cleanUrls": true,
 	"trailingSlash": false,
 	"rewrites": [
+		{ "source": "/api/staff", "destination": "/api/portal-bootstrap?staff=1" },
 		{ "source": "/api/session-revoke-others", "destination": "/api/portal-bootstrap?action=revoke-others" },
 		{ "source": "/api/staff/revoke", "destination": "/api/portal-bootstrap?action=revoke-staff" }
 		,{ "source": "/api/tickets/write", "destination": "/api/ticket-write" }

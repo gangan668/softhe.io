@@ -25,9 +25,9 @@ export function AuthProvider({ children }) {
 	useEffect(() => {
 		if (!session?.access_token) return;
 		let active = true;
-		const bootstrap = () => fetch('/api/portal-bootstrap', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: '{}' })
+		const bootstrap = () => fetch('/api/staff?action=status', { headers: { Authorization: `Bearer ${session.access_token}` } })
 			.then((response) => response.ok ? response.json() : null)
-			.then((data) => { if (active) setStaff(Boolean(data?.staff)); })
+			.then((data) => { if (active) setStaff(Boolean(data?.authorized && data?.mfa === 'aal2')); })
 			.catch(() => { if (active) setStaff(false); })
 			.finally(() => { if (active) setStaffCheckedUserId(sessionUserId); });
 		bootstrap();

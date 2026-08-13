@@ -1,6 +1,7 @@
-const { adminRequest, getBearerToken, getConfig, isAdminEmail, verifyActiveUser, verifyUser } = require('./_lib/supabase');
+const { adminRequest, getBearerToken, getConfig, verifyActiveUser, verifyUser } = require('./_lib/supabase');
 const { clientIp, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 const { fetchWithTimeout } = require('./_lib/fetch');
+const staffHandler = require('./_lib/staff-handler');
 
 const revokeOtherSessions = async (req, res) => {
 	const user = await verifyUser(req);
@@ -10,55 +11,25 @@ const revokeOtherSessions = async (req, res) => {
 	return res.status(200).json({ revoked: true, userId: user.id });
 };
 
-const revokeStaff = async (req, res) => {
-	const actor = await verifyUser(req);
-	if (!actor.email_confirmed_at || !isAdminEmail(actor.email)) return res.status(403).json({ error: 'Staff access required' });
-	const role = (await adminRequest(`user_roles?user_id=eq.${encodeURIComponent(actor.id)}&select=role,expires_at,revoked_at`))?.[0];
-	if (!['staff','admin'].includes(role?.role) || role.revoked_at || new Date(role.expires_at) <= new Date()) return res.status(403).json({ error: 'Staff access required' });
-	await enforceRateLimit('staff:revoke', actor.id, 10, 3600);
-	const targetUser = String(req.body?.targetUser || '');
-	const reason = String(req.body?.reason || '').trim();
-	if (!/^[0-9a-f-]{36}$/i.test(targetUser) || reason.length < 3 || reason.length > 500) return res.status(400).json({ error: 'Valid target user and reason are required' });
-	if (targetUser === actor.id) return res.status(400).json({ error: 'Use another administrator to revoke this account' });
-	await adminRequest('rpc/revoke_staff_access', { method: 'POST', body: { target_user: targetUser, revoker: actor.id, revoke_reason: reason } });
-	return res.status(200).json({ revoked: true });
-};
-
-const setAccountStatus = async (req, res) => {
-	const actor = await verifyActiveUser(req);
-	if (!actor.email_confirmed_at || !isAdminEmail(actor.email)) return res.status(403).json({ error: 'Staff access required' });
-	const role = (await adminRequest(`user_roles?user_id=eq.${encodeURIComponent(actor.id)}&select=role,expires_at,revoked_at`))?.[0];
-	if (role?.role !== 'admin' || role.revoked_at || new Date(role.expires_at) <= new Date()) return res.status(403).json({ error: 'Administrator access required' });
-	await enforceRateLimit('account-status', actor.id, 20, 3600);
-	const targetUser = String(req.body?.targetUser || '');
-	const status = String(req.body?.status || '');
-	if (!/^[0-9a-f-]{36}$/i.test(targetUser) || !['active','suspended'].includes(status) || targetUser === actor.id) return res.status(400).json({ error: 'Valid target account and status are required' });
-	await adminRequest('rpc/set_portal_account_status', { method: 'POST', body: { target_user: targetUser, actor_user: actor.id, new_status: status } });
-	return res.status(200).json({ updated: true, status });
-};
-
 async function portalBootstrap(req, res) {
+	if (req.query?.staff === '1') return staffHandler(req, res);
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 	try {
 		jsonOnly(req);
 		if (req.query?.action === 'revoke-others') return await revokeOtherSessions(req, res);
-		if (req.query?.action === 'revoke-staff') return await revokeStaff(req, res);
-		if (req.query?.action === 'account-status') return await setAccountStatus(req, res);
+		if (['revoke-staff', 'account-status'].includes(req.query?.action)) return res.status(410).json({ error: 'Legacy staff operation disabled' });
 		const user = await verifyActiveUser(req);
 		if (!user.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before using the portal' });
 		await Promise.all([
 			enforceRateLimit('bootstrap:user', user.id, 10, 60),
 			enforceRateLimit('bootstrap:ip', clientIp(req), 30, 60),
 		]);
-		const staff = isAdminEmail(user.email);
-		await adminRequest('user_roles?on_conflict=user_id', {
-			method: 'POST', body: { user_id: user.id, role: staff ? 'admin' : 'customer', expires_at: staff ? new Date(Date.now() + 15 * 60 * 1000).toISOString() : null, revoked_at: null }, headers: { Prefer: 'resolution=merge-duplicates' },
-		});
+		// Bootstrap is deliberately incapable of granting or renewing privileged roles.
 		const claimed = await adminRequest('rpc/claim_verified_orders', { method: 'POST', body: { claim_user: user.id, claim_email: user.email } });
 		if (claimed?.length) await adminRequest('activity_events', { method: 'POST', body: claimed.map((order) => ({
 			user_id: user.id, actor_id: user.id, event_type: 'order.claimed', resource_type: 'order', resource_id: order.id,
 		})) });
-		return res.status(200).json({ ready: true, claimedOrders: claimed?.length || 0, staff });
+		return res.status(200).json({ ready: true, claimedOrders: claimed?.length || 0 });
 	} catch (error) {
 		return sendPublicError(res, error, 'Customer portal is temporarily unavailable');
 	}

@@ -15,9 +15,11 @@ The `SUPABASE_SERVICE_ROLE_KEY` bypasses RLS and must remain server-only. Never 
 
 ## Staff access and backfill
 
-Comma-separated, verified emails in `ADMIN_EMAIL_ALLOWLIST` are promoted to `admin` by `/api/portal-bootstrap` after login. Removing an email from the variable demotes that account to `customer` on its next session bootstrap.
+Staff access is disabled unless the server-only `STAFF_PORTAL_ENABLED` flag is exactly `true`. Email addresses are never an authorization source. Customer bootstrap cannot grant, renew, or restore a privileged role.
 
-After deploying the schema and server variables, an allowlisted administrator can POST to `/api/portal-backfill` with their Supabase bearer token. It scans paid Stripe Checkout Sessions, imports sessions containing Softhe order metadata, and safely upserts them by Stripe session ID. Run it once for initial migration; repeated runs are idempotent for orders and line items.
+Staff must be provisioned by immutable Supabase user ID through the service-role-only `grant_staff_access` RPC. Grants require a reason and an expiry of no more than 90 days. Every staff API request requires an active grant, an active Auth session, and Supabase AAL2 MFA. Revoke staff through the protected staff API or `revoke_staff_access`; revocation also deletes the user's Auth sessions.
+
+After an administrator is explicitly enrolled and has elevated the current session with MFA, they can POST to `/api/portal-backfill` with their Supabase bearer token. It scans paid Stripe Checkout Sessions, imports sessions containing Softhe order metadata, and safely upserts them by Stripe session ID. Run it once for initial migration; repeated runs are idempotent for orders and line items.
 
 ## Preview payment receiver
 
@@ -30,5 +32,6 @@ Set `FULFILLMENT_TEST_FAIL_FIRST=true` only for the retry test. The first delive
 - Confirm anonymous Supabase REST requests cannot read any portal table.
 - Confirm two test customers cannot read or update each other's profile, orders, tickets, messages, or activity.
 - Confirm customers cannot update `user_roles`, orders, order items, activity events, or webhook event records.
-- Confirm only staff can change ticket status or access `/admin` data.
+- Confirm a normal customer, an expired staff grant, and an AAL1 staff session cannot access `/admin` data.
+- Confirm authenticated browser queries remain ownership-only even for staff accounts.
 - Rotate the service-role key immediately if it is ever exposed.

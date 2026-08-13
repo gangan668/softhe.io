@@ -20,6 +20,7 @@ export default function Account() {
 	const [status, setStatus] = useState({ loading: true, error: '', message: '' });
 	const [newTicket, setNewTicket] = useState({ subject: '', category: 'general', message: '' });
 	const [reply, setReply] = useState('');
+	const [mfa, setMfa] = useState({ factorId: '', qr: '', code: '', message: '', error: '' });
 
 	const load = useCallback(async () => {
 		setStatus((s) => ({ ...s, loading: true, error: '' }));
@@ -81,6 +82,22 @@ export default function Account() {
 		}
 		setStatus((s) => ({ ...s, error: error ? 'Password could not be updated. Sign in again and retry.' : '', message: error ? '' : 'Password updated and other sessions revoked.' })); event.currentTarget.reset();
 	};
+	const beginMfa = async () => {
+		const factors = await supabase.auth.mfa.listFactors();
+		const verified = factors.data?.totp?.find((factor) => factor.status === 'verified');
+		if (verified) return setMfa((value) => ({ ...value, factorId: verified.id, qr: '', message: 'Enter a current authenticator code to elevate this session.', error: '' }));
+		const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Softhe.io staff access' });
+		setMfa((value) => error ? { ...value, error: 'MFA enrollment could not be started.' } : { ...value, factorId: data.id, qr: data.totp.qr_code, message: 'Scan this QR code, then enter the six-digit code.', error: '' });
+	};
+	const verifyMfa = async (event) => {
+		event.preventDefault();
+		const challenge = await supabase.auth.mfa.challenge({ factorId: mfa.factorId });
+		if (challenge.error) return setMfa((value) => ({ ...value, error: 'MFA challenge could not be created.' }));
+		const verified = await supabase.auth.mfa.verify({ factorId: mfa.factorId, challengeId: challenge.data.id, code: mfa.code });
+		if (verified.error) return setMfa((value) => ({ ...value, error: 'That authenticator code was not accepted.' }));
+		await supabase.auth.refreshSession();
+		setMfa((value) => ({ ...value, code: '', qr: '', message: 'MFA verified. This session now has AAL2 assurance.', error: '' }));
+	};
 
 	const profile = data.profile || {}; const address = profile.billing_address || {};
 	return <div className="portal-page"><SEO title="Customer account | Softhe.io" description="Manage your Softhe.io profile, orders, support tickets, and account history." />
@@ -91,6 +108,6 @@ export default function Account() {
 		{tab === 'orders' && <section className="portal-card"><h2>Orders</h2>{!data.orders.length ? <p>No linked orders yet. Guest purchases are claimed after your verified email matches the Stripe receipt.</p> : <div className="portal-list">{data.orders.map((order) => <article key={order.id}><div><strong>Order {order.stripe_session_id.slice(-10)}</strong><p>{formatDate(order.created_at)} · {order.status}</p><small>{order.order_items?.map((item) => `${item.product_name} × ${item.quantity}`).join(', ')}</small></div><strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: order.currency.toUpperCase() }).format(order.amount_total / 100)}</strong></article>)}</div>}</section>}
 		{tab === 'tickets' && <div className="portal-grid"><section className="portal-card"><h2>New ticket</h2><form className="portal-form" onSubmit={createTicket}><label>Subject<input value={newTicket.subject} onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })} minLength="3" maxLength="120" required /></label><label>Category<select value={newTicket.category} onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}><option value="general">General</option><option value="technical">Technical</option><option value="sales">Sales</option><option value="billing">Billing</option></select></label><label>Message<textarea value={newTicket.message} onChange={(e) => setNewTicket({ ...newTicket, message: e.target.value })} maxLength="4000" required /></label><button className="btn btn-primary">Create ticket</button></form></section><section className="portal-card"><h2>Your tickets</h2><div className="ticket-layout"><div className="ticket-list">{data.tickets.map((ticket) => <button key={ticket.id} onClick={() => openTicket(ticket)} className={selectedTicket?.id === ticket.id ? 'active' : ''}><strong>{ticket.subject}</strong><span>{ticket.status.replaceAll('_', ' ')}</span></button>)}</div>{selectedTicket && <div className="conversation"><h3>{selectedTicket.subject}</h3>{messages.map((message) => <div className={message.author_id === user.id ? 'message own' : 'message'} key={message.id}><p>{message.body}</p><small>{formatDate(message.created_at)}</small></div>)}{selectedTicket.status !== 'closed' && <form onSubmit={sendReply}><textarea value={reply} onChange={(e) => setReply(e.target.value)} maxLength="4000" aria-label="Reply" required /><button className="btn btn-primary">Send reply</button></form>}</div>}</div></section></div>}
 		{tab === 'history' && <section className="portal-card"><h2>Activity history</h2><div className="timeline">{data.activity.map((event) => <article key={event.id}><span></span><div><strong>{event.event_type.replaceAll('.', ' ')}</strong><p>{formatDate(event.created_at)}</p></div></article>)}</div></section>}
-		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><form className="portal-form" onSubmit={updatePassword}><label>New password<input name="password" type="password" minLength="12" autoComplete="new-password" required /><small>{passwordRequirements}</small></label><button className="btn btn-primary">Change password</button></form></section>}
+		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><form className="portal-form" onSubmit={updatePassword}><label>New password<input name="password" type="password" minLength="12" autoComplete="new-password" required /><small>{passwordRequirements}</small></label><button className="btn btn-primary">Change password</button></form><hr /><h3>Authenticator app</h3><p>Staff access requires a verified authenticator and an AAL2 session.</p>{mfa.error && <div className="portal-error" role="alert">{mfa.error}</div>}{mfa.message && <div className="portal-success" role="status">{mfa.message}</div>}{mfa.qr && <img src={mfa.qr} alt="Authenticator enrollment QR code" width="220" height="220" />}{!mfa.factorId ? <button className="btn btn-secondary" onClick={beginMfa}>Set up or verify MFA</button> : <form className="portal-form" onSubmit={verifyMfa}><label>Six-digit code<input value={mfa.code} onChange={(event) => setMfa((value) => ({ ...value, code: event.target.value.replace(/\D/g, '').slice(0, 6) }))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required /></label><button className="btn btn-primary">Verify MFA</button></form>}</section>}
 	</div>;
 }
