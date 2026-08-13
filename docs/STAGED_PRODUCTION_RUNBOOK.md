@@ -3,8 +3,8 @@
 ## Current release candidate
 
 - Source commit: `e009c3928d4cd46cf0a18bf913737843c14d6c7e`
-- Preview deployment: `dpl_7vK12ixYqL77eHbnVrkqxsVYnti2`
-- Preview origin: `https://softhe-1u14ft7qm-suportsofthe-9420s-projects.vercel.app`
+- Preview deployment: `dpl_7VAzHt69g7MU9wzf6WfDTtG6SXhn`
+- Preview origin: `https://softhe-fqsrij48t-suportsofthe-9420s-projects.vercel.app`
 - Release fingerprint: `softhe-20260813-e009c39-a9135fd2`
 - Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled
 - Fail-closed checkout verification: `POST /api/create-checkout-session` returned HTTP 503 with

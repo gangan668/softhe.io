@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "origin": "https://softhe-1u14ft7qm-suportsofthe-9420s-projects.vercel.app",
-    "deploymentId": "dpl_7vK12ixYqL77eHbnVrkqxsVYnti2",
+    "origin": "https://softhe-fqsrij48t-suportsofthe-9420s-projects.vercel.app",
+    "deploymentId": "dpl_7VAzHt69g7MU9wzf6WfDTtG6SXhn",
     "commitSha": "e009c3928d4cd46cf0a18bf913737843c14d6c7e",
     "releaseFingerprint": "softhe-20260813-e009c39-a9135fd2",
-    "strictSmokeRun": "Authenticated Vercel CLI health and fail-closed checkout qualification completed 2026-08-13T07:36:21+02:00; protected browser, CAPTCHA lifecycle, rollback rehearsal, and GitHub Commercial Release Gate remain pending",
-    "verifiedAt": "2026-08-13T07:36:21+02:00"
+    "strictSmokeRun": "Authenticated Vercel CLI health and fail-closed checkout qualification completed 2026-08-13T07:38:08+02:00; protected browser, CAPTCHA lifecycle, rollback rehearsal, and GitHub Commercial Release Gate remain pending",
+    "verifiedAt": "2026-08-13T07:38:08+02:00"
   },
   "evidence": {
     "legal.operator-identity": { "status": "passed", "verifiedAt": "2026-07-21T08:01:11+02:00", "verifiedBy": "Hannes Axelsson", "references": ["https://softhe-io.vercel.app/api/health (operator identity configuration check passed)"] },
