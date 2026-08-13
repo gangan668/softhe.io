@@ -2,11 +2,13 @@
 
 ## Current release candidate
 
-- Source commit: `17dab0c7396abef55241a727a1767f60322350c3`
-- Preview deployment: `dpl_7xKXvaBtwiogxbCAkeqxigda6A8g`
-- Preview origin: `https://softhe-7zper1esk-suportsofthe-9420s-projects.vercel.app`
-- Release fingerprint: `softhe-20260813-17dab0c-7b41c2e9`
+- Source commit: `e009c3928d4cd46cf0a18bf913737843c14d6c7e`
+- Preview deployment: `dpl_7vK12ixYqL77eHbnVrkqxsVYnti2`
+- Preview origin: `https://softhe-1u14ft7qm-suportsofthe-9420s-projects.vercel.app`
+- Release fingerprint: `softhe-20260813-e009c39-a9135fd2`
 - Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled
+- Fail-closed checkout verification: `POST /api/create-checkout-session` returned HTTP 503 with
+  `Checkout is not available` while commerce was disabled.
 
 Do not promote a different deployment or rebuild from a different commit. Confirm the source commit
 and fingerprint through `/api/health` immediately before and after promotion.
