@@ -1,5 +1,4 @@
 import SEO from '../components/SEO';
-import { absoluteUrl } from '../config/site';
 import { benchmarkEvidenceComplete, benchmarkMethodology } from '../data/benchmark';
 import "./Performance.css";
 
@@ -8,11 +7,10 @@ function Performance() {
 		<>
 			<SEO
 				title="Performance Benchmarks - Real FPS Comparisons | Softhe.io"
-				description="Review benchmark screenshots and resource usage comparisons for a Softhe.io optimized setup, including CS2 FPS and Windows Task Manager examples."
+				description="Review measured FPS, frame-time, and system-overhead comparisons for a documented SoftheOS and BIOS-tuned configuration."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="Performance Benchmarks - CS2 Configuration Comparison"
 				ogDescription="Two-run CapFrameX medians measured 658 FPS default and 826 FPS SoftheOS in Counter-Strike 2 on the tested platform."
-				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -20,8 +18,8 @@ function Performance() {
 						<span className="section-kicker">Benchmarks</span>
 						<h1>Performance proof, not just promises.</h1>
 						<p>
-							Before and after screenshots from the current test set, presented with the
-							context users need to evaluate the difference.
+							Native before-and-after metrics from the current test set, presented with
+							the context users need to evaluate the difference.
 						</p>
 						<div className="performance-stats">
 							<div>
@@ -29,12 +27,12 @@ function Performance() {
 								<span>Average FPS in CS2 sample</span>
 							</div>
 							<div>
-								<strong>111 to 31</strong>
-								<span>Idle background processes</span>
+								<strong>225 to 285</strong>
+								<span>1% low FPS in CS2 sample</span>
 							</div>
 							<div>
-								<strong>2.5 to 0.8 GB</strong>
-								<span>Idle memory usage shown</span>
+								<strong>Version 74</strong>
+								<span>Iterative tuning release</span>
 							</div>
 						</div>
 					</div>
@@ -48,64 +46,28 @@ function Performance() {
 							<p>Same CPU, GPU, and motherboard; the optimized configuration also changes memory tuning, Windows edition, and GPU driver.</p>
 						</div>
 
-						<div className="fps-showcase">
-							<div className="fps-comparison-item">
-								<div className="fps-header">
-									<h3>Counter-Strike 2 Performance</h3>
-									<p>
-										Observed whole-configuration comparison
-									</p>
+						<div className="native-benchmark-card">
+							<div className="native-card-topline">
+								<div><span>Measured result</span><strong>CS2 · Dust 2 benchmark</strong></div>
+								<b>2-run median</b>
+							</div>
+							<div className="native-result-stage">
+								<div className="native-result before">
+									<span>Before · Default Windows</span>
+									<strong>658</strong>
+									<small>average FPS</small>
 								</div>
-
-								<div className="fps-images">
-									<div className="fps-image-container">
-										<div className="fps-label">
-											<span className="fps-title">
-												Stock Windows
-											</span>
-											<span className="fps-value poor">
-												658 FPS
-											</span>
-										</div>
-										<img
-											src="/images/cs2-stock-capframex.svg"
-											alt="Counter-Strike 2 Stock"
-											className="fps-screenshot"
-											width="1024"
-											height="576"
-											loading="lazy"
-											decoding="async"
-										/>
-										<div className="fps-details">
-											<span>1% Low: 225 FPS</span>
-											<span>Frame Time: 1.52ms</span>
-										</div>
-									</div>
-
-									<div className="fps-image-container">
-										<div className="fps-label">
-											<span className="fps-title">
-												Softhe.io Optimized
-											</span>
-											<span className="fps-value excellent">
-												826 Average FPS
-											</span>
-										</div>
-										<img
-											src="/images/cs2-optimized-capframex.svg"
-											alt="Counter-Strike 2 Optimized"
-											className="fps-screenshot"
-											width="1024"
-											height="576"
-											loading="lazy"
-											decoding="async"
-										/>
-										<div className="fps-details">
-											<span>1% Low: 285 FPS</span>
-											<span>Frame Time: 1.21ms</span>
-										</div>
-									</div>
+								<div className="native-gain"><i className="fas fa-arrow-right" aria-hidden="true"></i><strong>+25%</strong><span>average FPS</span></div>
+								<div className="native-result after">
+									<span>After · SoftheOS + BIOS</span>
+									<strong>826</strong>
+									<small>average FPS</small>
 								</div>
+							</div>
+							<div className="native-supporting-metrics">
+								<div><span>1% low</span><strong>225 <i className="fas fa-arrow-right" aria-hidden="true"></i> 285 FPS</strong><b>+27%</b></div>
+								<div><span>Average frame time</span><strong>1.52 <i className="fas fa-arrow-right" aria-hidden="true"></i> 1.21 ms</strong><b>-20%</b></div>
+								<div><span>Recorded sample</span><strong>2 × 109 seconds</strong><b>Median</b></div>
 							</div>
 						</div>
 					</div>
@@ -115,71 +77,45 @@ function Performance() {
 					<div className="container">
 						<div className="performance-section-heading">
 							<span className="section-kicker">System overhead</span>
-							<h2 className="section-title">Windows Task Manager resource usage</h2>
-							<p>Idle resource screenshots showing stock versus optimized Windows overhead.</p>
+							<h2 className="section-title">Less work before the game starts</h2>
+							<p>Idle Windows overhead from the documented stock and optimized configurations.</p>
 						</div>
 
-						<div className="fps-showcase">
-							<div className="fps-comparison-item">
-								<div className="fps-header">
-									<h3>Task Manager Comparison</h3>
-									<p>
-										Same hardware, stock vs optimized Windows
-									</p>
-								</div>
-
-								<div className="fps-images">
-									<div className="fps-image-container">
-										<div className="fps-label">
-											<span className="fps-title">
-												Stock Windows
-											</span>
-											<span className="fps-value poor">
-												High Usage
-											</span>
-										</div>
-										<img
-											src="/images/stock-task-manager.webp"
-											alt="Stock Windows Task Manager"
-											className="fps-screenshot"
-											width="1024"
-											height="768"
-											loading="lazy"
-											decoding="async"
-										/>
-										<div className="fps-details">
-											<span>RAM: 2.5 GB</span>
-											<span>Processes: 111</span>
-											<span>CPU: 1%</span>
-										</div>
-									</div>
-
-									<div className="fps-image-container">
-										<div className="fps-label">
-											<span className="fps-title">
-												Softhe.io Optimized
-											</span>
-											<span className="fps-value excellent">
-												Minimal Usage
-											</span>
-										</div>
-										<img
-											src="/images/optimized-task-manager.webp"
-											alt="Softhe.io Optimized Task Manager"
-											className="fps-screenshot"
-											width="1024"
-											height="768"
-											loading="lazy"
-											decoding="async"
-										/>
-										<div className="fps-details">
-											<span>RAM: 0.8 GB</span>
-											<span>Processes: 31</span>
-											<span>CPU: 0%</span>
-										</div>
-									</div>
-								</div>
+						<div className="overhead-showcase">
+							<div className="overhead-heading">
+								<div><span>Default Windows</span><strong>More idle overhead</strong></div>
+								<div><span>SoftheOS</span><strong>More room for the workload</strong></div>
 							</div>
+							<div className="overhead-metric">
+								<div><span>Background processes</span><strong>111</strong></div>
+								<div className="overhead-change"><b>-72%</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
+								<div><strong>31</strong><span>Target shown in sample</span></div>
+							</div>
+							<div className="overhead-metric">
+								<div><span>Idle memory</span><strong>2.5 GB</strong></div>
+								<div className="overhead-change"><b>-68%</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
+								<div><strong>0.8 GB</strong><span>Observed idle use</span></div>
+							</div>
+							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
+						</div>
+					</div>
+				</section>
+
+				<section className="version-evolution" aria-labelledby="version-evolution-title">
+					<div className="container evolution-layout">
+						<div className="evolution-copy">
+							<span className="section-kicker">Built through iteration</span>
+							<div className="version-mark"><span>SoftheOS</span><strong>v74</strong></div>
+							<h2 id="version-evolution-title">The improvement is the process.</h2>
+							<p>
+								Version 74 represents repeated rounds of tuning, compatibility work, validation,
+								and refinement—not a one-off preset. Each release carries lessons from the versions before it.
+							</p>
+						</div>
+						<div className="evolution-steps">
+							<div><span>01</span><strong>Measure</strong><p>Capture frame rate, frame time, idle overhead, and system behavior.</p></div>
+							<div><span>02</span><strong>Refine</strong><p>Adjust the build and tuning based on observed results and compatibility needs.</p></div>
+							<div><span>03</span><strong>Validate</strong><p>Recheck performance and stability before changes become part of the next release.</p></div>
 						</div>
 					</div>
 				</section>
@@ -189,7 +125,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">Summary</span>
 							<h2 className="section-title">Detailed performance analysis</h2>
-							<p>Numbers surfaced from the current benchmark screenshots and service claims.</p>
+							<p>Measured values from the current benchmark evidence and documented idle samples.</p>
 						</div>
 
 						<div className="comparison-table">
@@ -223,9 +159,9 @@ function Performance() {
 									<i className="fas fa-stopwatch"></i>
 									Frame Time
 								</div>
-								<div className="table-cell stock-value">1,5ms</div>
+								<div className="table-cell stock-value">1.52ms</div>
 								<div className="table-cell optimized-value">
-									1.1ms
+									1.21ms
 								</div>
 								<div className="table-cell improvement">
 									-20% reduction
@@ -296,6 +232,11 @@ function Performance() {
 								median FPS and 1% lows from at least two repeated stock and optimized runs.
 							</p>
 						</div>
+						<p className="version-stability-note">
+							SoftheOS is currently at version 74. Its long development history supports a more mature,
+							stability-focused baseline, while final stability still depends on the individual hardware,
+							drivers, BIOS configuration, and workload.
+						</p>
 					</div>
 				</section>
 			</div>

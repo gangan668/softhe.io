@@ -59,7 +59,7 @@ describe('Store', () => {
 		renderStore();
 		await user.click(screen.getAllByRole('button', { name: /buy now/i })[0]);
 		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([
-			expect.objectContaining({ id: 'windows-10', quantity: 1 }),
+			expect.objectContaining({ id: 'windows-11', quantity: 1 }),
 		]);
 	});
 

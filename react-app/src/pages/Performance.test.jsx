@@ -13,25 +13,23 @@ describe('Performance', () => {
 
 		expect(screen.getByRole('heading', { name: /performance proof/i })).toBeInTheDocument();
 		expect(screen.getByText(/Counter-Strike 2 FPS comparison/i)).toBeInTheDocument();
-		expect(screen.getByText(/Windows Task Manager resource usage/i)).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: /less work before the game starts/i })).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: /the improvement is the process/i })).toBeInTheDocument();
 		expect(screen.getByRole('heading', { name: /benchmark methodology/i })).toBeInTheDocument();
 		expect(screen.getByText(/preliminary product evidence/i)).toBeInTheDocument();
 	});
 
-	it('keeps task manager screenshots matched to the right labels', () => {
+	it('renders benchmark and overhead metrics natively without legacy screenshots', () => {
 		render(
 			<MemoryRouter>
 				<Performance />
 			</MemoryRouter>
 		);
 
-		expect(screen.getByAltText('Stock Windows Task Manager')).toHaveAttribute(
-			'src',
-			'/images/stock-task-manager.webp'
-		);
-		expect(screen.getByAltText('Softhe.io Optimized Task Manager')).toHaveAttribute(
-			'src',
-			'/images/optimized-task-manager.webp'
-		);
+		expect(screen.getByText('Before · Default Windows')).toBeInTheDocument();
+		expect(screen.getByText('After · SoftheOS + BIOS')).toBeInTheDocument();
+		expect(screen.getByText('2 × 109 seconds')).toBeInTheDocument();
+		expect(screen.getByText(/version 74 represents repeated rounds/i)).toBeInTheDocument();
+		expect(screen.queryByRole('img')).not.toBeInTheDocument();
 	});
 });

@@ -64,52 +64,46 @@ function Home() {
 						<div className="hero-visual" aria-label="Performance comparison preview">
 							<div className="benchmark-panel">
 								<div className="panel-topline">
-									<span>CS2 benchmark sample</span>
-									<span className="live-pill">Optimized</span>
-								</div>
-								<div className="fps-readout">
 									<div>
-										<span className="readout-label">Stock</span>
-										<strong>658</strong>
+										<span className="panel-eyebrow">Measured result</span>
+										<strong>CS2 · Dust 2 benchmark</strong>
+									</div>
+									<span className="live-pill">2-run median</span>
+								</div>
+								<div className="result-stage">
+									<div className="result-column result-before">
+										<span className="result-label">Before</span>
+										<span className="result-profile">Default Windows</span>
+										<div className="result-number">658</div>
+										<span className="result-unit">average FPS</span>
+									</div>
+									<div className="result-gain" aria-label="25 percent higher average FPS">
+										<i className="fas fa-arrow-right" aria-hidden="true"></i>
+										<strong>+25%</strong>
 										<span>avg FPS</span>
 									</div>
-									<div className="readout-divider"></div>
+									<div className="result-column result-after">
+										<span className="result-label">After</span>
+										<span className="result-profile">SoftheOS + BIOS</span>
+										<div className="result-number">826</div>
+										<span className="result-unit">average FPS</span>
+									</div>
+								</div>
+								<div className="result-details">
 									<div>
-										<span className="readout-label">Softhe.io</span>
-										<strong>826</strong>
-										<span>avg FPS</span>
+										<span>1% low</span>
+										<strong><span>225</span><i className="fas fa-arrow-right" aria-hidden="true"></i>285 FPS</strong>
+									</div>
+									<div>
+										<span>Average frame time</span>
+										<strong><span>1.52</span><i className="fas fa-arrow-right" aria-hidden="true"></i>1.21 ms</strong>
+									</div>
+									<div>
+										<span>Capture</span>
+										<strong>2 × 109 sec</strong>
 									</div>
 								</div>
-								<div className="metric-bars">
-									<div className="metric-bar">
-										<span>Frame time</span>
-										<div className="bar-track"><span className="bar-width-64"></span></div>
-										<strong>-20%</strong>
-									</div>
-									<div className="metric-bar">
-										<span>Processes</span>
-										<div className="bar-track"><span className="bar-width-28"></span></div>
-										<strong>-72%</strong>
-									</div>
-									<div className="metric-bar">
-										<span>RAM idle use</span>
-										<div className="bar-track"><span className="bar-width-32"></span></div>
-										<strong>0.8 GB</strong>
-									</div>
-								</div>
-								<img
-									src="/images/cs2-optimized-capframex.svg"
-									alt="Counter-Strike 2 optimized FPS benchmark"
-									className="hero-screenshot"
-									width="969"
-									height="226"
-									decoding="async"
-									fetchPriority="high"
-								/>
-							</div>
-							<div className="floating-metric">
-								<span>Background processes</span>
-								<strong>111 to 31</strong>
+								<p className="result-note">Same hardware and in-game settings. Whole-configuration comparison; individual results vary.</p>
 							</div>
 						</div>
 					</div>
