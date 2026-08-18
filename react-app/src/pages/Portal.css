@@ -63,6 +63,27 @@
 .admin-metrics span { color: var(--text-secondary); }
 .ticket-toolbar { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
 .ticket-toolbar select { width: auto; }
-@media (max-width: 800px) { .portal-heading { align-items: start; flex-direction: column; } .portal-grid { grid-template-columns: 1fr; } .admin-metrics { grid-template-columns: 1fr; } .ticket-workspace { grid-template-columns: 1fr; grid-template-rows: minmax(120px, 34%) minmax(0, 1fr); height: 72vh; } .ticket-list { border-right: 0; border-bottom: 1px solid var(--border-color); } }
-@media (max-width: 520px) { .form-row { grid-template-columns: 1fr; } .portal-page { width: min(100% - 20px, 1180px); } .portal-list article { align-items: start; flex-direction: column; } }
+@media (max-width: 800px) {
+	.portal-heading { align-items: start; flex-direction: column; }
+	.portal-grid { grid-template-columns: 1fr; }
+	.admin-metrics { grid-template-columns: 1fr; }
+	.ticket-workspace { display: flex; flex-direction: column; height: auto; min-height: 0; }
+	.ticket-list { flex-direction: row; padding: 12px; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid var(--border-color); scroll-snap-type: x proximity; }
+	.ticket-list button { flex: 0 0 min(220px, 76vw); scroll-snap-align: start; }
+	.conversation-panel { overflow: visible; }
+	.conversation { grid-template-rows: auto auto auto; height: auto; padding: 18px; }
+	.conversation-messages { max-height: min(38vh, 320px); padding-right: 4px; }
+	.conversation textarea { min-height: 88px; }
+	.ticket-empty-detail { min-height: 180px; }
+}
+@media (max-width: 520px) {
+	.form-row { grid-template-columns: 1fr; }
+	.portal-page { width: min(100% - 20px, 1180px); }
+	.portal-list article { align-items: start; flex-direction: column; }
+	.tickets-heading { padding: 18px; }
+	.tickets-heading p { display: none; }
+	.tickets-heading .btn { padding-inline: 14px; white-space: nowrap; }
+	.conversation { padding: 16px; }
+	.message { max-width: 94%; }
+}
 
