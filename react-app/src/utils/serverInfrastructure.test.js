@@ -16,6 +16,7 @@ const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_l
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
 const testFulfillment = require('../../../api/test-fulfillment.js');
+const monitoringTest = require('../../../api/monitoring-test.js');
 
 const jsonResponse = (result, ok = true, status = 200) => ({
 	ok,
@@ -165,6 +166,7 @@ describe('ticket notification API', () => {
 			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
 			.mockResolvedValueOnce(jsonResponse([{ role: 'staff' }]))
 			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }])));
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const response = createResponse();
 		await ticketNotification({
 			method: 'POST',
@@ -174,6 +176,10 @@ describe('ticket notification API', () => {
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.error).toMatch(/not configured/i);
+		expect(consoleError).toHaveBeenCalledWith('ticket_delivery_failed', {
+			message: 'Ticket notifications are not configured',
+		});
+		consoleError.mockRestore();
 	});
 	it('falls back to an idempotent Resend notification when EmailJS fails', async () => {
 		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
@@ -703,6 +709,31 @@ describe('browser error reporting API', () => {
 		expect(consoleError).toHaveBeenCalledWith('browser_error', expect.objectContaining({
 			message: 'Failure message',
 		}));
+		consoleError.mockRestore();
+	});
+});
+
+describe('monitoring test API', () => {
+	it('is unavailable outside Preview', async () => {
+		process.env.VERCEL_ENV = 'production';
+		process.env.MONITORING_TEST_SECRET = 'monitor-secret';
+		const response = createResponse();
+		await monitoringTest({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'browser' } }, response);
+		expect(response.statusCode).toBe(404);
+	});
+
+	it('requires its dedicated secret and emits bounded test markers', async () => {
+		process.env.VERCEL_ENV = 'preview';
+		process.env.MONITORING_TEST_SECRET = 'monitor-secret';
+		const unauthorized = createResponse();
+		await monitoringTest({ method: 'POST', headers: {}, body: { kind: 'browser' } }, unauthorized);
+		expect(unauthorized.statusCode).toBe(401);
+
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = createResponse();
+		await monitoringTest({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'delivery' } }, response);
+		expect(response.statusCode).toBe(202);
+		expect(consoleError).toHaveBeenCalledWith('contact_delivery_failed', { monitorTest: true });
 		consoleError.mockRestore();
 	});
 });

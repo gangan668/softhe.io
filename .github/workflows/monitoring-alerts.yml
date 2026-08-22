@@ -1,0 +1,92 @@
+name: Production Monitoring Alerts
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_alert:
+        description: Emit a controlled alert to prove GitHub notifications
+        required: true
+        default: none
+        type: choice
+        options:
+          - none
+          - uptime
+          - browser
+          - delivery
+  schedule:
+    - cron: '*/10 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-monitoring
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      MONITORING_TEST_SECRET: ${{ secrets.MONITORING_TEST_SECRET }}
+      MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL || 'https://softhe.io' }}
+      TEST_ALERT: ${{ inputs.test_alert || 'none' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Link Vercel project
+        shell: bash
+        run: |
+          mkdir -p .vercel
+          printf '%s\n' '{"orgId":"team_N2ebrhHRUamJXfQQ2LXBOEny","projectId":"prj_ivs19EGdAuvKZJ6nPd34WRtJ3Kki"}' > .vercel/project.json
+
+      - name: Verify health endpoint
+        id: health
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 curl /api/health --deployment "$MONITOR_BASE_URL" > health.json
+          node -e "const fs=require('fs');const h=JSON.parse(fs.readFileSync('health.json','utf8'));if(h.status!=='ready'||!Object.values(h.checks||{}).every(Boolean))throw new Error('Health endpoint is not ready')"
+          if [ "$TEST_ALERT" = "uptime" ]; then
+            echo 'Controlled uptime alert test: health succeeded, now proving the notification path.' >&2
+            exit 1
+          fi
+
+      - name: Emit controlled runtime event
+        if: ${{ inputs.test_alert == 'browser' || inputs.test_alert == 'delivery' }}
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 curl /api/monitoring-test --deployment "$MONITOR_BASE_URL" -- \
+            --request POST \
+            --header "Authorization: Bearer $MONITORING_TEST_SECRET" \
+            --header 'Content-Type: application/json' \
+            --data "{\"kind\":\"$TEST_ALERT\"}"
+          sleep 8
+
+      - name: Query browser-error logs
+        if: ${{ always() && steps.health.outcome == 'success' }}
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+            --query browser_error --json > browser-errors.jsonl
+
+      - name: Query delivery-failure logs
+        if: ${{ always() && steps.health.outcome == 'success' }}
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+            --query delivery_failed --json > delivery-failures.jsonl
+
+      - name: Evaluate runtime alerts
+        if: ${{ always() && steps.health.outcome == 'success' }}
+        working-directory: react-app
+        env:
+          BROWSER_LOG_FILE: ../browser-errors.jsonl
+          DELIVERY_LOG_FILE: ../delivery-failures.jsonl
+        run: node scripts/check-monitoring-alerts.js

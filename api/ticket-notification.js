@@ -23,7 +23,10 @@ async function ticketNotification(req, res) {
 		const owner = (await userRequest(user, `profiles?id=eq.${ticket.user_id}&select=email,full_name`))?.[0];
 		const recipient = isStaff ? owner?.email : process.env.SUPPORT_EMAIL;
 		if (!recipient) return res.status(502).json({ error: 'Ticket notification recipient is unavailable' });
-		if (!process.env.EMAILJS_TICKET_TEMPLATE_ID && !process.env.RESEND_API_KEY) return res.status(503).json({ error: 'Ticket notifications are not configured' });
+		if (!process.env.EMAILJS_TICKET_TEMPLATE_ID && !process.env.RESEND_API_KEY) {
+			console.error('ticket_delivery_failed', { message: 'Ticket notifications are not configured' });
+			return res.status(503).json({ error: 'Ticket notifications are not configured' });
+		}
 		await Promise.all([
 			enforceRateLimit('ticket:user', user.id, 20, 3600),
 			enforceRateLimit('ticket:thread', ticket.id, 5, 600),
@@ -53,7 +56,12 @@ async function ticketNotification(req, res) {
 			}
 		} catch (error) { await releaseLock(lockName).catch(() => {}); throw error; }
 		return res.status(200).json({ notified: true, duplicate: false });
-	} catch (error) { return sendPublicError(res, error, 'Ticket notification could not be sent'); }
+	} catch (error) {
+		console.error('ticket_delivery_failed', {
+			message: error instanceof Error ? error.message : 'Unknown ticket notification error',
+		});
+		return sendPublicError(res, error, 'Ticket notification could not be sent');
+	}
 }
 
 module.exports = ticketNotification;
