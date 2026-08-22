@@ -1,13 +1,13 @@
 # Production rollback record
 
-Last verified: 2026-08-13 (Europe/Berlin)
+Last verified: 2026-08-22 (Europe/Berlin)
 
 ## Known deployment targets
 
 | Role | Origin or identifier | Evidence |
 | --- | --- | --- |
 | Current public production | `https://softhe.io` on GitHub Pages | Pages run `29711027437`, commit `5417994f898fed04707e4c39b26e2a7eafac8f12` |
-| Vercel release candidate | `https://softhe-4io0v8xpk-suportsofthe-9420s-projects.vercel.app` | Deployment `dpl_CH3LjgqSXQyEGDz2V8HVC7Aw74Se`; source `f2ba25e36f46ab4f5d6fd242c037219941e54c9d`; fingerprint `softhe-20260813-f2ba25e-stage1`; commerce disabled |
+| Vercel release candidate | `https://softhe-pol077go6-suportsofthe-9420s-projects.vercel.app` | Deployment `dpl_GmQKaefFwXNifXJ1FuZWmtnEw23R`; source `81b961f5b6c25d9bf27c398c13fbc80b515ffd83`; intended fingerprint `softhe-20260822-81b961f-stage1`; blocked by health and environment checks |
 | Preview rollback candidate | `https://softhe-28md2dy4z-suportsofthe-9420s-projects.vercel.app` | Deployment `dpl_EfhsJ1urLkqn1H9hXdn1zczq2vLW`; `/api/health` ready at rehearsal time |
 
 The custom domain still points to GitHub Pages. Do not change the records below until the
@@ -15,7 +15,7 @@ Vercel health endpoint is ready and the commercial launch checklist is complete.
 
 ## Public resolver baseline
 
-Observed again at `2026-08-13T10:13:00+02:00` from the release workstation:
+Observed again at `2026-08-22T19:04:39+02:00` from the release workstation:
 
 - `https://softhe.io/` returned HTTP 200 with `Server: GitHub.com`.
 - A deliberately missing path returned HTTP 404.

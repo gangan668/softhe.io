@@ -2,13 +2,14 @@
 
 ## Current release candidate
 
-- Source commit: `e009c3928d4cd46cf0a18bf913737843c14d6c7e`
-- Preview deployment: `dpl_7VAzHt69g7MU9wzf6WfDTtG6SXhn`
-- Preview origin: `https://softhe-fqsrij48t-suportsofthe-9420s-projects.vercel.app`
-- Release fingerprint: `softhe-20260813-e009c39-a9135fd2`
+- Source commit: `81b961f5b6c25d9bf27c398c13fbc80b515ffd83`
+- Preview deployment: `dpl_GmQKaefFwXNifXJ1FuZWmtnEw23R`
+- Preview origin: `https://softhe-pol077go6-suportsofthe-9420s-projects.vercel.app`
+- Intended release fingerprint: `softhe-20260822-81b961f-stage1`
 - Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled
-- Fail-closed checkout verification: `POST /api/create-checkout-session` returned HTTP 503 with
-  `Checkout is not available` while commerce was disabled.
+- Promotion status: blocked. On 2026-08-22 `/api/health` returned HTTP 503 because the Supabase
+  service credential failed its server-side probe, and the deployment reported stale `ace154f`
+  release metadata. Correct the Preview environment and redeploy before running strict smoke.
 
 Do not promote a different deployment or rebuild from a different commit. Confirm the source commit
 and fingerprint through `/api/health` immediately before and after promotion.
