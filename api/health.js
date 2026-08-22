@@ -70,12 +70,17 @@ async function health(req, res) {
 		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
 	}
 	const ready = configuration.ready && portalAccess;
+	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
+	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
+	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
+		? `softhe-${process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)}-${releaseStage}`
+		: process.env.RELEASE_FINGERPRINT || null;
 	res.setHeader('Cache-Control', 'no-store');
 	return res.status(ready ? 200 : 503).json({
 		status: ready ? 'ready' : 'configuration-required',
 		release: {
-			sourceCommit: process.env.RELEASE_SOURCE_COMMIT || null,
-			fingerprint: process.env.RELEASE_FINGERPRINT || null,
+			sourceCommit,
+			fingerprint,
 		},
 		checks: {
 			portal: portalAccess && readyFor([...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),

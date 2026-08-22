@@ -77,6 +77,20 @@ describe('production health API', () => {
 		expect(response.headers['Cache-Control']).toBe('no-store');
 	});
 
+	it('binds deployed release metadata to the immutable Vercel commit', async () => {
+		process.env.VERCEL_GIT_COMMIT_SHA = 'abcdef0123456789';
+		process.env.RELEASE_SOURCE_COMMIT = 'stale-commit';
+		process.env.RELEASE_FINGERPRINT = 'stale-fingerprint';
+		process.env.COMMERCE_ENABLED = 'false';
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.payload.release).toEqual({
+			sourceCommit: 'abcdef0123456789',
+			fingerprint: 'softhe-abcdef0-stage1',
+		});
+	});
+
 	it('reports ready when every required variable exists', async () => {
 		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
 		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
@@ -663,7 +677,7 @@ afterEach(() => {
 		'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
-		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT',
+		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT', 'VERCEL_GIT_COMMIT_SHA',
 		'STAFF_PORTAL_ENABLED',
 	]) delete process.env[key];
 });
