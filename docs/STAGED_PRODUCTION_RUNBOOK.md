@@ -2,14 +2,15 @@
 
 ## Current release candidate
 
-- Source commit: `81b961f5b6c25d9bf27c398c13fbc80b515ffd83`
-- Preview deployment: `dpl_GmQKaefFwXNifXJ1FuZWmtnEw23R`
-- Preview origin: `https://softhe-pol077go6-suportsofthe-9420s-projects.vercel.app`
-- Intended release fingerprint: `softhe-20260822-81b961f-stage1`
-- Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled
-- Promotion status: blocked. On 2026-08-22 `/api/health` returned HTTP 503 because the Supabase
-  service credential failed its server-side probe, and the deployment reported stale `ace154f`
-  release metadata. Correct the Preview environment and redeploy before running strict smoke.
+- Source commit: `27e2a0fa656a0e55693cda7bcd150d286106dcde`
+- Preview deployment: `dpl_HvKyFLtDp7tCPeimF1SRZdnCvTU3`
+- Preview origin: `https://softhe-cinsvqhf5-suportsofthe-9420s-projects.vercel.app`
+- Release fingerprint: `softhe-27e2a0f-stage1`
+- Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled, staff disabled
+- Health status: verified HTTP 200 `ready` on 2026-08-22 with every required check true and exact
+  source-commit/fingerprint binding.
+- Promotion status: blocked only on the pending monitoring-alert proofs and authoritative DNS export
+  listed in `docs/launch-evidence.json`. Production and DNS remain unchanged.
 
 Do not promote a different deployment or rebuild from a different commit. Confirm the source commit
 and fingerprint through `/api/health` immediately before and after promotion.

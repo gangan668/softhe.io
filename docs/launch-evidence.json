@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "origin": "https://softhe-pol077go6-suportsofthe-9420s-projects.vercel.app",
-    "deploymentId": "dpl_GmQKaefFwXNifXJ1FuZWmtnEw23R",
-    "commitSha": "81b961f5b6c25d9bf27c398c13fbc80b515ffd83",
-    "releaseFingerprint": "softhe-20260822-81b961f-stage1",
-    "strictSmokeRun": "Blocked on 2026-08-22: the immutable Preview is READY and the UI suite passed, but /api/health returned HTTP 503 because the Supabase service credential is invalid and the deployment still reports stale ace154f release metadata. Do not promote until the Preview environment is corrected, redeployed, and strict smoke passes.",
-    "verifiedAt": "2026-08-22T19:05:00+02:00"
+    "origin": "https://softhe-cinsvqhf5-suportsofthe-9420s-projects.vercel.app",
+    "deploymentId": "dpl_HvKyFLtDp7tCPeimF1SRZdnCvTU3",
+    "commitSha": "27e2a0fa656a0e55693cda7bcd150d286106dcde",
+    "releaseFingerprint": "softhe-27e2a0f-stage1",
+    "strictSmokeRun": "Preview health verified on 2026-08-22: HTTP 200 ready, every required check true, and the runtime source commit and fingerprint match this manifest. Commerce and staff access remain fail-closed. Promotion remains blocked on the pending monitoring-alert proofs and authoritative DNS export recorded below.",
+    "verifiedAt": "2026-08-22T19:31:00+02:00"
   },
   "evidence": {
     "legal.operator-identity": { "status": "passed", "verifiedAt": "2026-07-21T08:01:11+02:00", "verifiedBy": "Hannes Axelsson", "references": ["https://softhe-io.vercel.app/api/health (operator identity configuration check passed)"] },
