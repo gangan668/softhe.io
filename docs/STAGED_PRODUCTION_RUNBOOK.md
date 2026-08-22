@@ -2,10 +2,10 @@
 
 ## Current release candidate
 
-- Source commit: `27e2a0fa656a0e55693cda7bcd150d286106dcde`
-- Preview deployment: `dpl_HvKyFLtDp7tCPeimF1SRZdnCvTU3`
-- Preview origin: `https://softhe-cinsvqhf5-suportsofthe-9420s-projects.vercel.app`
-- Release fingerprint: `softhe-27e2a0f-stage1`
+- Source commit: `41e2fe3e970525736eaf0c2b7ae527dec7cc663b`
+- Preview deployment: `dpl_8MFq5sHiffXVxzj2XjcohZHN3bo9`
+- Preview origin: `https://softhe-ktmr04yr8-suportsofthe-9420s-projects.vercel.app`
+- Release fingerprint: `softhe-41e2fe3-stage1`
 - Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled, staff disabled
 - Health status: verified HTTP 200 `ready` on 2026-08-22 with every required check true and exact
   source-commit/fingerprint binding.

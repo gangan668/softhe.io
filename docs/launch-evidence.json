@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "origin": "https://softhe-cinsvqhf5-suportsofthe-9420s-projects.vercel.app",
-    "deploymentId": "dpl_HvKyFLtDp7tCPeimF1SRZdnCvTU3",
-    "commitSha": "27e2a0fa656a0e55693cda7bcd150d286106dcde",
-    "releaseFingerprint": "softhe-27e2a0f-stage1",
+    "origin": "https://softhe-ktmr04yr8-suportsofthe-9420s-projects.vercel.app",
+    "deploymentId": "dpl_8MFq5sHiffXVxzj2XjcohZHN3bo9",
+    "commitSha": "41e2fe3e970525736eaf0c2b7ae527dec7cc663b",
+    "releaseFingerprint": "softhe-41e2fe3-stage1",
     "strictSmokeRun": "Preview health verified on 2026-08-22: HTTP 200 ready, every required check true, and the runtime source commit and fingerprint match this manifest. Commerce and staff access remain fail-closed. Promotion remains blocked on the pending monitoring-alert proofs and authoritative DNS export recorded below.",
-    "verifiedAt": "2026-08-22T19:31:00+02:00"
+    "verifiedAt": "2026-08-22T19:34:00+02:00"
   },
   "evidence": {
     "legal.operator-identity": { "status": "passed", "verifiedAt": "2026-07-21T08:01:11+02:00", "verifiedBy": "Hannes Axelsson", "references": ["https://softhe-io.vercel.app/api/health (operator identity configuration check passed)"] },
