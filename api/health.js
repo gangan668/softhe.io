@@ -1,5 +1,12 @@
+const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
 const { adminRequest } = require('./_lib/supabase');
+
+const safeEqual = (left, right) => {
+	const leftBuffer = Buffer.from(String(left || ''));
+	const rightBuffer = Buffer.from(String(right || ''));
+	return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
 
 const REQUIRED_CONFIGURATION = [
 	'PUBLIC_SITE_URL',
@@ -57,8 +64,22 @@ const getConfigurationStatus = (environment = process.env) => {
 };
 
 async function health(req, res) {
+	res.setHeader('Cache-Control', 'no-store');
+	if (req.method === 'POST') {
+		if (process.env.VERCEL_ENV !== 'preview') return res.status(404).json({ error: 'Not found' });
+		const configuredSecret = process.env.MONITORING_TEST_SECRET;
+		const suppliedSecret = String(req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
+		if (!configuredSecret || !safeEqual(configuredSecret, suppliedSecret)) {
+			return res.status(401).json({ error: 'Unauthorized' });
+		}
+		const kind = req.body?.kind;
+		if (kind === 'browser') console.error('browser_error', { monitorTest: true });
+		else if (kind === 'delivery') console.error('contact_delivery_failed', { monitorTest: true });
+		else return res.status(400).json({ error: 'Unsupported monitoring test' });
+		return res.status(202).json({ accepted: true, kind });
+	}
 	if (req.method !== 'GET') {
-		res.setHeader('Allow', 'GET');
+		res.setHeader('Allow', 'GET, POST');
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
@@ -75,7 +96,6 @@ async function health(req, res) {
 	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
 		? `softhe-${process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)}-${releaseStage}`
 		: process.env.RELEASE_FINGERPRINT || null;
-	res.setHeader('Cache-Control', 'no-store');
 	return res.status(ready ? 200 : 503).json({
 		status: ready ? 'ready' : 'configuration-required',
 		release: {
@@ -97,3 +117,4 @@ async function health(req, res) {
 module.exports = health;
 module.exports.REQUIRED_CONFIGURATION = REQUIRED_CONFIGURATION;
 module.exports.getConfigurationStatus = getConfigurationStatus;
+module.exports.safeEqual = safeEqual;

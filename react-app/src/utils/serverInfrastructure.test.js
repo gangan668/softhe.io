@@ -16,7 +16,6 @@ const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_l
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
 const testFulfillment = require('../../../api/test-fulfillment.js');
-const monitoringTest = require('../../../api/monitoring-test.js');
 
 const jsonResponse = (result, ok = true, status = 200) => ({
 	ok,
@@ -718,7 +717,7 @@ describe('monitoring test API', () => {
 		process.env.VERCEL_ENV = 'production';
 		process.env.MONITORING_TEST_SECRET = 'monitor-secret';
 		const response = createResponse();
-		await monitoringTest({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'browser' } }, response);
+		await health({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'browser' } }, response);
 		expect(response.statusCode).toBe(404);
 	});
 
@@ -726,12 +725,12 @@ describe('monitoring test API', () => {
 		process.env.VERCEL_ENV = 'preview';
 		process.env.MONITORING_TEST_SECRET = 'monitor-secret';
 		const unauthorized = createResponse();
-		await monitoringTest({ method: 'POST', headers: {}, body: { kind: 'browser' } }, unauthorized);
+		await health({ method: 'POST', headers: {}, body: { kind: 'browser' } }, unauthorized);
 		expect(unauthorized.statusCode).toBe(401);
 
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const response = createResponse();
-		await monitoringTest({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'delivery' } }, response);
+		await health({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'delivery' } }, response);
 		expect(response.statusCode).toBe(202);
 		expect(consoleError).toHaveBeenCalledWith('contact_delivery_failed', { monitorTest: true });
 		consoleError.mockRestore();

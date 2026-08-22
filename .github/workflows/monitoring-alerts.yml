@@ -62,7 +62,7 @@ jobs:
         if: ${{ inputs.test_alert == 'browser' || inputs.test_alert == 'delivery' }}
         shell: bash
         run: |
-          npx --yes vercel@59.3.0 curl /api/monitoring-test --deployment "$MONITOR_BASE_URL" -- \
+          npx --yes vercel@59.3.0 curl /api/health --deployment "$MONITOR_BASE_URL" -- \
             --request POST \
             --header "Authorization: Bearer $MONITORING_TEST_SECRET" \
             --header 'Content-Type: application/json' \
