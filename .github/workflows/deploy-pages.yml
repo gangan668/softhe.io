@@ -43,6 +43,7 @@ jobs:
           VITE_APP_URL: https://softhe.io
           VITE_API_URL: https://softhe-io.vercel.app
           VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
+          COMMERCE_ENABLED: 'false'
           VITE_COMMERCE_ENABLED: 'false'
           VITE_CONTACT_FORM_ENABLED: 'true'
 

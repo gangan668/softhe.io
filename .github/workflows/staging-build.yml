@@ -33,6 +33,7 @@ jobs:
           VITE_APP_URL: https://staging.softhe.io
           VITE_ENVIRONMENT: staging
           VITE_GA_MEASUREMENT_ID: G-XXXXXXXXXX
+          COMMERCE_ENABLED: 'false'
           VITE_COMMERCE_ENABLED: 'false'
           VITE_CONTACT_FORM_ENABLED: 'true'
 
