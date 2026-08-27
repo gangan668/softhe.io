@@ -15,6 +15,17 @@ const requestId = (req) => String(req.headers?.['x-request-id'] || crypto.random
 
 const clientIp = (req) => String(req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',')[0].trim();
 
+const enforceSameOrigin = (req) => {
+	const origin = String(req.headers?.origin || '');
+	const host = String(req.headers?.host || '');
+	if (!origin || !host) throw Object.assign(new Error('Forbidden'), { statusCode: 403, publicMessage: 'Forbidden' });
+	let originUrl;
+	try { originUrl = new URL(origin); } catch { throw Object.assign(new Error('Forbidden'), { statusCode: 403, publicMessage: 'Forbidden' }); }
+	if (!['https:', 'http:'].includes(originUrl.protocol) || originUrl.host !== host) {
+		throw Object.assign(new Error('Forbidden'), { statusCode: 403, publicMessage: 'Forbidden' });
+	}
+};
+
 const rateIdentity = (value) => {
 	const secret = process.env.PORTAL_RATE_LIMIT_SECRET;
 	if (!secret) throw Object.assign(new Error('Portal rate limiting is not configured'), { statusCode: 503 });
@@ -49,4 +60,4 @@ const sendPublicError = (res, error, fallback = 'Request could not be completed'
 	return res.status(status).json({ error: error?.publicMessage || (status < 500 ? error?.message : fallback) });
 };
 
-module.exports = { acquireLock, clientIp, enforceRateLimit, jsonOnly, receiptToken, releaseLock, requestId, sendPublicError, verifyReceiptToken };
+module.exports = { acquireLock, clientIp, enforceRateLimit, enforceSameOrigin, jsonOnly, receiptToken, releaseLock, requestId, sendPublicError, verifyReceiptToken };

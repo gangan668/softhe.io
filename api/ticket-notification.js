@@ -1,12 +1,13 @@
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { sendTransactionalEmail } = require('./_lib/resend');
 const { userRequest, verifyActiveUser } = require('./_lib/supabase');
-const { acquireLock, enforceRateLimit, jsonOnly, releaseLock, sendPublicError } = require('./_lib/portal-security');
+const { acquireLock, enforceRateLimit, enforceSameOrigin, jsonOnly, releaseLock, sendPublicError } = require('./_lib/portal-security');
 
 async function ticketNotification(req, res) {
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 	try {
 		jsonOnly(req);
+		enforceSameOrigin(req);
 		const user = await verifyActiveUser(req);
 		const messageId = typeof req.body?.messageId === 'string' ? req.body.messageId : '';
 		const ticketId = typeof req.body?.ticketId === 'string' ? req.body.ticketId : '';

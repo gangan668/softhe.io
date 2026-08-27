@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { notifyTicketReply } from './portal';
+import { notifyTicketReply, writeTicket } from './portal';
 
 describe('notifyTicketReply', () => {
 	it('does nothing without an authenticated session', async () => {
@@ -21,5 +21,16 @@ describe('notifyTicketReply', () => {
 	it('reports a failed notification response', async () => {
 		const fetchImpl = vi.fn().mockResolvedValue({ ok: false });
 		await expect(notifyTicketReply({ access_token: 'token' }, { messageId: 'message' }, fetchImpl)).resolves.toBe(false);
+	});
+});
+
+describe('writeTicket', () => {
+	it('authenticates and supplies a unique replay-prevention key', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'ticket' }) });
+		await expect(writeTicket({ access_token: 'token' }, { action: 'create' }, fetchImpl)).resolves.toEqual({ id: 'ticket' });
+		expect(fetchImpl).toHaveBeenCalledWith('/api/tickets/write', expect.objectContaining({
+			method: 'POST',
+			headers: expect.objectContaining({ Authorization: 'Bearer token', 'Idempotency-Key': expect.stringMatching(/^[0-9a-f-]{36}$/i) }),
+		}));
 	});
 });

@@ -1,5 +1,5 @@
 const { adminRequest, getBearerToken, getConfig, verifyActiveUser, verifyUser } = require('./_lib/supabase');
-const { clientIp, enforceRateLimit, jsonOnly, sendPublicError } = require('./_lib/portal-security');
+const { clientIp, enforceRateLimit, enforceSameOrigin, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const staffHandler = require('./_lib/staff-handler');
 
@@ -16,6 +16,7 @@ async function portalBootstrap(req, res) {
 	if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 	try {
 		jsonOnly(req);
+		enforceSameOrigin(req);
 		if (req.query?.action === 'revoke-others') return await revokeOtherSessions(req, res);
 		if (['revoke-staff', 'account-status'].includes(req.query?.action)) return res.status(410).json({ error: 'Legacy staff operation disabled' });
 		const user = await verifyActiveUser(req);

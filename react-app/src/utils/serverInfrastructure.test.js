@@ -9,6 +9,8 @@ const health = require('../../../api/health.js');
 const browserErrors = require('../../../api/browser-errors.js');
 const checkoutSession = require('../../../api/checkout-session.js');
 const ticketNotification = require('../../../api/ticket-notification.js');
+const ticketWrite = require('../../../api/ticket-write.js');
+const { runIdempotent } = ticketWrite;
 const portalBootstrap = require('../../../api/portal-bootstrap.js');
 const staffApi = require('../../../api/_lib/staff-handler.js');
 const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
@@ -169,7 +171,7 @@ describe('ticket notification API', () => {
 		const response = createResponse();
 		await ticketNotification({
 			method: 'POST',
-			headers: { authorization: 'Bearer token', 'content-type': 'application/json' },
+			headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' },
 			body: { messageId: 'message' },
 		}, response);
 
@@ -205,13 +207,49 @@ describe('ticket notification API', () => {
 			.mockResolvedValueOnce(new Response('', { status: 500 }))
 			.mockResolvedValueOnce(jsonResponse({ id: 'email-id' })));
 		const response = createResponse();
-		await ticketNotification({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json' }, body: { messageId: 'message' } }, response);
+		await ticketNotification({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' }, body: { messageId: 'message' } }, response);
 
 		expect(response.statusCode).toBe(200);
 		const resendCall = fetch.mock.calls.find(([url]) => url === 'https://api.resend.com/emails');
 		expect(resendCall).toBeTruthy();
 		expect(resendCall[1].headers['Idempotency-Key']).toBe('ticket-notification/message');
 		expect(JSON.parse(resendCall[1].body).html).toContain('&lt;test&gt;');
+	});
+	it('rejects authenticated ticket mutations without a same-origin browser request', async () => {
+		const response = createResponse();
+		await ticketNotification({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json' }, body: { messageId: 'message' } }, response);
+		expect(response.statusCode).toBe(403);
+		expect(response.payload).toEqual({ error: 'Forbidden' });
+	});
+});
+
+describe('ticket write API', () => {
+	it('returns the stored result instead of repeating an identical write', async () => {
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+		const stored = JSON.stringify({ id: '11111111-1111-4111-8111-111111111111' });
+		vi.stubGlobal('fetch', vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ result: null }))
+			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
+			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
+			.mockResolvedValueOnce(jsonResponse({ result: stored })));
+		const operation = vi.fn().mockResolvedValue({ id: '11111111-1111-4111-8111-111111111111' });
+		const req = { headers: { 'idempotency-key': '12345678901234567890' } };
+		expect(await runIdempotent(req, { id: '22222222-2222-4222-8222-222222222222' }, operation)).toEqual({ id: '11111111-1111-4111-8111-111111111111' });
+		expect(await runIdempotent(req, { id: '22222222-2222-4222-8222-222222222222' }, operation)).toEqual({ id: '11111111-1111-4111-8111-111111111111', duplicate: true });
+		expect(operation).toHaveBeenCalledTimes(1);
+	});
+	it('rejects cross-origin writes before authenticating or touching the database', async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await ticketWrite({
+			method: 'POST',
+			headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://evil.example', host: 'softhe.io' },
+			body: { action: 'message', ticketId: '11111111-1111-4111-8111-111111111111', message: 'hello' },
+		}, response);
+		expect(response.statusCode).toBe(403);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });
 
@@ -239,7 +277,7 @@ describe('staff authorization boundary', () => {
 			.mockResolvedValueOnce(jsonResponse([]));
 		vi.stubGlobal('fetch', fetchMock);
 		const response = createResponse();
-		await portalBootstrap({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json' }, body: {}, query: {} }, response);
+		await portalBootstrap({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' }, body: {}, query: {} }, response);
 		expect(response.statusCode).toBe(200);
 		expect(fetchMock.mock.calls.some(([url]) => String(url).includes('user_roles'))).toBe(false);
 		expect(response.payload).not.toHaveProperty('staff');

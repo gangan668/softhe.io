@@ -3,7 +3,7 @@ export const staffRequest = async (session, action, { method = 'GET', query = {}
 	const params = new URLSearchParams({ action, ...query });
 	const response = await fetchImpl(`/api/staff?${params}`, {
 		method,
-		headers: { Authorization: `Bearer ${session.access_token}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+		headers: { Authorization: `Bearer ${session.access_token}`, ...(body ? { 'Content-Type': 'application/json', 'Idempotency-Key': crypto.randomUUID() } : {}) },
 		body: body ? JSON.stringify(body) : undefined,
 	});
 	const data = await response.json().catch(() => ({}));
