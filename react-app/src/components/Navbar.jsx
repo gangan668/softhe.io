@@ -56,7 +56,8 @@ function Navbar({ onCartClick }) {
 			<div className="nav-container">
 				<div className="nav-logo">
 					<Link to="/" aria-label="Softhe.io home">
-						<img src="/images/softhe-icon-v2-192.png" alt="Softhe.io logo" width="48" height="48" />
+						<span className="nav-logo-mark" aria-hidden="true"></span>
+						<img className="visually-hidden" src="/images/softhe-icon-v2-192.png" alt="Softhe.io logo" width="48" height="48" />
 					</Link>
 				</div>
 				<ul id="primary-navigation" className={"nav-menu " + (isOpen ? "active" : "")}>
@@ -146,7 +147,9 @@ function Navbar({ onCartClick }) {
 					onClick={onCartClick}
 					aria-label={`Shopping cart with ${cartCount} items`}
 				>
-					<i className="fas fa-shopping-cart" aria-hidden="true"></i>
+					<svg className="cart-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+						<path d="M3 4h2l1.75 10.15a2 2 0 0 0 1.97 1.66h8.75a2 2 0 0 0 1.94-1.5L21 8H6.1M9 20h.01M18 20h.01" />
+					</svg>
 					{cartCount > 0 && (
 						<span className="cart-badge">{cartCount}</span>
 					)}
