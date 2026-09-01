@@ -13,6 +13,19 @@ const ticketWrite = require('../../../api/ticket-write.js');
 const { runIdempotent } = ticketWrite;
 const portalBootstrap = require('../../../api/portal-bootstrap.js');
 const staffApi = require('../../../api/_lib/staff-handler.js');
+
+const vercelConfig = require('../../../vercel.json');
+
+describe('deployment security headers', () => {
+	it('allows both production and isolated Preview Supabase origins without a wildcard', () => {
+		const csp = vercelConfig.headers[0].headers.find(({ key }) => key === 'Content-Security-Policy')?.value || '';
+		expect(csp).toContain('https://mbwsmyqofkxmxkelqviy.supabase.co');
+		expect(csp).toContain('wss://mbwsmyqofkxmxkelqviy.supabase.co');
+		expect(csp).toContain('https://zbchdxptibehtizomwiq.supabase.co');
+		expect(csp).toContain('wss://zbchdxptibehtizomwiq.supabase.co');
+		expect(csp).not.toContain('https://*.supabase.co');
+	});
+});
 const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
