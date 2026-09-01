@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-09-01T02:43:00.943Z",
+  "scope": {
+    "supabaseProject": "zbchdxptibehtizomwiq",
+    "previewDeployment": "dpl_CgkyGn7bAiuGuXMY3pVsLzbbFyUX",
+    "previewCommit": "c02e2fdd1c45a9aacd61a2350f7f6b8e0b02a39c",
+    "commerceEnabled": false,
+    "staffEnabled": false
+  },
+  "syntheticCustomers": {
+    "correlationHashes": ["3c946d93c931d87d", "0cc18ade2fd56241"],
+    "created": [200, 200],
+    "authenticated": [200, 200],
+    "deletedAfterTest": [200, 200]
+  },
+  "isolation": {
+    "ownProfileRows": [1, 1],
+    "crossCustomerProfileRows": [0, 0],
+    "ownTicketRows": [1, 1],
+    "crossCustomerTicketRows": [0, 0],
+    "crossCustomerMessageRows": 0,
+    "crossCustomerOrderRows": 0,
+    "crossCustomerActivityRows": 0,
+    "crossCustomerRoleRows": 0,
+    "forgedOwnerInsertStatus": 403,
+    "roleEscalationInsertStatus": 403,
+    "crossCustomerReplyStatus": 403
+  },
+  "sessionBoundary": {
+    "confirmedCustomerBootstrap": [200, 200],
+    "malformedTokenStatus": 401,
+    "logoutStatus": 204,
+    "stalePreviewTokenStatus": 401
+  },
+  "replayBoundary": {
+    "firstReplyStatus": 201,
+    "replayedReplyStatus": 200,
+    "replayedReplyMarkedDuplicate": true
+  },
+  "staffBoundary": {
+    "anonymousStatus": 404,
+    "customerStatus": 404
+  },
+  "independentReview": {
+    "tool": "GitHub CodeQL security-extended",
+    "commit": "9f02a89",
+    "run": "https://github.com/gangan668/softhe.io/actions/runs/33463700757",
+    "conclusion": "success",
+    "openAlerts": 0
+  },
+  "dataHandling": "No email address, password, access token, API key, customer message body, or service credential is retained in this artifact."
+}

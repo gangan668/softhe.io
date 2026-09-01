@@ -82,7 +82,7 @@ The Supabase development-branch path was attempted after cost confirmation, but 
 - Production build: passed.
 - Supabase Security Advisor: leaked-password protection remains unavailable on Free and is explicitly accepted as a scoped residual risk.
 - CodeRabbit: unavailable because its installer rejects this Windows/MINGW environment; no CodeRabbit result is claimed.
-- Independent hosted review: GitHub CodeQL (`security-extended`) is configured for `customer-portal-test`, pull requests to `main`, and `main`; its completed run is required before merge.
+- Independent hosted review: GitHub CodeQL (`security-extended`) completed successfully for commit `9f02a89` with zero open alerts ([run 33463700757](https://github.com/gangan668/softhe.io/actions/runs/33463700757)).
 
 ## Release status
 
@@ -94,7 +94,7 @@ access fails closed with 404 and a hostile-origin ticket mutation fails with 403
 permits only the exact production and isolated Supabase project origins; wildcard Supabase access is
 not allowed.
 
-Production promotion and commerce remain blocked. The authenticated Preview isolation pass and
-leaked-password protection decision are complete. Independent CodeQL evidence and disposable-project
+Production promotion and commerce remain blocked. The authenticated Preview isolation pass,
+leaked-password protection decision, and independent CodeQL review are complete. Disposable-project
 cleanup must complete before this run can be accepted. Hardening changes must remain on
 `customer-portal-test` until review; do not merge or promote automatically.
