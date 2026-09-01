@@ -40,12 +40,14 @@ The Supabase development-branch path was attempted after cost confirmation, but 
 - **Regression:** Live synthetic grant/revoke test.
 - **Verification:** Role revoked, session deleted, and `staff.revoked` audit event present.
 
-### Medium — Leaked-password protection unavailable on current plan (open)
+### Medium — Leaked-password protection unavailable on current plan (accepted residual risk)
 
 - **Boundary:** Supabase Auth signup and password changes.
 - **Evidence:** Supabase Security Advisor reports `auth_leaked_password_protection`. Enabling the control in the disposable project was rejected because HaveIBeenPwned protection requires Pro.
-- **Remediation:** Upgrade the organization/project to Pro and enable **Prevent use of leaked passwords**, then verify a known compromised password is rejected. Do not infer this protection from client-side password-strength checks.
-- **Verification:** Open; this prevents a claim of zero unresolved Supabase security warnings.
+- **Compensating controls:** The application enforces a 12-character mixed-class password policy, mandatory email verification, Turnstile, generic authentication errors, provider rate limits, recent-authentication checks for password changes, and session revocation.
+- **Decision:** On 2026-09-01, the project owner explicitly selected the documented residual-risk alternative instead of authorizing a paid Supabase Pro upgrade. This acceptance applies only to the leaked-password lookup and does not waive any other security or release gate.
+- **Future remediation:** Upgrade the organization/project to Pro, enable **Prevent use of leaked passwords**, and verify a known compromised password is rejected. Do not infer this protection from client-side password-strength checks.
+- **Verification:** Risk accepted with the compensating controls above; the Supabase advisor warning may remain visible on the Free plan.
 - **Reference:** https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
 
 ### Low — Missing privileged-audit actor index (fixed)
@@ -56,9 +58,15 @@ The Supabase development-branch path was attempted after cost confirmation, but 
 
 ## Isolation evidence
 
-- Synthetic customer A and B could read only their own profiles.
-- Cross-customer ticket reads returned no rows.
-- Cross-customer message insert, role manipulation, ticket deletion, and closed-ticket writes were denied.
+- On 2026-09-01, two newly created, confirmed synthetic customers authenticated through the isolated Supabase project and exercised protected APIs on immutable Preview `dpl_CgkyGn7bAiuGuXMY3pVsLzbbFyUX` (`c02e2fdd1c45a9aacd61a2350f7f6b8e0b02a39c`).
+- Each customer could read exactly one own profile and zero rows for the other profile.
+- Each customer created one ticket through `/api/ticket-write`, could read its own ticket, and received zero rows for the other customer's ticket, messages, orders, activity, and role.
+- Forged ownership and role-escalation inserts were denied with HTTP 403. A cross-customer ticket reply was denied with HTTP 403.
+- Replaying one own-ticket reply with the same idempotency key returned HTTP 200 with `duplicate: true` after the original HTTP 201 response.
+- Portal bootstrap returned HTTP 200 for both confirmed customers; malformed and stale sessions returned HTTP 401. Direct use of the logged-out token was rejected.
+- Staff status returned HTTP 404 with and without a customer token because the staff feature remained disabled.
+- Sanitized customer-ID hashes used to correlate the run: `3c946d93c931d87d` and `0cc18ade2fd56241`. No email address, password, token, message body, or service credential was retained.
+- Earlier database-only verification also denied cross-customer message insert, ticket deletion, and closed-ticket writes.
 - Suspended-user portal reads returned no rows.
 - Staff access required `aal2`; `aal1` returned no authorization.
 - Staff revocation persisted, removed the synthetic session, and generated the privileged audit event.
@@ -72,8 +80,9 @@ The Supabase development-branch path was attempted after cost confirmation, but 
 - Dependency audit: zero high-severity vulnerabilities.
 - Secret scan: passed.
 - Production build: passed.
-- Supabase Security Advisor: one unresolved warning for leaked-password protection.
+- Supabase Security Advisor: leaked-password protection remains unavailable on Free and is explicitly accepted as a scoped residual risk.
 - CodeRabbit: unavailable because its installer rejects this Windows/MINGW environment; no CodeRabbit result is claimed.
+- Independent hosted review: GitHub CodeQL (`security-extended`) is configured for `customer-portal-test`, pull requests to `main`, and `main`; its completed run is required before merge.
 
 ## Release status
 
@@ -85,7 +94,7 @@ access fails closed with 404 and a hostile-origin ticket mutation fails with 403
 permits only the exact production and isolated Supabase project origins; wildcard Supabase access is
 not allowed.
 
-Production promotion and commerce remain blocked. The authenticated Preview isolation pass,
-leaked-password protection decision, independent code-review evidence, and disposable-project cleanup
-must complete before this run can be accepted. Hardening changes must remain on
+Production promotion and commerce remain blocked. The authenticated Preview isolation pass and
+leaked-password protection decision are complete. Independent CodeQL evidence and disposable-project
+cleanup must complete before this run can be accepted. Hardening changes must remain on
 `customer-portal-test` until review; do not merge or promote automatically.
