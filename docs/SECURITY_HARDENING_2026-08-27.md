@@ -77,4 +77,15 @@ The Supabase development-branch path was attempted after cost confirmation, but 
 
 ## Release status
 
-Production promotion and commerce remain blocked. The branch-scoped isolated Preview, low-rate live API probing, current commit/evidence binding, final secret repair, and disposable-project cleanup must complete before this run can be accepted. Hardening changes must remain on `customer-portal-test` until review; do not merge or promote automatically.
+On 2026-09-01, the branch-scoped service-role secret was repaired and deployment
+`dpl_3H7f8TTMdGPrt9Bkb6RDANjqGQEE` became Ready from commit
+`980d65f0491d1f711541dfcde5aa3cc568684954`. `/api/health` returned `ready` with the
+matching fingerprint `softhe-980d65f-stage1`. Low-rate unauthenticated probing confirmed that staff
+access fails closed with 404 and a hostile-origin ticket mutation fails with 403. The Preview CSP now
+permits only the exact production and isolated Supabase project origins; wildcard Supabase access is
+not allowed.
+
+Production promotion and commerce remain blocked. The authenticated Preview isolation pass,
+leaked-password protection decision, independent code-review evidence, and disposable-project cleanup
+must complete before this run can be accepted. Hardening changes must remain on
+`customer-portal-test` until review; do not merge or promote automatically.

@@ -2,15 +2,16 @@
 
 ## Current release candidate
 
-- Source commit: `41e2fe3e970525736eaf0c2b7ae527dec7cc663b`
-- Preview deployment: `dpl_8MFq5sHiffXVxzj2XjcohZHN3bo9`
-- Preview origin: `https://softhe-ktmr04yr8-suportsofthe-9420s-projects.vercel.app`
-- Release fingerprint: `softhe-41e2fe3-stage1`
+- Source commit: `980d65f0491d1f711541dfcde5aa3cc568684954`
+- Preview deployment: `dpl_3H7f8TTMdGPrt9Bkb6RDANjqGQEE`
+- Preview origin: `https://softhe-evmy7bx88-suportsofthe-9420s-projects.vercel.app`
+- Release fingerprint: `softhe-980d65f-stage1`
 - Stage-one flags: portal enabled, contact enabled, CAPTCHA enabled, commerce disabled, staff disabled
-- Health status: verified HTTP 200 `ready` on 2026-08-22 with every required check true and exact
+- Health status: verified HTTP 200 `ready` on 2026-09-01 with every required check true and exact
   source-commit/fingerprint binding.
-- Promotion status: blocked only on the pending monitoring-alert proofs and authoritative DNS export
-  listed in `docs/launch-evidence.json`. Production and DNS remain unchanged.
+- Promotion status: blocked on the pending entries in `docs/launch-evidence.json`, the unresolved
+  Supabase leaked-password warning, and completion of the final authenticated Preview isolation pass.
+  Production and DNS remain unchanged.
 
 Do not promote a different deployment or rebuild from a different commit. Confirm the source commit
 and fingerprint through `/api/health` immediately before and after promotion.
