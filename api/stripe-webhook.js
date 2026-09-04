@@ -4,6 +4,7 @@ const { getPublicOrigin, normalizeItems, PRODUCTS } = require('./create-checkout
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
+const { adminRequest, portalServerConfigured } = require('./_lib/supabase');
 
 const MAX_WEBHOOK_BYTES = 1024 * 1024;
 
@@ -85,6 +86,9 @@ const deliverFulfillment = async (event, session) => {
 			'Content-Type': 'application/json',
 			'Idempotency-Key': session.id,
 			'X-Softhe-Signature': signature,
+			...(process.env.ORDER_FULFILLMENT_BYPASS_SECRET
+				? { 'x-vercel-protection-bypass': process.env.ORDER_FULFILLMENT_BYPASS_SECRET }
+				: {}),
 		},
 		body,
 	});
@@ -114,6 +118,43 @@ const sendOrderConfirmation = async (session) => {
 	});
 };
 
+const persistPaidOrder = async (event, session) => {
+	const items = getOrderItems(session);
+	const email = String(session.customer_details?.email || '').trim().toLowerCase();
+	if (!email) throw new Error('Paid checkout is missing a customer email');
+	const existingOrder = (await adminRequest(`orders?stripe_session_id=eq.${encodeURIComponent(session.id)}&select=id,user_id`))?.[0];
+	const orderRows = await adminRequest('orders?on_conflict=stripe_session_id', {
+		method: 'POST',
+		body: {
+			user_id: session.metadata?.portal_user_id || existingOrder?.user_id || null,
+			stripe_session_id: session.id,
+			stripe_customer_id: session.customer || null,
+			payment_intent_id: session.payment_intent || null,
+			customer_email: email,
+			status: 'paid',
+			amount_total: session.amount_total || 0,
+			currency: String(session.currency || 'eur').toLowerCase(),
+			updated_at: new Date().toISOString(),
+		},
+		headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+	});
+	const order = orderRows?.[0];
+	if (!order) throw new Error('Order persistence returned no order');
+	await adminRequest('order_items?on_conflict=order_id,product_id', {
+		method: 'POST',
+		body: items.map((item) => ({ order_id: order.id, product_id: item.id, product_name: PRODUCTS[item.id].name, quantity: item.quantity })),
+		headers: { Prefer: 'resolution=merge-duplicates' },
+	});
+	const insertedEvents = await adminRequest('stripe_webhook_events?on_conflict=event_id', {
+		method: 'POST', body: { event_id: event.id, event_type: event.type }, headers: { Prefer: 'resolution=ignore-duplicates,return=representation' },
+	});
+	if (order.user_id && insertedEvents?.length) await adminRequest('activity_events', { method: 'POST', body: {
+		user_id: order.user_id, actor_id: order.user_id, event_type: 'order.paid', resource_type: 'order', resource_id: order.id,
+		metadata: { amount_total: order.amount_total, currency: order.currency },
+	} });
+	return order;
+};
+
 const fulfillPaidSession = async (event) => {
 	const session = event.data.object;
 	if (!['paid', 'no_payment_required'].includes(session.payment_status)) return 'payment-pending';
@@ -122,6 +163,7 @@ const fulfillPaidSession = async (event) => {
 	if (!claimed) return 'duplicate';
 
 	try {
+		if (portalServerConfigured()) await persistPaidOrder(event, session);
 		await deliverFulfillment(event, session);
 		await sendOrderConfirmation(session);
 		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
@@ -186,3 +228,4 @@ module.exports.fulfillPaidSession = fulfillPaidSession;
 module.exports.getFulfillmentUrl = getFulfillmentUrl;
 module.exports.getOrderItems = getOrderItems;
 module.exports.sendOrderConfirmation = sendOrderConfirmation;
+module.exports.persistPaidOrder = persistPaidOrder;

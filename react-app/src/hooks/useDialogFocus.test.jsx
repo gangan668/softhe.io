@@ -11,6 +11,7 @@ function DialogProbe({
 	withInitialFocus = false,
 	withButtons = true,
 	backgroundSelector,
+	modal = true,
 }) {
 	const dialogRef = useRef(null);
 	const initialFocusRef = useRef(null);
@@ -20,6 +21,7 @@ function DialogProbe({
 		onDismiss,
 		initialFocusRef: withInitialFocus ? initialFocusRef : undefined,
 		backgroundSelector,
+		modal,
 	});
 
 	if (!withDialog) return null;
@@ -111,6 +113,31 @@ describe('useDialogFocus', () => {
 
 		await user.keyboard('{Escape}');
 		expect(onDismiss).toHaveBeenCalledOnce();
+	});
+
+	it('keeps page scrolling and background interaction available for non-modal banners', async () => {
+		const user = userEvent.setup();
+		const background = document.createElement('main');
+		background.className = 'banner-background';
+		document.body.appendChild(background);
+		document.body.style.overflow = 'auto';
+
+		render(
+			<DialogProbe
+				backgroundSelector=".banner-background"
+				modal={false}
+			/>,
+		);
+
+		expect(document.body.style.overflow).toBe('auto');
+		expect(background).not.toHaveAttribute('inert');
+		expect(background).not.toHaveAttribute('aria-hidden');
+
+		const last = screen.getByRole('button', { name: 'Last' });
+		last.focus();
+		await user.tab();
+		expect(last).not.toHaveFocus();
+		background.remove();
 	});
 
 	it('isolates backgrounds and restores absent and pre-existing attributes', () => {

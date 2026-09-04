@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "rawEvidenceArchive": {
+    "url": "https://github.com/gangan668/softhe.io/releases/download/benchmark-evidence-v74-2026-08-13/softhe-cs2-benchmark-evidence-v74-2026-08-13.zip",
+    "sha256": "7ffd5cfb4816fc581f359d96c0e9e6aa76f83c15a81a2aafe7bfae4b4c183de6",
+    "contents": "Four original CapFrameX JSON captures plus this evidence manifest"
+  },
+  "captureDate": "2026-08-13",
+  "summaryMethod": "median",
+  "hardware": "AMD Ryzen 9 7900X; NVIDIA GeForce RTX 4070; ASUS ROG STRIX B650E-I GAMING WIFI; 32 GB DDR5 (6000 MT/s default, 6200 MT/s SoftheOS)",
+  "bios": "Default profile: standard settings with XMP enabled. SoftheOS profile: modified ASUS BIOS 3854 with Softhe.io BIOS tuning.",
+  "drivers": "NVIDIA 591.86 in the default profile; NVIDIA 537.58 in the SoftheOS profile. CapFrameX did not record chipset-driver versions.",
+  "operatingSystem": "Default: Microsoft Windows 11 Home Build 26200. SoftheOS: Microsoft Windows 11 IoT Enterprise LTSC Build 26200 with the Softhe.io OS build.",
+  "gameVersion": "Counter-Strike 2 build current at capture time; the exact build identifier was not recorded by CapFrameX.",
+  "graphicsSettings": "Fullscreen Windowed; 4:3; 1280x960; 360 Hz; maximum in-game FPS 0; maximum menu FPS 200; MSAA none; global shadows low; dynamic shadows all; model/texture medium; anisotropic 16x; shader low; particles low; ambient occlusion disabled; HDR quality; FidelityFX Super Resolution disabled (highest quality). Identical game configuration and video settings for all runs.",
+  "scenario": "Counter-Strike 2 Dust2 FPS Benchmark workshop map recorded with CapFrameX 1.8.6.2 for 109 seconds per run.",
+  "warmupProcedure": "Clean fresh boot with only Steam and CapFrameX running before the two consecutive benchmark runs for each profile.",
+  "stock": {
+    "runs": [
+      { "id": "default-2026-08-11-083136z", "averageFps": 662.08, "onePercentLowFps": 228.31, "rawEvidence": "CapFrameX-cs2.exe-2026-08-11T103136-DEFUALT.json; CapFrameX hash 2961BEBE02CBAF6D5367926B5013292F9A0AB1AB" },
+      { "id": "default-2026-08-11-083449z", "averageFps": 654.34, "onePercentLowFps": 221.76, "rawEvidence": "CapFrameX-cs2.exe-2026-08-11T103449-DEFUALT.json; CapFrameX hash 0011BAB5357EB72C20A42A130C45CFB9957E8B76" }
+    ]
+  },
+  "optimized": {
+    "runs": [
+      { "id": "softheos-2026-08-13-031834z", "averageFps": 825.53, "onePercentLowFps": 283.73, "rawEvidence": "CapFrameX-cs2.exe-2026-08-13T51834-SoftheOS.json; CapFrameX hash E7C9482EAF843645E842CA9489C7181A69EE6ABA" },
+      { "id": "softheos-2026-08-13-032143z", "averageFps": 826.13, "onePercentLowFps": 287.06, "rawEvidence": "CapFrameX-cs2.exe-2026-08-13T52143-SoftheOS.json; CapFrameX hash 59E6F2351BF66B7D3B88E18859685CA5683017BB" }
+    ]
+  },
+  "reportedMedians": {
+    "stock": { "averageFps": 658.21, "onePercentLowFps": 225.035 },
+    "optimized": { "averageFps": 825.83, "onePercentLowFps": 285.395 }
+  }
+}

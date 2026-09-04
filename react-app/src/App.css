@@ -7,6 +7,11 @@
 :root {
 	--primary-color: #42e8c4;
 	--primary-dark: #16b89c;
+	--brand-cyan: #4fd8e8;
+	--brand-blue: #72a7ff;
+	--brand-surface: rgba(67, 220, 211, 0.09);
+	--brand-surface-strong: rgba(67, 220, 211, 0.14);
+	--brand-border: rgba(82, 218, 222, 0.32);
 	--secondary-color: #ffb020;
 	--background-color: #080a0f;
 	--surface-color: #111821;
@@ -20,7 +25,7 @@
 	--border-color: rgba(174, 197, 218, 0.16);
 	--success-color: #35d28f;
 	--error-color: #ff5c75;
-	--gradient: linear-gradient(135deg, #42e8c4 0%, #72a7ff 100%);
+	--gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--brand-cyan) 48%, var(--brand-blue) 100%);
 	--gradient-warm: linear-gradient(135deg, #ffb020 0%, #ff6b6b 100%);
 	--shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 	--shadow-soft: 0 14px 40px rgba(2, 8, 23, 0.26);
@@ -33,7 +38,7 @@
 	--radius-lg: 14px;
 	--radius-md: 10px;
 	--radius-sm: 8px;
-	--glow-primary: 0 0 0 1px rgba(66, 232, 196, 0.24), 0 16px 36px rgba(66, 232, 196, 0.18);
+	--glow-primary: 0 0 0 1px rgba(82, 218, 222, 0.22), 0 16px 36px rgba(66, 196, 216, 0.16);
 }
 
 
@@ -275,21 +280,6 @@ textarea:focus-visible {
 }
 
 
-.nav-link.active {
-	background: rgba(66, 232, 196, 0.12);
-	color: var(--primary-color) !important;
-
-	padding: 10px 16px;
-	border-radius: 9999px;
-
-	box-shadow: var(--glow-primary);
-}
-
-
-.nav-link.active::after {
-	display: none;
-}
-
 /* Remove any remaining blurs on performance page (React app scope) */
 .performance-page *,
 .page-performance * {
@@ -414,3 +404,6 @@ textarea:focus-visible {
 	color: var(--primary-color);
 	font-size: 1.5rem;
 }
+.bar-width-64 { width: 64%; }
+.bar-width-28 { width: 28%; }
+.bar-width-32 { width: 32%; }

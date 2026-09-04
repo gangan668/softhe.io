@@ -1,65 +1,7 @@
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { PRODUCTS } from '../data/products';
 import './Services.css';
-
-const services = [
-	{
-		icon: 'fab fa-windows',
-		title: 'Custom Windows Enterprise ISO',
-		summary:
-			'A lean Windows build for players who want fewer background tasks, gaming-focused defaults, and a cleaner install baseline.',
-		bestFor: 'Fresh installs, competitive FPS setups, and PCs currently carrying unnecessary Windows overhead.',
-		price: 'Starting at €65',
-		features: [
-			'Zero bloatware installation',
-			'Gaming-focused registry and service tuning',
-			'Privacy-conscious defaults',
-			'Installation guidance and update notes',
-		],
-	},
-	{
-		icon: 'fas fa-microchip',
-		title: 'Expert BIOS Optimization',
-		summary:
-			'Hardware-aware motherboard configuration focused on memory behavior, CPU settings, boot flow, and stable performance.',
-		bestFor: 'High-refresh systems with inconsistent lows, untuned memory, or unclear BIOS defaults.',
-		price: 'Starting at €75',
-		features: [
-			'Memory timing optimization',
-			'CPU and power behavior tuning',
-			'Unused feature cleanup',
-			'Stability-oriented review',
-		],
-	},
-	{
-		icon: 'fas fa-tachometer-alt',
-		title: 'Complete Performance Tuning',
-		summary:
-			'A combined service path for users who want Windows, BIOS, driver, and game-specific configuration handled together.',
-		bestFor: 'Full rebuilds, new gaming PCs, or users who want one coordinated optimization pass.',
-		price: 'Starting at €120',
-		features: [
-			'Custom Windows ISO installation',
-			'BIOS optimization service',
-			'Driver and software cleanup',
-			'Game-specific configuration guidance',
-		],
-	},
-	{
-		icon: 'fas fa-headset',
-		title: 'Premium Support & Maintenance',
-		summary:
-			'Direct support for troubleshooting, compatibility questions, follow-up configuration, and optimization maintenance.',
-		bestFor: 'Customers who want help after setup or need a second pass when hardware or games change.',
-		price: '€25/request',
-		features: [
-			'Priority support requests',
-			'Performance checkups',
-			'Optimization update guidance',
-			'Remote troubleshooting when needed',
-		],
-	},
-];
 
 const processSteps = [
 	{
@@ -106,34 +48,35 @@ function Services() {
 								<h2>Pick the depth of optimization your setup needs.</h2>
 							</div>
 							<p>
-								Some systems only need a clean Windows baseline. Others need BIOS, drivers,
-								and game settings reviewed together. These packages make that decision clearer.
+								Compare each service separately, then use the Store when you are ready to order.
+								Every option includes a clear use case, scope, and starting price.
 							</p>
 						</div>
 
 						<div className="services-grid">
-							{services.map((service) => (
-								<article className="service-card" key={service.title}>
-									<div className="service-card-top">
-										<div className="service-icon">
-											<i className={service.icon}></i>
+							{PRODUCTS.map((service) => (
+								<article className="service-card" key={service.id}>
+									{service.badge && <span className="service-badge">{service.badge}</span>}
+									<div className="service-visual">
+										<i className={service.icon} aria-hidden="true"></i>
+									</div>
+									<div className="service-body">
+										<div className="service-heading">
+											<h3>{service.name}</h3>
+											<strong>€{service.price}</strong>
 										</div>
-										<div className="service-price">{service.price}</div>
+										<p>{service.description}</p>
+										<div className="service-fit">
+											<span>Best for</span>
+											<strong>{service.bestFor}</strong>
+										</div>
+										<ul className="service-features">
+											{service.features.map((feature) => <li key={feature}>{feature}</li>)}
+										</ul>
+										<Link to={`/store#${service.id}`} className="btn btn-primary service-action">
+											View in Store <i className="fas fa-arrow-right" aria-hidden="true"></i>
+										</Link>
 									</div>
-									<h3>{service.title}</h3>
-									<p>{service.summary}</p>
-									<div className="service-fit">
-										<span>Best for</span>
-										<strong>{service.bestFor}</strong>
-									</div>
-									<ul className="service-features">
-										{service.features.map((feature) => (
-											<li key={feature}>
-												<i className="fas fa-check"></i>
-												{feature}
-											</li>
-										))}
-									</ul>
 								</article>
 							))}
 						</div>

@@ -191,7 +191,7 @@ function Store() {
 						<div className="store-proof" aria-label="Benchmark evidence">
 							<div>
 								<span className="section-kicker">Benchmark context</span>
-								<h3>Current test sample: 670 to 932 average FPS in CS2.</h3>
+								<h3>Current two-run median: 658 to 826 average FPS in CS2.</h3>
 								<p>
 									The store points buyers back to measured before/after screenshots so product
 									choice is grounded in the available evidence.

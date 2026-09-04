@@ -1,15 +1,5 @@
 export const PRODUCTS = [
 	{
-		id: 'windows-10',
-		name: 'Custom Windows 10 ISO',
-		price: 65,
-		description: 'Our custom Windows Enterprise ISO is built for ultimate speed and no bloat. Experience gaming as it should be.',
-		bestFor: 'Competitive FPS players who want maximum compatibility and low overhead.',
-		features: ['Reduced preinstalled software', 'Gaming-focused configuration', 'Lower background overhead', 'Customer-supplied valid Windows licence required'],
-		icon: 'fab fa-windows',
-		badge: 'Best Seller',
-	},
-	{
 		id: 'windows-11',
 		name: 'Custom Windows 11 ISO',
 		price: 75,
@@ -17,7 +7,17 @@ export const PRODUCTS = [
 		bestFor: 'Newer systems that need current Windows 11 gaming features.',
 		features: ['DirectX 12 Ultimate support', 'Auto HDR support', 'Windowed gaming configuration', 'Customer-supplied valid Windows licence required'],
 		icon: 'fab fa-windows',
-		badge: null,
+		badge: 'Best Seller',
+	},
+	{
+		id: 'windows-10',
+		name: 'Custom Windows 10 ISO',
+		price: 65,
+		description: 'A lean older-build option for customers who specifically prefer Windows 10 or need it for compatibility with an existing setup.',
+		bestFor: 'Customers who intentionally want an older Windows build for familiar behavior or specific compatibility needs.',
+		features: ['Reduced preinstalled software', 'Gaming-focused configuration', 'Lower background overhead', 'Customer-supplied valid Windows licence required'],
+		icon: 'fab fa-windows',
+		badge: 'Older-build option',
 	},
 	{
 		id: 'bios-optimization',

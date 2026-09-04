@@ -1,5 +1,8 @@
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
+const { verifyActiveUser } = require('./_lib/supabase');
+const { clientIp, enforceRateLimit, jsonOnly, receiptToken, sendPublicError } = require('./_lib/portal-security');
+const { claimKey, redisCommand } = require('./_lib/redis');
 
 const PRODUCTS = {
 	'windows-10': { name: 'Custom Windows 10 ISO', unitAmount: 6500 },
@@ -79,7 +82,18 @@ const getVatStatus = () => {
 	return vatStatus;
 };
 
-const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), vatStatus = 'not-registered') => {
+const getIdempotentAcceptedAt = async (idempotencyKey, now = new Date(), store = { claimKey, redisCommand }) => {
+	const key = `checkout:accepted-at:${idempotencyKey}`;
+	const proposed = now.toISOString();
+	if (await store.claimKey(key, proposed, 86400)) return proposed;
+	const existing = await store.redisCommand(['GET', key]);
+	if (typeof existing !== 'string' || Number.isNaN(Date.parse(existing))) {
+		throw new Error('Checkout idempotency state is unavailable');
+	}
+	return existing;
+};
+
+const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), vatStatus = 'not-registered', customer = null) => {
 	const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 	const discountRate = getDiscountRate(items.length);
 	const form = new URLSearchParams();
@@ -90,6 +104,11 @@ const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), 
 	form.append('billing_address_collection', 'auto');
 	form.append('invoice_creation[enabled]', 'true');
 	form.append('customer_creation', 'always');
+	if (customer) {
+		form.append('customer_email', customer.email);
+		form.append('client_reference_id', customer.id);
+		form.append('metadata[portal_user_id]', customer.id);
+	}
 	if (vatStatus === 'registered') form.append('automatic_tax[enabled]', 'true');
 	form.append('metadata[item_count]', String(itemCount));
 	form.append('metadata[product_count]', String(items.length));
@@ -125,10 +144,16 @@ async function createCheckoutSession(req, res) {
 		res.setHeader('Allow', 'POST');
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
+	if (process.env.COMMERCE_ENABLED !== 'true') {
+		return res.status(503).json({ error: 'Checkout is not available' });
+	}
 
 	if (!process.env.STRIPE_SECRET_KEY) {
 		return res.status(503).json({ error: 'Stripe checkout is not configured' });
 	}
+	try { jsonOnly(req, 32768); } catch (error) { return sendPublicError(res, error); }
+	const idempotencyKey = String(req.headers?.['idempotency-key'] || '').trim();
+	if (!/^[A-Za-z0-9_-]{20,100}$/.test(idempotencyKey)) return res.status(400).json({ error: 'A valid idempotency key is required' });
 	try {
 		assertCommerceConfiguration();
 	} catch (error) {
@@ -146,9 +171,16 @@ async function createCheckoutSession(req, res) {
 	let form;
 	let discountRate;
 	try {
-		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), new Date().toISOString(), getVatStatus()));
+		const customer = await verifyActiveUser(req, { required: false });
+		if (customer && !customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before linking this order' });
+		const [, , acceptedAt] = await Promise.all([
+			enforceRateLimit('checkout:actor', customer?.id || clientIp(req), 10, 600),
+			enforceRateLimit('checkout:ip', clientIp(req), 10, 600),
+			getIdempotentAcceptedAt(idempotencyKey),
+		]);
+		({ form, discountRate } = createStripeForm(items, getPublicOrigin(), acceptedAt, getVatStatus(), customer));
 	} catch (error) {
-		return res.status(503).json({ error: error.message });
+		return sendPublicError(res, error, 'Checkout could not be started. Please try again.');
 	}
 	try {
 		const response = await fetchWithTimeout('https://api.stripe.com/v1/checkout/sessions', {
@@ -156,6 +188,7 @@ async function createCheckoutSession(req, res) {
 			headers: {
 				Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}`,
 				'Content-Type': 'application/x-www-form-urlencoded',
+				'Idempotency-Key': idempotencyKey,
 			},
 			body: form,
 		});
@@ -170,10 +203,10 @@ async function createCheckoutSession(req, res) {
 			return res.status(502).json({ error: 'Checkout could not be started. Please try again.' });
 		}
 
-		return res.status(200).json({ url: data.url, id: data.id, discountRate });
+		return res.status(200).json({ url: data.url, id: data.id, discountRate, receiptToken: receiptToken(data.id) });
 	} catch (error) {
 		console.error('checkout_session_creation_failed', { status: null, message: error.message });
-		return res.status(502).json({ error: 'Unable to reach Stripe. Please try again.' });
+		return sendPublicError(res, Object.assign(error, { statusCode: 502 }), 'Unable to reach Stripe. Please try again.');
 	}
 }
 
@@ -186,5 +219,6 @@ module.exports.normalizeItems = normalizeItems;
 module.exports.createStripeForm = createStripeForm;
 module.exports.getPublicOrigin = getPublicOrigin;
 module.exports.getVatStatus = getVatStatus;
+module.exports.getIdempotentAcceptedAt = getIdempotentAcceptedAt;
 module.exports.isStripeCheckoutUrl = isStripeCheckoutUrl;
 module.exports.validateLegalAcceptance = validateLegalAcceptance;

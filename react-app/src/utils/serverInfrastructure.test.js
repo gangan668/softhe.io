@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import crypto from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
@@ -7,9 +8,29 @@ const withdrawal = require('../../../api/withdrawal.js');
 const health = require('../../../api/health.js');
 const browserErrors = require('../../../api/browser-errors.js');
 const checkoutSession = require('../../../api/checkout-session.js');
+const ticketNotification = require('../../../api/ticket-notification.js');
+const ticketWrite = require('../../../api/ticket-write.js');
+const { runIdempotent } = ticketWrite;
+const portalBootstrap = require('../../../api/portal-bootstrap.js');
+const staffApi = require('../../../api/_lib/staff-handler.js');
+
+const vercelConfig = require('../../../vercel.json');
+
+describe('deployment security headers', () => {
+	it('allows both production and isolated Preview Supabase origins without a wildcard', () => {
+		const csp = vercelConfig.headers[0].headers.find(({ key }) => key === 'Content-Security-Policy')?.value || '';
+		expect(csp).toContain('https://mbwsmyqofkxmxkelqviy.supabase.co');
+		expect(csp).toContain('wss://mbwsmyqofkxmxkelqviy.supabase.co');
+		expect(csp).toContain('https://zbchdxptibehtizomwiq.supabase.co');
+		expect(csp).toContain('wss://zbchdxptibehtizomwiq.supabase.co');
+		expect(csp).not.toContain('https://*.supabase.co');
+	});
+});
+const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
 const { claimKey, incrementWithExpiry, redisCommand } = require('../../../api/_lib/redis.js');
 const { assertCommerceConfiguration, assertOperatorIdentity } = require('../../../api/_lib/config.js');
 const { fulfillPaidSession, getFulfillmentUrl } = require('../../../api/stripe-webhook.js');
+const testFulfillment = require('../../../api/test-fulfillment.js');
 
 const jsonResponse = (result, ok = true, status = 200) => ({
 	ok,
@@ -62,7 +83,7 @@ describe('production health API', () => {
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.status).toBe('configuration-required');
-		expect(response.payload.missing).toContain('STRIPE_SECRET_KEY');
+		expect(response.payload.checks.checkout).toBe(false);
 		expect(response.payload).not.toHaveProperty('values');
 		expect(response.payload.release).toEqual({
 			sourceCommit: '0123456789abcdef',
@@ -71,8 +92,51 @@ describe('production health API', () => {
 		expect(response.headers['Cache-Control']).toBe('no-store');
 	});
 
+	it('binds deployed release metadata to the immutable Vercel commit', async () => {
+		process.env.VERCEL_GIT_COMMIT_SHA = 'abcdef0123456789';
+		process.env.RELEASE_SOURCE_COMMIT = 'stale-commit';
+		process.env.RELEASE_FINGERPRINT = 'stale-fingerprint';
+		process.env.COMMERCE_ENABLED = 'false';
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.payload.release).toEqual({
+			sourceCommit: 'abcdef0123456789',
+			fingerprint: 'softhe-abcdef0-stage1',
+		});
+	});
+
 	it('reports ready when every required variable exists', async () => {
 		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(200);
+		expect(response.payload).toEqual(expect.objectContaining({ status: 'ready' }));
+	});
+
+	it('fails readiness when privileged portal access is rejected', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ message: 'Invalid API key' }, false, 401)));
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.checks.portal).toBe(false);
+	});
+
+	it('does not report ticket notifications ready without their template', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		delete process.env.EMAILJS_TICKET_TEMPLATE_ID;
 		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
 		process.env.VAT_STATUS = 'not-registered';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
@@ -80,11 +144,156 @@ describe('production health API', () => {
 		const response = createResponse();
 		await health({ method: 'GET' }, response);
 
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.checks.tickets).toBe(false);
+		expect(response.payload).not.toHaveProperty('missing');
+	});
+
+	it('rejects masked secret placeholders as invalid configuration', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		process.env.EMAILJS_PRIVATE_KEY = 'Encrypted';
+		const response = createResponse();
+		await health({ method: 'GET' }, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.checks.tickets).toBe(false);
+		expect(response.payload).not.toHaveProperty('invalid');
+	});
+});
+
+describe('ticket notification API', () => {
+	it('keeps the secured API categories aligned with the customer form', () => {
+		expect([...TICKET_CATEGORIES]).toEqual(['general', 'sales', 'technical', 'billing']);
+	});
+	it('fails closed when the ticket notification template is missing', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		vi.stubGlobal('fetch', vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ id: 'staff', email: 'staff@example.com' }))
+			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: 'Reply' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
+			.mockResolvedValueOnce(jsonResponse([{ role: 'staff' }]))
+			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }])));
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = createResponse();
+		await ticketNotification({
+			method: 'POST',
+			headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' },
+			body: { messageId: 'message' },
+		}, response);
+
+		expect(response.statusCode).toBe(503);
+		expect(response.payload.error).toMatch(/not configured/i);
+		expect(consoleError).toHaveBeenCalledWith('ticket_delivery_failed', {
+			message: 'Ticket notifications are not configured',
+		});
+		consoleError.mockRestore();
+	});
+	it('falls back to an idempotent Resend notification when EmailJS fails', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		process.env.SUPPORT_EMAIL = 'support@softhe.io';
+		process.env.PORTAL_RATE_LIMIT_SECRET = 'portal-rate-secret';
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+		process.env.EMAILJS_SERVICE_ID = 'service';
+		process.env.EMAILJS_PUBLIC_KEY = 'public';
+		process.env.EMAILJS_TICKET_TEMPLATE_ID = 'ticket-template';
+		process.env.RESEND_API_KEY = 're_test';
+		vi.stubGlobal('fetch', vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ id: 'customer', email: 'customer@example.com' }))
+			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: '<test>' }]))
+			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
+			.mockResolvedValueOnce(jsonResponse([]))
+			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }]))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
+			.mockResolvedValueOnce(new Response('', { status: 500 }))
+			.mockResolvedValueOnce(jsonResponse({ id: 'email-id' })));
+		const response = createResponse();
+		await ticketNotification({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' }, body: { messageId: 'message' } }, response);
+
 		expect(response.statusCode).toBe(200);
-		expect(response.payload).toEqual(expect.objectContaining({
-			status: 'ready',
-			missing: [],
-		}));
+		const resendCall = fetch.mock.calls.find(([url]) => url === 'https://api.resend.com/emails');
+		expect(resendCall).toBeTruthy();
+		expect(resendCall[1].headers['Idempotency-Key']).toBe('ticket-notification/message');
+		expect(JSON.parse(resendCall[1].body).html).toContain('&lt;test&gt;');
+	});
+	it('rejects authenticated ticket mutations without a same-origin browser request', async () => {
+		const response = createResponse();
+		await ticketNotification({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json' }, body: { messageId: 'message' } }, response);
+		expect(response.statusCode).toBe(403);
+		expect(response.payload).toEqual({ error: 'Forbidden' });
+	});
+});
+
+describe('ticket write API', () => {
+	it('returns the stored result instead of repeating an identical write', async () => {
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+		const stored = JSON.stringify({ id: '11111111-1111-4111-8111-111111111111' });
+		vi.stubGlobal('fetch', vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ result: null }))
+			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
+			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
+			.mockResolvedValueOnce(jsonResponse({ result: stored })));
+		const operation = vi.fn().mockResolvedValue({ id: '11111111-1111-4111-8111-111111111111' });
+		const req = { headers: { 'idempotency-key': '12345678901234567890' } };
+		expect(await runIdempotent(req, { id: '22222222-2222-4222-8222-222222222222' }, operation)).toEqual({ id: '11111111-1111-4111-8111-111111111111' });
+		expect(await runIdempotent(req, { id: '22222222-2222-4222-8222-222222222222' }, operation)).toEqual({ id: '11111111-1111-4111-8111-111111111111', duplicate: true });
+		expect(operation).toHaveBeenCalledTimes(1);
+	});
+	it('rejects cross-origin writes before authenticating or touching the database', async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await ticketWrite({
+			method: 'POST',
+			headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://evil.example', host: 'softhe.io' },
+			body: { action: 'message', ticketId: '11111111-1111-4111-8111-111111111111', message: 'hello' },
+		}, response);
+		expect(response.statusCode).toBe(403);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+});
+
+describe('staff authorization boundary', () => {
+	it('keeps every staff endpoint unavailable unless explicitly enabled', async () => {
+		delete process.env.STAFF_PORTAL_ENABLED;
+		const response = createResponse();
+		await staffApi({ method: 'GET', headers: {}, query: { action: 'status' } }, response);
+		expect(response.statusCode).toBe(404);
+		expect(response.payload).toEqual({ error: 'Not found' });
+	});
+
+	it('never grants or renews a role during customer bootstrap', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		process.env.PORTAL_RATE_LIMIT_SECRET = 'rate-secret';
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
+		const fetchMock = vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ id: '11111111-1111-4111-8111-111111111111', email: 'test@example.com', email_confirmed_at: '2026-08-13T00:00:00Z' }))
+			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
+			.mockResolvedValueOnce(jsonResponse([]));
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await portalBootstrap({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' }, body: {}, query: {} }, response);
+		expect(response.statusCode).toBe(200);
+		expect(fetchMock.mock.calls.some(([url]) => String(url).includes('user_roles'))).toBe(false);
+		expect(response.payload).not.toHaveProperty('staff');
 	});
 });
 
@@ -327,6 +536,7 @@ describe('Stripe fulfillment', () => {
 	});
 
 	it('durably claims and delivers a paid session once', async () => {
+		process.env.ORDER_FULFILLMENT_BYPASS_SECRET = 'preview-bypass-secret';
 		const fetchMock = vi.fn()
 			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
 			.mockResolvedValueOnce(jsonResponse({}, true, 200))
@@ -349,6 +559,7 @@ describe('Stripe fulfillment', () => {
 		expect(fetchMock.mock.calls[1][0]).toBe('https://fulfillment.example/orders');
 		expect(fetchMock.mock.calls[1][1].headers['Idempotency-Key']).toBe('cs_1');
 		expect(fetchMock.mock.calls[1][1].headers['X-Softhe-Signature']).toMatch(/^[a-f0-9]{64}$/);
+		expect(fetchMock.mock.calls[1][1].headers['x-vercel-protection-bypass']).toBe('preview-bypass-secret');
 		expect(JSON.parse(fetchMock.mock.calls[1][1].body).items).toEqual([
 			{ id: 'windows-10', quantity: 1 },
 		]);
@@ -390,9 +601,91 @@ describe('Stripe fulfillment', () => {
 	});
 });
 
+describe('Preview fulfillment test receiver', () => {
+	const secret = 'preview-fulfillment-secret';
+	const order = {
+		sessionId: 'cs_test_12345678', amountTotal: 6500, currency: 'eur', paymentIntentId: 'pi_test',
+		customerEmail: 'customer@example.com', items: [{ id: 'windows-10', quantity: 1 }],
+	};
+	const request = (body = order, headers = {}) => {
+		const payload = Buffer.from(JSON.stringify(body));
+		return {
+			method: 'POST', body: payload,
+			headers: {
+				'idempotency-key': body.sessionId,
+				'x-softhe-signature': crypto.createHmac('sha256', secret).update(payload).digest('hex'),
+				...headers,
+			},
+		};
+	};
+
+	beforeEach(() => {
+		process.env.VERCEL_ENV = 'preview';
+		process.env.FULFILLMENT_TEST_MODE = 'true';
+		process.env.ORDER_FULFILLMENT_WEBHOOK_SECRET = secret;
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
+		process.env.UPSTASH_REDIS_REST_TOKEN = 'token';
+	});
+
+	it('is unavailable outside an explicitly enabled Preview', async () => {
+		process.env.VERCEL_ENV = 'production';
+		const response = createResponse();
+		await testFulfillment(request(), response);
+		expect(response.statusCode).toBe(404);
+	});
+
+	it('rejects invalid signatures before durable storage', async () => {
+		const fetchMock = vi.fn();
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await testFulfillment(request(order, { 'x-softhe-signature': '0'.repeat(64) }), response);
+		expect(response.statusCode).toBe(401);
+		expect(fetchMock).not.toHaveBeenCalled();
+	});
+
+	it('accepts and durably records a valid order without customer email', async () => {
+		const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ result: ['accepted', '1'] }));
+		vi.stubGlobal('fetch', fetchMock);
+		const response = createResponse();
+		await testFulfillment(request(), response);
+		expect(response.statusCode).toBe(202);
+		expect(response.payload).toEqual({ accepted: true, duplicate: false, attempts: 1 });
+		const command = JSON.parse(fetchMock.mock.calls[0][1].body);
+		expect(command[0]).toBe('EVAL');
+		expect(command.join(' ')).not.toContain('customer@example.com');
+	});
+
+	it('reports duplicate deliveries and fail-first retries', async () => {
+		const fetchMock = vi.fn()
+			.mockResolvedValueOnce(jsonResponse({ result: ['retry', '1'] }))
+			.mockResolvedValueOnce(jsonResponse({ result: ['duplicate', '3'] }));
+		vi.stubGlobal('fetch', fetchMock);
+		process.env.FULFILLMENT_TEST_FAIL_FIRST = 'true';
+		const retryResponse = createResponse();
+		await testFulfillment(request(), retryResponse);
+		expect(retryResponse.statusCode).toBe(503);
+		expect(retryResponse.payload.retry).toBe(true);
+		const duplicateResponse = createResponse();
+		await testFulfillment(request(), duplicateResponse);
+		expect(duplicateResponse.payload).toEqual({ accepted: true, duplicate: true, attempts: 3 });
+	});
+
+	it('requires a separate bearer token to read evidence', async () => {
+		process.env.FULFILLMENT_TEST_EVIDENCE_TOKEN = 'evidence-token';
+		const unauthorized = createResponse();
+		await testFulfillment({ method: 'GET', headers: {}, query: { session_id: order.sessionId } }, unauthorized);
+		expect(unauthorized.statusCode).toBe(401);
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: [JSON.stringify({ sessionId: order.sessionId }), '2'] })));
+		const response = createResponse();
+		await testFulfillment({ method: 'GET', headers: { authorization: 'Bearer evidence-token' }, query: { session_id: order.sessionId } }, response);
+		expect(response.payload).toEqual({ order: { sessionId: order.sessionId }, attempts: 2 });
+	});
+});
+
 describe('checkout session verification', () => {
 	beforeEach(() => {
 		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		process.env.CHECKOUT_RECEIPT_SECRET = 'receipt-secret';
 	});
 
 	it('returns paid status only for a server-created Softhe order', async () => {
@@ -405,7 +698,8 @@ describe('checkout session verification', () => {
 			metadata: { order_schema: '1', order_items: '[{"id":"windows-10","quantity":1}]' },
 		})));
 		const response = createResponse();
-		await checkoutSession({ method: 'GET', query: { session_id: 'cs_test_12345678' } }, response);
+		const receipt = crypto.createHmac('sha256', process.env.CHECKOUT_RECEIPT_SECRET).update('cs_test_12345678').digest('base64url');
+		await checkoutSession({ method: 'GET', headers: { 'x-checkout-receipt': receipt }, query: { session_id: 'cs_test_12345678' } }, response);
 
 		expect(response.statusCode).toBe(200);
 		expect(response.payload).toEqual(expect.objectContaining({ paid: true, status: 'complete' }));
@@ -427,13 +721,20 @@ afterEach(() => {
 	for (const key of [
 		'UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'CONTACT_RATE_LIMIT_SECRET',
 		'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY',
+		'EMAILJS_TICKET_TEMPLATE_ID',
 		'EMAILJS_ORDER_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
 		'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
+		'ORDER_FULFILLMENT_BYPASS_SECRET',
+		'FULFILLMENT_TEST_MODE', 'FULFILLMENT_TEST_FAIL_FIRST', 'FULFILLMENT_TEST_RETENTION_DAYS',
+		'FULFILLMENT_TEST_EVIDENCE_TOKEN', 'VERCEL_ENV',
 		'STRIPE_SECRET_KEY',
+		'CHECKOUT_RECEIPT_SECRET', 'PORTAL_RATE_LIMIT_SECRET',
+		'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
 		'PUBLIC_SITE_URL', 'STRIPE_WEBHOOK_SECRET',
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
-		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT',
+		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT', 'VERCEL_GIT_COMMIT_SHA',
+		'STAFF_PORTAL_ENABLED',
 	]) delete process.env[key];
 });
 
@@ -458,6 +759,31 @@ describe('browser error reporting API', () => {
 		expect(consoleError).toHaveBeenCalledWith('browser_error', expect.objectContaining({
 			message: 'Failure message',
 		}));
+		consoleError.mockRestore();
+	});
+});
+
+describe('monitoring test API', () => {
+	it('is unavailable outside Preview', async () => {
+		process.env.VERCEL_ENV = 'production';
+		process.env.MONITORING_TEST_SECRET = 'monitor-secret';
+		const response = createResponse();
+		await health({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'browser' } }, response);
+		expect(response.statusCode).toBe(404);
+	});
+
+	it('requires its dedicated secret and emits bounded test markers', async () => {
+		process.env.VERCEL_ENV = 'preview';
+		process.env.MONITORING_TEST_SECRET = 'monitor-secret';
+		const unauthorized = createResponse();
+		await health({ method: 'POST', headers: {}, body: { kind: 'browser' } }, unauthorized);
+		expect(unauthorized.statusCode).toBe(401);
+
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = createResponse();
+		await health({ method: 'POST', headers: { authorization: 'Bearer monitor-secret' }, body: { kind: 'delivery' } }, response);
+		expect(response.statusCode).toBe(202);
+		expect(consoleError).toHaveBeenCalledWith('contact_delivery_failed', { monitorTest: true });
 		consoleError.mockRestore();
 	});
 });

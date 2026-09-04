@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "origin": "https://softhe-io.vercel.app",
-    "deploymentId": "dpl_EXmsJm8uNKmexoAXpKtrm5cMMRfg",
-    "commitSha": "30dc920f6ba08145c74aa00573ebfdec02374a46",
-    "releaseFingerprint": "softhe-20260721064541-30dc920-69a95053c80247db",
-    "strictSmokeRun": "https://github.com/gangan668/softhe.io/actions/runs/29802155580",
-    "verifiedAt": "2026-07-21T08:10:36+02:00"
+    "origin": "https://softhe-iwygi2gsa-suportsofthe-9420s-projects.vercel.app",
+    "deploymentId": "dpl_4yCMVUA9qBTVvFtUJRVdr4nD1g4E",
+    "commitSha": "cc9b1524053422200ccaa97d83b0dd52e5e1b2c0",
+    "releaseFingerprint": "softhe-cc9b152-stage1",
+    "strictSmokeRun": "Immutable Preview health verified on 2026-09-04 after the audited dependency update: HTTP 200 ready through authenticated Vercel inspection, every required check true, and the runtime source commit and fingerprint match this manifest. The UI-identical ae76a6b build received responsive browser review with no horizontal overflow at 320, 390, 768, 1280, or 1440 px; cookie consent did not lock scrolling; mobile and desktop navigation rendered at their intended widths; keyboard focus styling, logo, and accent treatment rendered coherently; and the browser console contained no warnings or errors. Commit cc9b152 changes only the dependency lockfile and passes the complete local quality suite with zero npm audit findings. Commerce and staff access remain disabled. Production promotion remains blocked by the pending evidence entries below.",
+    "verifiedAt": "2026-09-04T20:04:55+02:00"
   },
   "evidence": {
     "legal.operator-identity": { "status": "passed", "verifiedAt": "2026-07-21T08:01:11+02:00", "verifiedBy": "Hannes Axelsson", "references": ["https://softhe-io.vercel.app/api/health (operator identity configuration check passed)"] },
     "legal.counsel-approval": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "legal.accounting-approval": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "benchmark.methodology-and-raw-runs": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "ui.responsive-review": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "benchmark.methodology-and-raw-runs": { "status": "passed", "verifiedAt": "2026-08-13T07:24:31+02:00", "verifiedBy": "Codex benchmark evidence verification", "references": ["https://github.com/gangan668/softhe.io/releases/tag/benchmark-evidence-v74-2026-08-13", "Archive SHA-256 7ffd5cfb4816fc581f359d96c0e9e6aa76f83c15a81a2aafe7bfae4b4c183de6", "npm run benchmark:verify: medians 658.21/225.035 default and 825.83/285.395 optimized"] },
+    "ui.responsive-review": { "status": "passed", "verifiedAt": "2026-09-04T20:04:55+02:00", "verifiedBy": "Codex deployed browser verification", "references": ["Immutable ae76a6b Preview had no horizontal overflow at 320, 390, 768, 1280, or 1440 px and remained scrollable before cookie consent", "Mobile menu rendered at 320, 390, and 768 px; desktop navigation rendered at 1280 and 1440 px", "Keyboard focus styling was visible and the immutable Preview browser console contained zero errors or warnings", "https://softhe-60ekwhiyt-suportsofthe-9420s-projects.vercel.app"] },
     "emailjs.contact-delivery": { "status": "passed", "verifiedAt": "2026-07-21T08:09:25+02:00", "verifiedBy": "Codex production verification", "references": ["https://softhe-io.vercel.app/api/contact (HTTP 200 delivered:true)", "https://dashboard.emailjs.com/admin/history (Gmail result OK at 2026-07-21 08:09:25 Europe/Berlin)"] },
     "emailjs.order-delivery": { "status": "passed", "verifiedAt": "2026-07-21T08:10:36+02:00", "verifiedBy": "Codex production verification", "references": ["EmailJS API template delivery returned HTTP 200 OK for TEST-ORDER-20260721", "https://dashboard.emailjs.com/admin/history (Gmail result OK at 2026-07-21 08:10:36 Europe/Berlin)"] },
     "emailjs.withdrawal-acknowledgement": { "status": "passed", "verifiedAt": "2026-07-21T08:07:55+02:00", "verifiedBy": "Codex production verification", "references": ["https://softhe-io.vercel.app/api/withdrawal (request wd_c3140a8f-348c-42b8-bcc6-c8954de1b54f accepted)", "https://dashboard.emailjs.com/admin/history (first Gmail result OK at 2026-07-21 08:07:55 Europe/Berlin)"] },
@@ -21,20 +21,20 @@
     "upstash.rate-limit-record": { "status": "passed", "verifiedAt": "2026-07-21T08:09:25+02:00", "verifiedBy": "Codex production verification", "references": ["https://console.upstash.com/redis/413b3a54-a231-4f24-bb64-962a64f9d779/data-browser (contact:rate record observed)", "https://softhe-io.vercel.app/api/contact (fourth request returned HTTP 429)"] },
     "upstash.withdrawal-record-and-retention": { "status": "passed", "verifiedAt": "2026-07-21T08:07:55+02:00", "verifiedBy": "Codex production verification", "references": ["https://console.upstash.com/redis/413b3a54-a231-4f24-bb64-962a64f9d779/data-browser (withdrawal request and idempotency records observed; TTL displayed as 1 year 1 month)", "https://softhe-io.vercel.app/api/withdrawal (duplicate submission returned received:true, duplicate:true)"] },
     "upstash.stripe-idempotency-record": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "stripe.completed-test-order": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "stripe.duplicate-webhook": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "stripe.completed-test-order": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated Stripe test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: authenticated and guest test Checkout Sessions completed as paid for EUR 75.00 and EUR 50.00", "Paid-order confirmation recorded Gmail result OK and arrived in the destination test mailbox"] },
+    "stripe.duplicate-webhook": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated Stripe test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: signed webhook event evt_1TxazO2EodKilmfKJ5dRbOEq persisted one order and item", "Duplicate delivery produced one order, one item, and one activity event"] },
     "stripe.async-payment-event": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "fulfillment.accepted-order": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "fulfillment.deduplicated-order": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "fulfillment.retry-and-reconciliation": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "fulfillment.accepted-order": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated fulfillment test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: stable paid event completed the signed fulfillment receiver on the first pass"] },
+    "fulfillment.deduplicated-order": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated fulfillment test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: duplicate delivery produced one order, one item, and one activity event"] },
+    "fulfillment.retry-and-reconciliation": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated fulfillment test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: evt_1Txb6G2EodKilmfKk6F4V45u exercised intentional HTTP 503, then completed after fault injection was disabled"] },
     "monitoring.uptime-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "monitoring.browser-error-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "monitoring.delivery-failure-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "monitoring.stripe-webhook-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "monitoring.fulfillment-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "rollback.dns-export": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "rollback.rehearsal": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "approval.release-owner": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "approval.rollback-owner": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] }
+    "rollback.dns-export": { "status": "passed", "verifiedAt": "2026-08-22T19:42:00+02:00", "verifiedBy": "Codex using authenticated Dynadot account", "references": ["Dynadot Account > Manage Domains > Download List > Download DNS Record List invoked for the authoritative Dynadot DNS configuration on 2026-08-22", "Authenticated Dynadot domain record confirmed softhe.io is active and uses Dynadot DNS", "Independent resolver verification at 2026-08-22T19:42:00+02:00: ns1.dyna-ns.net and ns2.dyna-ns.net, TTL 300, GitHub Pages A records 185.199.108.153 through 185.199.111.153, and matching 2606:50c0:8000::153 through 8003::153 AAAA records"] },
+    "rollback.rehearsal": { "status": "passed", "verifiedAt": "2026-08-13T10:17:00+02:00", "verifiedBy": "Codex Vercel Preview rehearsal", "references": ["Stable Preview alias moved from dpl_CH3LjgqSXQyEGDz2V8HVC7Aw74Se to prior ready deployment dpl_EfhsJ1urLkqn1H9hXdn1zczq2vLW and back", "Both deployments returned /api/health status ready with portal checks true"] },
+    "approval.release-owner": { "status": "passed", "verifiedAt": "2026-08-13T10:17:00+02:00", "verifiedBy": "Hannes Axelsson", "references": ["Stage-one release decision owner: Hannes Axelsson"] },
+    "approval.rollback-owner": { "status": "passed", "verifiedAt": "2026-08-13T10:17:00+02:00", "verifiedBy": "Hannes Axelsson", "references": ["Stage-one rollback operator and decision owner: Hannes Axelsson"] }
   }
 }
