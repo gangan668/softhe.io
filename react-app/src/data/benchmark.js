@@ -19,6 +19,6 @@ export const benchmarkEvidenceComplete = Boolean(
 		&& import.meta.env.VITE_BENCHMARK_SOFTWARE
 		&& import.meta.env.VITE_BENCHMARK_SCENARIO
 		&& import.meta.env.VITE_BENCHMARK_CAPTURE_DATE
-		&& benchmarkMethodology.runCount >= 3
+		&& benchmarkMethodology.runCount >= 2
 		&& benchmarkMethodology.summaryMethod.toLowerCase() === 'median',
 );

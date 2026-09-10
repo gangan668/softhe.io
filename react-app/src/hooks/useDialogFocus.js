@@ -19,6 +19,7 @@ export function useDialogFocus({
 	onDismiss,
 	initialFocusRef,
 	backgroundSelector,
+	modal = true,
 }) {
 	useEffect(() => {
 		if (!isOpen || !dialogRef.current) return undefined;
@@ -26,7 +27,7 @@ export function useDialogFocus({
 		const dialog = dialogRef.current;
 		const returnFocusTo = document.activeElement;
 		const previousOverflow = document.body.style.overflow;
-		const backgroundElements = backgroundSelector
+		const backgroundElements = modal && backgroundSelector
 			? [...document.querySelectorAll(backgroundSelector)].filter(
 					(element) => element !== dialog && !element.contains(dialog),
 				)
@@ -37,7 +38,7 @@ export function useDialogFocus({
 			ariaHidden: element.getAttribute('aria-hidden'),
 		}));
 
-		document.body.style.overflow = 'hidden';
+		if (modal) document.body.style.overflow = 'hidden';
 		backgroundElements.forEach((element) => {
 			element.setAttribute('inert', '');
 			element.setAttribute('aria-hidden', 'true');
@@ -56,7 +57,7 @@ export function useDialogFocus({
 				return;
 			}
 
-			if (event.key !== 'Tab') return;
+			if (!modal || event.key !== 'Tab') return;
 			const focusable = getFocusable();
 			if (focusable.length === 0) {
 				event.preventDefault();
@@ -78,7 +79,7 @@ export function useDialogFocus({
 		document.addEventListener('keydown', handleKeyDown);
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
-			document.body.style.overflow = previousOverflow;
+			if (modal) document.body.style.overflow = previousOverflow;
 			previousBackgroundState.forEach(({ element, inert, ariaHidden }) => {
 				if (inert === null) element.removeAttribute('inert');
 				else element.setAttribute('inert', inert);
@@ -89,5 +90,5 @@ export function useDialogFocus({
 				returnFocusTo.focus();
 			}
 		};
-	}, [backgroundSelector, dialogRef, initialFocusRef, isOpen, onDismiss]);
+	}, [backgroundSelector, dialogRef, initialFocusRef, isOpen, modal, onDismiss]);
 }

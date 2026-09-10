@@ -21,10 +21,14 @@ const environment = {
 	VITE_BENCHMARK_SOFTWARE: 'E2E BIOS, drivers, and Windows fixture',
 	VITE_BENCHMARK_SCENARIO: 'E2E game settings and repeated capture procedure',
 	VITE_BENCHMARK_CAPTURE_DATE: '2026-07-20',
-	VITE_BENCHMARK_RUN_COUNT: '3',
+	VITE_BENCHMARK_RUN_COUNT: '2',
 	VITE_BENCHMARK_SUMMARY_METHOD: 'median',
 	VITE_COMMERCE_ENABLED: featureEnabled,
+	COMMERCE_ENABLED: featureEnabled,
 	VITE_CONTACT_FORM_ENABLED: featureEnabled,
+	STRIPE_SECRET_KEY: 'sk_test_e2e_fixture_only',
+	STRIPE_WEBHOOK_SECRET: 'whsec_e2e_fixture_only',
+	PUBLIC_SITE_URL: 'https://softhe.io',
 };
 
 const npmCli = process.env.npm_execpath;

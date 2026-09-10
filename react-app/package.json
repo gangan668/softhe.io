@@ -5,14 +5,15 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"prebuild": "node scripts/validate-production-config.js",
-		"build": "vite build && node scripts/postbuild.js",
+		"prebuild": "node scripts/validate-production-config.js && node scripts/validate-server-config.js",
+		"build": "vite build && node scripts/postbuild.js && node scripts/scan-secrets.js",
+		"security:scan": "node scripts/scan-secrets.js",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
-		"audit:ci": "node scripts/audit-policy.js",
+		"audit:ci": "npm audit --audit-level=high",
 		"e2e": "node scripts/run-e2e.js enabled",
 		"e2e:disabled": "node scripts/run-e2e.js disabled",
 		"e2e:all": "npm run e2e && npm run e2e:disabled",
@@ -22,9 +23,11 @@
 		"budget": "node scripts/check-performance-budget.js"
 	},
 	"dependencies": {
+		"@marsidev/react-turnstile": "1.5.4",
+		"@supabase/supabase-js": "^2.110.8",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
-		"react-router-dom": "7.18.1"
+		"wouter": "3.10.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "10.0.1",

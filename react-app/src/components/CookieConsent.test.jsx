@@ -251,9 +251,10 @@ describe("CookieConsent Component", () => {
 
 			await waitFor(() => {
 				const banner = screen.getByRole("dialog", { name: /we value your privacy/i });
-				expect(banner).toHaveAttribute("aria-modal", "true");
+				expect(banner).toHaveAttribute("aria-modal", "false");
 				expect(banner).toHaveAttribute("aria-describedby", "cookie-consent-description");
 				expect(screen.getByRole("button", { name: /decline cookies/i })).toHaveFocus();
+				expect(document.body.style.overflow).not.toBe("hidden");
 			}, { timeout: 3000 });
 		});
 

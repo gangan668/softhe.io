@@ -1,13 +1,16 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Cart from './components/Cart';
 import CookieConsent from './components/CookieConsent';
 import ErrorBoundary from './components/ErrorBoundary';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
 import { CartProvider } from './context/CartProvider';
+import { AuthProvider } from './context/AuthProvider';
+import ProtectedRoute from './components/ProtectedRoute';
 import { trackPageView } from './utils/analytics';
 import { initMonitoring } from './utils/monitoring';
+import { getAuthCallbackError } from './utils/authCallback';
 import './App.css';
 
 import Home from './pages/Home';
@@ -25,6 +28,10 @@ const Terms = lazy(() => import('./pages/Terms'));
 const LegalNotice = lazy(() => import('./pages/LegalNotice'));
 const Withdrawal = lazy(() => import('./pages/Withdrawal'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const AuthPage = lazy(() => import('./pages/AuthPage'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Account = lazy(() => import('./pages/Account'));
+const Admin = lazy(() => import('./pages/Admin'));
 
 function RouteTracker() {
 	const location = useLocation();
@@ -44,6 +51,17 @@ function RouteTracker() {
 	return null;
 }
 
+function AuthCallbackErrorRedirect() {
+	const navigate = useNavigate();
+	useEffect(() => {
+		const authError = getAuthCallbackError(window.location.hash);
+		if (!authError) return;
+		window.history.replaceState(null, '', window.location.pathname + window.location.search);
+		navigate('/forgot-password', { replace: true, state: { authError } });
+	}, [navigate]);
+	return null;
+}
+
 function PageLoader() {
 	return (
 		<div className="page-loader" role="status" aria-label="Loading page">
@@ -59,7 +77,9 @@ function App() {
 	return (
 		<ErrorBoundary>
 			<Router>
+				<AuthProvider>
 				<CartProvider>
+					<AuthCallbackErrorRedirect />
 					<RouteTracker />
 					<div className="App">
 						<a className="skip-link" href="#main-content">Skip to main content</a>
@@ -82,6 +102,13 @@ function App() {
 									<Route path="/terms" element={<Terms />} />
 									<Route path="/legal-notice" element={<LegalNotice />} />
 									<Route path="/withdrawal" element={<Withdrawal />} />
+									<Route path="/login" element={<AuthPage mode="login" />} />
+									<Route path="/register" element={<AuthPage mode="register" />} />
+									<Route path="/forgot-password" element={<AuthPage mode="forgot" />} />
+									<Route path="/resend-confirmation" element={<AuthPage mode="resend" />} />
+									<Route path="/reset-password" element={<ResetPassword />} />
+									<Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
+									<Route path="/admin" element={<ProtectedRoute staffOnly><Admin /></ProtectedRoute>} />
 									<Route path="*" element={<NotFound />} />
 									</Routes>
 								</Suspense>
@@ -92,6 +119,7 @@ function App() {
 					</div>
 					<CookieConsent />
 				</CartProvider>
+				</AuthProvider>
 			</Router>
 		</ErrorBoundary>
 	);

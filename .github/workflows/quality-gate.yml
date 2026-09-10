@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Audit high-severity dependencies
-        run: npm run audit:ci
+        run: npm audit --audit-level=high
 
       - name: Lint
         run: npm run lint

@@ -51,6 +51,7 @@ jobs:
           VITE_BENCHMARK_CAPTURE_DATE: '2026-07-20'
           VITE_BENCHMARK_RUN_COUNT: '3'
           VITE_BENCHMARK_SUMMARY_METHOD: median
+          COMMERCE_ENABLED: 'false'
           VITE_COMMERCE_ENABLED: 'false'
           VITE_CONTACT_FORM_ENABLED: 'false'
 

@@ -17,6 +17,7 @@ function CookieConsent() {
 		onDismiss: dismissBanner,
 		initialFocusRef: declineButtonRef,
 		backgroundSelector: '.App',
+		modal: false,
 	});
 
 	useEffect(() => {
@@ -83,7 +84,7 @@ function CookieConsent() {
 				className="cookie-consent"
 				ref={dialogRef}
 				role="dialog"
-				aria-modal="true"
+				aria-modal="false"
 				aria-labelledby="cookie-consent-title"
 				aria-describedby="cookie-consent-description"
 				tabIndex={-1}

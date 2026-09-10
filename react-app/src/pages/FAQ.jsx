@@ -171,10 +171,10 @@ function FAQ() {
 						</p>
 						<ul>
 							<li>
-								<strong>CS2 average FPS:</strong> 670 to 932 on the tested setup
+								<strong>CS2 average FPS:</strong> 658 to 826 in the two-run medians
 							</li>
 							<li>
-								<strong>CS2 1% low:</strong> 355 to 498 FPS in the published screenshots
+								<strong>CS2 1% low:</strong> 225 to 285 FPS in the two-run medians
 							</li>
 							<li>
 								<strong>Idle processes:</strong> 111 to 31 in the Task Manager sample

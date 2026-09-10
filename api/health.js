@@ -1,4 +1,12 @@
+const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
+const { adminRequest } = require('./_lib/supabase');
+
+const safeEqual = (left, right) => {
+	const leftBuffer = Buffer.from(String(left || ''));
+	const rightBuffer = Buffer.from(String(right || ''));
+	return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+};
 
 const REQUIRED_CONFIGURATION = [
 	'PUBLIC_SITE_URL',
@@ -12,9 +20,17 @@ const REQUIRED_CONFIGURATION = [
 	'UPSTASH_REDIS_REST_URL',
 	'UPSTASH_REDIS_REST_TOKEN',
 	'CONTACT_RATE_LIMIT_SECRET',
+	'PORTAL_RATE_LIMIT_SECRET',
+	'CHECKOUT_RECEIPT_SECRET',
+	'SUPABASE_URL',
+	'SUPABASE_PUBLISHABLE_KEY',
+	'SUPABASE_SERVICE_ROLE_KEY',
+	'STAFF_PORTAL_ENABLED',
 	'EMAILJS_SERVICE_ID',
 	'EMAILJS_TEMPLATE_ID',
 	'EMAILJS_PUBLIC_KEY',
+	'EMAILJS_PRIVATE_KEY',
+	'EMAILJS_TICKET_TEMPLATE_ID',
 	'EMAILJS_ORDER_TEMPLATE_ID',
 	'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
 	'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID',
@@ -24,7 +40,8 @@ const REQUIRED_CONFIGURATION = [
 
 const getConfigurationStatus = (environment = process.env) => {
 	const missing = REQUIRED_CONFIGURATION.filter((key) => !environment[key]?.trim());
-	const invalid = [];
+	const invalid = REQUIRED_CONFIGURATION.filter((key) =>
+		/^(?:encrypted|masked|redacted)$/i.test(environment[key]?.trim() || ''));
 	if (environment.VAT_STATUS && !['registered', 'not-registered', 'exempt'].includes(environment.VAT_STATUS)) {
 		invalid.push('VAT_STATUS');
 	}
@@ -42,37 +59,62 @@ const getConfigurationStatus = (environment = process.env) => {
 	} catch {
 		invalid.push('PUBLIC_SITE_URL');
 	}
-	return { ready: missing.length === 0 && invalid.length === 0, missing, invalid };
+	const uniqueInvalid = [...new Set(invalid)];
+	return { ready: missing.length === 0 && uniqueInvalid.length === 0, missing, invalid: uniqueInvalid };
 };
 
 async function health(req, res) {
+	res.setHeader('Cache-Control', 'no-store');
+	if (req.method === 'POST') {
+		if (process.env.VERCEL_ENV !== 'preview') return res.status(404).json({ error: 'Not found' });
+		const configuredSecret = process.env.MONITORING_TEST_SECRET;
+		const suppliedSecret = String(req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
+		if (!configuredSecret || !safeEqual(configuredSecret, suppliedSecret)) {
+			return res.status(401).json({ error: 'Unauthorized' });
+		}
+		const kind = req.body?.kind;
+		if (kind === 'browser') console.error('browser_error', { monitorTest: true });
+		else if (kind === 'delivery') console.error('contact_delivery_failed', { monitorTest: true });
+		else return res.status(400).json({ error: 'Unsupported monitoring test' });
+		return res.status(202).json({ accepted: true, kind });
+	}
 	if (req.method !== 'GET') {
-		res.setHeader('Allow', 'GET');
+		res.setHeader('Allow', 'GET, POST');
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
 	const configuration = getConfigurationStatus();
 	const readyFor = (keys) => !keys.some((key) => configuration.missing.includes(key) || configuration.invalid.includes(key));
 	const storageKeys = ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
-	res.setHeader('Cache-Control', 'no-store');
-	return res.status(configuration.ready ? 200 : 503).json({
-		status: configuration.ready ? 'ready' : 'configuration-required',
+	let portalAccess = readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY']);
+	if (portalAccess) {
+		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
+	}
+	const ready = configuration.ready && portalAccess;
+	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
+	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
+	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
+		? `softhe-${process.env.VERCEL_GIT_COMMIT_SHA.slice(0, 7)}-${releaseStage}`
+		: process.env.RELEASE_FINGERPRINT || null;
+	return res.status(ready ? 200 : 503).json({
+		status: ready ? 'ready' : 'configuration-required',
 		release: {
-			sourceCommit: process.env.RELEASE_SOURCE_COMMIT || null,
-			fingerprint: process.env.RELEASE_FINGERPRINT || null,
+			sourceCommit,
+			fingerprint,
 		},
 		checks: {
+			portal: portalAccess && readyFor([...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
 			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
-			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
-			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
+			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
+			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
+			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
 			storage: readyFor(storageKeys),
-			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', 'EMAILJS_ORDER_TEMPLATE_ID']),
+			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID']),
 		},
-		missing: configuration.missing,
-		invalid: configuration.invalid,
 	});
 }
 
 module.exports = health;
 module.exports.REQUIRED_CONFIGURATION = REQUIRED_CONFIGURATION;
 module.exports.getConfigurationStatus = getConfigurationStatus;
+module.exports.safeEqual = safeEqual;

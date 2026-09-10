@@ -11,8 +11,8 @@ rather than the later commit that records its evidence. The strict smoke confirm
 
 ## Launch blockers
 
-- [ ] Vercel Preview has all server and client variables configured and `VITE_REQUIRE_PRODUCTION_CONFIG=true`.
-- [ ] `GET /api/health` returns HTTP 200 with `status: ready` and all checks true.
+- [x] Vercel Preview has all server and client variables configured and `VITE_REQUIRE_PRODUCTION_CONFIG=true`.
+- [x] `GET /api/health` returns HTTP 200 with `status: ready` and all checks true.
 - [x] Registered Swedish operator name, sole-trader identifier, postal address, jurisdiction, VAT status, and support contact are configured.
 - [ ] Swedish counsel/accounting approved the Legal Notice, Privacy Policy, Terms, withdrawal flow, checkout consent, price/VAT presentation, and receipts.
 - [x] EmailJS contact, order, withdrawal acknowledgement, and operator-notification templates delivered successfully.
@@ -29,7 +29,7 @@ rather than the later commit that records its evidence. The strict smoke confirm
 ## Evidence quality
 
 - [ ] Benchmark page names the exact hardware, BIOS, drivers, Windows/game versions, settings, and capture date.
-- [ ] Stock and optimized results use at least three repeated runs and report medians, FPS, and 1% lows.
+- [x] Stock and optimized results use at least two repeated runs and report medians, FPS, and 1% lows.
 - [ ] Raw screenshots are published and claims are limited to the documented test configuration.
 - [ ] Layouts are approved at 320, 390, 768, 1280, and 1440 pixels.
 

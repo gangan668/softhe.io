@@ -33,11 +33,12 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `CONTACT_RATE_LIMIT_SECRET` | HMAC key used to pseudonymize contact-form IP addresses |
 | `EMAILJS_SERVICE_ID` | EmailJS service used by the server function |
 | `EMAILJS_TEMPLATE_ID` | EmailJS contact template |
+| `EMAILJS_TICKET_TEMPLATE_ID` | Customer/staff ticket reply notification template |
 | `EMAILJS_ORDER_TEMPLATE_ID` | Durable customer order-confirmation template |
 | `EMAILJS_WITHDRAWAL_TEMPLATE_ID` | Timestamped customer withdrawal acknowledgement |
 | `EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID` | Operator withdrawal notification |
 | `EMAILJS_PUBLIC_KEY` | EmailJS account public key |
-| `EMAILJS_PRIVATE_KEY` | Optional EmailJS private key |
+| `EMAILJS_PRIVATE_KEY` | Required EmailJS private key for server-side Strict Mode |
 | `WITHDRAWAL_RETENTION_DAYS` | Optional withdrawal-record retention, default 400 days |
 | `EXTERNAL_REQUEST_TIMEOUT_MS` | Optional outbound API timeout, default 8000 ms and clamped to 1000–30000 ms |
 | `RELEASE_SOURCE_COMMIT` | Public source commit identifier reported by `/api/health` for release binding |

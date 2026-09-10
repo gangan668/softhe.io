@@ -1,5 +1,7 @@
 const { normalizeItems } = require('./create-checkout-session');
 const { fetchWithTimeout } = require('./_lib/fetch');
+const { verifyActiveUser } = require('./_lib/supabase');
+const { verifyReceiptToken } = require('./_lib/portal-security');
 
 const CHECKOUT_SESSION_ID = /^cs_(?:test_|live_)?[A-Za-z0-9]{8,}$/;
 
@@ -27,6 +29,9 @@ async function checkoutSession(req, res) {
 	}
 
 	try {
+		const user = await verifyActiveUser(req, { required: false });
+		const hasReceipt = verifyReceiptToken(sessionId, req.headers?.['x-checkout-receipt']);
+		if (!user && !hasReceipt) return res.status(401).json({ error: 'Checkout receipt authorization required' });
 		const response = await fetchWithTimeout(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`, {
 			headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
 		});
@@ -39,6 +44,7 @@ async function checkoutSession(req, res) {
 		if (!items) {
 			return res.status(409).json({ error: 'Checkout session is not a Softhe order' });
 		}
+		if (!hasReceipt && session.metadata?.portal_user_id !== user?.id) return res.status(403).json({ error: 'Checkout session access denied' });
 		const paid = ['paid', 'no_payment_required'].includes(session.payment_status);
 		return res.status(200).json({
 			id: session.id,

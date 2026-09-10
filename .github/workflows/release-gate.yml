@@ -20,6 +20,14 @@ on:
         required: true
         default: docs/launch-evidence.json
         type: string
+      launch_stage:
+        description: Release stage to qualify
+        required: true
+        default: stage-one
+        type: choice
+        options:
+          - stage-one
+          - commerce
 
 jobs:
   release-gate:
@@ -50,6 +58,7 @@ jobs:
           EVIDENCE_EXPECTED_ORIGIN: ${{ inputs.candidate_url }}
           EVIDENCE_EXPECTED_COMMIT: ${{ inputs.candidate_commit }}
           EVIDENCE_EXPECTED_RELEASE_FINGERPRINT: ${{ inputs.release_fingerprint }}
+          LAUNCH_STAGE: ${{ inputs.launch_stage }}
 
       - name: Run strict production smoke
         run: npm run smoke:production

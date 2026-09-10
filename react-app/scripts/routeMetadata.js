@@ -91,4 +91,46 @@ export const routeMetadata = [
 		title: 'Online Withdrawal Request | Softhe.io',
 		description: 'Submit a withdrawal request for an eligible Softhe.io distance contract and receive a timestamped acknowledgement.',
 	},
+	{
+		path: '/login',
+		title: 'Customer Login | Softhe.io',
+		description: 'Sign in to your Softhe.io customer account.',
+		robots: 'noindex, nofollow',
+	},
+	{
+		path: '/register',
+		title: 'Create Customer Account | Softhe.io',
+		description: 'Create a verified Softhe.io customer account.',
+		robots: 'noindex, nofollow',
+	},
+	{
+		path: '/forgot-password',
+		title: 'Reset Password | Softhe.io',
+		description: 'Request a secure password reset for your Softhe.io customer account.',
+		robots: 'noindex, nofollow',
+	},
+	{
+		path: '/resend-confirmation',
+		title: 'Resend Account Confirmation | Softhe.io',
+		description: 'Request a new confirmation link for an unverified Softhe.io customer account.',
+		robots: 'noindex, nofollow',
+	},
+	{
+		path: '/reset-password',
+		title: 'Choose a New Password | Softhe.io',
+		description: 'Choose a new password for your Softhe.io customer account.',
+		robots: 'noindex, nofollow',
+	},
+	{
+		path: '/account',
+		title: 'Customer Account | Softhe.io',
+		description: 'Manage your Softhe.io profile, orders, tickets, and account history.',
+		robots: 'noindex, nofollow',
+	},
+	{
+		path: '/admin',
+		title: 'Staff Portal | Softhe.io',
+		description: 'Softhe.io staff portal.',
+		robots: 'noindex, nofollow',
+	},
 ];

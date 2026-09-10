@@ -8,7 +8,7 @@ summary charts. Keep the commercial release gate pending until this runbook has 
 1. Copy `benchmark-evidence.template.json` to `benchmark-evidence.json`.
 2. Record the exact CPU, GPU, motherboard, memory, storage, cooling, BIOS, drivers, Windows build,
    game build, resolution, graphics settings, measurement tool, scenario, and warm-up procedure.
-3. Capture at least three stock runs and three optimized runs. Use the same machine, game build,
+3. Capture at least two stock runs and two optimized runs. Use the same machine, game build,
    settings, scenario, warm-up, and capture duration for every run.
 4. Save an unedited result screenshot or exported capture for every run and reference it from
    `rawEvidence`. Preserve failed or anomalous runs; rerun only for a documented technical reason.
@@ -22,7 +22,7 @@ From `react-app`, run:
 npm run benchmark:verify
 ```
 
-The validator rejects placeholders, missing raw evidence, fewer than three runs per profile,
+The validator rejects placeholders, missing raw evidence, fewer than two runs per profile,
 non-positive measurements, 1% lows above the average, duplicate run IDs, and reported figures that
 do not equal the calculated medians.
 

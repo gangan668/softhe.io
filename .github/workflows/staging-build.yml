@@ -33,7 +33,8 @@ jobs:
           VITE_APP_URL: https://staging.softhe.io
           VITE_ENVIRONMENT: staging
           VITE_GA_MEASUREMENT_ID: G-XXXXXXXXXX
-          VITE_COMMERCE_ENABLED: 'true'
+          COMMERCE_ENABLED: 'false'
+          VITE_COMMERCE_ENABLED: 'false'
           VITE_CONTACT_FORM_ENABLED: 'true'
 
       - name: Upload staging artifact

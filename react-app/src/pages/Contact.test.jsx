@@ -367,24 +367,22 @@ describe("Contact Component", () => {
 		});
 
 		it("should limit input length", async () => {
-			const user = userEvent.setup();
 			renderContact();
 
 			const messageInput = screen.getByLabelText(/^Message/i);
 			const longMessage = "a".repeat(1500); // Exceeds 1000 char limit
 
-			await user.type(messageInput, longMessage);
+			fireEvent.change(messageInput, { target: { value: longMessage } });
 
 			// Input should be trimmed to max length during sanitization
 			expect(messageInput.value.length).toBeLessThanOrEqual(1000);
 		});
 
 		it("should trim whitespace from inputs", async () => {
-			const user = userEvent.setup();
 			renderContact();
 
 			const nameInput = screen.getByLabelText(/Full Name/i);
-			await user.type(nameInput, "  John Doe  ");
+			fireEvent.change(nameInput, { target: { value: "  John Doe  " } });
 
 			// Component should trim the value during processing
 			expect(nameInput.value.trim()).toBe("John Doe");
