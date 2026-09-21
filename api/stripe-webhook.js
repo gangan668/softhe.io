@@ -5,6 +5,7 @@ const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { adminRequest, portalServerConfigured } = require('./_lib/supabase');
+const orderFulfillment = require('./_lib/order-fulfillment');
 
 const MAX_WEBHOOK_BYTES = 1024 * 1024;
 
@@ -175,6 +176,7 @@ const fulfillPaidSession = async (event) => {
 };
 
 async function stripeWebhook(req, res) {
+	if (req.headers['x-softhe-signature']) return orderFulfillment(req, res);
 	if (req.method !== 'POST') {
 		res.setHeader('Allow', 'POST');
 		return res.status(405).json({ error: 'Method not allowed' });

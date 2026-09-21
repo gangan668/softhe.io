@@ -49,9 +49,11 @@ Required environment variables:
 - ORDER_FULFILLMENT_WEBHOOK_URL
 - ORDER_FULFILLMENT_WEBHOOK_SECRET
 
-## order-fulfillment.js
+## /api/order-fulfillment
 
-Accepts the HMAC-signed paid-order payload emitted by `stripe-webhook.js`, enforces the Checkout
+This public route is internally rewritten to the shared `stripe-webhook.js` function so the
+deployment remains within Vercel's Hobby function limit. It accepts the HMAC-signed paid-order
+payload emitted by `stripe-webhook.js`, enforces the Checkout
 Session idempotency key, and stores one durable order record in Upstash Redis. Duplicate Stripe
 deliveries return success without creating another record. `ORDER_RETENTION_DAYS` controls record
 retention and defaults to 400 days (allowed range: 30–730). Production should configure

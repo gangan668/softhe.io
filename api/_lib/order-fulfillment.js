@@ -1,5 +1,5 @@
 const crypto = require('node:crypto');
-const { redisCommand } = require('./_lib/redis');
+const { redisCommand } = require('./redis');
 
 const MAX_BODY_BYTES = 64 * 1024;
 const HEX_SIGNATURE = /^[a-f0-9]{64}$/;
@@ -84,7 +84,6 @@ async function orderFulfillment(req, res) {
 }
 
 module.exports = orderFulfillment;
-module.exports.config = { api: { bodyParser: false } };
 module.exports.normalizeOrder = normalizeOrder;
 module.exports.retentionSeconds = retentionSeconds;
 module.exports.storeOrder = storeOrder;

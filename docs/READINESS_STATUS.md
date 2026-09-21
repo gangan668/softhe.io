@@ -23,7 +23,8 @@ Last verified: 2026-09-15 (Europe/Berlin)
 - On 2026-09-21 the claimed Vercel Stripe integration provisioned a sandbox test secret and
   publishable keys for Production and Preview. The webhook destination and its signing secret
   remain pending until the Production receiver deployment is available.
-- `api/order-fulfillment.js` is the Production receiver: it verifies the sender HMAC, enforces
+- `/api/order-fulfillment` is the Production receiver, internally handled by the shared Stripe
+  webhook function to stay within the Vercel Hobby function limit. It verifies the sender HMAC, enforces
   the Checkout Session idempotency key, durably deduplicates accepted orders in Upstash, and
   retains the bounded order record for the configured legal period.
 - `api/test-fulfillment.js` is explicitly Preview-only. Do not point Production at that
