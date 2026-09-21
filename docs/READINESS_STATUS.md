@@ -1,6 +1,40 @@
 # Production readiness status
 
-Last verified: 2026-07-21 (Europe/Berlin)
+Last verified: 2026-09-15 (Europe/Berlin)
+
+## Current release checkpoint
+
+- Local `main` and the fetched `origin/main` identify merge commit
+  `bbea382223668498f5668c22c9f58ceae1a03b39`. No tracked changes preceded this status update.
+- The Vercel project origin, `https://softhe-io.vercel.app`, reports that source commit and
+  fingerprint `softhe-bbea382-stage1`. Health remains `configuration-required`: contact,
+  tickets, withdrawal, and storage pass; portal, checkout, and fulfillment do not.
+- Local lint and unit checks pass: 33 test files, 296 passed tests, and 3 skipped tests.
+  These checks do not prove provider behavior or Production readiness.
+- `npm run benchmark:verify` passes. `npm run evidence:verify` remains blocked by nine entries:
+  legal counsel and accounting approval; Stripe asynchronous payment and Upstash Stripe
+  idempotency evidence; uptime, browser-error, delivery-failure, Stripe-webhook, and
+  fulfillment alert evidence. Do not mark these passed without provider or human proof.
+- The next provider dependency is Stripe test credentials (`STRIPE_SECRET_KEY` and
+  `STRIPE_WEBHOOK_SECRET`) plus the actual fulfillment receiver URL and signing secret
+  (`ORDER_FULFILLMENT_WEBHOOK_URL` and `ORDER_FULFILLMENT_WEBHOOK_SECRET`). Health failure
+  alone does not establish which individual values are absent or invalid; inspect scoped
+  provider configuration before changing it.
+- On 2026-09-21 the claimed Vercel Stripe integration provisioned a sandbox test secret and
+  publishable keys for Production and Preview. The webhook destination and its signing secret
+  remain pending until the Production receiver deployment is available.
+- `api/order-fulfillment.js` is the Production receiver: it verifies the sender HMAC, enforces
+  the Checkout Session idempotency key, durably deduplicates accepted orders in Upstash, and
+  retains the bounded order record for the configured legal period.
+- `api/test-fulfillment.js` is explicitly Preview-only. Do not point Production at that
+  endpoint or relax its environment guard to make health pass.
+- Keep `VITE_COMMERCE_ENABLED`, `COMMERCE_ENABLED`, and `STAFF_PORTAL_ENABLED` false.
+  Validate payment, webhook, idempotency, retry, and monitoring behavior before running
+  the Commercial Release Gate. This checkpoint does not authorize DNS cutover or live commerce.
+- The observations below are historical, not current deployment identity, provider
+  verification, or launch approval. Do not copy historical Preview secrets into Production.
+
+## Historical checkpoint (2026-07-21)
 
 ## Repository state
 

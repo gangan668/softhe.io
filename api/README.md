@@ -49,6 +49,15 @@ Required environment variables:
 - ORDER_FULFILLMENT_WEBHOOK_URL
 - ORDER_FULFILLMENT_WEBHOOK_SECRET
 
+## order-fulfillment.js
+
+Accepts the HMAC-signed paid-order payload emitted by `stripe-webhook.js`, enforces the Checkout
+Session idempotency key, and stores one durable order record in Upstash Redis. Duplicate Stripe
+deliveries return success without creating another record. `ORDER_RETENTION_DAYS` controls record
+retention and defaults to 400 days (allowed range: 30–730). Production should configure
+`ORDER_FULFILLMENT_WEBHOOK_URL` as the HTTPS `/api/order-fulfillment` route on the immutable
+candidate origin and use the same `ORDER_FULFILLMENT_WEBHOOK_SECRET` for sender and receiver.
+
 ## health.js and browser-errors.js
 
 `GET /api/health` reports whether every required production integration is configured without exposing secret values. Use it as the cutover and uptime readiness check.
