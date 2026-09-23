@@ -54,7 +54,7 @@ describe("Contact Component", () => {
 	describe("Rendering", () => {
 		it("should render the contact page with heading", () => {
 			renderContact();
-			expect(screen.getByText(/Get in Touch/i)).toBeInTheDocument();
+			expect(screen.getByText(/Contact Softhe.io/i)).toBeInTheDocument();
 		});
 
 		it("should render all form fields", () => {

@@ -14,8 +14,8 @@ describe('FAQ Component', () => {
 
 	it('renders FAQ page header', () => {
 		renderFAQ();
-		expect(screen.getByText('Frequently Asked Questions')).toBeInTheDocument();
-		expect(screen.getByText(/Find answers to common questions/i)).toBeInTheDocument();
+		expect(screen.getByText('Questions about products and support')).toBeInTheDocument();
+		expect(screen.getByText(/Read about compatibility/i)).toBeInTheDocument();
 	});
 
 	it('renders all category buttons', () => {
@@ -38,7 +38,7 @@ describe('FAQ Component', () => {
 
 	it('renders search input', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 		expect(searchInput).toBeInTheDocument();
 	});
 
@@ -82,7 +82,7 @@ describe('FAQ Component', () => {
 
 	it('filters FAQ items by search term', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Search for "refund"
 		fireEvent.change(searchInput, { target: { value: 'refund' } });
@@ -93,7 +93,7 @@ describe('FAQ Component', () => {
 
 	it('shows no results message when search has no matches', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Search for something that doesn't exist
 		fireEvent.change(searchInput, { target: { value: 'xyzabc123notfound' } });
@@ -135,7 +135,7 @@ describe('FAQ Component', () => {
 
 	it('expands matching FAQ items when searching', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Search for "ISO"
 		fireEvent.change(searchInput, { target: { value: 'ISO' } });
@@ -148,7 +148,7 @@ describe('FAQ Component', () => {
 
 	it('clears search when changing category', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Perform a search
 		fireEvent.change(searchInput, { target: { value: 'test search' } });

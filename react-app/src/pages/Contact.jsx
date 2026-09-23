@@ -173,19 +173,19 @@ function Contact() {
 	return (
 		<>
 			<SEO
-				title="Contact Us - Get Expert PC Optimization Support | Softhe.io"
+				title="Contact Softhe.io | Product and setup support"
 				description="Contact Softhe.io for PC optimization support. Get help with custom Windows ISOs, BIOS tuning, compatibility questions, and setup guidance."
 				keywords="contact pc optimization, gaming support, technical support, pc optimization help, custom windows support, bios tuning support, gaming pc help"
-				ogTitle="Contact Softhe.io - Expert Gaming PC Optimization Support"
+				ogTitle="Contact Softhe.io"
 				ogDescription="Need help choosing or setting up a PC optimization product? Email and Discord support are available."
 			/>
 			<div className="contact-page">
 				<section className="page-header">
 					<div className="container">
-						<h1>Get In Touch</h1>
+						<h1>Contact Softhe.io</h1>
 						<p>
-							Questions about compatibility, setup, or which product fits your
-							PC? Send the details and we will help you choose the right path.
+							Send your hardware details, main games, and question. We can check
+							compatibility or help with an existing order.
 						</p>
 					</div>
 				</section>
@@ -194,12 +194,10 @@ function Contact() {
 					<div className="container">
 						<div className="contact-grid">
 							<div className="contact-info">
-								<h2>Contact Information</h2>
+								<h2>Contact options</h2>
 								<p className="contact-description">
-									Our team of PC optimization experts is available
-									to help with product questions, setup guidance,
-									and compatibility checks. Choose your preferred
-									contact method below.
+									Use email for orders and detailed support requests. Use Discord
+									for short product and compatibility questions when support is available.
 								</p>
 
 								<div className="contact-methods">
@@ -208,7 +206,7 @@ function Contact() {
 											<i className="fas fa-envelope"></i>
 										</div>
 										<div className="contact-details">
-											<h3>Email Support</h3>
+										<h3>Email support</h3>
 											<p>
 												Primary contact method for all
 												inquiries
@@ -230,9 +228,9 @@ function Contact() {
 											<i className="fab fa-discord"></i>
 										</div>
 										<div className="contact-details">
-											<h3>Discord Support</h3>
+										<h3>Discord support</h3>
 											<p>
-												Real-time chat and community support
+												Short questions and community chat
 											</p>
 											<a
 											href={siteConfig.social.discord}
@@ -253,10 +251,9 @@ function Contact() {
 								<div className="security-notice">
 									<i className="fas fa-shield-alt"></i>
 									<div>
-										<h4>Your Privacy Matters</h4>
+										<h4>How the form is delivered</h4>
 										<p>
-											Form submissions are sent securely through
-											EmailJS so our support team can reply.
+											EmailJS processes the form and sends it to the support inbox.
 										</p>
 									</div>
 								</div>
@@ -264,10 +261,9 @@ function Contact() {
 
 							<div className="contact-form-section">
 								<div className="contact-form-container">
-									<h2>Send Us a Message</h2>
+									<h2>Send a message</h2>
 									<p>
-										Have a specific question? Fill out the form
-										below and we'll get back to you quickly.
+										Include your hardware and what you want to change. Response times vary with request volume.
 									</p>
 									{/* Rate Limit Warning */}
 									{rateLimit.isBlocked && (
@@ -476,7 +472,7 @@ function Contact() {
 													isSubmitting ||
 													rateLimit.isBlocked
 												}
-												placeholder="Tell us about your gaming setup and what you're looking to optimize..."
+										placeholder="List your hardware, main games, current problem, and what you have already tried."
 												aria-invalid={errors.message ? "true" : "false"}
 												aria-describedby={errors.message ? "message-error" : undefined}
 											></textarea>
@@ -542,7 +538,7 @@ function Contact() {
 											) : (
 												<>
 													<i className="fas fa-paper-plane"></i>
-													Send Message
+										Send message
 												</>
 											)}
 										</button>

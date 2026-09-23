@@ -9,7 +9,7 @@ function Guides() {
 		<>
 			<SEO
 				title="Gaming PC Optimization Guides | Softhe.io"
-				description="High-intent gaming PC optimization guides covering CS2, Windows 10 vs 11, BIOS tuning, and latency basics."
+				description="Practical guides to CS2 testing, Windows version choices, BIOS tuning, and gaming PC latency."
 				keywords="CS2 optimization, Windows 10 vs Windows 11 gaming, BIOS optimization, gaming PC latency, FPS stability"
 				ogTitle="Gaming PC Optimization Guides"
 				ogDescription="Practical optimization guides for competitive gaming PCs."
@@ -28,8 +28,8 @@ function Guides() {
 			<div className="guides-page">
 				<section className="page-header">
 					<div className="container">
-						<h1>Optimization Guides</h1>
-						<p>Practical guidance for players comparing Windows, BIOS, FPS, and latency optimization options.</p>
+						<h1>PC optimization guides</h1>
+						<p>Test changes, compare Windows versions, tune BIOS settings safely, and understand latency.</p>
 					</div>
 				</section>
 
@@ -47,7 +47,7 @@ function Guides() {
 											<li key={point}>{point}</li>
 									))}
 								</ul>
-								<Link className="guide-link" to={`/guides/${guide.slug}`}>Read guide <span aria-hidden="true">→</span></Link>
+								<Link className="guide-link" to={`/guides/${guide.slug}`}>Read the guide <span aria-hidden="true">→</span></Link>
 							</article>
 							))}
 						</div>

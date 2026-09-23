@@ -6,20 +6,20 @@ function Performance() {
 	return (
 		<>
 			<SEO
-				title="Performance Benchmarks - Real FPS Comparisons | Softhe.io"
+				title="PC performance benchmark results | Softhe.io"
 				description="Review measured FPS, frame-time, and system-overhead comparisons for a documented SoftheOS and BIOS-tuned configuration."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
-				ogTitle="Performance Benchmarks - CS2 Configuration Comparison"
+				ogTitle="CS2 benchmark comparison | Softhe.io"
 				ogDescription="Two-run CapFrameX medians measured 658 FPS default and 826 FPS SoftheOS in Counter-Strike 2 on the tested platform."
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
 					<div className="container">
 						<span className="section-kicker">Benchmarks</span>
-						<h1>Performance proof, not just promises.</h1>
+						<h1>Measured results from the current test PC</h1>
 						<p>
-							Native before-and-after metrics from the current test set, presented with
-							the context users need to evaluate the difference.
+							Compare the current before and after results. Read the methodology and missing
+							evidence before applying the numbers to another PC.
 						</p>
 						<div className="performance-stats">
 							<div>
@@ -32,7 +32,7 @@ function Performance() {
 							</div>
 							<div>
 								<strong>Version 74</strong>
-								<span>Iterative tuning release</span>
+								<span>Build used in the published sample</span>
 							</div>
 						</div>
 					</div>
@@ -43,7 +43,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">In-game sample</span>
 							<h2 className="section-title">Counter-Strike 2 FPS comparison</h2>
-							<p>Same CPU, GPU, and motherboard; the optimized configuration also changes memory tuning, Windows edition, and GPU driver.</p>
+							<p>The CPU, GPU, and motherboard are the same. Memory settings, Windows edition, and the GPU driver also changed, so this is a whole-system comparison.</p>
 						</div>
 
 						<div className="native-benchmark-card">
@@ -77,14 +77,14 @@ function Performance() {
 					<div className="container">
 						<div className="performance-section-heading">
 							<span className="section-kicker">System overhead</span>
-							<h2 className="section-title">Less work before the game starts</h2>
+							<h2 className="section-title">Idle process and memory use</h2>
 							<p>Idle Windows overhead from the documented stock and optimized configurations.</p>
 						</div>
 
 						<div className="overhead-showcase">
 							<div className="overhead-heading">
-								<div><span>Default Windows</span><strong>More idle overhead</strong></div>
-								<div><span>SoftheOS</span><strong>More room for the workload</strong></div>
+								<div><span>Default Windows</span><strong>Stock sample</strong></div>
+								<div><span>SoftheOS</span><strong>Optimized sample</strong></div>
 							</div>
 							<div className="overhead-metric">
 								<div><span>Background processes</span><strong>111</strong></div>
@@ -104,12 +104,12 @@ function Performance() {
 				<section className="version-evolution" aria-labelledby="version-evolution-title">
 					<div className="container evolution-layout">
 						<div className="evolution-copy">
-							<span className="section-kicker">Built through iteration</span>
+							<span className="section-kicker">Release history</span>
 							<div className="version-mark"><span>SoftheOS</span><strong>v74</strong></div>
-							<h2 id="version-evolution-title">The improvement is the process.</h2>
+							<h2 id="version-evolution-title">Version 74 follows repeated testing and revision</h2>
 							<p>
-								Version 74 represents repeated rounds of tuning, compatibility work, validation,
-								and refinement—not a one-off preset. Each release carries lessons from the versions before it.
+								The build has been revised over many releases. Each revision checks performance,
+								compatibility, and stability before settings move into the next version.
 							</p>
 						</div>
 						<div className="evolution-steps">
@@ -124,7 +124,7 @@ function Performance() {
 					<div className="container">
 						<div className="performance-section-heading">
 							<span className="section-kicker">Summary</span>
-							<h2 className="section-title">Detailed performance analysis</h2>
+							<h2 className="section-title">Results at a glance</h2>
 							<p>Measured values from the current benchmark evidence and documented idle samples.</p>
 						</div>
 
@@ -233,9 +233,8 @@ function Performance() {
 							</p>
 						</div>
 						<p className="version-stability-note">
-							SoftheOS is currently at version 74. Its long development history supports a more mature,
-							stability-focused baseline, while final stability still depends on the individual hardware,
-							drivers, BIOS configuration, and workload.
+							SoftheOS version 74 was used for this sample. Stability still depends on the hardware,
+							drivers, BIOS settings, and workload of each PC.
 						</p>
 					</div>
 				</section>
