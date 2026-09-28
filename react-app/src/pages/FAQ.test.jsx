@@ -38,7 +38,7 @@ describe('FAQ Component', () => {
 
 	it('renders search input', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
+		const searchInput = screen.getByRole('textbox', { name: /search questions/i });
 		expect(searchInput).toBeInTheDocument();
 	});
 
@@ -59,10 +59,12 @@ describe('FAQ Component', () => {
 		// Click to expand
 		fireEvent.click(faqButton);
 		expect(faqItem).toHaveClass('active');
+		expect(faqButton.closest('button')).toHaveAttribute('aria-expanded', 'true');
 
 		// Click to collapse
 		fireEvent.click(faqButton);
 		expect(faqItem).not.toHaveClass('active');
+		expect(faqButton.closest('button')).toHaveAttribute('aria-expanded', 'false');
 	});
 
 	it('filters FAQ items by category', () => {
@@ -104,7 +106,7 @@ describe('FAQ Component', () => {
 
 	it('renders CTA section', () => {
 		renderFAQ();
-		expect(screen.getByText(/Still Have Questions?/i)).toBeInTheDocument();
+		expect(screen.getByText(/Need a specific answer?/i)).toBeInTheDocument();
 
 		// Use getAllByText since "Contact Support" appears in both content and button
 		const contactSupportElements = screen.getAllByText(/Contact Support/i);
@@ -116,7 +118,7 @@ describe('FAQ Component', () => {
 		);
 		expect(hasLink).toBe(true);
 
-		expect(screen.getByText(/Join Discord/i)).toBeInTheDocument();
+		expect(screen.getByText(/Message on Discord/i)).toBeInTheDocument();
 	});
 
 	it('has correct links in CTA section', () => {
@@ -127,7 +129,7 @@ describe('FAQ Component', () => {
 		const contactLinks = contactSupportElements.map(el => el.closest('a')).filter(Boolean);
 		const contactLink = contactLinks.find(link => link.getAttribute('href') === '/contact');
 
-		const discordLink = screen.getByText(/Join Discord/i).closest('a');
+		const discordLink = screen.getByText(/Message on Discord/i).closest('a');
 
 		expect(contactLink).toHaveAttribute('href', '/contact');
 		expect(discordLink).toHaveAttribute('href', 'https://discord.com/users/softhecs');

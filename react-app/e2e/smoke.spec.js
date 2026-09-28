@@ -24,6 +24,15 @@ test.describe('public website smoke tests', () => {
 		await expect(page.getByRole('button', { name: /added to cart/i })).toBeVisible();
 	});
 
+	test('service product links land on their store cards', async ({ page }) => {
+		await page.goto('/services');
+		const productLink = page.locator('a.service-action[href^="/store#"]').first();
+		const targetId = new URL(await productLink.getAttribute('href'), 'http://localhost').hash.slice(1);
+		await productLink.click();
+		await expect(page).toHaveURL(new RegExp(`/store#${targetId}$`));
+		await expect(page.locator(`#${targetId}`)).toBeInViewport();
+	});
+
 	test('cart quantity, removal, and close controls work', async ({ page }) => {
 		await page.goto('/store');
 		await page.getByRole('button', { name: /add to cart/i }).first().click();

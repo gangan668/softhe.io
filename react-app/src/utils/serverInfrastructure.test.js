@@ -537,11 +537,13 @@ describe('Stripe fulfillment', () => {
 
 	it('durably claims and delivers a paid session once', async () => {
 		process.env.ORDER_FULFILLMENT_BYPASS_SECRET = 'preview-bypass-secret';
-		const fetchMock = vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
-			.mockResolvedValueOnce(jsonResponse({}, true, 200))
-			.mockResolvedValueOnce(jsonResponse({}, true, 200))
-			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }));
+		const fetchMock = vi.fn(async (url, options) => {
+			if (url === 'https://redis.example') {
+				const command = JSON.parse(options.body);
+				return jsonResponse({ result: command[0] === 'GET' ? null : 'OK' });
+			}
+			return jsonResponse({}, true, 200);
+		});
 		vi.stubGlobal('fetch', fetchMock);
 		const event = {
 			id: 'evt_1',
@@ -556,17 +558,17 @@ describe('Stripe fulfillment', () => {
 		};
 
 		await expect(fulfillPaidSession(event)).resolves.toBe('fulfilled');
-		expect(fetchMock.mock.calls[1][0]).toBe('https://fulfillment.example/orders');
-		expect(fetchMock.mock.calls[1][1].headers['Idempotency-Key']).toBe('cs_1');
-		expect(fetchMock.mock.calls[1][1].headers['X-Softhe-Signature']).toMatch(/^[a-f0-9]{64}$/);
-		expect(fetchMock.mock.calls[1][1].headers['x-vercel-protection-bypass']).toBe('preview-bypass-secret');
-		expect(JSON.parse(fetchMock.mock.calls[1][1].body).items).toEqual([
+		const fulfillmentCall = fetchMock.mock.calls.find(([url]) => url === 'https://fulfillment.example/orders');
+		expect(fulfillmentCall[1].headers['Idempotency-Key']).toBe('cs_1');
+		expect(fulfillmentCall[1].headers['X-Softhe-Signature']).toMatch(/^[a-f0-9]{64}$/);
+		expect(fulfillmentCall[1].headers['x-vercel-protection-bypass']).toBe('preview-bypass-secret');
+		expect(JSON.parse(fulfillmentCall[1].body).items).toEqual([
 			{ id: 'windows-10', quantity: 1 },
 		]);
 	});
 
 	it('does not redeliver a checkout session that is already claimed', async () => {
-		const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse({ result: null }));
+		const fetchMock = vi.fn().mockResolvedValueOnce(jsonResponse({ result: 'completed' }));
 		vi.stubGlobal('fetch', fetchMock);
 		const event = { id: 'evt_duplicate', data: { object: { id: 'cs_duplicate', payment_status: 'paid' } } };
 		await expect(fulfillPaidSession(event)).resolves.toBe('duplicate');
@@ -581,11 +583,12 @@ describe('Stripe fulfillment', () => {
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
-	it('releases the durable claim when fulfillment fails so Stripe can retry', async () => {
-		const fetchMock = vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
-			.mockResolvedValueOnce(jsonResponse({}, false, 503))
-			.mockResolvedValueOnce(jsonResponse({ result: 1 }));
+	it('releases the processing lock when fulfillment fails so Stripe can retry', async () => {
+		const fetchMock = vi.fn(async (url, options) => {
+			if (url === 'https://fulfillment.example/orders') return jsonResponse({}, false, 503);
+			const command = JSON.parse(options.body);
+			return jsonResponse({ result: command[0] === 'GET' ? null : command[0] === 'EVAL' ? 1 : 'OK' });
+		});
 		vi.stubGlobal('fetch', fetchMock);
 		const event = {
 			id: 'evt_retry',
@@ -596,8 +599,39 @@ describe('Stripe fulfillment', () => {
 			} },
 		};
 		await expect(fulfillPaidSession(event)).rejects.toThrow(/status 503/i);
-		const deleteCommand = JSON.parse(fetchMock.mock.calls[2][1].body);
-		expect(deleteCommand).toEqual(['DEL', 'stripe:fulfilled:cs_retry']);
+		const unlockCommand = JSON.parse(fetchMock.mock.calls.at(-1)[1].body);
+		expect(unlockCommand).toEqual(expect.arrayContaining(['stripe:fulfilled:cs_retry:processing']));
+		expect(unlockCommand[0]).toBe('EVAL');
+	});
+
+	it('does not resend an email after an uncertain delivery result', async () => {
+		const state = new Map();
+		const fetchMock = vi.fn(async (url, options) => {
+			if (url === 'https://api.emailjs.com/api/v1.0/email/send') return jsonResponse({}, false, 503);
+			if (url === 'https://fulfillment.example/orders') return jsonResponse({}, true, 200);
+			const [operation, key, value] = JSON.parse(options.body);
+			if (operation === 'GET') return jsonResponse({ result: state.get(key) || null });
+			if (operation === 'SET') {
+				if (JSON.parse(options.body).includes('NX') && state.has(key)) return jsonResponse({ result: null });
+				state.set(key, value);
+				return jsonResponse({ result: 'OK' });
+			}
+			if (operation === 'EVAL') {
+				state.delete(JSON.parse(options.body)[3]);
+				return jsonResponse({ result: 1 });
+			}
+			throw new Error(`Unexpected Redis command: ${operation}`);
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const event = { id: 'evt_email_retry', data: { object: {
+			id: 'cs_email_retry', payment_status: 'paid', amount_total: 6500, currency: 'eur',
+			customer_details: { email: 'customer@example.com' },
+			metadata: { order_schema: '1', order_items: '[{"id":"windows-10","quantity":1}]' },
+		} } };
+		await expect(fulfillPaidSession(event)).rejects.toThrow('Email delivery failed');
+		await expect(fulfillPaidSession(event)).resolves.toBe('confirmation-review-required');
+		expect(fetchMock.mock.calls.filter(([url]) => url === 'https://api.emailjs.com/api/v1.0/email/send')).toHaveLength(1);
+		expect(fetchMock.mock.calls.filter(([url]) => url === 'https://fulfillment.example/orders')).toHaveLength(1);
 	});
 });
 

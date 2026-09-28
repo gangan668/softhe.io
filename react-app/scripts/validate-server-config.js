@@ -1,4 +1,18 @@
 import process from 'node:process';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const vercelConfigPath = fileURLToPath(new URL('../../vercel.json', import.meta.url));
+
+function portalOriginsAllowed(url) {
+	const origin = new URL(url).origin;
+	const websocketOrigin = origin.replace(/^https:/, 'wss:');
+	const config = JSON.parse(readFileSync(vercelConfigPath, 'utf8'));
+	const policy = config.headers?.flatMap(({ headers }) => headers || [])
+		.find(({ key }) => key.toLowerCase() === 'content-security-policy')?.value;
+	const connectSources = policy?.match(/(?:^|;)\s*connect-src\s+([^;]+)/)?.[1]?.split(/\s+/) || [];
+	return connectSources.includes(origin) && connectSources.includes(websocketOrigin);
+}
 
 if (process.env.VITE_REQUIRE_PRODUCTION_CONFIG === 'true' || process.env.VERCEL === '1') {
 	const required = new Set();
@@ -15,6 +29,13 @@ if (process.env.VITE_REQUIRE_PRODUCTION_CONFIG === 'true' || process.env.VERCEL 
 	const exposed = serverSecrets.filter((key) => key.startsWith('VITE_'));
 	const supabaseUrl = process.env.SUPABASE_URL;
 	if (supabaseUrl && process.env.VITE_SUPABASE_URL && supabaseUrl.replace(/\/$/,'') !== process.env.VITE_SUPABASE_URL.replace(/\/$/,'')) bad.push('SUPABASE_PROJECT_MISMATCH');
+	if (process.env.VITE_PORTAL_ENABLED === 'true' && process.env.VITE_SUPABASE_URL) {
+		try {
+			if (!portalOriginsAllowed(process.env.VITE_SUPABASE_URL)) bad.push('SUPABASE_CSP_ORIGIN');
+		} catch {
+			bad.push('SUPABASE_CSP_ORIGIN');
+		}
+	}
 	if (process.env.VERCEL_ENV === 'preview' && /^sk_live_/.test(process.env.STRIPE_SECRET_KEY || '')) bad.push('PREVIEW_STRIPE_MODE');
 	if (exposed.length || bad.length) throw new Error(`Server configuration is incomplete (${[...new Set([...bad,...exposed])].join(', ')})`);
 }

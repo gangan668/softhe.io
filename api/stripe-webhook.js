@@ -1,5 +1,5 @@
 const crypto = require('node:crypto');
-const { claimKey, deleteKey, setKey } = require('./_lib/redis');
+const { claimKey, redisCommand, setKey } = require('./_lib/redis');
 const { getPublicOrigin, normalizeItems, PRODUCTS } = require('./create-checkout-session');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertCommerceConfiguration } = require('./_lib/config');
@@ -160,18 +160,40 @@ const fulfillPaidSession = async (event) => {
 	const session = event.data.object;
 	if (!['paid', 'no_payment_required'].includes(session.payment_status)) return 'payment-pending';
 	const key = `stripe:fulfilled:${session.id}`;
-	const claimed = await claimKey(key, 'processing', 600);
+	const lockKey = `${key}:processing`;
+	const token = crypto.randomUUID();
+	if (await redisCommand(['GET', key])) return 'duplicate';
+	const claimed = await claimKey(lockKey, token, 600);
 	if (!claimed) return 'duplicate';
 
 	try {
-		if (portalServerConfigured()) await persistPaidOrder(event, session);
-		await deliverFulfillment(event, session);
-		await sendOrderConfirmation(session);
+		if (await redisCommand(['GET', key])) return 'duplicate';
+		if (portalServerConfigured() && !await redisCommand(['GET', `${key}:order`])) {
+			await persistPaidOrder(event, session);
+			await setKey(`${key}:order`, 'completed', 60 * 60 * 24 * 400);
+		}
+		if (!await redisCommand(['GET', `${key}:delivery`])) {
+			// The receiver deduplicates by session ID if delivery succeeds before this write.
+			await deliverFulfillment(event, session);
+			await setKey(`${key}:delivery`, 'completed', 60 * 60 * 24 * 400);
+		}
+		const emailKey = `${key}:email`;
+		const emailState = await redisCommand(['GET', emailKey]);
+		if (emailState === 'attempted') {
+			// EmailJS has no idempotency key. A failed or timed-out attempt may have sent.
+			console.error('stripe_confirmation_requires_review', { sessionId: session.id });
+			return 'confirmation-review-required';
+		}
+		if (!emailState) {
+			if (!await claimKey(emailKey, 'attempted', 60 * 60 * 24 * 400)) return 'confirmation-review-required';
+			await sendOrderConfirmation(session);
+			await setKey(emailKey, 'completed', 60 * 60 * 24 * 400);
+		}
 		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
 		return 'fulfilled';
-	} catch (error) {
-		await deleteKey(key).catch(() => {});
-		throw error;
+	} finally {
+		const unlock = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0";
+		await redisCommand(['EVAL', unlock, 1, lockKey, token]).catch(() => {});
 	}
 };
 

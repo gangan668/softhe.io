@@ -31,6 +31,19 @@ describe('createCheckoutSession', () => {
 			.rejects.toThrow('Stripe checkout is not configured');
 	});
 
+	it('reuses the same key after an uncertain failure and changes it when the cart changes', async () => {
+		const cart = [{ id: 'windows-10', quantity: 3 }];
+		const fetchImpl = vi.fn()
+			.mockRejectedValueOnce(new Error('Network timeout'))
+			.mockResolvedValue({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		const firstKey = fetchImpl.mock.calls[0][1].headers['Idempotency-Key'];
+		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key']).toBe(firstKey);
+		await createCheckoutSession([{ id: 'windows-10', quantity: 4 }], legalAcceptance, fetchImpl);
+		expect(fetchImpl.mock.calls[2][1].headers['Idempotency-Key']).not.toBe(firstKey);
+	});
+
 	it('links checkout with an authenticated bearer token without adding user ids to the body', async () => {
 		const fetchImpl = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'cs_test', url: 'https://checkout.stripe.com/test' }) });
 		await createCheckoutSession([{ id: 'windows-11', quantity: 1 }], legalAcceptance, fetchImpl, 'verified-session-token');

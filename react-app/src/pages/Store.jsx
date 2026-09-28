@@ -27,6 +27,25 @@ function Store() {
 	);
 
 	useEffect(() => {
+		let timer;
+		const scrollToProduct = () => {
+			const productId = decodeURIComponent(window.location.hash.slice(1));
+			if (!products.some((product) => product.id === productId)) return;
+			window.clearTimeout(timer);
+			timer = window.setTimeout(() => {
+				const card = document.getElementById(productId);
+				if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 90, behavior: 'instant' });
+			}, 0);
+		};
+		scrollToProduct();
+		window.addEventListener('hashchange', scrollToProduct);
+		return () => {
+			window.clearTimeout(timer);
+			window.removeEventListener('hashchange', scrollToProduct);
+		};
+	}, []);
+
+	useEffect(() => {
 		trackEvent('view_item_list', {
 			item_list_name: 'store_products',
 			items: products.map((product) => ({
@@ -125,13 +144,13 @@ function Store() {
 							"@type": "Product",
 							name: product.name,
 							description: product.description,
-							offers: {
+							...(commerceEnabled ? { offers: {
 								"@type": "Offer",
 								price: product.price,
 								priceCurrency: "EUR",
 								availability: "https://schema.org/InStock",
 								url: `${absoluteUrl('/store')}#${product.id}`,
-							},
+							} } : {}),
 						},
 					})),
 				}}
@@ -140,8 +159,8 @@ function Store() {
 				{!commerceEnabled && (
 					<div className="checkout-result checkout-result-pending" role="status">
 						<div className="container">
-							<strong>Online checkout is being prepared</strong>
-							<span>Products remain available to review while secure checkout is being activated.</span>
+							<strong>Online ordering is unavailable</strong>
+							<span>You can review products and prices here. Contact us with your hardware details if you have questions.</span>
 							<Link to="/contact" className="status-contact-link">Ask about an order</Link>
 						</div>
 					</div>
@@ -157,7 +176,7 @@ function Store() {
 				<section className="page-header">
 					<div className="container">
 						<h1>Store</h1>
-						<p>Compare each product by price, included work, and hardware fit.</p>
+						<p>Compare each product by price, included work, and hardware fit.{!commerceEnabled && ' Online ordering is currently unavailable.'}</p>
 					</div>
 				</section>
 
@@ -169,14 +188,14 @@ function Store() {
 								<h2>Choose Windows, BIOS tuning, or both.</h2>
 								<p>
 									Choose a Windows build for operating-system changes or BIOS tuning for firmware
-									and memory settings. Stripe opens only after the server checks the order.
+								and memory settings. {commerceEnabled ? 'The server checks the order before Stripe opens.' : 'Online ordering is currently unavailable.'}
 								</p>
 							</div>
 							<div className="store-trust">
-								<div>
+								{commerceEnabled && <div>
 									<strong>Stripe</strong>
 									<span>Secure hosted checkout</span>
-								</div>
+								</div>}
 								<div>
 									<strong>Withdrawal</strong>
 									<span>Online request available</span>
@@ -191,10 +210,10 @@ function Store() {
 						<div className="store-proof" aria-label="Benchmark evidence">
 							<div>
 								<span className="section-kicker">Benchmark context</span>
-								<h3>The current CS2 sample increased from 658 to 826 average FPS.</h3>
+								<h3>See the limits of the preliminary CS2 comparison.</h3>
 								<p>
-									This is a two-run median from one whole-system comparison. Read the test details
-									and limitations before using it to estimate results for your PC.
+									One PC measured 658 and 826 average FPS across two configurations. Windows edition,
+									memory settings, and GPU driver changed. Raw runs are not yet published.
 								</p>
 							</div>
 							<a href="/performance" className="proof-link">
@@ -241,7 +260,7 @@ function Store() {
 
 						<div className="products-grid">
 							{products.map((product) => (
-								<div key={product.id} className="product-card">
+								<div key={product.id} id={product.id} className="product-card">
 									{product.badge && (
 										<div className="product-badge">{product.badge}</div>
 									)}

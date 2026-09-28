@@ -1,5 +1,7 @@
 import { apiFetch, readJson } from './api';
 
+const pendingCheckoutKeys = new Map();
+
 export const isStripeCheckoutUrl = (value) => {
 	try {
 		const url = new URL(value);
@@ -10,12 +12,15 @@ export const isStripeCheckoutUrl = (value) => {
 };
 
 export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = fetch, accessToken = null) => {
-	const idempotencyKey = crypto.randomUUID();
+	const items = cart.map(({ id, quantity }) => ({ id, quantity })).sort((left, right) => left.id.localeCompare(right.id));
+	const requestKey = JSON.stringify({ items, legalAcceptance, accessToken });
+	const idempotencyKey = pendingCheckoutKeys.get(requestKey) || crypto.randomUUID();
+	pendingCheckoutKeys.set(requestKey, idempotencyKey);
 	const response = await apiFetch('/api/create-checkout-session', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey, ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
 		body: JSON.stringify({
-			items: cart.map(({ id, quantity }) => ({ id, quantity })),
+			items,
 			legalAcceptance,
 		}),
 	}, fetchImpl);
@@ -24,6 +29,7 @@ export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = f
 	if (!response.ok || !isStripeCheckoutUrl(data.url)) {
 		throw new Error(data.error || 'Checkout could not be started. Please try again.');
 	}
+	pendingCheckoutKeys.delete(requestKey);
 	if (data.id && data.receiptToken && typeof sessionStorage !== 'undefined') sessionStorage.setItem(`softhe:checkout:${data.id}`, data.receiptToken);
 	return data;
 };

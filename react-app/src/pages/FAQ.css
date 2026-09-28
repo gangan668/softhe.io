@@ -61,9 +61,14 @@
 .faq-search i {
 	position: absolute;
 	left: 1rem;
-	top: 50%;
-	transform: translateY(-50%);
+	bottom: 1.1rem;
 	color: var(--text-secondary);
+}
+
+.faq-search label {
+	display: block;
+	margin-bottom: 0.5rem;
+	color: var(--text-primary);
 }
 
 .faq-search input {

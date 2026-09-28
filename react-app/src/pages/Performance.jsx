@@ -7,10 +7,10 @@ function Performance() {
 		<>
 			<SEO
 				title="PC performance benchmark results | Softhe.io"
-				description="Review measured FPS, frame-time, and system-overhead comparisons for a documented SoftheOS and BIOS-tuned configuration."
+				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription="Two-run CapFrameX medians measured 658 FPS default and 826 FPS SoftheOS in Counter-Strike 2 on the tested platform."
+				ogDescription="One PC measured 658 and 826 average FPS across two configurations. Raw runs remain unpublished and several variables changed."
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -18,8 +18,13 @@ function Performance() {
 						<span className="section-kicker">Benchmarks</span>
 						<h1>Measured results from the current test PC</h1>
 						<p>
-							Compare the current before and after results. Read the methodology and missing
-							evidence before applying the numbers to another PC.
+							This preliminary comparison uses one PC. Windows edition, memory settings, and
+							GPU driver changed. The result cannot isolate the effect of a Softhe.io product.
+						</p>
+						<p className="methodology-warning" role="note">
+							Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
+							 Runs per configuration: {benchmarkMethodology.runCount ?? 'not yet published'}.
+							 Raw run captures: not yet published.
 						</p>
 						<div className="performance-stats">
 							<div>
@@ -41,14 +46,14 @@ function Performance() {
 				<section className="fps-comparison">
 					<div className="container">
 						<div className="performance-section-heading">
-							<span className="section-kicker">In-game sample</span>
+							<span className="section-kicker">Preliminary in-game sample</span>
 							<h2 className="section-title">Counter-Strike 2 FPS comparison</h2>
-							<p>The CPU, GPU, and motherboard are the same. Memory settings, Windows edition, and the GPU driver also changed, so this is a whole-system comparison.</p>
+							<p>The CPU, GPU, and motherboard are the same. Memory settings, Windows edition, and GPU driver changed. This whole-system comparison does not measure the effect of any single product.</p>
 						</div>
 
 						<div className="native-benchmark-card">
 							<div className="native-card-topline">
-								<div><span>Measured result</span><strong>CS2 · Dust 2 benchmark</strong></div>
+								<div><span>Preliminary result</span><strong>CS2 · Dust 2 benchmark</strong></div>
 								<b>2-run median</b>
 							</div>
 							<div className="native-result-stage">
@@ -125,7 +130,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">Summary</span>
 							<h2 className="section-title">Results at a glance</h2>
-							<p>Measured values from the current benchmark evidence and documented idle samples.</p>
+							<p>Values from the preliminary CS2 comparison and separate idle snapshots. Raw runs are not yet published.</p>
 						</div>
 
 						<div className="comparison-table">
@@ -219,7 +224,7 @@ function Performance() {
 							{!benchmarkEvidenceComplete && (
 								<p className="methodology-warning" role="note">
 									Full reproducibility details and raw run evidence have not yet been published.
-									Treat these figures as preliminary product evidence.
+									These figures cannot establish the effect of a single product.
 								</p>
 							)}
 						</section>

@@ -36,7 +36,7 @@ function RouteTracker() {
 	const isInitialRoute = useRef(true);
 	useEffect(() => {
 		trackPageView(location.pathname);
-		window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+		if (!window.location.hash) window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 		if (isInitialRoute.current) {
 			isInitialRoute.current = false;
 			return undefined;

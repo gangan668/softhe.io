@@ -16,7 +16,7 @@ describe('Performance', () => {
 		expect(screen.getByRole('heading', { name: /idle process and memory use/i })).toBeInTheDocument();
 		expect(screen.getByRole('heading', { name: /version 74 follows repeated testing and revision/i })).toBeInTheDocument();
 		expect(screen.getByRole('heading', { name: /benchmark methodology/i })).toBeInTheDocument();
-		expect(screen.getByText(/preliminary product evidence/i)).toBeInTheDocument();
+		expect(screen.getByText(/figures cannot establish the effect of a single product/i)).toBeInTheDocument();
 	});
 
 	it('renders benchmark and overhead metrics natively without legacy screenshots', () => {

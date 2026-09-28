@@ -66,10 +66,7 @@ function FAQ() {
 							<li>
 								<strong>Updates:</strong> The applicable update terms are stated with the product and order
 							</li>
-							<li>
-								<strong>Documentation:</strong> Detailed installation guides and
-								optimization explanations
-							</li>
+							<li><strong>Setup information:</strong> Check the current product description and order confirmation for the material supplied with your build</li>
 						</ul>
 					</div>
 				),
@@ -159,11 +156,7 @@ function FAQ() {
 				question: "How much performance improvement can I expect?",
 				answer: (
 					<div>
-						<p>
-						Performance improvements vary based on hardware, software, drivers,
-						game settings, and the starting condition of the system. The current
-						published sample shows:
-						</p>
+						<p>Results depend on the hardware, drivers, game settings, and starting configuration. The current preliminary sample compares two configurations of one PC:</p>
 						<ul>
 							<li>
 								<strong>CS2 average FPS:</strong> 658 to 826 in the two-run medians
@@ -179,9 +172,7 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							<strong>Note:</strong> These are single-system observations, not a
-							guarantee. Review the benchmark page and ask about compatibility
-							before purchasing.
+							Windows edition, memory settings, and GPU driver changed. Raw run captures are not yet published. The comparison cannot isolate the effect of one product or predict your result.
 						</p>
 					</div>
 				),
@@ -190,30 +181,7 @@ function FAQ() {
 				question: "Will this work with my specific hardware?",
 				answer: (
 					<div>
-						<p>
-							Compatibility depends on the exact motherboard, CPU, GPU, firmware, drivers, and Windows edition. General starting points are:
-						</p>
-						<ul>
-							<li>
-								<strong>CPUs:</strong> Intel (6th gen+) and AMD Ryzen (all
-								generations)
-							</li>
-							<li>
-								<strong>GPUs:</strong> NVIDIA (GTX 900 series+) and AMD (RX 400
-								series+)
-							</li>
-							<li>
-								<strong>RAM:</strong> 8GB minimum, 16GB+ recommended
-							</li>
-							<li>
-								<strong>Storage:</strong> SSD strongly recommended for best
-								results
-							</li>
-							<li>
-								<strong>Operating Systems:</strong> Windows 10 (1903+) and
-								Windows 11
-							</li>
-						</ul>
+						<p>Compatibility depends on your motherboard, CPU, GPU, firmware, drivers, and Windows licence. Send your hardware list and current Windows edition before ordering. Support can check the fit of the selected product.</p>
 						<p>
 							If you have specific concerns about compatibility,{" "}
 							<a href="/contact">contact us</a> before purchasing and we'll
@@ -226,17 +194,11 @@ function FAQ() {
 				question: "Do I need technical knowledge to use your products?",
 				answer: (
 					<div>
-						<p>
-							You should be comfortable installing Windows and following recovery instructions.
-							The supplied material includes:
-						</p>
+						<p>You should be comfortable installing Windows and following recovery instructions. Review the specific product description and order confirmation for included files and support.</p>
 						<ul>
-							<li>Step-by-step installation guides with screenshots</li>
-							<li>Video tutorials walking through the entire process</li>
-							<li>Pre-configured settings (no manual tweaking required)</li>
-							<li>Automated scripts that do the work for you</li>
-								<li>Email and Discord support for setup questions</li>
-							<li>Discord community for peer support</li>
+							<li>Back up your data and keep official recovery media available</li>
+							<li>Check that your Windows licence and hardware meet the stated requirements</li>
+							<li>Contact support before ordering if you need help assessing compatibility</li>
 						</ul>
 						<p>
 							Contact support before ordering if you have not installed Windows or changed BIOS settings before.
@@ -248,23 +210,7 @@ function FAQ() {
 				question: "What's the difference between Windows 10 and Windows 11 ISOs?",
 				answer: (
 					<div>
-						<p>Both are fully optimized, but have key differences:</p>
-						<h4>Windows 10 Enterprise ISO:</h4>
-						<ul>
-							<li>For a specific Windows 10 compatibility requirement</li>
-							<li>Best for competitive gaming (proven platform)</li>
-							<li>Lower system requirements</li>
-							<li>Wider driver support</li>
-							<li>Recommended for: CS2, Valorant, competitive FPS</li>
-						</ul>
-						<h4>Windows 11 Pro Gaming Edition:</h4>
-						<ul>
-							<li>Latest features and DirectX 12 Ultimate</li>
-							<li>Auto HDR and improved gaming features</li>
-							<li>Better for newer games (2022+)</li>
-							<li>Requires newer hardware (TPM 2.0, UEFI)</li>
-							<li>For newer hardware and software that requires Windows 11</li>
-						</ul>
+						<p>The Windows 10 build is for an existing setup that still needs Windows 10. The Windows 11 build is for newer hardware or software that needs Windows 11. Check your device requirements and valid Windows licence before choosing.</p>
 						<p>
 							Not sure which to choose? <a href="/contact">Contact us</a> and
 							we'll recommend based on your hardware and games.
@@ -307,18 +253,9 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							Windows updates can reset or replace settings. The included maintenance guidance explains which settings may need to be checked again.
+							Windows updates can reset or replace settings. Check the product description and order confirmation for any maintenance material included with your purchase.
 						</p>
-						<ul>
-							<li>
-								We include scripts that automatically reapply certain settings
-								after updates
-							</li>
-							<li>Update policies are configured to minimize disruption</li>
-							<li>You have full control over when updates are installed</li>
-							<li>We provide update guides to maintain optimizations</li>
-							<li>Our support team helps if any issues arise post-update</li>
-						</ul>
+						<p>Keep normal security updates enabled. If performance or compatibility changes after an update, record the update and contact support with your order number.</p>
 					</div>
 				),
 			},
@@ -326,14 +263,8 @@ function FAQ() {
 				question: "Can I use your ISO on multiple computers?",
 				answer: (
 					<div>
-						<p>Yes, but with limitations:</p>
+						<p>Each computer needs its own valid Windows licence. The number of devices covered by a Softhe.io purchase depends on the terms of that order.</p>
 						<ul>
-							<li>
-								You can use the ISO to install on{" "}
-								<strong>up to 3 personal computers</strong>
-							</li>
-							<li>Each computer requires its own valid Windows license</li>
-							<li>Commercial use requires a separate license (contact us)</li>
 							<li>Redistribution of the ISO is strictly prohibited</li>
 						</ul>
 						<p>
@@ -349,19 +280,7 @@ function FAQ() {
 				question: "What payment methods do you accept?",
 				answer: (
 					<div>
-						<p>
-							We accept all major payment methods through our secure Stripe
-							payment processor:
-						</p>
-						<ul>
-							<li>
-								Credit cards (Visa, Mastercard, American Express, Discover)
-							</li>
-							<li>Debit cards</li>
-							<li>Apple Pay</li>
-							<li>Google Pay</li>
-							<li>European payment methods (iDEAL, SEPA, etc.)</li>
-						</ul>
+						<p>Stripe shows the available payment methods at checkout. They can vary by location and device.</p>
 						<p>
 							Stripe handles the payment form. Softhe.io does not collect card numbers through this website.
 						</p>
@@ -373,15 +292,16 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							A 14-day withdrawal period may apply. The legal terms and any consent to begin digital delivery determine your rights for a specific order.
+							Eligible consumers generally have a statutory 14-day withdrawal period for distance contracts. The calculation and any exception depend on whether your order is digital content or a service and whether delivery or work has begun.
 						</p>
 						<ul>
-							<li>Submit the withdrawal form or email support with your order number</li>
-							<li>Digital delivery and work already started can affect the amount due</li>
+							<li>Submit the online withdrawal form or email support with your order number</li>
+							<li>Immediate digital delivery requires your express request and acknowledgement that the withdrawal right may be lost once performance begins, as permitted by law</li>
+							<li>Work started at your express request may leave a proportionate amount due</li>
 							<li>Read the Terms of Service and withdrawal notice before checkout</li>
 						</ul>
 						<p>
-							To request a refund, email{" "}
+							To make a withdrawal request, use the <a href="/withdrawal">online form</a> or email{" "}
 							<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a> with your
 							order number. Support will confirm whether the request qualifies and what happens next.
 						</p>
@@ -456,15 +376,14 @@ function FAQ() {
 				question: "What kind of support do you provide?",
 				answer: (
 					<div>
-						<p>Support is available through these channels:</p>
+						<p>Ask product and order questions by email. You can also message the Softhe.io Discord account. The support scope and duration depend on the product and terms shown at checkout.</p>
 						<ul>
 							<li>
-								<strong>Email Support:</strong>{" "}
+								<strong>Email:</strong>{" "}
 								<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>{" "}
-								(response time varies with request volume)
 							</li>
 							<li>
-								<strong>Discord Support:</strong>{" "}
+								<strong>Discord direct message:</strong>{" "}
 								<a
 									href="https://discord.com/users/softhecs"
 									target="_blank"
@@ -474,23 +393,7 @@ function FAQ() {
 								</a>{" "}
 								(availability varies)
 							</li>
-							<li>
-								<strong>Documentation:</strong> Detailed guides and video
-								tutorials
-							</li>
-							<li>
-								<strong>Community Forum:</strong> Discord server with active
-								community
-							</li>
-							<li>
-								<strong>Remote Assistance:</strong> Screen sharing for complex
-								issues (Premium Support customers)
-							</li>
 						</ul>
-						<p>
-							Support scope and duration follow the purchased product and the
-							terms shown at checkout.
-						</p>
 					</div>
 				),
 			},
@@ -522,16 +425,7 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>Installation support can include:</p>
-						<ul>
-							<li>Step-by-step written guides with screenshots</li>
-							<li>Video tutorial showing the entire installation process</li>
-							<li>Pre-installation checklist</li>
-							<li>USB creation tool and instructions</li>
-							<li>Live support via Discord or email</li>
-							<li>
-								Remote assistance available (for Premium Support customers)
-							</li>
-						</ul>
+						<p>Email support with your order number, hardware details, and the step where installation stopped. We will review the information and advise on the next step. The product description and order confirmation state any included setup material.</p>
 						<p>
 							Back up important data and keep official Windows recovery media available before installation.
 						</p>
@@ -542,16 +436,7 @@ function FAQ() {
 				question: "Do you offer custom optimization services?",
 				answer: (
 					<div>
-						<p>
-							Custom work may be available for specific hardware or software requirements:
-						</p>
-						<ul>
-							<li>Custom BIOS tuning for specific games or workloads</li>
-							<li>Personalized Windows configuration</li>
-							<li>Multi-system optimization (for LAN centers)</li>
-							<li>Ongoing maintenance and monitoring</li>
-							<li>Training and consultation</li>
-						</ul>
+						<p>Contact us with your hardware and the change you need. We will confirm whether the work is available and provide its scope and price before you order.</p>
 						<p>
 							<a href="/contact">Contact us</a> to discuss your requirements and
 							get a custom quote.
@@ -564,17 +449,7 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>Stop and contact support if installation does not complete as expected:</p>
-						<ul>
-							<li>Contact support immediately for troubleshooting assistance</li>
-							<li>We'll help diagnose and fix the issue remotely</li>
-							<li>If needed, we'll guide you through a clean reinstallation</li>
-							<li>Use your backup or official recovery media when a clean rollback is required</li>
-							<li>We include recovery tools in case of system issues</li>
-						</ul>
-						<p>
-							Serious issues are uncommon when the installation guide is followed,
-							and support can help troubleshoot if something does not behave as expected.
-						</p>
+						<p>Send your order number, hardware details, and the exact error. Keep your backup and official Windows recovery media available in case you need to restore the prior installation.</p>
 					</div>
 				),
 			},
@@ -585,12 +460,7 @@ function FAQ() {
 						<p>
 							Contact support with your order number if you later need Windows 11:
 						</p>
-						<ul>
-							<li>You can upgrade by paying the difference (€15)</li>
-							<li>Contact us with your original order number</li>
-							<li>Support will confirm hardware compatibility and the current upgrade terms</li>
-							<li>Delivery timing is confirmed with the upgrade order</li>
-						</ul>
+						<p>Support will confirm hardware compatibility, whether an upgrade is available, its current price, and delivery timing before you place another order.</p>
 						<p>
 							Do not upgrade until you have checked Windows 11 hardware and software compatibility.
 						</p>
@@ -710,8 +580,10 @@ function FAQ() {
 
 					{/* Search Box */}
 					<div className="faq-search">
-						<i className="fas fa-search"></i>
+						<label htmlFor="faq-search-input">Search questions</label>
+						<i className="fas fa-search" aria-hidden="true"></i>
 						<input
+							id="faq-search-input"
 							type="text"
 							placeholder="Search the FAQ"
 							value={searchTerm}
@@ -750,13 +622,16 @@ function FAQ() {
 											className={`faq-item ${isActive ? "active" : ""}`}
 										>
 											<button
+												type="button"
 												className="faq-question"
+												aria-expanded={isActive}
+												aria-controls={`faq-answer-${itemId}`}
 												onClick={() => toggleItem(category, originalIndex)}
 											>
 												<span>{item.question}</span>
 												<i className="fas fa-chevron-down"></i>
 											</button>
-											<div className="faq-answer">
+											<div id={`faq-answer-${itemId}`} className="faq-answer" hidden={!isActive}>
 												{typeof item.answer === "string" ? (
 													<p>{item.answer}</p>
 												) : (
@@ -788,11 +663,8 @@ function FAQ() {
 					{/* CTA Section */}
 					<div className="faq-cta">
 						<div className="faq-cta-content">
-							<h2>Still Have Questions?</h2>
-							<p>
-								Can't find the answer you're looking for? Our support team is
-								here to help!
-							</p>
+								<h2>Need a specific answer?</h2>
+								<p>Send your hardware details and question to support.</p>
 							<div className="faq-cta-buttons">
 								<a href="/contact" className="btn btn-primary">
 									<i className="fas fa-envelope"></i> Contact Support
@@ -803,7 +675,7 @@ function FAQ() {
 									rel="noopener noreferrer"
 									className="btn btn-secondary"
 								>
-									<i className="fab fa-discord"></i> Join Discord
+									<i className="fab fa-discord"></i> Message on Discord
 								</a>
 							</div>
 						</div>

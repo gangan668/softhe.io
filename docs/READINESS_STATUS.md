@@ -1,8 +1,19 @@
 # Production readiness status
 
-Last verified: 2026-09-15 (Europe/Berlin)
+Last source review: 2026-09-28 (Europe/Berlin). Live provider and deployment state was not reverified.
 
-## Current release checkpoint
+## Test-branch checkpoint (2026-09-28)
+
+- `copy-rewrite-test` contains source changes to the public copy, checkout and webhook retry handling, accessibility, contact form, product links, CSP validation, and development dependencies.
+- The local unit suite passes (297 passed, 3 skipped), both browser profiles pass (62 enabled-state and 4 disabled-state checks), the build and secret scan pass, and `npm audit --audit-level=moderate` reports zero vulnerabilities. These checks do not verify live providers or the deployment.
+- The checkout webhook now stores separate fulfillment stages. An uncertain EmailJS confirmation attempt is held for manual review because EmailJS does not provide an idempotency key. Operators must investigate `stripe_confirmation_requires_review`; the code cannot guarantee exactly-once delivery by itself.
+- The benchmark remains preliminary whole-system evidence, not proof of a particular product's effect. Raw runs and full methodology still need publication. Copy changes do not replace the missing evidence.
+- This is a local test-branch checkpoint, not a Production deployment or commercial launch approval. Keep commerce disabled until the evidence gate passes and the live environment has been checked.
+- `npm run evidence:verify` still rejects nine pending legal, payment, idempotency, and monitoring evidence items. Their status was not changed by this source update.
+
+## Previous checkpoint (2026-09-15)
+
+### Recorded release checkpoint at that date
 
 - Local `main` and the fetched `origin/main` identify merge commit
   `bbea382223668498f5668c22c9f58ceae1a03b39`. No tracked changes preceded this status update.

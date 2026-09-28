@@ -8,10 +8,10 @@ function Home() {
 		<>
 			<SEO
 				title="Softhe.io | Windows and BIOS tuning for gaming PCs"
-				description="Custom Windows builds and BIOS tuning for gaming PCs, with published benchmark data, clear compatibility guidance, and setup support."
+				description="Custom Windows builds and BIOS tuning for gaming PCs, with a documented whole-system CS2 sample, compatibility guidance, and setup support."
 				keywords="pc optimization, gaming optimization, fps boost, custom windows iso, bios optimization, esports performance, competitive gaming, windows optimization, gaming pc tuning"
 				ogTitle="Windows and BIOS tuning for gaming PCs | Softhe.io"
-				ogDescription="Custom Windows builds and BIOS tuning, backed by published test results and setup support."
+				ogDescription="Custom Windows builds and BIOS tuning, with a preliminary whole-system CS2 comparison and setup support."
 				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 				structuredData={{
 					"@context": "https://schema.org",
@@ -65,7 +65,7 @@ function Home() {
 							<div className="benchmark-panel">
 								<div className="panel-topline">
 									<div>
-										<span className="panel-eyebrow">Measured result</span>
+									<span className="panel-eyebrow">Preliminary sample</span>
 										<strong>CS2 · Dust 2 benchmark</strong>
 									</div>
 									<span className="live-pill">2-run median</span>
@@ -103,21 +103,21 @@ function Home() {
 										<strong>2 × 109 sec</strong>
 									</div>
 								</div>
-								<p className="result-note">Same hardware and in-game settings. Whole-configuration comparison; individual results vary.</p>
+								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. Raw runs are not yet published. This cannot isolate the effect of one product.</p>
 							</div>
 						</div>
 					</div>
 				</header>
 
-				<section className="proof-strip" aria-label="Optimization results">
+				<section className="proof-strip" aria-label="Preliminary test summary">
 					<div className="container proof-grid">
 						<div>
 							<strong>+25%</strong>
-							<span>Average FPS in tested CS2 run</span>
+							<span>Average FPS in one whole-system CS2 comparison</span>
 						</div>
 						<div>
 							<strong>-20%</strong>
-							<span>Frame time reduction</span>
+							<span>Frame time change in the same comparison</span>
 						</div>
 						<div>
 							<strong>31</strong>
@@ -125,7 +125,7 @@ function Home() {
 						</div>
 						<div>
 							<strong>14 days</strong>
-							<span>Refund window listed in FAQ</span>
+							<span>General statutory withdrawal period for eligible consumers; exceptions apply</span>
 						</div>
 					</div>
 				</section>
@@ -133,11 +133,12 @@ function Home() {
 				<section className="performance-preview">
 					<div className="container preview-grid">
 						<div className="preview-copy">
-							<span className="section-kicker">Published test data</span>
+							<span className="section-kicker">Preliminary test data</span>
 							<h2>Read the numbers and the test limits before you buy.</h2>
 							<p>
-								The benchmark page lists the measured changes, the available test details, and
-								what has not yet been published. Results from one PC are not a guarantee for another.
+								The sample compares two configurations of one PC. Windows edition, memory settings,
+								and GPU driver changed. Raw run evidence is still unpublished, and the result cannot
+								show what any one product contributed.
 							</p>
 							<Link to="/performance" className="text-link">
 								Read the benchmark details
@@ -154,7 +155,7 @@ function Home() {
 								<strong>826 FPS</strong>
 							</div>
 							<div className="comparison-footnote">
-								Results from the documented test configuration; individual systems will vary.
+								Preliminary whole-system sample. Raw runs are not yet published.
 							</div>
 						</div>
 					</div>
@@ -174,8 +175,8 @@ function Home() {
 							</div>
 							<div className="trust-preview-item">
 								<i className="fas fa-rotate-left" aria-hidden="true"></i>
-								<h3>14-day refund window</h3>
-								<p>Read the refund terms in the FAQ before placing an order.</p>
+								<h3>Withdrawal rights</h3>
+								<p>Eligible consumers generally have 14 days to withdraw. Digital delivery or work started at your request can affect that right. Read the terms before ordering.</p>
 							</div>
 							<div className="trust-preview-item">
 								<i className="fas fa-headset" aria-hidden="true"></i>
@@ -211,8 +212,8 @@ function Home() {
 								<div className="feature-icon">
 									<i className="fas fa-chart-line"></i>
 								</div>
-								<h3>Published benchmark results</h3>
-								<p>Before and after results show the measured change and state the limits of the test.</p>
+								<h3>Preliminary benchmark sample</h3>
+								<p>The current CS2 comparison shows the measured change and identifies missing evidence.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">

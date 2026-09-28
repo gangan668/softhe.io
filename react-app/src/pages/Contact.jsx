@@ -28,9 +28,7 @@ function Contact() {
 	 * Sanitize input to prevent XSS
 	 */
 	const sanitizeInput = (input) => {
-		return input
-			.replace(/[<>]/g, "") // Remove < and >
-			.slice(0, 1000); // Limit length
+		return input.replace(/[<>]/g, "");
 	};
 
 	/**
