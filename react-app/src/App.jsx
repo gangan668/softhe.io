@@ -16,8 +16,6 @@ import './App.css';
 import Home from './pages/Home';
 const Services = lazy(() => import('./pages/Services'));
 const Store = lazy(() => import('./pages/Store'));
-const Guides = lazy(() => import('./pages/Guides'));
-const GuideDetail = lazy(() => import('./pages/GuideDetail'));
 const Performance = lazy(() => import('./pages/Performance'));
 const Contact = lazy(() => import('./pages/Contact'));
 const FAQ = lazy(() => import('./pages/FAQ'));
@@ -92,8 +90,6 @@ function App() {
 									<Route path="/services" element={<Services />} />
 									<Route path="/store" element={<Store />} />
 									<Route path="/performance" element={<Performance />} />
-									<Route path="/guides" element={<Guides />} />
-									<Route path="/guides/:slug" element={<GuideDetail />} />
 									<Route path="/contact" element={<Contact />} />
 									<Route path="/faq" element={<FAQ />} />
 									<Route path="/checkout" element={<Checkout />} />

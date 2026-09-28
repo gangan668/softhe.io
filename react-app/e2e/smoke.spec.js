@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/services', '/store', '/performance', '/guides', '/faq', '/contact', '/terms', '/privacy-policy', '/legal-notice', '/withdrawal'];
+const routes = ['/', '/services', '/store', '/performance', '/faq', '/contact', '/terms', '/privacy-policy', '/legal-notice', '/withdrawal'];
 
 test.describe('public website smoke tests', () => {
 	test.beforeEach(async ({ page }) => {
@@ -18,7 +18,7 @@ test.describe('public website smoke tests', () => {
 
 	test('store recommendation and cart path work', async ({ page }) => {
 		await page.goto('/store');
-		await page.getByRole('button', { name: /newer pc/i }).click();
+		await page.getByRole('button', { name: /requires windows 11/i }).click();
 		await expect(page.getByText('Custom Windows 11 ISO').first()).toBeVisible();
 		await page.getByRole('button', { name: /add to cart/i }).first().click();
 		await expect(page.getByRole('button', { name: /added to cart/i })).toBeVisible();
@@ -47,16 +47,16 @@ test.describe('public website smoke tests', () => {
 		await question.click();
 		await expect(question.locator('xpath=..')).toHaveClass(/active/);
 		await page.locator('.category-btn').filter({ hasText: 'All Questions' }).click();
-		await page.getByPlaceholder('Search for answers...').fill('refund');
+		await page.getByPlaceholder('Search the FAQ').fill('refund');
 		await expect(page.getByRole('button', { name: /refund/i }).first()).toBeVisible();
-		await page.getByPlaceholder('Search for answers...').fill('no-match-phrase-12345');
+		await page.getByPlaceholder('Search the FAQ').fill('no-match-phrase-12345');
 		await expect(page.getByRole('heading', { name: 'No results found' })).toBeVisible();
 	});
 
 	test('every header and footer internal destination resolves', async ({ page }) => {
 		const destinations = [
 			['Home', '/', 'header'], ['Services', '/services', 'header'], ['Store', '/store', 'header'],
-			['Performance', '/performance', 'header'], ['Guides', '/guides', 'header'], ['Contact', '/contact', 'header'],
+			['Performance', '/performance', 'header'], ['Contact', '/contact', 'header'],
 			['FAQ', '/faq', 'header'], ['Privacy Policy', '/privacy-policy', 'footer'], ['Cookie Policy', '/cookie-policy', 'footer'],
 			['Terms of Service', '/terms', 'footer'], ['Legal Notice', '/legal-notice', 'footer'],
 			['Withdraw from an Order', '/withdrawal', 'footer'],
