@@ -633,6 +633,47 @@ describe('Stripe fulfillment', () => {
 		expect(fetchMock.mock.calls.filter(([url]) => url === 'https://api.emailjs.com/api/v1.0/email/send')).toHaveLength(1);
 		expect(fetchMock.mock.calls.filter(([url]) => url === 'https://fulfillment.example/orders')).toHaveLength(1);
 	});
+
+	it('retries an uncertain Resend confirmation with the same idempotency key', async () => {
+		process.env.ORDER_CONFIRMATION_PROVIDER = 'resend';
+		process.env.RESEND_API_KEY = 'test-key';
+		process.env.EMAIL_FROM = 'orders@softhe.io';
+		const state = new Map();
+		let emailAttempts = 0;
+		const fetchMock = vi.fn(async (url, options) => {
+			if (url === 'https://api.resend.com/emails') {
+				emailAttempts += 1;
+				return jsonResponse({}, emailAttempts > 1, emailAttempts > 1 ? 200 : 503);
+			}
+			if (url === 'https://fulfillment.example/orders') return jsonResponse({}, true, 200);
+			const command = JSON.parse(options.body);
+			const [operation, key, value] = command;
+			if (operation === 'GET') return jsonResponse({ result: state.get(key) || null });
+			if (operation === 'SET') {
+				if (command.includes('NX') && state.has(key)) return jsonResponse({ result: null });
+				state.set(key, value);
+				return jsonResponse({ result: 'OK' });
+			}
+			if (operation === 'EVAL') {
+				state.delete(command[3]);
+				return jsonResponse({ result: 1 });
+			}
+			throw new Error(`Unexpected Redis command: ${operation}`);
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const event = { id: 'evt_resend_retry', data: { object: {
+			id: 'cs_resend_retry', payment_status: 'paid', amount_total: 6500, currency: 'eur',
+			customer_details: { email: 'customer@example.com' },
+			metadata: { order_schema: '1', order_items: '[{"id":"windows-10","quantity":1}]' },
+		} } };
+		await expect(fulfillPaidSession(event)).rejects.toThrow();
+		await expect(fulfillPaidSession(event)).resolves.toBe('fulfilled');
+		const sends = fetchMock.mock.calls.filter(([url]) => url === 'https://api.resend.com/emails');
+		expect(sends).toHaveLength(2);
+		expect(sends[0][1].headers['Idempotency-Key']).toBe('order-confirmation/cs_resend_retry');
+		expect(sends[1][1].headers['Idempotency-Key']).toBe(sends[0][1].headers['Idempotency-Key']);
+		expect(fetchMock.mock.calls.filter(([url]) => url === 'https://fulfillment.example/orders')).toHaveLength(1);
+	});
 });
 
 describe('Preview fulfillment test receiver', () => {
@@ -757,6 +798,7 @@ afterEach(() => {
 		'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY',
 		'EMAILJS_TICKET_TEMPLATE_ID',
 		'EMAILJS_ORDER_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID',
+		'ORDER_CONFIRMATION_PROVIDER', 'RESEND_API_KEY', 'EMAIL_FROM',
 		'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID',
 		'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET',
 		'ORDER_FULFILLMENT_BYPASS_SECRET',

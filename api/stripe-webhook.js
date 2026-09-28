@@ -2,12 +2,18 @@ const crypto = require('node:crypto');
 const { claimKey, redisCommand, setKey } = require('./_lib/redis');
 const { getPublicOrigin, normalizeItems, PRODUCTS } = require('./create-checkout-session');
 const { sendEmailTemplate } = require('./_lib/emailjs');
+const { sendTransactionalEmail } = require('./_lib/resend');
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { adminRequest, portalServerConfigured } = require('./_lib/supabase');
 const orderFulfillment = require('./_lib/order-fulfillment');
 
 const MAX_WEBHOOK_BYTES = 1024 * 1024;
+const RESEND_RETRY_WINDOW_MS = 23 * 60 * 60 * 1000;
+
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+	'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[character]);
 
 const readRawBody = async (req) => {
 	if (Buffer.isBuffer(req.body)) {
@@ -102,7 +108,7 @@ const sendOrderConfirmation = async (session) => {
 	const customerEmail = session.customer_details?.email;
 	if (!customerEmail) throw new Error('Paid checkout is missing a customer email');
 	const origin = getPublicOrigin();
-	await sendEmailTemplate(process.env.EMAILJS_ORDER_TEMPLATE_ID, {
+	const details = {
 		to_email: customerEmail,
 		order_reference: session.id,
 		items: items.map((item) => `${PRODUCTS[item.id].name} × ${item.quantity}`).join(', '),
@@ -116,7 +122,30 @@ const sendOrderConfirmation = async (session) => {
 		legal_name: process.env.LEGAL_NAME,
 		business_registration_id: process.env.BUSINESS_REGISTRATION_ID,
 		fulfillment_status: 'Payment confirmed; fulfillment is being prepared',
-	});
+	};
+	if (process.env.ORDER_CONFIRMATION_PROVIDER === 'resend') {
+		const lines = [
+			`Order reference: ${details.order_reference}`,
+			`Products: ${details.items}`,
+			`Total paid: ${details.amount_total} ${details.currency}`,
+			`VAT treatment: ${details.vat_treatment}`,
+			`VAT ID: ${details.vat_id}`,
+			'', details.fulfillment_status,
+			`Terms: ${details.terms_url}`,
+			`Withdrawal request: ${details.withdrawal_url}`,
+			`Support: ${details.support_email}`,
+			`${details.legal_name} (${details.business_registration_id})`,
+		];
+		await sendTransactionalEmail({
+			to: customerEmail,
+			subject: `Softhe.io order confirmation ${session.id}`,
+			text: lines.join('\n'),
+			html: `<h1>Payment confirmed</h1>${lines.map((line) => line ? `<p>${escapeHtml(line)}</p>` : '').join('')}`,
+			idempotencyKey: `order-confirmation/${session.id}`,
+		});
+		return;
+	}
+	await sendEmailTemplate(process.env.EMAILJS_ORDER_TEMPLATE_ID, details);
 };
 
 const persistPaidOrder = async (event, session) => {
@@ -179,13 +208,20 @@ const fulfillPaidSession = async (event) => {
 		}
 		const emailKey = `${key}:email`;
 		const emailState = await redisCommand(['GET', emailKey]);
-		if (emailState === 'attempted') {
-			// EmailJS has no idempotency key. A failed or timed-out attempt may have sent.
+		const resendStartedAt = emailState?.startsWith('resend:') ? Number(emailState.slice(7)) : null;
+		const canRetryResend = process.env.ORDER_CONFIRMATION_PROVIDER === 'resend'
+			&& Number.isFinite(resendStartedAt) && resendStartedAt > 0
+			&& Date.now() - resendStartedAt < RESEND_RETRY_WINDOW_MS;
+		if (emailState && emailState !== 'completed' && !canRetryResend) {
+			// EmailJS has no idempotency key, and Resend keys expire after 24 hours.
 			console.error('stripe_confirmation_requires_review', { sessionId: session.id });
 			return 'confirmation-review-required';
 		}
 		if (!emailState) {
-			if (!await claimKey(emailKey, 'attempted', 60 * 60 * 24 * 400)) return 'confirmation-review-required';
+			const pendingState = process.env.ORDER_CONFIRMATION_PROVIDER === 'resend' ? `resend:${Date.now()}` : 'attempted';
+			if (!await claimKey(emailKey, pendingState, 60 * 60 * 24 * 400)) return 'confirmation-review-required';
+		}
+		if (emailState !== 'completed') {
 			await sendOrderConfirmation(session);
 			await setKey(emailKey, 'completed', 60 * 60 * 24 * 400);
 		}
