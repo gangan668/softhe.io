@@ -20,7 +20,14 @@ const renderStore = (initialEntry = '/store') =>
 describe('Store', () => {
 	beforeEach(() => {
 		localStorage.clear();
+		window.history.replaceState({}, '', '/');
 		vi.clearAllMocks();
+	});
+
+	it('ignores a malformed product fragment without crashing', () => {
+		window.history.replaceState({}, '', '/store#%');
+		renderStore();
+		expect(screen.getByRole('heading', { name: 'Store' })).toBeInTheDocument();
 	});
 
 	it('renders product cards and recommendation helper', () => {

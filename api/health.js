@@ -39,9 +39,17 @@ const REQUIRED_CONFIGURATION = [
 ];
 
 const getConfigurationStatus = (environment = process.env) => {
-	const missing = REQUIRED_CONFIGURATION.filter((key) => !environment[key]?.trim());
-	const invalid = REQUIRED_CONFIGURATION.filter((key) =>
+	const orderEmailKeys = environment.ORDER_CONFIRMATION_PROVIDER === 'resend'
+		? ['RESEND_API_KEY', 'EMAIL_FROM']
+		: ['EMAILJS_ORDER_TEMPLATE_ID'];
+	const required = [...REQUIRED_CONFIGURATION.filter((key) =>
+		environment.ORDER_CONFIRMATION_PROVIDER !== 'resend' || key !== 'EMAILJS_ORDER_TEMPLATE_ID'), ...orderEmailKeys];
+	const missing = required.filter((key) => !environment[key]?.trim());
+	const invalid = required.filter((key) =>
 		/^(?:encrypted|masked|redacted)$/i.test(environment[key]?.trim() || ''));
+	if (environment.ORDER_CONFIRMATION_PROVIDER && !['emailjs', 'resend'].includes(environment.ORDER_CONFIRMATION_PROVIDER)) {
+		invalid.push('ORDER_CONFIRMATION_PROVIDER');
+	}
 	if (environment.VAT_STATUS && !['registered', 'not-registered', 'exempt'].includes(environment.VAT_STATUS)) {
 		invalid.push('VAT_STATUS');
 	}
@@ -86,6 +94,9 @@ async function health(req, res) {
 	const configuration = getConfigurationStatus();
 	const readyFor = (keys) => !keys.some((key) => configuration.missing.includes(key) || configuration.invalid.includes(key));
 	const storageKeys = ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
+	const orderEmailKeys = process.env.ORDER_CONFIRMATION_PROVIDER === 'resend'
+		? ['RESEND_API_KEY', 'EMAIL_FROM']
+		: ['EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID'];
 	let portalAccess = readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY']);
 	if (portalAccess) {
 		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
@@ -109,7 +120,7 @@ async function health(req, res) {
 			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
 			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
 			storage: readyFor(storageKeys),
-			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID']),
+			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
 		},
 	});
 }

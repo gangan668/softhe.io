@@ -29,7 +29,12 @@ function Store() {
 	useEffect(() => {
 		let timer;
 		const scrollToProduct = () => {
-			const productId = decodeURIComponent(window.location.hash.slice(1));
+			let productId;
+			try {
+				productId = decodeURIComponent(window.location.hash.slice(1));
+			} catch {
+				return;
+			}
 			if (!products.some((product) => product.id === productId)) return;
 			window.clearTimeout(timer);
 			timer = window.setTimeout(() => {

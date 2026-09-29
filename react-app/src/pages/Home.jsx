@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
+import { commerceEnabled } from '../utils/runtimeConfig';
 import './Home.css';
 
 function Home() {
@@ -170,8 +171,8 @@ function Home() {
 						<div className="trust-preview-grid">
 							<div className="trust-preview-item">
 								<i className="fas fa-lock" aria-hidden="true"></i>
-								<h3>Secure Stripe checkout</h3>
-								<p>The server checks product prices and bundle discounts before Stripe opens.</p>
+								<h3>{commerceEnabled ? 'Secure Stripe checkout' : 'Online ordering is unavailable'}</h3>
+								<p>{commerceEnabled ? 'The server checks product prices and bundle discounts before Stripe opens.' : 'Checkout will open after payment and legal readiness checks pass. You can compare products now.'}</p>
 							</div>
 							<div className="trust-preview-item">
 								<i className="fas fa-rotate-left" aria-hidden="true"></i>

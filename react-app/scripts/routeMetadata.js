@@ -4,23 +4,23 @@ export const socialImage = `${siteUrl}/images/social-share.png`;
 export const routeMetadata = [
 	{
 		path: '/',
-		title: 'Softhe.io - PC Optimization for Competitive Gaming',
-		description: 'PC optimization products and support for competitive gaming setups. Custom Windows builds, BIOS tuning, benchmark screenshots, and setup guidance.',
+		title: 'Windows and BIOS tuning for gaming PCs | Softhe.io',
+		description: 'Custom Windows builds and BIOS tuning for gaming PCs, with a preliminary whole-system CS2 comparison, compatibility guidance, and setup support.',
 	},
 	{
 		path: '/services',
-		title: 'PC Optimization Services | Softhe.io',
-		description: 'Windows, BIOS, and remote PC optimization services designed around competitive gaming performance and stability.',
+		title: 'Windows and BIOS services | Softhe.io',
+		description: 'Compare custom Windows builds and BIOS tuning for gaming PCs. See the scope, price, compatibility guidance, and support included with each service.',
 	},
 	{
 		path: '/store',
-		title: 'Store - PC Optimization Products | Softhe.io',
-		description: 'Compare custom Windows builds and BIOS optimization services with secure server-validated Stripe checkout.',
+		title: 'Store | Softhe.io',
+		description: 'Compare custom Windows builds and BIOS tuning by price, included work, and hardware fit. Online ordering is currently unavailable.',
 	},
 	{
 		path: '/performance',
-		title: 'Performance Benchmarks - Real FPS Comparisons | Softhe.io',
-		description: 'Review before-and-after CS2 FPS, frame-time, process-count, and idle-memory evidence from the current Softhe.io test system.',
+		title: 'Preliminary CS2 results | Softhe.io',
+		description: 'Review a preliminary whole-system CS2 comparison, the settings that changed, and the evidence still needed to reproduce it.',
 	},
 	{
 		path: '/contact',
@@ -30,7 +30,7 @@ export const routeMetadata = [
 	{
 		path: '/checkout',
 		title: 'Checkout | Softhe.io',
-		description: 'Review your Softhe.io order before continuing to secure Stripe-hosted payment.',
+		description: 'Review selected Softhe.io products and order terms. Online checkout is currently unavailable.',
 	},
 	{
 		path: '/faq',

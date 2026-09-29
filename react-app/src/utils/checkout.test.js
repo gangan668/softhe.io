@@ -31,6 +31,17 @@ describe('createCheckoutSession', () => {
 			.rejects.toThrow('Stripe checkout is not configured');
 	});
 
+	it('uses a new key after a definite server rejection', async () => {
+		const cart = [{ id: 'windows-10', quantity: 7 }];
+		const fetchImpl = vi.fn()
+			.mockResolvedValueOnce({ ok: false, json: async () => ({ error: 'Checkout is unavailable' }) })
+			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Checkout is unavailable');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
+			.not.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
+	});
+
 	it('reuses the same key after an uncertain failure and changes it when the cart changes', async () => {
 		const cart = [{ id: 'windows-10', quantity: 3 }];
 		const fetchImpl = vi.fn()
@@ -51,6 +62,47 @@ describe('createCheckoutSession', () => {
 			headers: expect.objectContaining({ 'Content-Type': 'application/json', Authorization: 'Bearer verified-session-token', 'Idempotency-Key': expect.any(String) }),
 			body: JSON.stringify({ items: [{ id: 'windows-11', quantity: 1 }], legalAcceptance }),
 		}));
+	});
+
+	it('isolates uncertain retries by authenticated token without keeping the token in the lookup key', async () => {
+		const cart = [{ id: 'windows-11', quantity: 8 }];
+		const fetchImpl = vi.fn().mockRejectedValue(new Error('Network timeout'));
+		for (const token of ['first-session-token', 'first-session-token', 'second-session-token']) {
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, token)).rejects.toThrow('Network timeout');
+		}
+		const keys = fetchImpl.mock.calls.map((call) => call[1].headers['Idempotency-Key']);
+		expect(keys[1]).toBe(keys[0]);
+		expect(keys[2]).not.toBe(keys[0]);
+	});
+
+	it('expires an uncertain retry after 23 hours', async () => {
+		const cart = [{ id: 'windows-11', quantity: 9 }];
+		const fetchImpl = vi.fn().mockRejectedValue(new Error('Network timeout'));
+		vi.useFakeTimers();
+		try {
+			vi.setSystemTime(new Date('2026-09-29T00:00:00.000Z'));
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			vi.setSystemTime(new Date('2026-09-29T22:59:59.000Z'));
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			vi.setSystemTime(new Date('2026-09-29T23:00:00.000Z'));
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			const keys = fetchImpl.mock.calls.map((call) => call[1].headers['Idempotency-Key']);
+			expect(keys[1]).toBe(keys[0]);
+			expect(keys[2]).not.toBe(keys[0]);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('caps uncertain retry entries', async () => {
+		const fetchImpl = vi.fn().mockRejectedValue(new Error('Network timeout'));
+		const cartFor = (index) => [{ id: `test-product-${index}`, quantity: 1 }];
+		for (let index = 0; index <= 100; index += 1) {
+			await expect(createCheckoutSession(cartFor(index), legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+		}
+		await expect(createCheckoutSession(cartFor(0), legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+		const keys = fetchImpl.mock.calls.map((call) => call[1].headers['Idempotency-Key']);
+		expect(keys.at(-1)).not.toBe(keys[0]);
 	});
 
 	it('rejects a successful response that does not point to Stripe Checkout', async () => {

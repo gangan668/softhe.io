@@ -207,14 +207,27 @@ const fulfillPaidSession = async (event) => {
 			await setKey(`${key}:delivery`, 'completed', 60 * 60 * 24 * 400);
 		}
 		const emailKey = `${key}:email`;
+		const reviewKey = `${key}:confirmation-review`;
+		const recordConfirmationReview = async (reason) => {
+			await claimKey(reviewKey, JSON.stringify({
+				sessionId: session.id,
+				reason,
+				createdAt: new Date().toISOString(),
+			}), 60 * 60 * 24 * 400);
+			console.error('stripe_confirmation_requires_review', { sessionId: session.id, reason });
+		};
 		const emailState = await redisCommand(['GET', emailKey]);
+		if (await redisCommand(['GET', reviewKey])) {
+			console.error('stripe_confirmation_requires_review', { sessionId: session.id, reason: 'review-recorded' });
+			return 'confirmation-review-required';
+		}
 		const resendStartedAt = emailState?.startsWith('resend:') ? Number(emailState.slice(7)) : null;
 		const canRetryResend = process.env.ORDER_CONFIRMATION_PROVIDER === 'resend'
 			&& Number.isFinite(resendStartedAt) && resendStartedAt > 0
 			&& Date.now() - resendStartedAt < RESEND_RETRY_WINDOW_MS;
 		if (emailState && emailState !== 'completed' && !canRetryResend) {
 			// EmailJS has no idempotency key, and Resend keys expire after 24 hours.
-			console.error('stripe_confirmation_requires_review', { sessionId: session.id });
+			await recordConfirmationReview('uncertain-confirmation');
 			return 'confirmation-review-required';
 		}
 		if (!emailState) {
@@ -222,7 +235,14 @@ const fulfillPaidSession = async (event) => {
 			if (!await claimKey(emailKey, pendingState, 60 * 60 * 24 * 400)) return 'confirmation-review-required';
 		}
 		if (emailState !== 'completed') {
-			await sendOrderConfirmation(session);
+			try {
+				await sendOrderConfirmation(session);
+			} catch (error) {
+				if (process.env.ORDER_CONFIRMATION_PROVIDER !== 'resend' || error.statusCode === 409) {
+					await recordConfirmationReview(error.statusCode === 409 ? 'resend-idempotency-conflict' : 'emailjs-send-failed');
+				}
+				throw error;
+			}
 			await setKey(emailKey, 'completed', 60 * 60 * 24 * 400);
 		}
 		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
