@@ -45,11 +45,20 @@ describe('monitoring alert checker', () => {
 		const lines = workflow.split(/\r?\n/);
 		expect(workflow).toContain('https://softhe.io/api/health');
 		expect(workflow).toContain('npx --yes vercel@59.3.0 curl /api/health --deployment "$MONITOR_BASE_URL"');
+		expect(workflow).toContain("MONITOR_PREVIEW_BRANCH: ${{ vars.MONITOR_PREVIEW_BRANCH || 'customer-portal-test' }}");
 		for (const event of ['browser_error', 'delivery_failed', 'stripe_confirmation_requires_review']) {
-			for (const scope of ['--environment production', '--branch customer-portal-test']) {
+			for (const scope of ['--environment production', '--branch "$MONITOR_PREVIEW_BRANCH"']) {
 				expect(lines.some((line, index) => line.includes(`logs ${scope} --since 15m`)
 					&& lines[index + 1]?.includes(`--query ${event} --json`))).toBe(true);
 			}
 		}
+	});
+
+	it('requires explicit aligned Preview configuration for controlled runtime tests', () => {
+		const workflow = readFileSync(join(process.cwd(), '..', '.github', 'workflows', 'monitoring-alerts.yml'), 'utf8');
+		expect(workflow).toContain('MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}');
+		expect(workflow).toContain('MONITOR_PREVIEW_BRANCH_CONFIGURED: ${{ vars.MONITOR_PREVIEW_BRANCH }}');
+		expect(workflow).toContain('if [ -z "$MONITOR_BASE_URL" ] || [ -z "$MONITOR_PREVIEW_BRANCH_CONFIGURED" ]; then');
+		expect(workflow).toContain('Controlled tests require MONITOR_BASE_URL and an explicit MONITOR_PREVIEW_BRANCH');
 	});
 });
