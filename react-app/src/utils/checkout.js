@@ -48,9 +48,14 @@ export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = f
 		}),
 	}, fetchImpl);
 
-	const data = await readJson(response);
+	const data = await response.json().catch(() => null);
+	if (!data || typeof data !== 'object') {
+		throw new Error('Checkout could not be started. Please try again.');
+	}
 	if (!response.ok) {
-		if (pendingCheckoutKeys.get(requestKey) === entry) pendingCheckoutKeys.delete(requestKey);
+		// Only definitive request rejections release the key. A gateway error may follow a completed Stripe request.
+		const definitiveRejection = [400, 401, 403, 404, 405, 413, 415, 422].includes(response.status);
+		if (definitiveRejection && pendingCheckoutKeys.get(requestKey) === entry) pendingCheckoutKeys.delete(requestKey);
 		throw new Error(data.error || 'Checkout could not be started. Please try again.');
 	}
 	if (!isStripeCheckoutUrl(data.url)) {

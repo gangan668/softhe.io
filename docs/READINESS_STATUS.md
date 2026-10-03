@@ -1,6 +1,17 @@
 # Production readiness status
 
-Last source review: 2026-09-28 (Europe/Berlin). Live provider and deployment state was not reverified.
+Last source review: 2026-10-03 (Europe/Berlin). Vercel deployment metadata was inspected; live provider behavior was not reverified.
+
+## Test-branch checkpoint (2026-10-03)
+
+- `copy-rewrite-test` retains checkout idempotency keys after ambiguous server failures, including HTTP 502, while definite client rejections release the key. Regression tests cover the uncertain retry behavior.
+- The local suite passes with 321 tests passed and 3 skipped. Coverage is 89.54% lines and 81.37% branches. Both browser profiles pass, with 62 enabled-state and 4 disabled-state checks. The dependency audit reports zero vulnerabilities after the transitive dependency update. These are local checks, not live payment or delivery evidence.
+- Vercel deployment metadata shows the Ready Production deployment from `main` at `b36a5a8`, dated 2026-09-22, and the older Preview. No `copy-rewrite-test` deployment was observed. Ready deployment status does not establish provider readiness or verify the public site's behavior.
+- Fresh inspection of `https://softhe.io/api/health` returns HTTP 200 `ready`, all configuration checks true, source `b36a5a8`, and fingerprint `softhe-b36a5a8-stage1`. Strict local production smoke passes the application marker, security headers, serverless checks, and exact release identity. Health readiness checks configuration; it does not prove successful payment, fulfillment, or email delivery.
+- The scheduled GitHub smoke had stale July identity expectations. Its three non-secret repository variables now target `https://softhe.io`, source `b36a5a8`, and fingerprint `softhe-b36a5a8-stage1`. Fresh smoke run `37148460844` completed successfully. Monitoring failed with `User not found` for its Vercel authentication. No token was modified; credential renewal requires the account owner. No completed monitoring evidence was recorded.
+- The stage-one evidence gate still requires three pending alert proofs: uptime, browser-error, and delivery-failure alerts. The full commercial evidence gate has nine pending entries, including those three. Source fixes do not satisfy either gate or authorize commerce activation.
+- Preview log queries now use the repository variable `MONITOR_PREVIEW_BRANCH`, with `customer-portal-test` retained as the scheduled-monitoring fallback. Controlled browser and delivery tests require explicit `MONITOR_BASE_URL` and `MONITOR_PREVIEW_BRANCH` variables. Before running them, verify that the protected Preview URL belongs to that branch in Vercel; the workflow checks that both values are configured, but cannot establish their relationship from their strings alone. Update both together when changing the test deployment.
+- Keep `COMMERCE_ENABLED`, `VITE_COMMERCE_ENABLED`, and `STAFF_PORTAL_ENABLED` false. Publish the corrected candidate, require green CI, verify the Preview, and collect the stage-one alert evidence before claiming production qualification. Live provider, legal, payment, and fulfillment evidence remains outstanding.
 
 ## Test-branch checkpoint (2026-09-28)
 

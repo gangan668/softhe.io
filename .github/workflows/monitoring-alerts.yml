@@ -31,6 +31,8 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       MONITORING_TEST_SECRET: ${{ secrets.MONITORING_TEST_SECRET }}
       MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}
+      MONITOR_PREVIEW_BRANCH: ${{ vars.MONITOR_PREVIEW_BRANCH || 'customer-portal-test' }}
+      MONITOR_PREVIEW_BRANCH_CONFIGURED: ${{ vars.MONITOR_PREVIEW_BRANCH }}
       TEST_ALERT: ${{ inputs.test_alert || 'none' }}
     steps:
       - name: Checkout
@@ -62,8 +64,8 @@ jobs:
         if: ${{ inputs.test_alert == 'browser' || inputs.test_alert == 'delivery' }}
         shell: bash
         run: |
-          if [ -z "$MONITOR_BASE_URL" ]; then
-            echo 'MONITOR_BASE_URL must point to the protected Preview deployment for controlled tests.' >&2
+          if [ -z "$MONITOR_BASE_URL" ] || [ -z "$MONITOR_PREVIEW_BRANCH_CONFIGURED" ]; then
+            echo 'Controlled tests require MONITOR_BASE_URL and an explicit MONITOR_PREVIEW_BRANCH for that protected Preview deployment.' >&2
             exit 1
           fi
           npx --yes vercel@59.3.0 curl /api/health --deployment "$MONITOR_BASE_URL" -- \
@@ -79,7 +81,7 @@ jobs:
         run: |
           npx --yes vercel@59.3.0 logs --environment production --since 15m \
             --query browser_error --json > browser-errors.jsonl
-          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
             --query browser_error --json >> browser-errors.jsonl
 
       - name: Query delivery-failure logs
@@ -88,7 +90,7 @@ jobs:
         run: |
           npx --yes vercel@59.3.0 logs --environment production --since 15m \
             --query delivery_failed --json > delivery-failures.jsonl
-          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
             --query delivery_failed --json >> delivery-failures.jsonl
 
       - name: Query confirmation-review logs
@@ -97,7 +99,7 @@ jobs:
         run: |
           npx --yes vercel@59.3.0 logs --environment production --since 15m \
             --query stripe_confirmation_requires_review --json > confirmation-reviews.jsonl
-          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
             --query stripe_confirmation_requires_review --json >> confirmation-reviews.jsonl
 
       - name: Evaluate runtime alerts

@@ -34,9 +34,40 @@ describe('createCheckoutSession', () => {
 	it('uses a new key after a definite server rejection', async () => {
 		const cart = [{ id: 'windows-10', quantity: 7 }];
 		const fetchImpl = vi.fn()
-			.mockResolvedValueOnce({ ok: false, json: async () => ({ error: 'Checkout is unavailable' }) })
+			.mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: 'Checkout is unavailable' }) })
 			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
 		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Checkout is unavailable');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
+			.not.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
+	});
+
+	it.each([408, 409, 429, 500, 502, 503, 504])('reuses the key after an ambiguous HTTP %s response', async (status) => {
+		const cart = [{ id: `gateway-retry-${status}`, quantity: 1 }];
+		const fetchImpl = vi.fn()
+			.mockResolvedValueOnce({ ok: false, status, json: async () => ({ error: 'Unable to reach Stripe. Please try again.' }) })
+			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Unable to reach Stripe');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
+			.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
+	});
+
+	it.each([200, 400, 502])('reuses the key when an HTTP %s response cannot be parsed', async (status) => {
+		const cart = [{ id: `unreadable-retry-${status}`, quantity: 1 }];
+		const fetchImpl = vi.fn()
+			.mockResolvedValueOnce({ ok: status === 200, status, json: async () => { throw new SyntaxError('Invalid JSON'); } })
+			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Checkout could not be started');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
+			.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
+	});
+
+	it('releases the key after a successful Stripe checkout response', async () => {
+		const cart = [{ id: 'successful-checkout', quantity: 1 }];
+		const fetchImpl = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'cs_success', url: 'https://checkout.stripe.com/success' }) });
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
 		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
 		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
 			.not.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
