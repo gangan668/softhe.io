@@ -14,8 +14,8 @@ describe('FAQ Component', () => {
 
 	it('renders FAQ page header', () => {
 		renderFAQ();
-		expect(screen.getByText('Frequently Asked Questions')).toBeInTheDocument();
-		expect(screen.getByText(/Find answers to common questions/i)).toBeInTheDocument();
+		expect(screen.getByText('Questions about products and support')).toBeInTheDocument();
+		expect(screen.getByText(/Read about compatibility/i)).toBeInTheDocument();
 	});
 
 	it('renders all category buttons', () => {
@@ -38,7 +38,7 @@ describe('FAQ Component', () => {
 
 	it('renders search input', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByRole('textbox', { name: /search questions/i });
 		expect(searchInput).toBeInTheDocument();
 	});
 
@@ -59,10 +59,12 @@ describe('FAQ Component', () => {
 		// Click to expand
 		fireEvent.click(faqButton);
 		expect(faqItem).toHaveClass('active');
+		expect(faqButton.closest('button')).toHaveAttribute('aria-expanded', 'true');
 
 		// Click to collapse
 		fireEvent.click(faqButton);
 		expect(faqItem).not.toHaveClass('active');
+		expect(faqButton.closest('button')).toHaveAttribute('aria-expanded', 'false');
 	});
 
 	it('filters FAQ items by category', () => {
@@ -82,7 +84,7 @@ describe('FAQ Component', () => {
 
 	it('filters FAQ items by search term', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Search for "refund"
 		fireEvent.change(searchInput, { target: { value: 'refund' } });
@@ -93,7 +95,7 @@ describe('FAQ Component', () => {
 
 	it('shows no results message when search has no matches', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Search for something that doesn't exist
 		fireEvent.change(searchInput, { target: { value: 'xyzabc123notfound' } });
@@ -104,7 +106,7 @@ describe('FAQ Component', () => {
 
 	it('renders CTA section', () => {
 		renderFAQ();
-		expect(screen.getByText(/Still Have Questions?/i)).toBeInTheDocument();
+		expect(screen.getByText(/Need a specific answer?/i)).toBeInTheDocument();
 
 		// Use getAllByText since "Contact Support" appears in both content and button
 		const contactSupportElements = screen.getAllByText(/Contact Support/i);
@@ -116,7 +118,7 @@ describe('FAQ Component', () => {
 		);
 		expect(hasLink).toBe(true);
 
-		expect(screen.getByText(/Join Discord/i)).toBeInTheDocument();
+		expect(screen.getByText(/Message on Discord/i)).toBeInTheDocument();
 	});
 
 	it('has correct links in CTA section', () => {
@@ -127,7 +129,7 @@ describe('FAQ Component', () => {
 		const contactLinks = contactSupportElements.map(el => el.closest('a')).filter(Boolean);
 		const contactLink = contactLinks.find(link => link.getAttribute('href') === '/contact');
 
-		const discordLink = screen.getByText(/Join Discord/i).closest('a');
+		const discordLink = screen.getByText(/Message on Discord/i).closest('a');
 
 		expect(contactLink).toHaveAttribute('href', '/contact');
 		expect(discordLink).toHaveAttribute('href', 'https://discord.com/users/softhecs');
@@ -135,7 +137,7 @@ describe('FAQ Component', () => {
 
 	it('expands matching FAQ items when searching', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Search for "ISO"
 		fireEvent.change(searchInput, { target: { value: 'ISO' } });
@@ -148,7 +150,7 @@ describe('FAQ Component', () => {
 
 	it('clears search when changing category', () => {
 		renderFAQ();
-		const searchInput = screen.getByPlaceholderText(/Search for answers/i);
+		const searchInput = screen.getByPlaceholderText(/Search the FAQ/i);
 
 		// Perform a search
 		fireEvent.change(searchInput, { target: { value: 'test search' } });

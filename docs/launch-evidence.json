@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "candidate": {
-    "origin": "https://softhe-iwygi2gsa-suportsofthe-9420s-projects.vercel.app",
-    "deploymentId": "dpl_4yCMVUA9qBTVvFtUJRVdr4nD1g4E",
-    "commitSha": "cc9b1524053422200ccaa97d83b0dd52e5e1b2c0",
-    "releaseFingerprint": "softhe-cc9b152-stage1",
-    "strictSmokeRun": "Immutable Preview health verified on 2026-09-04 after the audited dependency update: HTTP 200 ready through authenticated Vercel inspection, every required check true, and the runtime source commit and fingerprint match this manifest. The UI-identical ae76a6b build received responsive browser review with no horizontal overflow at 320, 390, 768, 1280, or 1440 px; cookie consent did not lock scrolling; mobile and desktop navigation rendered at their intended widths; keyboard focus styling, logo, and accent treatment rendered coherently; and the browser console contained no warnings or errors. Commit cc9b152 changes only the dependency lockfile and passes the complete local quality suite with zero npm audit findings. Commerce and staff access remain disabled. Production promotion remains blocked by the pending evidence entries below.",
-    "verifiedAt": "2026-09-04T20:04:55+02:00"
+    "origin": "https://softhe-o54y0fipo-suportsofthe-9420s-projects.vercel.app",
+    "deploymentId": "dpl_64fwjQnB8F3QPYGWZfPdyXhZnyEc",
+    "commitSha": "531c96c450f1719da80b0f2a9839e7906074dc64",
+    "releaseFingerprint": "softhe-531c96c-stage1",
+    "strictSmokeRun": "https://github.com/gangan668/softhe.io/actions/runs/37164242676 passed staged Production health and the complete strict production smoke through authenticated Vercel transport on 2026-10-04. Application markers, security headers, true 404 behavior, all seven readiness checks, exact source commit, and release fingerprint passed. Custom domain assignment was skipped. Commerce and staff access were forced off. This qualifies the staged candidate's smoke behavior, not live payments or full commerce launch approval. The subsequent evidence-only commit does not alter deployed application source.",
+    "verifiedAt": "2026-10-04T02:13:49+02:00"
   },
   "evidence": {
     "legal.operator-identity": { "status": "passed", "verifiedAt": "2026-07-21T08:01:11+02:00", "verifiedBy": "Hannes Axelsson", "references": ["https://softhe-io.vercel.app/api/health (operator identity configuration check passed)"] },
@@ -27,9 +27,9 @@
     "fulfillment.accepted-order": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated fulfillment test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: stable paid event completed the signed fulfillment receiver on the first pass"] },
     "fulfillment.deduplicated-order": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated fulfillment test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: duplicate delivery produced one order, one item, and one activity event"] },
     "fulfillment.retry-and-reconciliation": { "status": "passed", "verifiedAt": "2026-07-27T01:09:07+02:00", "verifiedBy": "Codex isolated fulfillment test", "references": ["docs/CUSTOMER_PORTAL_TEST_EVIDENCE.md: evt_1Txb6G2EodKilmfKk6F4V45u exercised intentional HTTP 503, then completed after fault injection was disabled"] },
-    "monitoring.uptime-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "monitoring.browser-error-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
-    "monitoring.delivery-failure-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
+    "monitoring.uptime-alert": { "status": "passed", "verifiedAt": "2026-10-04T00:06:00+02:00", "verifiedBy": "Codex workflow inspection and user-provided email receipt", "references": ["https://github.com/gangan668/softhe.io/actions/runs/37157286776", "Production health passed before the controlled uptime test deliberately failed. The user supplied a Gmail screenshot showing the corresponding Production Monitoring Alerts failure notification received at 00:06 on 2026-10-04. This proves the controlled notification path, not an actual production outage or qualification of a new deployment."] },
+    "monitoring.browser-error-alert": { "status": "passed", "verifiedAt": "2026-10-04T00:22:02+02:00", "verifiedBy": "Codex workflow logs and Chrome mailbox inspection", "references": ["https://github.com/gangan668/softhe.io/actions/runs/37158143606", "Controlled test detected one browser-error event, zero delivery failures, and zero confirmation reviews. Chrome mailbox inspection confirmed the received 00:22 failure email links to this exact run. Email tracking tokens and private mailbox screenshots are not stored in the repository."] },
+    "monitoring.delivery-failure-alert": { "status": "passed", "verifiedAt": "2026-10-04T00:23:24+02:00", "verifiedBy": "Codex workflow logs and user-provided receipt verification", "references": ["https://github.com/gangan668/softhe.io/actions/runs/37158224480", "Controlled test detected one delivery-failure event and the preceding browser-error event within the shared monitoring window. The user supplied the received 00:23 email screenshot and followed its workflow link to this exact run. This proves synthetic event detection and notification delivery, not a real customer email-provider failure."] },
     "monitoring.stripe-webhook-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "monitoring.fulfillment-alert": { "status": "pending", "verifiedAt": "", "verifiedBy": "", "references": [] },
     "rollback.dns-export": { "status": "passed", "verifiedAt": "2026-08-22T19:42:00+02:00", "verifiedBy": "Codex using authenticated Dynadot account", "references": ["Dynadot Account > Manage Domains > Download List > Download DNS Record List invoked for the authoritative Dynadot DNS configuration on 2026-08-22", "Authenticated Dynadot domain record confirmed softhe.io is active and uses Dynadot DNS", "Independent resolver verification at 2026-08-22T19:42:00+02:00: ns1.dyna-ns.net and ns2.dyna-ns.net, TTL 300, GitHub Pages A records 185.199.108.153 through 185.199.111.153, and matching 2606:50c0:8000::153 through 8003::153 AAAA records"] },

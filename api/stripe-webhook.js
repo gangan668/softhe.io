@@ -1,13 +1,19 @@
 const crypto = require('node:crypto');
-const { claimKey, deleteKey, setKey } = require('./_lib/redis');
+const { claimKey, redisCommand, setKey } = require('./_lib/redis');
 const { getPublicOrigin, normalizeItems, PRODUCTS } = require('./create-checkout-session');
 const { sendEmailTemplate } = require('./_lib/emailjs');
+const { sendTransactionalEmail } = require('./_lib/resend');
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { adminRequest, portalServerConfigured } = require('./_lib/supabase');
 const orderFulfillment = require('./_lib/order-fulfillment');
 
 const MAX_WEBHOOK_BYTES = 1024 * 1024;
+const RESEND_RETRY_WINDOW_MS = 23 * 60 * 60 * 1000;
+
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+	'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+})[character]);
 
 const readRawBody = async (req) => {
 	if (Buffer.isBuffer(req.body)) {
@@ -102,7 +108,7 @@ const sendOrderConfirmation = async (session) => {
 	const customerEmail = session.customer_details?.email;
 	if (!customerEmail) throw new Error('Paid checkout is missing a customer email');
 	const origin = getPublicOrigin();
-	await sendEmailTemplate(process.env.EMAILJS_ORDER_TEMPLATE_ID, {
+	const details = {
 		to_email: customerEmail,
 		order_reference: session.id,
 		items: items.map((item) => `${PRODUCTS[item.id].name} × ${item.quantity}`).join(', '),
@@ -116,7 +122,30 @@ const sendOrderConfirmation = async (session) => {
 		legal_name: process.env.LEGAL_NAME,
 		business_registration_id: process.env.BUSINESS_REGISTRATION_ID,
 		fulfillment_status: 'Payment confirmed; fulfillment is being prepared',
-	});
+	};
+	if (process.env.ORDER_CONFIRMATION_PROVIDER === 'resend') {
+		const lines = [
+			`Order reference: ${details.order_reference}`,
+			`Products: ${details.items}`,
+			`Total paid: ${details.amount_total} ${details.currency}`,
+			`VAT treatment: ${details.vat_treatment}`,
+			`VAT ID: ${details.vat_id}`,
+			'', details.fulfillment_status,
+			`Terms: ${details.terms_url}`,
+			`Withdrawal request: ${details.withdrawal_url}`,
+			`Support: ${details.support_email}`,
+			`${details.legal_name} (${details.business_registration_id})`,
+		];
+		await sendTransactionalEmail({
+			to: customerEmail,
+			subject: `Softhe.io order confirmation ${session.id}`,
+			text: lines.join('\n'),
+			html: `<h1>Payment confirmed</h1>${lines.map((line) => line ? `<p>${escapeHtml(line)}</p>` : '').join('')}`,
+			idempotencyKey: `order-confirmation/${session.id}`,
+		});
+		return;
+	}
+	await sendEmailTemplate(process.env.EMAILJS_ORDER_TEMPLATE_ID, details);
 };
 
 const persistPaidOrder = async (event, session) => {
@@ -160,18 +189,67 @@ const fulfillPaidSession = async (event) => {
 	const session = event.data.object;
 	if (!['paid', 'no_payment_required'].includes(session.payment_status)) return 'payment-pending';
 	const key = `stripe:fulfilled:${session.id}`;
-	const claimed = await claimKey(key, 'processing', 600);
+	const lockKey = `${key}:processing`;
+	const token = crypto.randomUUID();
+	if (await redisCommand(['GET', key])) return 'duplicate';
+	const claimed = await claimKey(lockKey, token, 600);
 	if (!claimed) return 'duplicate';
 
 	try {
-		if (portalServerConfigured()) await persistPaidOrder(event, session);
-		await deliverFulfillment(event, session);
-		await sendOrderConfirmation(session);
+		if (await redisCommand(['GET', key])) return 'duplicate';
+		if (portalServerConfigured() && !await redisCommand(['GET', `${key}:order`])) {
+			await persistPaidOrder(event, session);
+			await setKey(`${key}:order`, 'completed', 60 * 60 * 24 * 400);
+		}
+		if (!await redisCommand(['GET', `${key}:delivery`])) {
+			// The receiver deduplicates by session ID if delivery succeeds before this write.
+			await deliverFulfillment(event, session);
+			await setKey(`${key}:delivery`, 'completed', 60 * 60 * 24 * 400);
+		}
+		const emailKey = `${key}:email`;
+		const reviewKey = `${key}:confirmation-review`;
+		const recordConfirmationReview = async (reason) => {
+			await claimKey(reviewKey, JSON.stringify({
+				sessionId: session.id,
+				reason,
+				createdAt: new Date().toISOString(),
+			}), 60 * 60 * 24 * 400);
+			console.error('stripe_confirmation_requires_review', { sessionId: session.id, reason });
+		};
+		const emailState = await redisCommand(['GET', emailKey]);
+		if (await redisCommand(['GET', reviewKey])) {
+			console.error('stripe_confirmation_requires_review', { sessionId: session.id, reason: 'review-recorded' });
+			return 'confirmation-review-required';
+		}
+		const resendStartedAt = emailState?.startsWith('resend:') ? Number(emailState.slice(7)) : null;
+		const canRetryResend = process.env.ORDER_CONFIRMATION_PROVIDER === 'resend'
+			&& Number.isFinite(resendStartedAt) && resendStartedAt > 0
+			&& Date.now() - resendStartedAt < RESEND_RETRY_WINDOW_MS;
+		if (emailState && emailState !== 'completed' && !canRetryResend) {
+			// EmailJS has no idempotency key, and Resend keys expire after 24 hours.
+			await recordConfirmationReview('uncertain-confirmation');
+			return 'confirmation-review-required';
+		}
+		if (!emailState) {
+			const pendingState = process.env.ORDER_CONFIRMATION_PROVIDER === 'resend' ? `resend:${Date.now()}` : 'attempted';
+			if (!await claimKey(emailKey, pendingState, 60 * 60 * 24 * 400)) return 'confirmation-review-required';
+		}
+		if (emailState !== 'completed') {
+			try {
+				await sendOrderConfirmation(session);
+			} catch (error) {
+				if (process.env.ORDER_CONFIRMATION_PROVIDER !== 'resend' || error.statusCode === 409) {
+					await recordConfirmationReview(error.statusCode === 409 ? 'resend-idempotency-conflict' : 'emailjs-send-failed');
+				}
+				throw error;
+			}
+			await setKey(emailKey, 'completed', 60 * 60 * 24 * 400);
+		}
 		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
 		return 'fulfilled';
-	} catch (error) {
-		await deleteKey(key).catch(() => {});
-		throw error;
+	} finally {
+		const unlock = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0";
+		await redisCommand(['EVAL', unlock, 1, lockKey, token]).catch(() => {});
 	}
 };
 

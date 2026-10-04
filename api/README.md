@@ -40,6 +40,8 @@ Required environment variables:
 - EMAILJS_TEMPLATE_ID
 - EMAILJS_TICKET_TEMPLATE_ID
 - EMAILJS_ORDER_TEMPLATE_ID
+- ORDER_CONFIRMATION_PROVIDER, optional; set to `resend` only after configuring and verifying `RESEND_API_KEY` and `EMAIL_FROM` (defaults to EmailJS)
+- RESEND_API_KEY and EMAIL_FROM, required for the opt-in Resend order-confirmation path
 - EMAILJS_WITHDRAWAL_TEMPLATE_ID
 - EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID
 - EMAILJS_PUBLIC_KEY
@@ -48,6 +50,8 @@ Required environment variables:
 - EXTERNAL_REQUEST_TIMEOUT_MS, optional; defaults to 8000 and is clamped to 1000–30000
 - ORDER_FULFILLMENT_WEBHOOK_URL
 - ORDER_FULFILLMENT_WEBHOOK_SECRET
+
+EmailJS confirmation attempts are never retried automatically after an uncertain result because EmailJS has no idempotency key. The opt-in Resend path uses the Stripe Checkout Session ID as a stable idempotency key and permits retries for 23 hours after the first attempt. Older uncertain attempts and Resend idempotency conflicts require manual review; do not switch providers while one is pending. A review record is retained in Redis under `stripe:fulfilled:<session-id>:confirmation-review` for 400 days. It contains the session ID, reason, and creation time, but no customer address. The monitoring workflow queries the `stripe_confirmation_requires_review` log event. Resend's key-retention window is 24 hours. Keep commerce disabled until the sender domain, delivery, and launch evidence have been verified in Preview.
 
 ## /api/order-fulfillment
 

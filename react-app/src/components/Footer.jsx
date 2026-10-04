@@ -28,7 +28,7 @@ function Footer() {
 				<div className="footer-content">
 					<div className="footer-section">
 						<h3>Softhe.io</h3>
-						<p>PC optimization products and support for competitive gaming setups.</p>
+						<p>Custom Windows builds, BIOS tuning, and setup support for gaming PCs.</p>
 						<div className="social-links">
 							<a href={siteConfig.social.twitter} target="_blank" rel="noreferrer" aria-label="X (formerly Twitter)">
 								<BrandIcon name="x" />
@@ -45,7 +45,7 @@ function Footer() {
 						</div>
 					</div>
 					<div className="footer-section">
-						<h4>Quick Links</h4>
+						<h4>Site links</h4>
 						<ul>
 							<li><Link to="/services">Services</Link></li>
 							<li><Link to="/performance">Performance</Link></li>

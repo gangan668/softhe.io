@@ -7,7 +7,7 @@ test.describe('fail-closed launch state', () => {
 
 	test('store keeps ordering controls unavailable and provides a contact path', async ({ page }) => {
 		await page.goto('/store');
-		await expect(page.getByRole('status').filter({ hasText: 'Online checkout is being prepared' })).toBeVisible();
+		await expect(page.getByRole('status').filter({ hasText: 'Online ordering is unavailable' })).toBeVisible();
 		await expect(page.getByRole('button', { name: /add to cart/i })).toHaveCount(0);
 		await expect(page.getByRole('button', { name: /buy now/i })).toHaveCount(0);
 		await expect(page.getByText('Ordering temporarily unavailable')).toHaveCount(3);

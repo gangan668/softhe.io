@@ -50,7 +50,6 @@ describe("Navbar Component", () => {
 			expect(screen.getByText("Services")).toBeInTheDocument();
 			expect(screen.getByText("Store")).toBeInTheDocument();
 			expect(screen.getByText("Performance")).toBeInTheDocument();
-			expect(screen.getByText("Guides")).toBeInTheDocument();
 			expect(screen.getByText("Contact")).toBeInTheDocument();
 		});
 
@@ -90,12 +89,6 @@ describe("Navbar Component", () => {
 			renderNavbar();
 			const performanceLink = screen.getByText("Performance");
 			expect(performanceLink).toHaveAttribute("href", "/performance");
-		});
-
-		it("should have correct href for Guides link", () => {
-			renderNavbar();
-			const guidesLink = screen.getByText("Guides");
-			expect(guidesLink).toHaveAttribute("href", "/guides");
 		});
 
 		it("should have correct href for Contact link", () => {
@@ -291,13 +284,13 @@ describe("Navbar Component", () => {
 		it("should have nav-item class on list items", () => {
 			renderNavbar();
 			const items = document.querySelectorAll(".nav-item");
-			expect(items.length).toBeGreaterThanOrEqual(6);
+			expect(items.length).toBeGreaterThanOrEqual(5);
 		});
 
 		it("should have nav-link class on navigation links", () => {
 			renderNavbar();
 			const links = document.querySelectorAll(".nav-link");
-			expect(links.length).toBeGreaterThanOrEqual(6);
+			expect(links.length).toBeGreaterThanOrEqual(5);
 		});
 	});
 
@@ -316,14 +309,14 @@ describe("Navbar Component", () => {
 		it("should have list items for each link", () => {
 			renderNavbar();
 			const listItems = screen.getAllByRole("listitem");
-			expect(listItems.length).toBe(7);
+			expect(listItems.length).toBe(6);
 		});
 
 		it("should have accessible links", () => {
 			renderNavbar();
 			const links = screen.getAllByRole("link");
-			// 7 nav links + logo + customer account link
-			expect(links.length).toBe(9);
+			// 6 nav links + logo + customer account link
+			expect(links.length).toBe(8);
 		});
 
 		it("should have clickable hamburger button", async () => {

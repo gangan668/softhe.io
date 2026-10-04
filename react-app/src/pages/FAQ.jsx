@@ -31,21 +31,21 @@ function FAQ() {
 			{
 				question: "What is Softhe.io and what do you offer?",
 				answer:
-					"Softhe.io is a PC optimization service for competitive gaming setups. We offer custom-built Windows ISOs, BIOS optimization services, and performance tuning packages designed to reduce overhead, improve consistency, and make setup easier to maintain.",
+					"Softhe.io sells custom Windows builds and BIOS tuning for gaming PCs. The work targets background use, frame-time consistency, and settings that match the customer's hardware.",
 			},
 			{
 				question: "What exactly is included in the custom Windows ISO?",
 				answer: (
 					<div>
-						<p>Our custom Windows ISO includes:</p>
+						<p>The Windows builds include:</p>
 						<ul>
 							<li>
-								<strong>Bloatware Removal:</strong> All unnecessary Windows apps
-								and services removed
+								<strong>Preinstalled software:</strong> Selected Windows apps
+								and services are removed or disabled
 							</li>
 							<li>
-								<strong>Registry Optimizations:</strong> Gaming-focused tweaks
-								for maximum performance
+								<strong>System settings:</strong> Windows settings configured
+								for the intended gaming workload
 							</li>
 							<li>
 								<strong>Service Optimization:</strong> Only essential services
@@ -56,21 +56,17 @@ function FAQ() {
 								privacy and minimal telemetry
 							</li>
 							<li>
-								<strong>Automation Scripts:</strong> 200+ scripts for Windows
-								Updates, driver updates, and per-game optimizations
+								<strong>Maintenance tools:</strong> Included scripts for supported
+								updates and configuration tasks
 							</li>
 							<li>
 								<strong>Performance Profiles:</strong> Pre-configured power
 								plans and GPU settings
 							</li>
 							<li>
-								<strong>Lifetime Updates:</strong> Free updates to the ISO as we
-								continue to improve it
+								<strong>Updates:</strong> The applicable update terms are stated with the product and order
 							</li>
-							<li>
-								<strong>Documentation:</strong> Detailed installation guides and
-								optimization explanations
-							</li>
+							<li><strong>Setup information:</strong> Check the current product description and order confirmation for the material supplied with your build</li>
 						</ul>
 					</div>
 				),
@@ -80,7 +76,7 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							<strong>Yes, absolutely.</strong> Our ISOs are based on official
+							The builds are based on official
 							Microsoft Windows builds sourced directly from Microsoft. We
 							optimize and customize the installation process, but the core
 							Windows files are genuine and unmodified.
@@ -92,7 +88,7 @@ function FAQ() {
 								activate Windows
 							</li>
 							<li>
-								All modifications are <strong>safe and reversible</strong>
+								Back up your data and keep official recovery media before installation
 							</li>
 							<li>No malware, spyware, or unauthorized software is included</li>
 							<li>We do not provide pirated or cracked software</li>
@@ -105,19 +101,17 @@ function FAQ() {
 				question: "Who are your typical customers?",
 				answer: (
 					<div>
-						<p>Our customer base includes:</p>
+						<p>The services are intended for:</p>
 						<ul>
 							<li>
-								<strong>Esports Professionals:</strong> Competitive players who
-								need every advantage
+								<strong>Competitive players:</strong> Players who want measured and repeatable PC changes
 							</li>
 							<li>
 								<strong>Content Creators:</strong> Streamers and YouTubers
 								requiring smooth performance
 							</li>
 							<li>
-								<strong>Serious Gamers:</strong> Enthusiasts who want the best
-								possible experience
+								<strong>PC enthusiasts:</strong> Users who want a documented Windows or BIOS configuration
 							</li>
 							<li>
 								<strong>LAN Centers:</strong> Gaming cafes looking to optimize
@@ -136,9 +130,8 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							Our optimizations are <strong>game-agnostic</strong> and improve
-							performance across all titles. However, we have specific
-							optimization profiles for popular esports games including:
+							System settings can affect many games, but results depend on the game,
+							hardware, drivers, and bottleneck. Common requests include:
 						</p>
 						<ul>
 							<li>Counter-Strike 2 (CS2)</li>
@@ -152,8 +145,7 @@ function FAQ() {
 							<li>Overwatch 2</li>
 						</ul>
 						<p>
-							The system-level optimizations benefit all games, while our
-							included scripts can apply game-specific tweaks.
+							No setting guarantees an improvement in every title. Measure each change on your own PC.
 						</p>
 					</div>
 				),
@@ -164,11 +156,7 @@ function FAQ() {
 				question: "How much performance improvement can I expect?",
 				answer: (
 					<div>
-						<p>
-						Performance improvements vary based on hardware, software, drivers,
-						game settings, and the starting condition of the system. The current
-						published sample shows:
-						</p>
+						<p>Results depend on the hardware, drivers, game settings, and starting configuration. The current preliminary sample compares two configurations of one PC:</p>
 						<ul>
 							<li>
 								<strong>CS2 average FPS:</strong> 658 to 826 in the two-run medians
@@ -184,9 +172,7 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							<strong>Note:</strong> These are single-system observations, not a
-							guarantee. Review the benchmark page and ask about compatibility
-							before purchasing.
+							Windows edition, memory settings, and GPU driver changed. Raw run captures are not yet published. The comparison cannot isolate the effect of one product or predict your result.
 						</p>
 					</div>
 				),
@@ -195,30 +181,7 @@ function FAQ() {
 				question: "Will this work with my specific hardware?",
 				answer: (
 					<div>
-						<p>
-							Our optimizations work with virtually all modern gaming hardware:
-						</p>
-						<ul>
-							<li>
-								<strong>CPUs:</strong> Intel (6th gen+) and AMD Ryzen (all
-								generations)
-							</li>
-							<li>
-								<strong>GPUs:</strong> NVIDIA (GTX 900 series+) and AMD (RX 400
-								series+)
-							</li>
-							<li>
-								<strong>RAM:</strong> 8GB minimum, 16GB+ recommended
-							</li>
-							<li>
-								<strong>Storage:</strong> SSD strongly recommended for best
-								results
-							</li>
-							<li>
-								<strong>Operating Systems:</strong> Windows 10 (1903+) and
-								Windows 11
-							</li>
-						</ul>
+						<p>Compatibility depends on your motherboard, CPU, GPU, firmware, drivers, and Windows licence. Send your hardware list and current Windows edition before ordering. Support can check the fit of the selected product.</p>
 						<p>
 							If you have specific concerns about compatibility,{" "}
 							<a href="/contact">contact us</a> before purchasing and we'll
@@ -231,21 +194,14 @@ function FAQ() {
 				question: "Do I need technical knowledge to use your products?",
 				answer: (
 					<div>
-						<p>
-							<strong>Not at all!</strong> While we serve many tech-savvy users,
-							our products are designed to be accessible to everyone:
-						</p>
+						<p>You should be comfortable installing Windows and following recovery instructions. Review the specific product description and order confirmation for included files and support.</p>
 						<ul>
-							<li>Step-by-step installation guides with screenshots</li>
-							<li>Video tutorials walking through the entire process</li>
-							<li>Pre-configured settings (no manual tweaking required)</li>
-							<li>Automated scripts that do the work for you</li>
-								<li>Email and Discord support for setup questions</li>
-							<li>Discord community for peer support</li>
+							<li>Back up your data and keep official recovery media available</li>
+							<li>Check that your Windows licence and hardware meet the stated requirements</li>
+							<li>Contact support before ordering if you need help assessing compatibility</li>
 						</ul>
 						<p>
-							If you can install Windows, you can use our products. And if you
-							need help, we're always here.
+							Contact support before ordering if you have not installed Windows or changed BIOS settings before.
 						</p>
 					</div>
 				),
@@ -254,23 +210,7 @@ function FAQ() {
 				question: "What's the difference between Windows 10 and Windows 11 ISOs?",
 				answer: (
 					<div>
-						<p>Both are fully optimized, but have key differences:</p>
-						<h4>Windows 10 Enterprise ISO:</h4>
-						<ul>
-							<li>Maximum stability and compatibility</li>
-							<li>Best for competitive gaming (proven platform)</li>
-							<li>Lower system requirements</li>
-							<li>Wider driver support</li>
-							<li>Recommended for: CS2, Valorant, competitive FPS</li>
-						</ul>
-						<h4>Windows 11 Pro Gaming Edition:</h4>
-						<ul>
-							<li>Latest features and DirectX 12 Ultimate</li>
-							<li>Auto HDR and improved gaming features</li>
-							<li>Better for newer games (2022+)</li>
-							<li>Requires newer hardware (TPM 2.0, UEFI)</li>
-							<li>Recommended for: Latest AAA games, future-proofing</li>
-						</ul>
+						<p>The Windows 10 build is for an existing setup that still needs Windows 10. The Windows 11 build is for newer hardware or software that needs Windows 11. Check your device requirements and valid Windows licence before choosing.</p>
 						<p>
 							Not sure which to choose? <a href="/contact">Contact us</a> and
 							we'll recommend based on your hardware and games.
@@ -283,8 +223,7 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							BIOS optimization involves configuring your motherboard's firmware
-							settings to maximize gaming performance. This includes:
+							BIOS tuning configures motherboard firmware for the installed hardware and workload. This can include:
 						</p>
 						<ul>
 							<li>Memory (RAM) timing optimization</li>
@@ -301,11 +240,10 @@ function FAQ() {
 							<li>Want to improve consistency and reduce system overhead</li>
 							<li>Have a high-end system that's not performing as expected</li>
 							<li>Experience stuttering or inconsistent frame times</li>
-							<li>Are a competitive player seeking every advantage</li>
+							<li>Want a documented BIOS profile and stability check</li>
 						</ul>
 						<p>
-							Then yes, BIOS optimization can provide significant benefits. We
-							handle everything remotely and ensure stability.
+							A compatibility check is required before deciding whether BIOS tuning is appropriate. No remote session can guarantee stability under every workload.
 						</p>
 					</div>
 				),
@@ -315,19 +253,9 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							No! Our optimizations are designed to persist through Windows
-							Updates. Additionally:
+							Windows updates can reset or replace settings. Check the product description and order confirmation for any maintenance material included with your purchase.
 						</p>
-						<ul>
-							<li>
-								We include scripts that automatically reapply certain settings
-								after updates
-							</li>
-							<li>Update policies are configured to minimize disruption</li>
-							<li>You have full control over when updates are installed</li>
-							<li>We provide update guides to maintain optimizations</li>
-							<li>Our support team helps if any issues arise post-update</li>
-						</ul>
+						<p>Keep normal security updates enabled. If performance or compatibility changes after an update, record the update and contact support with your order number.</p>
 					</div>
 				),
 			},
@@ -335,14 +263,8 @@ function FAQ() {
 				question: "Can I use your ISO on multiple computers?",
 				answer: (
 					<div>
-						<p>Yes, but with limitations:</p>
+						<p>Each computer needs its own valid Windows licence. The number of devices covered by a Softhe.io purchase depends on the terms of that order.</p>
 						<ul>
-							<li>
-								You can use the ISO to install on{" "}
-								<strong>up to 3 personal computers</strong>
-							</li>
-							<li>Each computer requires its own valid Windows license</li>
-							<li>Commercial use requires a separate license (contact us)</li>
 							<li>Redistribution of the ISO is strictly prohibited</li>
 						</ul>
 						<p>
@@ -358,22 +280,9 @@ function FAQ() {
 				question: "What payment methods do you accept?",
 				answer: (
 					<div>
+						<p>Stripe shows the available payment methods at checkout. They can vary by location and device.</p>
 						<p>
-							We accept all major payment methods through our secure Stripe
-							payment processor:
-						</p>
-						<ul>
-							<li>
-								Credit cards (Visa, Mastercard, American Express, Discover)
-							</li>
-							<li>Debit cards</li>
-							<li>Apple Pay</li>
-							<li>Google Pay</li>
-							<li>European payment methods (iDEAL, SEPA, etc.)</li>
-						</ul>
-						<p>
-							All transactions are encrypted and secure. We never see or store
-							your card details.
+							Stripe handles the payment form. Softhe.io does not collect card numbers through this website.
 						</p>
 					</div>
 				),
@@ -383,29 +292,18 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							We offer a <strong>14-day money-back guarantee</strong> on all
-							products and services:
+							Eligible consumers generally have a statutory 14-day withdrawal period for distance contracts. The calculation and any exception depend on whether your order is digital content or a service and whether delivery or work has begun.
 						</p>
 						<ul>
-							<li>
-								If you're not satisfied for any reason, contact us within 14
-								days
-							</li>
-							<li>We'll issue a full refund, no questions asked</li>
-							<li>
-								Digital products: Full refund available within 14 days of
-								purchase
-							</li>
-							<li>
-								Services: Full refund if not yet started, partial refund based
-								on completion
-							</li>
+							<li>Submit the online withdrawal form or email support with your order number</li>
+							<li>Immediate digital delivery requires your express request and acknowledgement that the withdrawal right may be lost once performance begins, as permitted by law</li>
+							<li>Work started at your express request may leave a proportionate amount due</li>
+							<li>Read the Terms of Service and withdrawal notice before checkout</li>
 						</ul>
 						<p>
-							To request a refund, email{" "}
+							To make a withdrawal request, use the <a href="/withdrawal">online form</a> or email{" "}
 							<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a> with your
-							order number. Refunds are typically processed within 3-5 business
-							days.
+							order number. Support will confirm whether the request qualifies and what happens next.
 						</p>
 					</div>
 				),
@@ -414,28 +312,23 @@ function FAQ() {
 				question: "How long does delivery take?",
 				answer: (
 					<div>
-						<p>Delivery times vary by product type:</p>
+						<p>Delivery and scheduling depend on the product and current availability:</p>
 						<ul>
 							<li>
-								<strong>Custom Windows ISOs:</strong> Instant delivery via email
-								after purchase
+								<strong>Windows builds:</strong> The order confirmation states the delivery method and timing
 							</li>
 							<li>
-								<strong>BIOS Optimization Service:</strong> 24-48 hours (remote
-								session scheduled)
+								<strong>BIOS tuning:</strong> Support confirms compatibility before scheduling a remote session
 							</li>
 							<li>
-								<strong>Complete Performance Tuning:</strong> 2-5 days depending
-								on complexity
+								<strong>Custom work:</strong> Timing depends on scope and hardware
 							</li>
 							<li>
-								<strong>Premium Support:</strong> Immediate access after purchase
+								<strong>Support:</strong> Response times vary with request volume
 							</li>
 						</ul>
 						<p>
-							You'll receive an email with download links and instructions
-							immediately after purchase. Check your spam folder if you don't see
-							it within 5 minutes.
+							Check the order confirmation for the delivery estimate. Contact support if it does not arrive.
 						</p>
 					</div>
 				),
@@ -444,30 +337,19 @@ function FAQ() {
 				question: "Do you offer discounts or bundle deals?",
 				answer: (
 					<div>
-						<p>Yes! We offer several ways to save:</p>
+						<p>The checkout applies the current bundle discounts:</p>
 						<ul>
 							<li>
-								<strong>Bundle Packages:</strong> Save up to 25% when purchasing
-								multiple services together
+								<strong>Two products:</strong> 5% off the bundle
 							</li>
 							<li>
-								<strong>Seasonal Sales:</strong> Special promotions during major
-								gaming events
+								<strong>Three products:</strong> 10% off the bundle
 							</li>
 							<li>
-								<strong>Referral Program:</strong> Get 15% off when you refer
-								friends (coming soon)
-							</li>
-							<li>
-								<strong>Educational Discount:</strong> 10% off for students with
-								valid ID
-							</li>
-							<li>
-								<strong>Team/Organization Discount:</strong> Contact us for bulk
-								pricing
+								<strong>Other offers:</strong> Only discounts shown in the store or checkout apply
 							</li>
 						</ul>
-						<p>Subscribe to our newsletter to be notified of special offers!</p>
+						<p>The server calculates the final discount before Stripe opens.</p>
 					</div>
 				),
 			},
@@ -494,15 +376,14 @@ function FAQ() {
 				question: "What kind of support do you provide?",
 				answer: (
 					<div>
-						<p>We provide comprehensive support through multiple channels:</p>
+						<p>Ask product and order questions by email. You can also message the Softhe.io Discord account. The support scope and duration depend on the product and terms shown at checkout.</p>
 						<ul>
 							<li>
-								<strong>Email Support:</strong>{" "}
+								<strong>Email:</strong>{" "}
 								<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>{" "}
-								(response time varies with request volume)
 							</li>
 							<li>
-								<strong>Discord Support:</strong>{" "}
+								<strong>Discord direct message:</strong>{" "}
 								<a
 									href="https://discord.com/users/softhecs"
 									target="_blank"
@@ -512,23 +393,7 @@ function FAQ() {
 								</a>{" "}
 								(availability varies)
 							</li>
-							<li>
-								<strong>Documentation:</strong> Detailed guides and video
-								tutorials
-							</li>
-							<li>
-								<strong>Community Forum:</strong> Discord server with active
-								community
-							</li>
-							<li>
-								<strong>Remote Assistance:</strong> Screen sharing for complex
-								issues (Premium Support customers)
-							</li>
 						</ul>
-						<p>
-							Support scope and duration follow the purchased product and the
-							terms shown at checkout.
-						</p>
 					</div>
 				),
 			},
@@ -559,20 +424,10 @@ function FAQ() {
 				question: "What if I need help installing the ISO?",
 				answer: (
 					<div>
-						<p>We're here to help! Installation support includes:</p>
-						<ul>
-							<li>Step-by-step written guides with screenshots</li>
-							<li>Video tutorial showing the entire installation process</li>
-							<li>Pre-installation checklist</li>
-							<li>USB creation tool and instructions</li>
-							<li>Live support via Discord or email</li>
-							<li>
-								Remote assistance available (for Premium Support customers)
-							</li>
-						</ul>
+						<p>Installation support can include:</p>
+						<p>Email support with your order number, hardware details, and the step where installation stopped. We will review the information and advise on the next step. The product description and order confirmation state any included setup material.</p>
 						<p>
-							The vast majority of customers complete installation without
-							issues, but we're always ready to help if needed.
+							Back up important data and keep official Windows recovery media available before installation.
 						</p>
 					</div>
 				),
@@ -581,17 +436,7 @@ function FAQ() {
 				question: "Do you offer custom optimization services?",
 				answer: (
 					<div>
-						<p>
-							Yes! For customers with specific needs or unique hardware
-							configurations, we offer custom optimization services:
-						</p>
-						<ul>
-							<li>Custom BIOS tuning for specific games or workloads</li>
-							<li>Personalized Windows configuration</li>
-							<li>Multi-system optimization (for LAN centers)</li>
-							<li>Ongoing maintenance and monitoring</li>
-							<li>Training and consultation</li>
-						</ul>
+						<p>Contact us with your hardware and the change you need. We will confirm whether the work is available and provide its scope and price before you order.</p>
 						<p>
 							<a href="/contact">Contact us</a> to discuss your requirements and
 							get a custom quote.
@@ -603,18 +448,8 @@ function FAQ() {
 				question: "What if something goes wrong with the installation?",
 				answer: (
 					<div>
-						<p>Don't worry - we've got you covered:</p>
-						<ul>
-							<li>Contact support immediately for troubleshooting assistance</li>
-							<li>We'll help diagnose and fix the issue remotely</li>
-							<li>If needed, we'll guide you through a clean reinstallation</li>
-							<li>All optimizations are reversible if you want to revert</li>
-							<li>We include recovery tools in case of system issues</li>
-						</ul>
-						<p>
-							Serious issues are uncommon when the installation guide is followed,
-							and support can help troubleshoot if something does not behave as expected.
-						</p>
+						<p>Stop and contact support if installation does not complete as expected:</p>
+						<p>Send your order number, hardware details, and the exact error. Keep your backup and official Windows recovery media available in case you need to restore the prior installation.</p>
 					</div>
 				),
 			},
@@ -623,18 +458,11 @@ function FAQ() {
 				answer: (
 					<div>
 						<p>
-							Yes! If you purchase the Windows 10 ISO and later decide you want
-							Windows 11:
+							Contact support with your order number if you later need Windows 11:
 						</p>
-						<ul>
-							<li>You can upgrade by paying the difference (€15)</li>
-							<li>Contact us with your original order number</li>
-							<li>We'll provide the Windows 11 ISO immediately</li>
-							<li>Full installation support included</li>
-						</ul>
+						<p>Support will confirm hardware compatibility, whether an upgrade is available, its current price, and delivery timing before you place another order.</p>
 						<p>
-							We want you to have the best solution for your needs, and we make
-							upgrades easy!
+							Do not upgrade until you have checked Windows 11 hardware and software compatibility.
 						</p>
 					</div>
 				),
@@ -716,16 +544,16 @@ function FAQ() {
 	return (
 		<div className="faq-page">
 			<SEO
-				title="FAQ - Frequently Asked Questions | Softhe.io"
-				description="Find answers to common questions about PC optimization, custom Windows ISOs, BIOS tuning, and our services at Softhe.io."
+				title="Windows and BIOS tuning FAQ | Softhe.io"
+				description="Answers about Softhe.io Windows builds, BIOS tuning, compatibility, benchmark limits, orders, and support."
 				keywords="PC optimization FAQ, Windows ISO questions, BIOS tuning help, gaming optimization FAQ"
 				canonicalUrl={absoluteUrl('/faq')}
 			/>
 
 			<section className="page-header">
 				<div className="container">
-					<h1>Frequently Asked Questions</h1>
-					<p>Find answers to common questions about our services and optimization process</p>
+					<h1>Questions about products and support</h1>
+					<p>Read about compatibility, installation, benchmark limits, ordering, and support.</p>
 				</div>
 			</section>
 
@@ -752,10 +580,12 @@ function FAQ() {
 
 					{/* Search Box */}
 					<div className="faq-search">
-						<i className="fas fa-search"></i>
+						<label htmlFor="faq-search-input">Search questions</label>
+						<i className="fas fa-search" aria-hidden="true"></i>
 						<input
+							id="faq-search-input"
 							type="text"
-							placeholder="Search for answers..."
+							placeholder="Search the FAQ"
 							value={searchTerm}
 							onChange={(e) => handleSearch(e.target.value)}
 						/>
@@ -792,13 +622,16 @@ function FAQ() {
 											className={`faq-item ${isActive ? "active" : ""}`}
 										>
 											<button
+												type="button"
 												className="faq-question"
+												aria-expanded={isActive}
+												aria-controls={`faq-answer-${itemId}`}
 												onClick={() => toggleItem(category, originalIndex)}
 											>
 												<span>{item.question}</span>
 												<i className="fas fa-chevron-down"></i>
 											</button>
-											<div className="faq-answer">
+											<div id={`faq-answer-${itemId}`} className="faq-answer" hidden={!isActive}>
 												{typeof item.answer === "string" ? (
 													<p>{item.answer}</p>
 												) : (
@@ -830,11 +663,8 @@ function FAQ() {
 					{/* CTA Section */}
 					<div className="faq-cta">
 						<div className="faq-cta-content">
-							<h2>Still Have Questions?</h2>
-							<p>
-								Can't find the answer you're looking for? Our support team is
-								here to help!
-							</p>
+								<h2>Need a specific answer?</h2>
+								<p>Send your hardware details and question to support.</p>
 							<div className="faq-cta-buttons">
 								<a href="/contact" className="btn btn-primary">
 									<i className="fas fa-envelope"></i> Contact Support
@@ -845,7 +675,7 @@ function FAQ() {
 									rel="noopener noreferrer"
 									className="btn btn-secondary"
 								>
-									<i className="fab fa-discord"></i> Join Discord
+									<i className="fab fa-discord"></i> Message on Discord
 								</a>
 							</div>
 						</div>

@@ -1,8 +1,44 @@
 # Production readiness status
 
-Last verified: 2026-09-15 (Europe/Berlin)
+Last verification checkpoint: 2026-10-04 (Europe/Berlin). The observations below distinguish controlled alert detection, notification receipt, and candidate readiness.
 
-## Current release checkpoint
+## Verification checkpoint (2026-10-04)
+
+- Chrome verification reconnected successfully. GitHub Actions shows the latest PR #7 quality, CI, E2E, staging artifact, and CodeQL runs passing for `9175262`.
+- The monitoring baseline run `37156833933` passed. The replacement Vercel credential works for the controlled test workflow's runtime-log queries.
+- Controlled uptime run `37157286776` passed production health, then deliberately failed. The user supplied the corresponding Gmail failure-notification screenshot. Its notification evidence is now recorded as passed in `launch-evidence.json`.
+- Fresh controlled browser run `37158143606` detected exactly one browser-error event, zero delivery failures, and zero confirmation-review events. Production health, event emission, and runtime queries passed before the expected alert-evaluation failure. Receipt of this run's notification is not yet verified.
+- Controlled delivery run `37158224480` completed after the browser run. Alert evaluation detected one delivery-failure event, one browser-error event still inside the shared log window, and zero confirmation-review events. The expected alert failure confirms detection of the requested delivery event; notification receipt remains unverified.
+- Chrome's currently open mailbox returned no matching GitHub monitoring notifications for the last two days. It is a different mailbox from the user-provided uptime receipt. Do not treat this search as proof that the intended notification mailbox failed.
+- The immutable candidate `https://softhe-q4r1b6rp2-suportsofthe-9420s-projects.vercel.app/api/health` reports source `91752621910b593f0b8d042a921f73d3a0c5d7df` and fingerprint `softhe-9175262-stage1`, but status is `configuration-required`. Portal, checkout, contact, tickets, withdrawal, storage, and fulfillment readiness checks are all false. This candidate cannot pass strict release smoke without appropriate isolated configuration.
+- Subsequent Chrome mailbox inspection verified that the received 00:22 browser-error email links to run `37158143606`. The user followed the received delivery email link to run `37158224480`. All three controlled alert notification proofs are now recorded as passed. The stage-one evidence verifier passes structurally, but the manifest still describes the older September candidate and must be rebound to a freshly qualified deployment before release.
+- The manual Commercial Release Gate has a separate `stage_candidate` mode. It builds using the existing Production configuration, forces commerce and staff access off, skips live domain assignment, and verifies runtime readiness and exact source identity. This mode does not run the qualification job or promote the deployment. No Production secrets are copied into Preview.
+- Keep commerce and staff access disabled. No merge or production promotion has been performed at this checkpoint.
+- Staged Production deployment `dpl_64fwjQnB8F3QPYGWZfPdyXhZnyEc`, source `531c96c450f1719da80b0f2a9839e7906074dc64`, passed all readiness checks and complete authenticated strict smoke in run `37164242676`. The manifest now identifies this immutable candidate. The local suite passes with 327 tests and 3 skipped; lint passes. Final evidence qualification and refreshed PR checks remain required before merge.
+
+## Test-branch checkpoint (2026-10-03)
+
+- `copy-rewrite-test` retains checkout idempotency keys after ambiguous server failures, including HTTP 502, while definite client rejections release the key. Regression tests cover the uncertain retry behavior.
+- The local suite passes with 321 tests passed and 3 skipped. Coverage is 89.54% lines and 81.37% branches. Both browser profiles pass, with 62 enabled-state and 4 disabled-state checks. The dependency audit reports zero vulnerabilities after the transitive dependency update. These are local checks, not live payment or delivery evidence.
+- Vercel deployment metadata shows the Ready Production deployment from `main` at `b36a5a8`, dated 2026-09-22, and the older Preview. No `copy-rewrite-test` deployment was observed. Ready deployment status does not establish provider readiness or verify the public site's behavior.
+- Fresh inspection of `https://softhe.io/api/health` returns HTTP 200 `ready`, all configuration checks true, source `b36a5a8`, and fingerprint `softhe-b36a5a8-stage1`. Strict local production smoke passes the application marker, security headers, serverless checks, and exact release identity. Health readiness checks configuration; it does not prove successful payment, fulfillment, or email delivery.
+- The scheduled GitHub smoke had stale July identity expectations. Its three non-secret repository variables now target `https://softhe.io`, source `b36a5a8`, and fingerprint `softhe-b36a5a8-stage1`. Fresh smoke run `37148460844` completed successfully. Monitoring failed with `User not found` for its Vercel authentication. No token was modified; credential renewal requires the account owner. No completed monitoring evidence was recorded.
+- The stage-one evidence gate still requires three pending alert proofs: uptime, browser-error, and delivery-failure alerts. The full commercial evidence gate has nine pending entries, including those three. Source fixes do not satisfy either gate or authorize commerce activation.
+- Preview log queries now use the repository variable `MONITOR_PREVIEW_BRANCH`, with `customer-portal-test` retained as the scheduled-monitoring fallback. Controlled browser and delivery tests require explicit `MONITOR_BASE_URL` and `MONITOR_PREVIEW_BRANCH` variables. Before running them, verify that the protected Preview URL belongs to that branch in Vercel; the workflow checks that both values are configured, but cannot establish their relationship from their strings alone. Update both together when changing the test deployment.
+- Keep `COMMERCE_ENABLED`, `VITE_COMMERCE_ENABLED`, and `STAFF_PORTAL_ENABLED` false. Publish the corrected candidate, require green CI, verify the Preview, and collect the stage-one alert evidence before claiming production qualification. Live provider, legal, payment, and fulfillment evidence remains outstanding.
+
+## Test-branch checkpoint (2026-09-28)
+
+- `copy-rewrite-test` contains source changes to the public copy, checkout and webhook retry handling, accessibility, contact form, product links, CSP validation, and development dependencies.
+- The local unit suite passes (297 passed, 3 skipped), both browser profiles pass (62 enabled-state and 4 disabled-state checks), the build and secret scan pass, and `npm audit --audit-level=moderate` reports zero vulnerabilities. These checks do not verify live providers or the deployment.
+- The checkout webhook now stores separate fulfillment stages. An uncertain EmailJS confirmation attempt is held for manual review because EmailJS does not provide an idempotency key. Operators must investigate `stripe_confirmation_requires_review`; the code cannot guarantee exactly-once delivery by itself.
+- The benchmark remains preliminary whole-system evidence, not proof of a particular product's effect. Raw runs and full methodology still need publication. Copy changes do not replace the missing evidence.
+- This is a local test-branch checkpoint, not a Production deployment or commercial launch approval. Keep commerce disabled until the evidence gate passes and the live environment has been checked.
+- `npm run evidence:verify` still rejects nine pending legal, payment, idempotency, and monitoring evidence items. Their status was not changed by this source update.
+
+## Previous checkpoint (2026-09-15)
+
+### Recorded release checkpoint at that date
 
 - Local `main` and the fetched `origin/main` identify merge commit
   `bbea382223668498f5668c22c9f58ceae1a03b39`. No tracked changes preceded this status update.

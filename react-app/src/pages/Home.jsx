@@ -1,17 +1,18 @@
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
+import { commerceEnabled } from '../utils/runtimeConfig';
 import './Home.css';
 
 function Home() {
 	return (
 		<>
 			<SEO
-				title="Softhe.io - PC Optimization for Competitive Gaming"
-				description="Custom Windows ISOs, BIOS tuning, and PC optimization support for competitive gaming setups. See benchmark screenshots, products, and compatibility details."
+				title="Softhe.io | Windows and BIOS tuning for gaming PCs"
+				description="Custom Windows builds and BIOS tuning for gaming PCs, with a documented whole-system CS2 sample, compatibility guidance, and setup support."
 				keywords="pc optimization, gaming optimization, fps boost, custom windows iso, bios optimization, esports performance, competitive gaming, windows optimization, gaming pc tuning"
-				ogTitle="Softhe.io - PC Optimization for Competitive Gaming"
-				ogDescription="Lean Windows builds, BIOS tuning, and benchmark-led optimization services for gaming PCs."
+				ogTitle="Windows and BIOS tuning for gaming PCs | Softhe.io"
+				ogDescription="Custom Windows builds and BIOS tuning, with a preliminary whole-system CS2 comparison and setup support."
 				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 				structuredData={{
 					"@context": "https://schema.org",
@@ -37,35 +38,35 @@ function Home() {
 						<div className="hero-content">
 							<div className="hero-kicker">
 								<span className="status-dot"></span>
-								Windows and BIOS tuning for competitive PCs
+								Windows and BIOS tuning for gaming PCs
 							</div>
 							<h1 className="hero-title">
-								Tune the machine. <span className="gradient-text">Raise the ceiling.</span>
+								Cut Windows overhead. <span className="gradient-text">Tune the hardware.</span>
 							</h1>
 							<p className="hero-description">
-								Softhe.io builds lean Windows installs and hardware-aware BIOS profiles for players
-								who care about stable frame rates, lower overhead, and cleaner input response.
+								Softhe.io configures Windows and BIOS settings around your hardware and games.
+								The goal is lower background use, steadier frame times, and a setup you can recover.
 							</p>
 							<div className="hero-buttons">
 								<Link to="/store" className="btn btn-primary">
-									View Products
+									Compare products
 									<i className="fas fa-arrow-right" aria-hidden="true"></i>
 								</Link>
 								<Link to="/performance" className="btn btn-secondary">
-									See Benchmarks
+									Check the results
 								</Link>
 							</div>
 							<div className="hero-proof">
-								<span>Custom Windows ISOs</span>
-								<span>BIOS optimization</span>
-								<span>Remote support</span>
+								<span>Custom Windows builds</span>
+								<span>BIOS tuning</span>
+								<span>Email and Discord support</span>
 							</div>
 						</div>
 						<div className="hero-visual" aria-label="Performance comparison preview">
 							<div className="benchmark-panel">
 								<div className="panel-topline">
 									<div>
-										<span className="panel-eyebrow">Measured result</span>
+									<span className="panel-eyebrow">Preliminary sample</span>
 										<strong>CS2 · Dust 2 benchmark</strong>
 									</div>
 									<span className="live-pill">2-run median</span>
@@ -103,21 +104,21 @@ function Home() {
 										<strong>2 × 109 sec</strong>
 									</div>
 								</div>
-								<p className="result-note">Same hardware and in-game settings. Whole-configuration comparison; individual results vary.</p>
+								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. Raw runs are not yet published. This cannot isolate the effect of one product.</p>
 							</div>
 						</div>
 					</div>
 				</header>
 
-				<section className="proof-strip" aria-label="Optimization results">
+				<section className="proof-strip" aria-label="Preliminary test summary">
 					<div className="container proof-grid">
 						<div>
 							<strong>+25%</strong>
-							<span>Average FPS in tested CS2 run</span>
+							<span>Average FPS in one whole-system CS2 comparison</span>
 						</div>
 						<div>
 							<strong>-20%</strong>
-							<span>Frame time reduction</span>
+							<span>Frame time change in the same comparison</span>
 						</div>
 						<div>
 							<strong>31</strong>
@@ -125,7 +126,7 @@ function Home() {
 						</div>
 						<div>
 							<strong>14 days</strong>
-							<span>Refund window listed in FAQ</span>
+							<span>General statutory withdrawal period for eligible consumers; exceptions apply</span>
 						</div>
 					</div>
 				</section>
@@ -133,14 +134,15 @@ function Home() {
 				<section className="performance-preview">
 					<div className="container preview-grid">
 						<div className="preview-copy">
-							<span className="section-kicker">Evidence first</span>
-							<h2>Show the difference before asking people to buy.</h2>
+							<span className="section-kicker">Preliminary test data</span>
+							<h2>Read the numbers and the test limits before you buy.</h2>
 							<p>
-								The benchmark page documents the measured comparison so visitors can see what
-								changed, how the result was produced, and which limitations apply.
+								The sample compares two configurations of one PC. Windows edition, memory settings,
+								and GPU driver changed. Raw run evidence is still unpublished, and the result cannot
+								show what any one product contributed.
 							</p>
 							<Link to="/performance" className="text-link">
-								Review full performance data
+								Read the benchmark details
 								<i className="fas fa-arrow-right" aria-hidden="true"></i>
 							</Link>
 						</div>
@@ -154,7 +156,7 @@ function Home() {
 								<strong>826 FPS</strong>
 							</div>
 							<div className="comparison-footnote">
-								Results from the documented test configuration; individual systems will vary.
+								Preliminary whole-system sample. Raw runs are not yet published.
 							</div>
 						</div>
 					</div>
@@ -163,24 +165,24 @@ function Home() {
 				<section className="trust-preview" aria-labelledby="trust-preview-title">
 					<div className="container">
 						<div className="section-heading">
-							<span className="section-kicker">Buyer confidence</span>
-							<h2 id="trust-preview-title" className="section-title">Clear expectations before checkout</h2>
+							<span className="section-kicker">Before you order</span>
+							<h2 id="trust-preview-title" className="section-title">Know the price, terms, and compatibility first</h2>
 						</div>
 						<div className="trust-preview-grid">
 							<div className="trust-preview-item">
 								<i className="fas fa-lock" aria-hidden="true"></i>
-								<h3>Secure Stripe checkout</h3>
-								<p>Prices and bundle discounts are validated on the server before Stripe handles card and wallet payment.</p>
+								<h3>{commerceEnabled ? 'Secure Stripe checkout' : 'Online ordering is unavailable'}</h3>
+								<p>{commerceEnabled ? 'The server checks product prices and bundle discounts before Stripe opens.' : 'Checkout will open after payment and legal readiness checks pass. You can compare products now.'}</p>
 							</div>
 							<div className="trust-preview-item">
 								<i className="fas fa-rotate-left" aria-hidden="true"></i>
-								<h3>14-day refund window</h3>
-								<p>The refund policy is documented in the FAQ so buyers can review terms before ordering.</p>
+								<h3>Withdrawal rights</h3>
+								<p>Eligible consumers generally have 14 days to withdraw. Digital delivery or work started at your request can affect that right. Read the terms before ordering.</p>
 							</div>
 							<div className="trust-preview-item">
 								<i className="fas fa-headset" aria-hidden="true"></i>
 								<h3>Pre-purchase support</h3>
-								<p>Compatibility questions can go through email or Discord before committing to an ISO or BIOS service.</p>
+								<p>Send your hardware list by email or Discord if you are unsure which option fits.</p>
 							</div>
 						</div>
 					</div>
@@ -189,37 +191,37 @@ function Home() {
 				<section className="features">
 					<div className="container">
 						<div className="section-heading">
-							<span className="section-kicker">What gets tuned</span>
-							<h2 className="section-title">A cleaner path to stable performance</h2>
+							<span className="section-kicker">What we change</span>
+							<h2 className="section-title">Windows, firmware, and setup support</h2>
 						</div>
 						<div className="features-grid">
 							<div className="feature-card">
 								<div className="feature-icon">
 									<i className="fas fa-layer-group"></i>
 								</div>
-								<h3>Lean Windows Builds</h3>
-								<p>Reduced bloat, lower idle overhead, and gaming-focused defaults without hiding the Windows license requirement.</p>
+								<h3>Lean Windows builds</h3>
+								<p>Fewer preinstalled apps and gaming-focused defaults. You must supply a valid Windows licence.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">
 									<i className="fas fa-microchip"></i>
 								</div>
-								<h3>Hardware-Aware BIOS</h3>
-								<p>Memory, CPU, boot, and power settings adjusted around the hardware you actually run.</p>
+								<h3>BIOS settings for your hardware</h3>
+								<p>Memory, CPU, boot, and power settings matched to your motherboard and components.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">
 									<i className="fas fa-chart-line"></i>
 								</div>
-								<h3>Benchmark-Led Proof</h3>
-								<p>Before and after screenshots give the sales flow something concrete to point at.</p>
+								<h3>Preliminary benchmark sample</h3>
+								<p>The current CS2 comparison shows the measured change and identifies missing evidence.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">
 									<i className="fas fa-headset"></i>
 								</div>
-								<h3>Direct Setup Support</h3>
-								<p>Email and Discord support help users choose the right product and complete setup with fewer dead ends.</p>
+								<h3>Setup support</h3>
+								<p>Use email or Discord for product selection, compatibility checks, and installation questions.</p>
 							</div>
 						</div>
 					</div>
@@ -228,12 +230,12 @@ function Home() {
 				<section className="cta">
 					<div className="container">
 						<div className="cta-content">
-							<span className="section-kicker">Ready for the next step?</span>
-							<h2>Choose the optimization path that fits your setup.</h2>
-							<p>Start with a Windows ISO, add BIOS tuning when your hardware needs deeper work, or contact support for compatibility questions.</p>
+							<span className="section-kicker">Choose a service</span>
+							<h2>Start with the part of your PC that needs work.</h2>
+							<p>Choose a Windows build, BIOS tuning, or send your hardware list if you need a compatibility check first.</p>
 							<div className="cta-actions">
-								<Link to="/store" className="btn btn-primary">Open Store</Link>
-								<Link to="/contact" className="btn btn-secondary">Ask Before Buying</Link>
+								<Link to="/store" className="btn btn-primary">Compare products</Link>
+								<Link to="/contact" className="btn btn-secondary">Check compatibility</Link>
 							</div>
 						</div>
 					</div>

@@ -21,7 +21,7 @@ Use the Vercel Preview deployment for every item. A local build is useful eviden
 ## Manual review
 
 - [ ] Legal identity, VAT presentation, prices, delivery timing, compatibility, complaints, and withdrawal language match counsel-approved values.
-- [ ] Home, store, checkout, contact, withdrawal, legal, benchmark, cart, menu, cookie dialog, guides, and 404 pages are reviewed at 320, 390, 768, 1280, and 1440 pixels.
+- [ ] Home, store, checkout, contact, withdrawal, legal, benchmark, cart, menu, cookie dialog, and 404 pages are reviewed at 320, 390, 768, 1280, and 1440 pixels.
 - [ ] Keyboard navigation, focus restoration, browser console, network failures, and error ingestion are reviewed.
 - [ ] Benchmark configuration identifies the exact setup, at least three repeated runs, median aggregation, raw evidence, FPS, and 1% lows.
 

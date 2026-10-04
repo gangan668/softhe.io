@@ -20,7 +20,14 @@ const renderStore = (initialEntry = '/store') =>
 describe('Store', () => {
 	beforeEach(() => {
 		localStorage.clear();
+		window.history.replaceState({}, '', '/');
 		vi.clearAllMocks();
+	});
+
+	it('ignores a malformed product fragment without crashing', () => {
+		window.history.replaceState({}, '', '/store#%');
+		renderStore();
+		expect(screen.getByRole('heading', { name: 'Store' })).toBeInTheDocument();
 	});
 
 	it('renders product cards and recommendation helper', () => {
@@ -29,19 +36,19 @@ describe('Store', () => {
 		expect(screen.getAllByText('Custom Windows 10 ISO').length).toBeGreaterThanOrEqual(1);
 		expect(screen.getAllByText('Custom Windows 11 ISO').length).toBeGreaterThanOrEqual(1);
 		expect(screen.getByText('BIOS Optimization Service')).toBeInTheDocument();
-		expect(screen.getByText('Which product should I start with?')).toBeInTheDocument();
+		expect(screen.getByText('Find the closest match for your PC')).toBeInTheDocument();
 		expect(screen.getByText('Server-validated checkout')).toBeInTheDocument();
-		expect(screen.getByText('Automatic bundle discounts')).toBeInTheDocument();
+		expect(screen.getByText('Bundle discounts')).toBeInTheDocument();
 	});
 
 	it('updates the product recommendation', async () => {
 		const user = userEvent.setup();
 		renderStore();
 
-		await user.click(screen.getByRole('button', { name: /newer pc/i }));
+		await user.click(screen.getByRole('button', { name: /requires windows 11/i }));
 
 		expect(screen.getAllByText('Custom Windows 11 ISO').length).toBeGreaterThanOrEqual(1);
-		expect(screen.getAllByText(/Newer systems that need current Windows 11/i).length).toBeGreaterThanOrEqual(1);
+		expect(screen.getAllByText(/Newer PCs that require Windows 11/i).length).toBeGreaterThanOrEqual(1);
 	});
 
 	it('adds a product to the cart', async () => {

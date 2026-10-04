@@ -6,19 +6,19 @@ import './Services.css';
 const processSteps = [
 	{
 		title: 'Profile',
-		text: 'Review hardware, games, operating system, and the problem you are trying to solve.',
+		text: 'Send your hardware, operating system, main games, and the problem you want to fix.',
 	},
 	{
 		title: 'Tune',
-		text: 'Apply the Windows, BIOS, and software changes that fit the system instead of a generic preset.',
+		text: 'We apply Windows, BIOS, and software changes that match the system.',
 	},
 	{
 		title: 'Validate',
-		text: 'Check stability, resource use, and benchmark signals before considering the setup complete.',
+		text: 'We check stability, resource use, and repeatable benchmark results.',
 	},
 	{
 		title: 'Support',
-		text: 'Provide follow-up help for installation, compatibility, or later configuration changes.',
+		text: 'Get help with installation, compatibility, and later configuration questions.',
 	},
 ];
 
@@ -26,17 +26,17 @@ function Services() {
 	return (
 		<>
 			<SEO
-				title="Our Services - Professional PC Optimization | Softhe.io"
-				description="PC optimization services for competitive gaming. Custom Windows ISOs, BIOS tuning, complete performance packages, and setup support."
+				title="PC optimization services | Softhe.io"
+				description="Compare custom Windows builds and BIOS tuning for gaming PCs. See the scope, price, compatibility guidance, and support included with each service."
 				keywords="pc optimization services, windows iso, bios tuning, gaming pc optimization, custom windows, performance tuning, gaming services, esports optimization"
-				ogTitle="Professional PC Optimization Services for Gaming PCs"
-				ogDescription="Custom Windows ISOs, BIOS tuning, support, and complete performance packages for competitive gaming systems."
+				ogTitle="PC optimization services for gaming PCs"
+				ogDescription="Compare custom Windows builds, BIOS tuning, prices, and support for gaming PCs."
 			/>
 			<div className="services-page">
 				<section className="page-header">
 					<div className="container">
-						<h1>Our Services</h1>
-						<p>PC optimization services built around your hardware, games, and support needs.</p>
+						<h1>PC optimization services</h1>
+						<p>Compare Windows builds and BIOS tuning by scope, hardware fit, and price.</p>
 					</div>
 				</section>
 
@@ -44,12 +44,12 @@ function Services() {
 					<div className="container">
 						<div className="services-intro">
 							<div>
-								<span className="section-kicker">Service menu</span>
-								<h2>Pick the depth of optimization your setup needs.</h2>
+								<span className="section-kicker">Services</span>
+								<h2>Choose the work your PC needs.</h2>
 							</div>
 							<p>
-								Compare each service separately, then use the Store when you are ready to order.
-								Every option includes a clear use case, scope, and starting price.
+								Each service lists its use case, included work, and price. Check compatibility
+								before ordering if your hardware or software requirements are unusual.
 							</p>
 						</div>
 
@@ -87,7 +87,7 @@ function Services() {
 					<div className="container">
 						<div className="process-header">
 							<span className="section-kicker">Workflow</span>
-							<h2 className="section-title">How the optimization work moves</h2>
+							<h2 className="section-title">How the service works</h2>
 						</div>
 						<div className="process-steps">
 							{processSteps.map((step, index) => (
@@ -101,11 +101,11 @@ function Services() {
 						<div className="services-cta">
 							<div>
 								<h3>Need help choosing?</h3>
-								<p>Send your CPU, GPU, RAM, motherboard, and main games before buying.</p>
+								<p>Send your CPU, GPU, memory, motherboard, and main games before buying.</p>
 							</div>
 							<div className="services-cta-actions">
-								<Link to="/contact" className="btn btn-secondary">Ask First</Link>
-								<Link to="/store" className="btn btn-primary">View Products</Link>
+								<Link to="/contact" className="btn btn-secondary">Check compatibility</Link>
+								<Link to="/store" className="btn btn-primary">Compare products</Link>
 							</div>
 						</div>
 					</div>

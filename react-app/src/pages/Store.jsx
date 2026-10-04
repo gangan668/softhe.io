@@ -27,6 +27,30 @@ function Store() {
 	);
 
 	useEffect(() => {
+		let timer;
+		const scrollToProduct = () => {
+			let productId;
+			try {
+				productId = decodeURIComponent(window.location.hash.slice(1));
+			} catch {
+				return;
+			}
+			if (!products.some((product) => product.id === productId)) return;
+			window.clearTimeout(timer);
+			timer = window.setTimeout(() => {
+				const card = document.getElementById(productId);
+				if (card) window.scrollTo({ top: card.getBoundingClientRect().top + window.scrollY - 90, behavior: 'instant' });
+			}, 0);
+		};
+		scrollToProduct();
+		window.addEventListener('hashchange', scrollToProduct);
+		return () => {
+			window.clearTimeout(timer);
+			window.removeEventListener('hashchange', scrollToProduct);
+		};
+	}, []);
+
+	useEffect(() => {
 		trackEvent('view_item_list', {
 			item_list_name: 'store_products',
 			items: products.map((product) => ({
@@ -109,11 +133,11 @@ function Store() {
 	return (
 		<>
 			<SEO
-				title="Store - PC Optimization Products | Softhe.io"
-				description="Shop custom Windows ISOs and BIOS optimization services for competitive gaming PCs. Products start at €50 with secure Stripe checkout."
+				title="Windows builds and BIOS tuning | Softhe.io store"
+				description="Compare custom Windows builds and BIOS tuning for gaming PCs. Products start at €50 and include clear scope and compatibility guidance."
 				keywords="buy windows iso, custom windows, bios optimization service, gaming pc products, windows optimization, pc optimization store"
-				ogTitle="Shop PC Optimization Products"
-				ogDescription="Custom Windows 10/11 ISOs and BIOS optimization services for competitive gaming setups."
+				ogTitle="Windows builds and BIOS tuning | Softhe.io"
+				ogDescription="Compare the price, scope, and hardware fit of each Softhe.io product."
 				structuredData={{
 					"@context": "https://schema.org",
 					"@type": "ItemList",
@@ -125,13 +149,13 @@ function Store() {
 							"@type": "Product",
 							name: product.name,
 							description: product.description,
-							offers: {
+							...(commerceEnabled ? { offers: {
 								"@type": "Offer",
 								price: product.price,
 								priceCurrency: "EUR",
 								availability: "https://schema.org/InStock",
 								url: `${absoluteUrl('/store')}#${product.id}`,
-							},
+							} } : {}),
 						},
 					})),
 				}}
@@ -140,8 +164,8 @@ function Store() {
 				{!commerceEnabled && (
 					<div className="checkout-result checkout-result-pending" role="status">
 						<div className="container">
-							<strong>Online checkout is being prepared</strong>
-							<span>Products remain available to review while secure checkout is being activated.</span>
+							<strong>Online ordering is unavailable</strong>
+							<span>You can review products and prices here. Contact us with your hardware details if you have questions.</span>
 							<Link to="/contact" className="status-contact-link">Ask about an order</Link>
 						</div>
 					</div>
@@ -157,7 +181,7 @@ function Store() {
 				<section className="page-header">
 					<div className="container">
 						<h1>Store</h1>
-						<p>Choose the optimization path that fits your system and support needs.</p>
+						<p>Compare each product by price, included work, and hardware fit.{!commerceEnabled && ' Online ordering is currently unavailable.'}</p>
 					</div>
 				</section>
 
@@ -166,17 +190,17 @@ function Store() {
 						<div className="store-intro">
 							<div>
 								<span className="section-kicker">Products</span>
-								<h2>Simple packages, clear outcomes.</h2>
+								<h2>Choose Windows, BIOS tuning, or both.</h2>
 								<p>
-									Start with a lean Windows install, add BIOS tuning for deeper hardware work,
-									then complete one server-validated Stripe checkout when you are ready.
+									Choose a Windows build for operating-system changes or BIOS tuning for firmware
+								and memory settings. {commerceEnabled ? 'The server checks the order before Stripe opens.' : 'Online ordering is currently unavailable.'}
 								</p>
 							</div>
 							<div className="store-trust">
-								<div>
+								{commerceEnabled && <div>
 									<strong>Stripe</strong>
 									<span>Secure hosted checkout</span>
-								</div>
+								</div>}
 								<div>
 									<strong>Withdrawal</strong>
 									<span>Online request available</span>
@@ -191,14 +215,14 @@ function Store() {
 						<div className="store-proof" aria-label="Benchmark evidence">
 							<div>
 								<span className="section-kicker">Benchmark context</span>
-								<h3>Current two-run median: 658 to 826 average FPS in CS2.</h3>
+								<h3>See the limits of the preliminary CS2 comparison.</h3>
 								<p>
-									The store points buyers back to measured before/after screenshots so product
-									choice is grounded in the available evidence.
+									One PC measured 658 and 826 average FPS across two configurations. Windows edition,
+									memory settings, and GPU driver changed. Raw runs are not yet published.
 								</p>
 							</div>
 							<a href="/performance" className="proof-link">
-								Review benchmarks
+								Read the benchmark details
 								<i className="fas fa-arrow-right" aria-hidden="true"></i>
 							</a>
 						</div>
@@ -206,8 +230,8 @@ function Store() {
 						<div className="product-finder">
 							<div>
 								<span className="section-kicker">Quick fit</span>
-								<h3>Which product should I start with?</h3>
-								<p>Pick the situation closest to your setup and use the recommendation as a starting point.</p>
+							<h3>Find the closest match for your PC</h3>
+							<p>Choose the statement that matches your requirement. Contact support if none of them fit.</p>
 							</div>
 							<div className="finder-controls" role="group" aria-label="Product recommendation options">
 								<button
@@ -215,21 +239,21 @@ function Store() {
 									className={quizChoice === 'windows-10' ? 'active' : ''}
 									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
 								>
-									I want a clean competitive Windows baseline
+									I want a streamlined Windows 10 build
 								</button>
 								<button
 									type="button"
 									className={quizChoice === 'windows-11' ? 'active' : ''}
 									onClick={() => handleQuizChoice('windows-11', 'newer_pc_windows_11')}
 								>
-									My newer PC should stay on Windows 11
+									My PC requires Windows 11
 								</button>
 								<button
 									type="button"
 									className={quizChoice === 'bios-optimization' ? 'active' : ''}
 									onClick={() => handleQuizChoice('bios-optimization', 'untuned_hardware')}
 								>
-									My hardware feels untuned or inconsistent
+									I need my BIOS and memory settings checked
 								</button>
 							</div>
 							<div className="finder-result">
@@ -241,7 +265,7 @@ function Store() {
 
 						<div className="products-grid">
 							{products.map((product) => (
-								<div key={product.id} className="product-card">
+								<div key={product.id} id={product.id} className="product-card">
 									{product.badge && (
 										<div className="product-badge">{product.badge}</div>
 									)}
@@ -312,14 +336,14 @@ function Store() {
 							<div className="assurance-item">
 								<i className="fas fa-tags" aria-hidden="true"></i>
 								<div>
-									<strong>Automatic bundle discounts</strong>
+									<strong>Bundle discounts</strong>
 									<span>Two products save 5%; three products save 10% at checkout.</span>
 								</div>
 							</div>
 							<div className="assurance-item">
 								<i className="fas fa-circle-question" aria-hidden="true"></i>
 								<div>
-									<strong>Compatibility check</strong>
+									<strong>Ask before ordering</strong>
 									<span>Ask support before buying if hardware fit is unclear.</span>
 								</div>
 							</div>

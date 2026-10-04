@@ -30,7 +30,9 @@ jobs:
     env:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       MONITORING_TEST_SECRET: ${{ secrets.MONITORING_TEST_SECRET }}
-      MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL || 'https://softhe.io' }}
+      MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}
+      MONITOR_PREVIEW_BRANCH: ${{ vars.MONITOR_PREVIEW_BRANCH || 'customer-portal-test' }}
+      MONITOR_PREVIEW_BRANCH_CONFIGURED: ${{ vars.MONITOR_PREVIEW_BRANCH }}
       TEST_ALERT: ${{ inputs.test_alert || 'none' }}
     steps:
       - name: Checkout
@@ -51,7 +53,7 @@ jobs:
         id: health
         shell: bash
         run: |
-          npx --yes vercel@59.3.0 curl /api/health --deployment "$MONITOR_BASE_URL" > health.json
+          curl --fail --silent --show-error --max-time 20 https://softhe.io/api/health > health.json
           node -e "const fs=require('fs');const h=JSON.parse(fs.readFileSync('health.json','utf8'));if(h.status!=='ready'||!Object.values(h.checks||{}).every(Boolean))throw new Error('Health endpoint is not ready')"
           if [ "$TEST_ALERT" = "uptime" ]; then
             echo 'Controlled uptime alert test: health succeeded, now proving the notification path.' >&2
@@ -62,6 +64,10 @@ jobs:
         if: ${{ inputs.test_alert == 'browser' || inputs.test_alert == 'delivery' }}
         shell: bash
         run: |
+          if [ -z "$MONITOR_BASE_URL" ] || [ -z "$MONITOR_PREVIEW_BRANCH_CONFIGURED" ]; then
+            echo 'Controlled tests require MONITOR_BASE_URL and an explicit MONITOR_PREVIEW_BRANCH for that protected Preview deployment.' >&2
+            exit 1
+          fi
           npx --yes vercel@59.3.0 curl /api/health --deployment "$MONITOR_BASE_URL" -- \
             --request POST \
             --header "Authorization: Bearer $MONITORING_TEST_SECRET" \
@@ -73,15 +79,28 @@ jobs:
         if: ${{ always() && steps.health.outcome == 'success' }}
         shell: bash
         run: |
-          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+          npx --yes vercel@59.3.0 logs --environment production --since 15m \
             --query browser_error --json > browser-errors.jsonl
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
+            --query browser_error --json >> browser-errors.jsonl
 
       - name: Query delivery-failure logs
         if: ${{ always() && steps.health.outcome == 'success' }}
         shell: bash
         run: |
-          npx --yes vercel@59.3.0 logs --branch customer-portal-test --since 15m \
+          npx --yes vercel@59.3.0 logs --environment production --since 15m \
             --query delivery_failed --json > delivery-failures.jsonl
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
+            --query delivery_failed --json >> delivery-failures.jsonl
+
+      - name: Query confirmation-review logs
+        if: ${{ always() && steps.health.outcome == 'success' }}
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 logs --environment production --since 15m \
+            --query stripe_confirmation_requires_review --json > confirmation-reviews.jsonl
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
+            --query stripe_confirmation_requires_review --json >> confirmation-reviews.jsonl
 
       - name: Evaluate runtime alerts
         if: ${{ always() && steps.health.outcome == 'success' }}
@@ -89,4 +108,5 @@ jobs:
         env:
           BROWSER_LOG_FILE: ../browser-errors.jsonl
           DELIVERY_LOG_FILE: ../delivery-failures.jsonl
+          CONFIRMATION_REVIEW_LOG_FILE: ../confirmation-reviews.jsonl
         run: node scripts/check-monitoring-alerts.js

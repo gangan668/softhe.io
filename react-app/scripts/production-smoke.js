@@ -1,4 +1,5 @@
 import process from 'node:process';
+import { requestVercel } from './vercel-smoke-request.js';
 
 const baseUrl = (process.env.PRODUCTION_BASE_URL || 'https://softhe.io').replace(/\/$/, '');
 const requireAppMarker = process.env.REQUIRE_APP_MARKER === 'true';
@@ -12,6 +13,7 @@ const assert = (condition, message) => {
 };
 
 const request = async (path) => {
+	if (process.env.SMOKE_VERCEL_AUTH === 'true') return requestVercel(baseUrl, path);
 	const response = await fetch(`${baseUrl}${path}`, {
 		headers: { 'User-Agent': 'softhe-production-smoke/1.0' },
 		redirect: 'follow',

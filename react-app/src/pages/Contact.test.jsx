@@ -54,7 +54,7 @@ describe("Contact Component", () => {
 	describe("Rendering", () => {
 		it("should render the contact page with heading", () => {
 			renderContact();
-			expect(screen.getByText(/Get in Touch/i)).toBeInTheDocument();
+			expect(screen.getByText(/Contact Softhe.io/i)).toBeInTheDocument();
 		});
 
 		it("should render all form fields", () => {
@@ -366,16 +366,16 @@ describe("Contact Component", () => {
 			expect(nameInput.value).not.toContain("</script>");
 		});
 
-		it("should limit input length", async () => {
+		it("preserves a message within the displayed 2000-character limit", async () => {
 			renderContact();
 
 			const messageInput = screen.getByLabelText(/^Message/i);
-			const longMessage = "a".repeat(1500); // Exceeds 1000 char limit
+			const longMessage = "a".repeat(1500);
 
 			fireEvent.change(messageInput, { target: { value: longMessage } });
 
-			// Input should be trimmed to max length during sanitization
-			expect(messageInput.value.length).toBeLessThanOrEqual(1000);
+			expect(messageInput).toHaveValue(longMessage);
+			expect(messageInput).toHaveAttribute("maxLength", "2000");
 		});
 
 		it("should trim whitespace from inputs", async () => {
@@ -583,7 +583,7 @@ describe("Contact Component", () => {
 			await user.type(messageInput, longMessage);
 
 			expect(messageInput.value.length).toBeGreaterThan(10);
-			expect(messageInput.value.length).toBeLessThanOrEqual(1000);
+			expect(messageInput.value.length).toBeLessThanOrEqual(2000);
 		});
 	});
 });
