@@ -8,6 +8,11 @@ on:
         required: false
         default: false
         type: boolean
+      authenticated_candidate:
+        description: Use authenticated Vercel transport for a protected immutable candidate (all smoke assertions remain enabled)
+        required: false
+        default: false
+        type: boolean
       candidate_url:
         description: HTTPS origin serving the release candidate
         required: true
@@ -71,12 +76,24 @@ jobs:
         run: |
           npx --yes vercel@59.3.0 curl /api/health --deployment "$CANDIDATE_URL" -- --silent --show-error --max-time 30 > candidate-health.json
           node -e "const fs=require('fs');const h=JSON.parse(fs.readFileSync('candidate-health.json','utf8'));console.log(JSON.stringify(h));if(h.status!=='ready'||!Object.values(h.checks||{}).every(Boolean))throw Error('Staged candidate configuration is not ready');if(h.release?.sourceCommit!==process.env.GITHUB_SHA)throw Error('Staged candidate source identity mismatch');if(h.release?.fingerprint!=='softhe-'+process.env.GITHUB_SHA.slice(0,7)+'-stage1')throw Error('Staged candidate release fingerprint mismatch')"
+      - name: Strict staged production smoke
+        working-directory: react-app
+        env:
+          PRODUCTION_BASE_URL: ${{ steps.deploy.outputs.url }}
+          SMOKE_VERCEL_AUTH: 'true'
+          REQUIRE_APP_MARKER: 'true'
+          REQUIRE_SECURITY_HEADERS: 'true'
+          REQUIRE_SERVERLESS_API: 'true'
+        run: |
+          EXPECTED_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" EXPECTED_RELEASE_FINGERPRINT="softhe-${GITHUB_SHA:0:7}-stage1" node scripts/production-smoke.js
 
   release-gate:
     if: ${{ !inputs.stage_candidate }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     defaults:
       run:
         working-directory: react-app
@@ -107,6 +124,7 @@ jobs:
         run: npm run smoke:production
         env:
           PRODUCTION_BASE_URL: ${{ inputs.candidate_url }}
+          SMOKE_VERCEL_AUTH: ${{ inputs.authenticated_candidate && 'true' || 'false' }}
           REQUIRE_APP_MARKER: 'true'
           REQUIRE_SECURITY_HEADERS: 'true'
           REQUIRE_SERVERLESS_API: 'true'
