@@ -3,6 +3,11 @@ name: Commercial Release Gate
 on:
   workflow_dispatch:
     inputs:
+      stage_candidate:
+        description: Build a staged Production candidate without assigning live domains (does not qualify or promote it)
+        required: false
+        default: false
+        type: boolean
       candidate_url:
         description: HTTPS origin serving the release candidate
         required: true
@@ -30,7 +35,45 @@ on:
           - commerce
 
 jobs:
+  stage-candidate:
+    if: ${{ inputs.stage_candidate }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Link existing project
+        run: |
+          mkdir -p .vercel
+          printf '%s\n' '{"orgId":"team_N2ebrhHRUamJXfQQ2LXBOEny","projectId":"prj_ivs19EGdAuvKZJ6nPd34WRtJ3Kki"}' > .vercel/project.json
+      - name: Build without assigning live domains
+        id: deploy
+        run: |
+          npx --yes vercel@59.3.0 deploy --prod --skip-domain --yes \
+            --build-env VITE_COMMERCE_ENABLED=false \
+            --env COMMERCE_ENABLED=false --env STAFF_PORTAL_ENABLED=false \
+            --env RELEASE_SOURCE_COMMIT="$GITHUB_SHA" \
+            --env RELEASE_FINGERPRINT="softhe-${GITHUB_SHA:0:7}-stage1" \
+            --meta githubCommitSha="$GITHUB_SHA" --meta githubCommitRef="$GITHUB_REF_NAME" > candidate-url.txt
+          candidate_url=$(tail -n 1 candidate-url.txt)
+          case "$candidate_url" in https://*.vercel.app) ;; *) echo 'Invalid candidate URL'; exit 1;; esac
+          echo "url=$candidate_url" >> "$GITHUB_OUTPUT"
+          printf 'Staged candidate: %s\nSource: %s\nLive domain assignment was skipped.\n' "$candidate_url" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+      - name: Inspect staged runtime configuration
+        env:
+          CANDIDATE_URL: ${{ steps.deploy.outputs.url }}
+        run: |
+          npx --yes vercel@59.3.0 curl /api/health --deployment "$CANDIDATE_URL" -- --silent --show-error --max-time 30 > candidate-health.json
+          node -e "const fs=require('fs');const h=JSON.parse(fs.readFileSync('candidate-health.json','utf8'));console.log(JSON.stringify(h));if(h.status!=='ready'||!Object.values(h.checks||{}).every(Boolean))throw Error('Staged candidate configuration is not ready');if(h.release?.sourceCommit!==process.env.GITHUB_SHA)throw Error('Staged candidate source identity mismatch');if(h.release?.fingerprint!=='softhe-'+process.env.GITHUB_SHA.slice(0,7)+'-stage1')throw Error('Staged candidate release fingerprint mismatch')"
+
   release-gate:
+    if: ${{ !inputs.stage_candidate }}
     runs-on: ubuntu-latest
     permissions:
       contents: read

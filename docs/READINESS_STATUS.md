@@ -1,6 +1,19 @@
 # Production readiness status
 
-Last source review: 2026-10-03 (Europe/Berlin). Vercel deployment metadata was inspected; live provider behavior was not reverified.
+Last verification checkpoint: 2026-10-04 (Europe/Berlin). The observations below distinguish controlled alert detection, notification receipt, and candidate readiness.
+
+## Verification checkpoint (2026-10-04)
+
+- Chrome verification reconnected successfully. GitHub Actions shows the latest PR #7 quality, CI, E2E, staging artifact, and CodeQL runs passing for `9175262`.
+- The monitoring baseline run `37156833933` passed. The replacement Vercel credential works for the controlled test workflow's runtime-log queries.
+- Controlled uptime run `37157286776` passed production health, then deliberately failed. The user supplied the corresponding Gmail failure-notification screenshot. Its notification evidence is now recorded as passed in `launch-evidence.json`.
+- Fresh controlled browser run `37158143606` detected exactly one browser-error event, zero delivery failures, and zero confirmation-review events. Production health, event emission, and runtime queries passed before the expected alert-evaluation failure. Receipt of this run's notification is not yet verified.
+- Controlled delivery run `37158224480` completed after the browser run. Alert evaluation detected one delivery-failure event, one browser-error event still inside the shared log window, and zero confirmation-review events. The expected alert failure confirms detection of the requested delivery event; notification receipt remains unverified.
+- Chrome's currently open mailbox returned no matching GitHub monitoring notifications for the last two days. It is a different mailbox from the user-provided uptime receipt. Do not treat this search as proof that the intended notification mailbox failed.
+- The immutable candidate `https://softhe-q4r1b6rp2-suportsofthe-9420s-projects.vercel.app/api/health` reports source `91752621910b593f0b8d042a921f73d3a0c5d7df` and fingerprint `softhe-9175262-stage1`, but status is `configuration-required`. Portal, checkout, contact, tickets, withdrawal, storage, and fulfillment readiness checks are all false. This candidate cannot pass strict release smoke without appropriate isolated configuration.
+- Subsequent Chrome mailbox inspection verified that the received 00:22 browser-error email links to run `37158143606`. The user followed the received delivery email link to run `37158224480`. All three controlled alert notification proofs are now recorded as passed. The stage-one evidence verifier passes structurally, but the manifest still describes the older September candidate and must be rebound to a freshly qualified deployment before release.
+- The manual Commercial Release Gate has a separate `stage_candidate` mode. It builds using the existing Production configuration, forces commerce and staff access off, skips live domain assignment, and verifies runtime readiness and exact source identity. This mode does not run the qualification job or promote the deployment. No Production secrets are copied into Preview.
+- Keep commerce and staff access disabled. No merge or production promotion has been performed at this checkpoint.
 
 ## Test-branch checkpoint (2026-10-03)
 
