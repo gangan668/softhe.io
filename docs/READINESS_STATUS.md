@@ -14,6 +14,7 @@ Last verification checkpoint: 2026-10-04 (Europe/Berlin). The observations below
 - Subsequent Chrome mailbox inspection verified that the received 00:22 browser-error email links to run `37158143606`. The user followed the received delivery email link to run `37158224480`. All three controlled alert notification proofs are now recorded as passed. The stage-one evidence verifier passes structurally, but the manifest still describes the older September candidate and must be rebound to a freshly qualified deployment before release.
 - The manual Commercial Release Gate has a separate `stage_candidate` mode. It builds using the existing Production configuration, forces commerce and staff access off, skips live domain assignment, and verifies runtime readiness and exact source identity. This mode does not run the qualification job or promote the deployment. No Production secrets are copied into Preview.
 - Keep commerce and staff access disabled. No merge or production promotion has been performed at this checkpoint.
+- Staged Production deployment `dpl_64fwjQnB8F3QPYGWZfPdyXhZnyEc`, source `531c96c450f1719da80b0f2a9839e7906074dc64`, passed all readiness checks and complete authenticated strict smoke in run `37164242676`. The manifest now identifies this immutable candidate. The local suite passes with 327 tests and 3 skipped; lint passes. Final evidence qualification and refreshed PR checks remain required before merge.
 
 ## Test-branch checkpoint (2026-10-03)
 
