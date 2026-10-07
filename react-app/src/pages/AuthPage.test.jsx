@@ -1,8 +1,12 @@
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import { beforeEach, afterEach, expect, it, vi } from 'vitest';
+import { beforeEach, afterEach, afterAll, expect, it, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import AuthPage from './AuthPage';
+// Canonical callback assertions use an explicit fixture instead of inheriting
+// the staging artifact workflow's public-origin configuration.
+vi.hoisted(() => { vi.stubEnv('VITE_PUBLIC_ORIGIN', 'https://softhe.io'); });
+afterAll(() => { vi.unstubAllEnvs(); });
 let auth;
 function mount(mode = 'login', context = {}) {
 	return render(<MemoryRouter><AuthContext.Provider value={{ configured: true, loading: false, supabase: { auth }, ...context }}><Routes><Route path="/" element={<AuthPage mode={mode} />} /><Route path="/account" element={<div>Account destination</div>} /></Routes></AuthContext.Provider></MemoryRouter>);
