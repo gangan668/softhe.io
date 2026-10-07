@@ -1,5 +1,20 @@
 # Production rollback record
 
+## Current verified baseline (2026-10-07)
+
+The public domain now runs on Vercel. The GitHub Pages records below are historical and must not be applied to the current release.
+
+- Current healthy Production deployment: `dpl_GqvggywWh9SNs1a9hjqYZDCU9weM`.
+- Immutable origin: `https://softhe-q72mdk5ce-suportsofthe-9420s-projects.vercel.app`.
+- Source: `77aead61515245e553efdda15fdaf4973b7e462a`; fingerprint: `softhe-77aead6-stage1`.
+- Public `https://softhe.io/api/health` passed the audit with HTTP 200 and all readiness checks true. Commerce and contact submission remain disabled in the visible application.
+- Vercel identifies this deployment as a rollback candidate. Retain it when qualifying the remediation release; no alias rollback rehearsal has been performed for the new release.
+- Workstation DNS observation: apex A `216.198.79.1`, TTL 300; authoritative nameservers `ns1.dyna-ns.net` and `ns2.dyna-ns.net`. This is a resolver observation, not a provider zone export.
+
+Use Vercel deployment rollback for a release regression. Do not restore the historical Pages DNS addresses merely to rehearse rollback. Verify the custom-domain source, fingerprint, health, flags, and critical routes after any authorized rollback.
+
+## Historical record (2026-08-22)
+
 Last verified: 2026-08-22 (Europe/Berlin)
 
 ## Known deployment targets

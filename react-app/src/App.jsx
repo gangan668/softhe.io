@@ -5,6 +5,8 @@ import CookieConsent from './components/CookieConsent';
 import ErrorBoundary from './components/ErrorBoundary';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
+import RouteMetadata from './components/RouteMetadata';
+import WebAnalytics from './components/WebAnalytics';
 import { CartProvider } from './context/CartProvider';
 import { AuthProvider } from './context/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -13,7 +15,7 @@ import { initMonitoring } from './utils/monitoring';
 import { getAuthCallbackError } from './utils/authCallback';
 import './App.css';
 
-import Home from './pages/Home';
+const Home = lazy(() => import('./pages/Home'));
 const Services = lazy(() => import('./pages/Services'));
 const Store = lazy(() => import('./pages/Store'));
 const Performance = lazy(() => import('./pages/Performance'));
@@ -79,6 +81,8 @@ function App() {
 				<CartProvider>
 					<AuthCallbackErrorRedirect />
 					<RouteTracker />
+					<RouteMetadata />
+					<WebAnalytics />
 					<div className="App">
 						<a className="skip-link" href="#main-content">Skip to main content</a>
 						<Navbar onCartClick={() => setIsCartOpen((open) => !open)} />

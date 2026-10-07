@@ -1,0 +1,351 @@
+[
+  {
+    "requested": "/",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css"
+    ],
+    "h1": "Cut Windows overhead. Tune the hardware.",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/"
+  },
+  {
+    "requested": "/services",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Services-DEAf_waB.css"
+    ],
+    "h1": "PC optimization services",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/services"
+  },
+  {
+    "requested": "/store",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Store-BV7duJYj.css"
+    ],
+    "h1": "Store",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/store"
+  },
+  {
+    "requested": "/performance",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Performance-l7YCShJh.css"
+    ],
+    "h1": "Measured results from the current test PC",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/performance"
+  },
+  {
+    "requested": "/contact",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Contact-Bdw-TO12.css"
+    ],
+    "h1": "Contact Softhe.io",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/contact"
+  },
+  {
+    "requested": "/faq",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/FAQ-lL1kJ464.css"
+    ],
+    "h1": "Questions about products and support",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/faq"
+  },
+  {
+    "requested": "/checkout",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Checkout-DpkcqGyX.css",
+      "https://softhe.io/assets/Store-BV7duJYj.css"
+    ],
+    "h1": "Store",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/store"
+  },
+  {
+    "requested": "/privacy-policy",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Legal-BBr0xFXW.css"
+    ],
+    "h1": "Privacy Policy",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/privacy-policy"
+  },
+  {
+    "requested": "/cookie-policy",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Legal-BBr0xFXW.css"
+    ],
+    "h1": "Cookie Policy",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/cookie-policy"
+  },
+  {
+    "requested": "/terms",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Legal-BBr0xFXW.css"
+    ],
+    "h1": "Terms of Service",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/terms"
+  },
+  {
+    "requested": "/legal-notice",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Legal-BBr0xFXW.css"
+    ],
+    "h1": "Legal Notice",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/legal-notice"
+  },
+  {
+    "requested": "/withdrawal",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Withdrawal-gkOLvR1_.css",
+      "https://softhe.io/assets/Legal-BBr0xFXW.css"
+    ],
+    "h1": "Withdraw from an Order",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/withdrawal"
+  },
+  {
+    "requested": "/login",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css",
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    ],
+    "h1": "Welcome back",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/login"
+  },
+  {
+    "requested": "/register",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css",
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    ],
+    "h1": "Create your account",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/register"
+  },
+  {
+    "requested": "/forgot-password",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css",
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    ],
+    "h1": "Reset your password",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/forgot-password"
+  },
+  {
+    "requested": "/resend-confirmation",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css",
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    ],
+    "h1": "Resend confirmation",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/resend-confirmation"
+  },
+  {
+    "requested": "/reset-password",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css"
+    ],
+    "h1": "Choose a new password",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/reset-password"
+  },
+  {
+    "requested": "/account",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css",
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    ],
+    "h1": "Welcome back",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/login"
+  },
+  {
+    "requested": "/admin",
+    "assets": [
+      "https://softhe.io/images/softhe-icon-v2-32.png",
+      "https://softhe.io/assets/index-GcIZhq4D.js",
+      "https://softhe.io/assets/index-DbF82arn.css",
+      "https://softhe.io/assets/Portal-BEsqSGQj.css",
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit"
+    ],
+    "h1": "Welcome back",
+    "images": [
+      {
+        "broken": false,
+        "src": "https://softhe.io/images/softhe-icon-v2-192.png"
+      }
+    ],
+    "overflow": false,
+    "path": "/login"
+  }
+]

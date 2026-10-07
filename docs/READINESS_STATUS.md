@@ -1,5 +1,13 @@
 # Production readiness status
 
+## Remediation execution checkpoint (2026-10-07)
+
+The current public release is Vercel Production deployment `dpl_GqvggywWh9SNs1a9hjqYZDCU9weM`, main source `77aead61515245e553efdda15fdaf4973b7e462a`, fingerprint `softhe-77aead6-stage1`. The full website audit and remediation are tracked in `audits/2026-10-07/REPORT.md`, `COMPLETION_PLAN.md`, and `EXECUTION_STATUS.md`.
+
+Source repairs and expanded regressions are being integrated on `codex/website-audit-remediation`; they are not deployed production fixes. Production commerce and contact submission remain disabled. The owner-approved restoration of isolated Supabase project `zbchdxptibehtizomwiq` completed successfully. Existing monitoring Preview `dpl_FS9FAVwQ5gX7EqgVfmiUozKMePUs` now returns HTTP 200 `ready` with every configuration check true, retaining its historical source/fingerprint.
+
+Live database grants/RLS checks passed using two credential-free synthetic identities inside a rolled-back transaction, including cross-customer and suspended-user denial. Cleanup confirmed zero synthetic users, tickets, and orders. This does not prove Auth API, CAPTCHA/MFA, transactional delivery, payments, or the new remediation candidate. Six commercial evidence entries remain pending. The checkpoints below remain dated history.
+
 Last verification checkpoint: 2026-10-04 (Europe/Berlin). The observations below distinguish controlled alert detection, notification receipt, and candidate readiness.
 
 ## Verification checkpoint (2026-10-04)

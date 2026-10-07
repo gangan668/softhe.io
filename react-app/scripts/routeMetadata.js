@@ -1,4 +1,8 @@
-export const siteUrl = 'https://softhe.io';
+import process from 'node:process';
+import { loadEnv } from 'vite';
+import { resolvePublicOrigin } from '../src/config/publicOrigin.js';
+
+export const siteUrl = resolvePublicOrigin({ ...loadEnv('production', process.cwd(), ''), ...process.env });
 export const socialImage = `${siteUrl}/images/social-share.png`;
 
 export const routeMetadata = [

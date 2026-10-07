@@ -1,0 +1,47 @@
+name: Durable Processing Reconciliation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/10 * * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: processing-reconciliation
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MONITORING_RECONCILIATION_SECRET: ${{ secrets.MONITORING_RECONCILIATION_SECRET }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reconcile durable Production processing attempts
+        shell: bash
+        run: |
+          if [ ${#MONITORING_RECONCILIATION_SECRET} -lt 32 ]; then
+            echo 'Configure the separate processing reconciliation secret in GitHub and Vercel before enabling this monitor.' >&2
+            exit 1
+          fi
+          curl --fail --silent --show-error --max-time 30 \
+            --header "Authorization: Bearer $MONITORING_RECONCILIATION_SECRET" \
+            'https://softhe.io/api/health?action=reconcile-processing' > production-processing.json
+          node react-app/scripts/check-processing-reconciliation.js production-processing.json
+      - name: Reconcile configured protected Preview processing attempts
+        if: ${{ always() && vars.MONITOR_BASE_URL != '' }}
+        shell: bash
+        run: |
+          mkdir -p .vercel
+          printf '%s\n' '{"orgId":"team_N2ebrhHRUamJXfQQ2LXBOEny","projectId":"prj_ivs19EGdAuvKZJ6nPd34WRtJ3Kki"}' > .vercel/project.json
+          npx --yes vercel@59.3.0 curl '/api/health?action=reconcile-processing' --deployment "$MONITOR_BASE_URL" -- \
+            --header "Authorization: Bearer $MONITORING_RECONCILIATION_SECRET" > preview-processing.json
+          node react-app/scripts/check-processing-reconciliation.js preview-processing.json

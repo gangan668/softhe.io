@@ -1,0 +1,55 @@
+{
+  "archiveUrl": "https://github.com/gangan668/softhe.io/releases/download/benchmark-evidence-v74-2026-08-13/softhe-cs2-benchmark-evidence-v74-2026-08-13.zip",
+  "sha256": "7ffd5cfb4816fc581f359d96c0e9e6aa76f83c15a81a2aafe7bfae4b4c183de6",
+  "archiveBytes": 8086382,
+  "captures": [
+    {
+      "name": "CapFrameX-cs2.exe-2026-08-11T103136-DEFUALT.json",
+      "captureHash": "2961BEBE02CBAF6D5367926B5013292F9A0AB1AB",
+      "frames": 72167,
+      "seconds": 109.00083650000181,
+      "averageFps": 662.0774878181674,
+      "onePercentLowFps": 228.30528983356547
+    },
+    {
+      "name": "CapFrameX-cs2.exe-2026-08-11T103449-DEFUALT.json",
+      "captureHash": "0011BAB5357EB72C20A42A130C45CFB9957E8B76",
+      "frames": 71324,
+      "seconds": 109.0016247000001,
+      "averageFps": 654.3388706021732,
+      "onePercentLowFps": 221.75899232713886
+    },
+    {
+      "name": "CapFrameX-cs2.exe-2026-08-13T51834-SoftheOS.json",
+      "captureHash": "E7C9482EAF843645E842CA9489C7181A69EE6ABA",
+      "frames": 89984,
+      "seconds": 109.00141469999895,
+      "averageFps": 825.530569925721,
+      "onePercentLowFps": 283.72818839551707
+    },
+    {
+      "name": "CapFrameX-cs2.exe-2026-08-13T52143-SoftheOS.json",
+      "captureHash": "59E6F2351BF66B7D3B88E18859685CA5683017BB",
+      "frames": 90049,
+      "seconds": 109.0008314000004,
+      "averageFps": 826.1313133433556,
+      "onePercentLowFps": 287.05936387644965
+    }
+  ],
+  "medians": {
+    "stock": {
+      "averageFps": 658.21,
+      "onePercentLowFps": 225.035
+    },
+    "optimized": {
+      "averageFps": 825.8299999999999,
+      "onePercentLowFps": 285.395
+    }
+  },
+  "limitations": [
+    "Capture authenticity and original test execution were not independently observed.",
+    "The exact CS2 build and chipset-driver versions were not recorded.",
+    "Windows edition, memory settings, BIOS profile and GPU driver changed.",
+    "The reported 1% low is a frame-time percentile, not the mean of the slowest one percent."
+  ]
+}

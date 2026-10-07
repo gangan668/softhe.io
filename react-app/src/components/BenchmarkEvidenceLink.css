@@ -1,0 +1,15 @@
+.benchmark-evidence-link {
+	color: var(--primary-color);
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.benchmark-evidence-link:hover {
+	color: var(--text-primary);
+}
+
+.benchmark-evidence-link:focus-visible {
+	outline: 2px solid var(--primary-color);
+	outline-offset: 3px;
+	border-radius: 2px;
+}

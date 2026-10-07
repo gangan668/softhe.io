@@ -121,9 +121,9 @@ function CookieConsent() {
 										Performance Cookies
 									</h4>
 									<p>
-										These cookies help us understand how visitors interact with our website
-										by collecting and reporting information anonymously. We use Google
-										Analytics with IP anonymization enabled to protect your privacy.
+										Optional analytics help us understand visits to our public pages
+										after consent. We use cookie-free Vercel Web Analytics and configured Google
+										Analytics. Vercel events exclude private routes, query strings, and URL fragments.
 									</p>
 									<span className="cookie-status optional">Optional</span>
 								</div>

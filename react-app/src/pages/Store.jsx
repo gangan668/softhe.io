@@ -1,3 +1,5 @@
+import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
+import { benchmarkPublication } from '../data/benchmarkPublication';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { absoluteUrl } from '../config/site';
@@ -218,7 +220,7 @@ function Store() {
 								<h3>See the limits of the preliminary CS2 comparison.</h3>
 								<p>
 									One PC measured 658 and 826 average FPS across two configurations. Windows edition,
-									memory settings, and GPU driver changed. Raw runs are not yet published.
+									memory settings, and GPU driver changed. {benchmarkPublication.status} <BenchmarkEvidenceLink />
 								</p>
 							</div>
 							<a href="/performance" className="proof-link">

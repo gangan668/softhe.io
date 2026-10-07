@@ -67,6 +67,8 @@
 	.portal-heading { align-items: start; flex-direction: column; }
 	.portal-grid { grid-template-columns: 1fr; }
 	.admin-metrics { grid-template-columns: 1fr; }
+	.ticket-toolbar { flex-direction: column; align-items: stretch; }
+	.ticket-toolbar select { width: 100%; min-width: 0; }
 	.ticket-workspace { display: flex; flex-direction: column; height: auto; min-height: 0; }
 	.ticket-list { flex-direction: row; padding: 12px; overflow-x: auto; overflow-y: hidden; border-right: 0; border-bottom: 1px solid var(--border-color); scroll-snap-type: x proximity; }
 	.ticket-list button { flex: 0 0 min(220px, 76vw); scroll-snap-align: start; }

@@ -7,6 +7,6 @@ export const getSupabase = () => {
 	if (!portalConfigured) return Promise.resolve(null);
 	if (!clientPromise) clientPromise = import('@supabase/supabase-js').then(({ createClient }) => createClient(url, key, {
 		auth: { flowType: 'pkce', persistSession: true, autoRefreshToken: true, detectSessionInUrl: true },
-	}));
+	})).catch((error) => { clientPromise = undefined; throw error; });
 	return clientPromise;
 };

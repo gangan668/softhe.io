@@ -22,7 +22,7 @@ function PrivacyPolicy() {
 				<section className="legal-content">
 					<div className="container">
 						<div className="legal-card">
-							<p className="legal-revision">Last updated: 20 July 2026</p>
+							<p className="legal-revision">Last updated: 7 October 2026</p>
 							<section>
 								<h2>Controller</h2>
 								<p>{legalName} is the controller for information processed through this website. Contact: <a href={`mailto:${supportEmail}`}>{supportEmail}</a>.</p>
@@ -58,6 +58,7 @@ function PrivacyPolicy() {
 									Analytics only load after you grant consent in the cookie banner. You can
 									change your choice by reopening cookie settings from the footer.
 								</p>
+								<p>Vercel Web Analytics measures visits to fixed public pages after consent. Our integration removes URL query strings and fragments and excludes checkout, authentication, account, staff, and unknown routes. It does not send custom events, form contents, order references, or customer identifiers. Vercel Web Analytics uses no analytics cookies. Google Analytics may also run after consent when configured.</p>
 							</section>
 							<section>
 								<h2>Purposes and legal bases</h2>
@@ -69,7 +70,7 @@ function PrivacyPolicy() {
 									<li>Measure site usage only after consent to optional analytics.</li>
 								</ul>
 							</section>
-							<section><h2>Recipients and international processing</h2><p>Service providers may include Stripe for payments, EmailJS for contact delivery, Upstash for short-lived rate limiting and webhook state, Vercel for hosting, and Google Analytics when consented. Some providers may process information outside the European Economic Area using an adequacy decision, standard contractual clauses, or another lawful transfer mechanism described in their privacy information.</p></section>
+							<section><h2>Recipients and international processing</h2><p>Service providers may include Stripe for payments, EmailJS for contact delivery, Upstash for short-lived rate limiting and webhook state, Vercel for hosting and consented Web Analytics, and Google Analytics when consented. Some providers may process information outside the European Economic Area using an adequacy decision, standard contractual clauses, or another lawful transfer mechanism described in their privacy information.</p></section>
 							<section><h2>Retention</h2><p>Contact messages are retained only as long as needed to respond and maintain an appropriate support record. Order, payment, refund, and accounting records are retained for applicable contractual, tax, and legal periods. Withdrawal records are retained for the configured legal-evidence period, currently up to 400 days unless law or a dispute requires longer. Rate-limit entries are short lived; webhook idempotency records are retained only as needed to prevent duplicate fulfillment. Browser error records are retained only as long as needed to diagnose and prevent recurring failures. Analytics retention follows the configured analytics property.</p></section>
 							<section><h2>Your rights</h2><p>Depending on applicable law, you may request access, correction, deletion, restriction, portability, or objection, and may withdraw consent without affecting earlier lawful processing. You may complain to the <a href="https://www.imy.se/en/" target="_blank" rel="noreferrer">Swedish Authority for Privacy Protection (IMY)</a> or another competent data-protection authority. Requests can be sent to the address below; identity verification may be required.</p></section>
 							<section><h2>Required and optional information</h2><p>Contact and order fields identified as required are needed to answer a request or deliver a purchase. Optional analytics can be declined without losing access to the site or store.</p></section>

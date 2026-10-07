@@ -1,6 +1,7 @@
 const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
 const { adminRequest } = require('./_lib/supabase');
+const { reconcileProcessing } = require('./_lib/processing-attempts');
 
 const safeEqual = (left, right) => {
 	const leftBuffer = Buffer.from(String(left || ''));
@@ -83,12 +84,27 @@ async function health(req, res) {
 		const kind = req.body?.kind;
 		if (kind === 'browser') console.error('browser_error', { monitorTest: true });
 		else if (kind === 'delivery') console.error('contact_delivery_failed', { monitorTest: true });
+		else if (kind === 'stripe') console.error('stripe_webhook_failed', { monitorTest: true });
+		else if (kind === 'fulfillment') console.error('fulfillment_delivery_failed', { monitorTest: true });
 		else return res.status(400).json({ error: 'Unsupported monitoring test' });
 		return res.status(202).json({ accepted: true, kind });
 	}
 	if (req.method !== 'GET') {
 		res.setHeader('Allow', 'GET, POST');
 		return res.status(405).json({ error: 'Method not allowed' });
+	}
+	if (req.query?.action === 'reconcile-processing') {
+		const secret = process.env.MONITORING_RECONCILIATION_SECRET;
+		const supplied = String(req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
+		if (!secret || secret.length < 32) return res.status(503).json({ error: 'Processing monitoring is not configured' });
+		if (!safeEqual(secret, supplied)) return res.status(401).json({ error: 'Unauthorized' });
+		try {
+			const result = await reconcileProcessing();
+			const attentionRequired = result.pending.stripe > 0 || result.pending.fulfillment > 0 || result.truncated;
+			return res.status(200).json({ ...result, status: attentionRequired ? 'attention-required' : 'ready' });
+		} catch {
+			return res.status(503).json({ error: 'Processing monitoring is temporarily unavailable' });
+		}
 	}
 
 	const configuration = getConfigurationStatus();

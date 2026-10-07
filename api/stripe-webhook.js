@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const { claimKey, redisCommand, setKey } = require('./_lib/redis');
+const { beginProcessing, finishProcessing } = require('./_lib/processing-attempts');
 const { getPublicOrigin, normalizeItems, PRODUCTS } = require('./create-checkout-session');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { sendTransactionalEmail } = require('./_lib/resend');
@@ -194,8 +195,16 @@ const fulfillPaidSession = async (event) => {
 	if (await redisCommand(['GET', key])) return 'duplicate';
 	const claimed = await claimKey(lockKey, token, 600);
 	if (!claimed) return 'duplicate';
+	const operationalContext = {
+		attemptId: token,
+		eventId: /^evt_[A-Za-z0-9]+$/.test(event.id) ? event.id : null,
+		sessionId: /^cs_[A-Za-z0-9_]+$/.test(session.id) ? session.id : null,
+		timestamp: new Date().toISOString(),
+	};
+	console.info('stripe_webhook_processing_started', operationalContext);
 
 	try {
+		const member = await beginProcessing('stripe', session.id, token);
 		if (await redisCommand(['GET', key])) return 'duplicate';
 		if (portalServerConfigured() && !await redisCommand(['GET', `${key}:order`])) {
 			await persistPaidOrder(event, session);
@@ -203,7 +212,12 @@ const fulfillPaidSession = async (event) => {
 		}
 		if (!await redisCommand(['GET', `${key}:delivery`])) {
 			// The receiver deduplicates by session ID if delivery succeeds before this write.
-			await deliverFulfillment(event, session);
+			try {
+				await deliverFulfillment(event, session);
+			} catch (error) {
+				console.error('fulfillment_delivery_failed', operationalContext);
+				throw error;
+			}
 			await setKey(`${key}:delivery`, 'completed', 60 * 60 * 24 * 400);
 		}
 		const emailKey = `${key}:email`;
@@ -246,8 +260,10 @@ const fulfillPaidSession = async (event) => {
 			await setKey(emailKey, 'completed', 60 * 60 * 24 * 400);
 		}
 		await setKey(key, JSON.stringify({ eventId: event.id, status: 'completed' }), 60 * 60 * 24 * 90);
+		await finishProcessing(member, token);
 		return 'fulfilled';
 	} finally {
+		console.info('stripe_webhook_processing_finished', { ...operationalContext, timestamp: new Date().toISOString() });
 		const unlock = "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end return 0";
 		await redisCommand(['EVAL', unlock, 1, lockKey, token]).catch(() => {});
 	}
@@ -277,18 +293,23 @@ async function stripeWebhook(req, res) {
 	try {
 		event = JSON.parse(payload.toString('utf8'));
 	} catch {
+		console.error('stripe_webhook_failed', { reason: 'signed-payload-invalid', timestamp: new Date().toISOString() });
 		return res.status(400).json({ error: 'Invalid JSON payload' });
+	}
+	if (!event || typeof event !== 'object' || Array.isArray(event)) {
+		console.error('stripe_webhook_failed', { reason: 'signed-event-invalid', timestamp: new Date().toISOString() });
+		return res.status(400).json({ error: 'Invalid event payload' });
 	}
 
 	if (['checkout.session.completed', 'checkout.session.async_payment_succeeded'].includes(event.type)) {
 		try {
 			const status = await fulfillPaidSession(event);
 			return res.status(200).json({ received: true, status });
-		} catch (error) {
-			console.error('stripe_fulfillment_failed', {
-				eventId: event.id || null,
-				sessionId: event.data?.object?.id || null,
-				message: error.message,
+		} catch {
+			console.error('stripe_webhook_failed', {
+				eventId: /^evt_[A-Za-z0-9]+$/.test(event.id) ? event.id : null,
+				sessionId: /^cs_[A-Za-z0-9_]+$/.test(event.data?.object?.id) ? event.data.object.id : null,
+				timestamp: new Date().toISOString(),
 			});
 			return res.status(503).json({ error: 'Fulfillment temporarily unavailable' });
 		}

@@ -1,0 +1,1852 @@
+{
+  "generatedAt": "2026-10-07T20:46:48.019Z",
+  "baseUrl": "http://127.0.0.1:41827",
+  "widths": [
+    320,
+    390,
+    768,
+    1280,
+    1440
+  ],
+  "routes": [
+    "/",
+    "/services",
+    "/store",
+    "/performance",
+    "/contact",
+    "/faq",
+    "/privacy-policy",
+    "/cookie-policy",
+    "/terms",
+    "/legal-notice",
+    "/withdrawal",
+    "/checkout",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/resend-confirmation",
+    "/reset-password",
+    "/account",
+    "/admin",
+    "/audit-missing-route"
+  ],
+  "passed": true,
+  "results": [
+    {
+      "width": 320,
+      "requestedRoute": "/",
+      "actualRoute": "/",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cut Windows overhead. Tune the hardware."
+      ],
+      "outsideViewport": [],
+      "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\docs\\audits\\2026-10-07\\responsive\\320-home.png"
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/services",
+      "actualRoute": "/services",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "PC optimization services"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/store",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": [],
+      "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\docs\\audits\\2026-10-07\\responsive\\320-store.png"
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/performance",
+      "actualRoute": "/performance",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Measured results from the current test PC"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/contact",
+      "actualRoute": "/contact",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Contact Softhe.io"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/faq",
+      "actualRoute": "/faq",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Questions about products and support"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/privacy-policy",
+      "actualRoute": "/privacy-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Privacy Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/cookie-policy",
+      "actualRoute": "/cookie-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cookie Policy"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "TABLE",
+          "class": "",
+          "text": "StoragePurposeTypeDurationsofthe_cartRemember cart contentsEssential local storageUntil clearedsofth"
+        },
+        {
+          "tag": "THEAD",
+          "class": "",
+          "text": "StoragePurposeTypeDuration"
+        },
+        {
+          "tag": "TR",
+          "class": "",
+          "text": "StoragePurposeTypeDuration"
+        },
+        {
+          "tag": "TH",
+          "class": "",
+          "text": "Purpose"
+        },
+        {
+          "tag": "TH",
+          "class": "",
+          "text": "Type"
+        },
+        {
+          "tag": "TH",
+          "class": "",
+          "text": "Duration"
+        },
+        {
+          "tag": "TBODY",
+          "class": "",
+          "text": "softhe_cartRemember cart contentsEssential local storageUntil clearedsofthe_analytics_consentRemembe"
+        },
+        {
+          "tag": "TR",
+          "class": "",
+          "text": "softhe_cartRemember cart contentsEssential local storageUntil cleared"
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/terms",
+      "actualRoute": "/terms",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Terms of Service"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/legal-notice",
+      "actualRoute": "/legal-notice",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Legal Notice"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/withdrawal",
+      "actualRoute": "/withdrawal",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Withdraw from an Order"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "INPUT",
+          "class": "withdrawal-honeypot",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/checkout",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/login",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/register",
+      "actualRoute": "/register",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Create your account"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/forgot-password",
+      "actualRoute": "/forgot-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Reset your password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/resend-confirmation",
+      "actualRoute": "/resend-confirmation",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Resend confirmation"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/reset-password",
+      "actualRoute": "/reset-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Choose a new password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/account",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": [],
+      "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\docs\\audits\\2026-10-07\\responsive\\320-account.png"
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/admin",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 320,
+      "requestedRoute": "/audit-missing-route",
+      "actualRoute": "/audit-missing-route",
+      "status": 200,
+      "passed": true,
+      "viewport": 320,
+      "pageWidth": 320,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Page Not Found"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/",
+      "actualRoute": "/",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cut Windows overhead. Tune the hardware."
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/services",
+      "actualRoute": "/services",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "PC optimization services"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/store",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/performance",
+      "actualRoute": "/performance",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Measured results from the current test PC"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/contact",
+      "actualRoute": "/contact",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Contact Softhe.io"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/faq",
+      "actualRoute": "/faq",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Questions about products and support"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/privacy-policy",
+      "actualRoute": "/privacy-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Privacy Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/cookie-policy",
+      "actualRoute": "/cookie-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cookie Policy"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "TABLE",
+          "class": "",
+          "text": "StoragePurposeTypeDurationsofthe_cartRemember cart contentsEssential local storageUntil clearedsofth"
+        },
+        {
+          "tag": "THEAD",
+          "class": "",
+          "text": "StoragePurposeTypeDuration"
+        },
+        {
+          "tag": "TR",
+          "class": "",
+          "text": "StoragePurposeTypeDuration"
+        },
+        {
+          "tag": "TH",
+          "class": "",
+          "text": "Purpose"
+        },
+        {
+          "tag": "TH",
+          "class": "",
+          "text": "Type"
+        },
+        {
+          "tag": "TH",
+          "class": "",
+          "text": "Duration"
+        },
+        {
+          "tag": "TBODY",
+          "class": "",
+          "text": "softhe_cartRemember cart contentsEssential local storageUntil clearedsofthe_analytics_consentRemembe"
+        },
+        {
+          "tag": "TR",
+          "class": "",
+          "text": "softhe_cartRemember cart contentsEssential local storageUntil cleared"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/terms",
+      "actualRoute": "/terms",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Terms of Service"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/legal-notice",
+      "actualRoute": "/legal-notice",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Legal Notice"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/withdrawal",
+      "actualRoute": "/withdrawal",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Withdraw from an Order"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "INPUT",
+          "class": "withdrawal-honeypot",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/checkout",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/login",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/register",
+      "actualRoute": "/register",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Create your account"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/forgot-password",
+      "actualRoute": "/forgot-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Reset your password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/resend-confirmation",
+      "actualRoute": "/resend-confirmation",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Resend confirmation"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/reset-password",
+      "actualRoute": "/reset-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Choose a new password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/account",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/admin",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 390,
+      "requestedRoute": "/audit-missing-route",
+      "actualRoute": "/audit-missing-route",
+      "status": 200,
+      "passed": true,
+      "viewport": 390,
+      "pageWidth": 390,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Page Not Found"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/",
+      "actualRoute": "/",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cut Windows overhead. Tune the hardware."
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/services",
+      "actualRoute": "/services",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "PC optimization services"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/store",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/performance",
+      "actualRoute": "/performance",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Measured results from the current test PC"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/contact",
+      "actualRoute": "/contact",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Contact Softhe.io"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/faq",
+      "actualRoute": "/faq",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Questions about products and support"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/privacy-policy",
+      "actualRoute": "/privacy-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Privacy Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/cookie-policy",
+      "actualRoute": "/cookie-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cookie Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/terms",
+      "actualRoute": "/terms",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Terms of Service"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/legal-notice",
+      "actualRoute": "/legal-notice",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Legal Notice"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/withdrawal",
+      "actualRoute": "/withdrawal",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Withdraw from an Order"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "INPUT",
+          "class": "withdrawal-honeypot",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/checkout",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/login",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/register",
+      "actualRoute": "/register",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Create your account"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/forgot-password",
+      "actualRoute": "/forgot-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Reset your password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/resend-confirmation",
+      "actualRoute": "/resend-confirmation",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Resend confirmation"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/reset-password",
+      "actualRoute": "/reset-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Choose a new password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/account",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/admin",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [],
+      "outsideViewport": []
+    },
+    {
+      "width": 768,
+      "requestedRoute": "/audit-missing-route",
+      "actualRoute": "/audit-missing-route",
+      "status": 200,
+      "passed": true,
+      "viewport": 768,
+      "pageWidth": 768,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Page Not Found"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/",
+      "actualRoute": "/",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cut Windows overhead. Tune the hardware."
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/services",
+      "actualRoute": "/services",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "PC optimization services"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/store",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/performance",
+      "actualRoute": "/performance",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Measured results from the current test PC"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/contact",
+      "actualRoute": "/contact",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Contact Softhe.io"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/faq",
+      "actualRoute": "/faq",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Questions about products and support"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/privacy-policy",
+      "actualRoute": "/privacy-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Privacy Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/cookie-policy",
+      "actualRoute": "/cookie-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cookie Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/terms",
+      "actualRoute": "/terms",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Terms of Service"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/legal-notice",
+      "actualRoute": "/legal-notice",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Legal Notice"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/withdrawal",
+      "actualRoute": "/withdrawal",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Withdraw from an Order"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "INPUT",
+          "class": "withdrawal-honeypot",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/checkout",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/login",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/register",
+      "actualRoute": "/register",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Create your account"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/forgot-password",
+      "actualRoute": "/forgot-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Reset your password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/resend-confirmation",
+      "actualRoute": "/resend-confirmation",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Resend confirmation"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/reset-password",
+      "actualRoute": "/reset-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Choose a new password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/account",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/admin",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1280,
+      "requestedRoute": "/audit-missing-route",
+      "actualRoute": "/audit-missing-route",
+      "status": 200,
+      "passed": true,
+      "viewport": 1280,
+      "pageWidth": 1280,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Page Not Found"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/",
+      "actualRoute": "/",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cut Windows overhead. Tune the hardware."
+      ],
+      "outsideViewport": [],
+      "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\docs\\audits\\2026-10-07\\responsive\\1440-home.png"
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/services",
+      "actualRoute": "/services",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "PC optimization services"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/store",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": [],
+      "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\docs\\audits\\2026-10-07\\responsive\\1440-store.png"
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/performance",
+      "actualRoute": "/performance",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Measured results from the current test PC"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/contact",
+      "actualRoute": "/contact",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Contact Softhe.io"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/faq",
+      "actualRoute": "/faq",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Questions about products and support"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/privacy-policy",
+      "actualRoute": "/privacy-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Privacy Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/cookie-policy",
+      "actualRoute": "/cookie-policy",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Cookie Policy"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/terms",
+      "actualRoute": "/terms",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Terms of Service"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/legal-notice",
+      "actualRoute": "/legal-notice",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Legal Notice"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/withdrawal",
+      "actualRoute": "/withdrawal",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Withdraw from an Order"
+      ],
+      "outsideViewport": [
+        {
+          "tag": "INPUT",
+          "class": "withdrawal-honeypot",
+          "text": ""
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/checkout",
+      "actualRoute": "/store",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Store"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/login",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/register",
+      "actualRoute": "/register",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Create your account"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/forgot-password",
+      "actualRoute": "/forgot-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Reset your password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/resend-confirmation",
+      "actualRoute": "/resend-confirmation",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Resend confirmation"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/reset-password",
+      "actualRoute": "/reset-password",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Choose a new password"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/account",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": [],
+      "screenshot": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\docs\\audits\\2026-10-07\\responsive\\1440-account.png"
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/admin",
+      "actualRoute": "/login",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Welcome back"
+      ],
+      "outsideViewport": []
+    },
+    {
+      "width": 1440,
+      "requestedRoute": "/audit-missing-route",
+      "actualRoute": "/audit-missing-route",
+      "status": 200,
+      "passed": true,
+      "viewport": 1440,
+      "pageWidth": 1440,
+      "horizontalOverflow": false,
+      "mainCount": 1,
+      "primaryNavigationCount": 1,
+      "footerCount": 1,
+      "headings": [
+        "Page Not Found"
+      ],
+      "outsideViewport": []
+    }
+  ]
+}

@@ -13,6 +13,8 @@ on:
           - uptime
           - browser
           - delivery
+          - stripe
+          - fulfillment
   schedule:
     - cron: '*/10 * * * *'
 
@@ -61,7 +63,7 @@ jobs:
           fi
 
       - name: Emit controlled runtime event
-        if: ${{ inputs.test_alert == 'browser' || inputs.test_alert == 'delivery' }}
+        if: ${{ inputs.test_alert == 'browser' || inputs.test_alert == 'delivery' || inputs.test_alert == 'stripe' || inputs.test_alert == 'fulfillment' }}
         shell: bash
         run: |
           if [ -z "$MONITOR_BASE_URL" ] || [ -z "$MONITOR_PREVIEW_BRANCH_CONFIGURED" ]; then
@@ -102,6 +104,23 @@ jobs:
           npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
             --query stripe_confirmation_requires_review --json >> confirmation-reviews.jsonl
 
+      - name: Query Stripe operational logs
+        if: ${{ always() && steps.health.outcome == 'success' }}
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 logs --environment production --since 15m \
+            --query stripe_webhook_ --json > stripe-events.jsonl
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
+            --query stripe_webhook_ --json >> stripe-events.jsonl
+
+      - name: Query fulfillment operational logs
+        if: ${{ always() && steps.health.outcome == 'success' }}
+        shell: bash
+        run: |
+          npx --yes vercel@59.3.0 logs --environment production --since 15m \
+            --query fulfillment_ --json > fulfillment-events.jsonl
+          npx --yes vercel@59.3.0 logs --branch "$MONITOR_PREVIEW_BRANCH" --since 15m \
+            --query fulfillment_ --json >> fulfillment-events.jsonl
       - name: Evaluate runtime alerts
         if: ${{ always() && steps.health.outcome == 'success' }}
         working-directory: react-app
@@ -109,4 +128,6 @@ jobs:
           BROWSER_LOG_FILE: ../browser-errors.jsonl
           DELIVERY_LOG_FILE: ../delivery-failures.jsonl
           CONFIRMATION_REVIEW_LOG_FILE: ../confirmation-reviews.jsonl
+          STRIPE_LOG_FILE: ../stripe-events.jsonl
+          FULFILLMENT_LOG_FILE: ../fulfillment-events.jsonl
         run: node scripts/check-monitoring-alerts.js

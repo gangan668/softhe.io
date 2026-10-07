@@ -193,6 +193,7 @@ export const trackVideo = (action, videoTitle) => {
  * Consent Management
  */
 const CONSENT_KEY = 'softhe_analytics_consent';
+export const ANALYTICS_CONSENT_EVENT = 'softhe:analytics-consent-change';
 
 /**
  * Get analytics consent status
@@ -215,6 +216,7 @@ export const getAnalyticsConsent = () => {
 export const setAnalyticsConsent = (granted) => {
 	try {
 		localStorage.setItem(CONSENT_KEY, granted.toString());
+		window.dispatchEvent(new Event(ANALYTICS_CONSENT_EVENT));
 
 		if (granted) {
 			// Initialize GA if consent is granted
@@ -254,6 +256,7 @@ export const hasConsentDecision = () => {
 export const clearConsent = () => {
 	try {
 		localStorage.removeItem(CONSENT_KEY);
+		window.dispatchEvent(new Event(ANALYTICS_CONSENT_EVENT));
 		return true;
 	} catch (e) {
 		logDevWarning('Unable to clear consent from localStorage:', e);
