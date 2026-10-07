@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Cart from './components/Cart';
 import CookieConsent from './components/CookieConsent';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -117,6 +118,7 @@ function App() {
 				</CartProvider>
 				</AuthProvider>
 			</Router>
+			<Analytics />
 		</ErrorBoundary>
 	);
 }
