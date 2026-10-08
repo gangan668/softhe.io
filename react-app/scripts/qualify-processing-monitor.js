@@ -12,6 +12,7 @@ const assert = (value) => { if (!value) throw new Error('Processing qualificatio
 const results = [];
 let phase = 'configuration';
 let httpStatus;
+let failureReason;
 try {
 	const productionSecret = process.env.MONITORING_RECONCILIATION_SECRET;
 	const previewSecret = process.env.MONITORING_PREVIEW_RECONCILIATION_SECRET;
@@ -27,7 +28,9 @@ try {
 		else assert(metadata.target !== 'production' && process.env.MONITOR_PREVIEW_BRANCH === 'customer-portal-test' && metadata.meta?.githubCommitRef === process.env.MONITOR_PREVIEW_BRANCH);
 		phase = `${name}.response`;
 		const { stdout } = await execute('npx', ['--yes', 'vercel@59.3.0', 'curl', '/api/health?action=reconcile-processing', '--deployment', origin, '--', '--silent', '--show-error', '--include', '--max-time', '30', '--header', `Authorization: Bearer ${secret}`], { timeout: 60000, maxBuffer: 1048576 });
-		const { response, text } = parseCurlResponse(stdout); httpStatus = response.status; assert(response.ok); const data = JSON.parse(text);
+		const { response, text } = parseCurlResponse(stdout); httpStatus = response.status; const data = JSON.parse(text);
+		if (!response.ok) failureReason = ['Processing monitoring is not configured', 'Processing monitoring is temporarily unavailable', 'Unauthorized'].includes(data.error) ? data.error : 'Unexpected endpoint response';
+		assert(response.ok);
 		phase = `${name}.reconciliation`;
 		checkReconciliation(data);
 		results.push({ environment: name, deployment: metadata.id, origin, sourceCommit: metadata.meta?.githubCommitSha, response: data });
@@ -35,7 +38,7 @@ try {
 	await writeFile('processing-qualification.json', JSON.stringify({ passed: true, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
 	console.log('Separate Production and isolated Preview reconciliation credentials verified. Scheduling remains disabled.');
 } catch {
-	await writeFile('processing-qualification.json', JSON.stringify({ passed: false, failedPhase: phase, httpStatus, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
+	await writeFile('processing-qualification.json', JSON.stringify({ passed: false, failedPhase: phase, httpStatus, failureReason, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
 	console.error('Processing qualification failed. Credentials and command arguments were not logged.');
 	process.exitCode = 1;
 }
