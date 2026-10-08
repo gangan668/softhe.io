@@ -12,12 +12,12 @@ const claims = (token) => JSON.parse(Buffer.from(token.split('.')[1], 'base64url
 const jwt = (id, aal = 'aal1') => `header.${Buffer.from(JSON.stringify({ sub: id, aal, session_id: crypto.randomUUID() })).toString('base64url')}.fixture`;
 beforeEach(() => { for (const [key, value] of Object.entries({ ...environment, SUPABASE_PUBLISHABLE_KEY: 'publishable-fixture', SUPABASE_SERVICE_ROLE_KEY: 'service-fixture', PORTAL_RATE_LIMIT_SECRET: secret, STAFF_PORTAL_ENABLED: 'true' })) vi.stubEnv(key, value); });
 afterEach(() => vi.unstubAllEnvs());
-function providerFixture({ failSignin = false, failCleanup = false, failAuditCleanup = false } = {}) {
+function providerFixture({ failSignin = false, failCleanup = false, failAuditCleanup = false, alternateCreatedId = false } = {}) {
 	const users = new Map(); const tickets = new Map(); const messages = []; const replays = new Map(); const commands = []; let granted = false;
 	const result = (data, status = 200) => ({ data, status, ok: status >= 200 && status < 300 });
 	const provider = vi.fn(async (path, options = {}) => {
 		const url = new URL(path, isolatedUrl); const id = options.token ? claims(options.token).sub : null;
-		if (path === '/auth/v1/admin/users') { users.set(options.body.id, { ...options.body, profile: { id: options.body.id } }); return result({ id: options.body.id }); }
+		if (path === '/auth/v1/admin/users') { const actualId = alternateCreatedId ? crypto.randomUUID() : options.body.id; users.set(actualId, { ...options.body, id: actualId, profile: { id: actualId } }); return result({ id: actualId, email: options.body.email }); }
 		if (path.startsWith('/auth/v1/token')) { if (failSignin) throw new Error('Do not expose provider-password'); const user = [...users.values()].find((value) => value.email === options.body.email); return result({ access_token: jwt(user.id), user: { id: user.id } }); }
 		if (path.startsWith('/auth/v1/admin/users/')) { const target = path.split('/').at(-1); if (options.method === 'DELETE') { if (failCleanup) return result({}, 503); users.delete(target); return result(null); } return users.has(target) ? result({ id: target }) : result({}, 404); }
 		if (path.startsWith('/auth/v1/logout')) return result(null, 204);
@@ -55,6 +55,17 @@ function providerFixture({ failSignin = false, failCleanup = false, failAuditCle
 	return { provider, users, commands, dependencies: { request: provider, command: async (command) => { commands.push(command); return command[0] === 'SET' ? 'OK' : 1; }, ticketHandler, staffHandler } };
 }
 describe('isolated provider verification safety', () => {
+	it('journals and deletes a mismatched provider UUID only when its acknowledged email proves run ownership', async () => {
+		const fixture = providerFixture({ alternateCreatedId: true }); const result = await runVerification(fixture.dependencies);
+		expect(result.passed).toBe(false); expect(result.failedPhase).toBe('temporary_auth_password_signin'); expect(result.cleanup.passed).toBe(true); expect(result.cleanup.attemptedUsers).toBe(3); expect(fixture.users.size).toBe(0);
+		const updated = fixture.commands.find((command) => command[0] === 'SET' && command[1].includes(':journal:') && !command.includes('NX'));
+		expect(JSON.parse(updated[2]).userIds).toHaveLength(3);
+	});
+	it('does not adopt or delete an unexpected UUID with an unrelated acknowledged email', async () => {
+		const fixture = providerFixture(); const unknown = crypto.randomUUID(); const raw = fixture.dependencies.request;
+		fixture.dependencies.request = async (path, options) => { const value = await raw(path, options); return path === '/auth/v1/admin/users' ? { ...value, data: { id: unknown, email: 'unrelated@example.test' } } : value; };
+		const result = await runVerification(fixture.dependencies); expect(result.passed).toBe(false); expect(fixture.provider.mock.calls.some(([path]) => path.includes(unknown))).toBe(false); expect(result.cleanup.attemptedUsers).toBe(2);
+	});
 	it('journals both preselected IDs before Auth creation and stops on budget exhaustion with cleanup', async () => {
 		const fixture = providerFixture(); let elapsed = 0;
 		const raw = fixture.dependencies.request;

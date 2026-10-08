@@ -67,7 +67,15 @@ async function runVerification({ request: rawRequest = providerRequest, command 
 				const email = `portal-${runId}-${index}@example.test`; const password = 'Aa1!' + crypto.randomBytes(24).toString('hex');
 				const user = users[index]; const id = user.id;
 				const created = await request('/auth/v1/admin/users', { admin: true, method: 'POST', body: { id, email, password, email_confirm: true, user_metadata: { full_name: 'Temporary provider verification' } } });
-				assert(created.ok); assert((created.data?.user?.id || created.data?.id) === id); user.created = true;
+				assert(created.ok);
+				const acknowledged = created.data?.user || created.data;
+				if (acknowledged?.id !== id && UUID.test(acknowledged?.id || '') && acknowledged.email === email) {
+					// Retain the planned ID for ambiguous creation while recording only an acknowledged run-owned alternate.
+					users.push({ id: acknowledged.id, created: true });
+					journal.userIds = users.map((entry) => entry.id);
+					assert(await command(['SET', `portal:provider-verification:journal:${runId}`, JSON.stringify(journal), 'EX', 86400]) === 'OK');
+				}
+				assert(acknowledged?.id === id); user.created = true;
 				const signin = await request('/auth/v1/token?grant_type=password', { method: 'POST', body: { email, password } }); assert(signin.ok && signin.data?.access_token && signin.data?.user?.id === id); user.token = signin.data.access_token;
 			}
 		});
@@ -140,7 +148,7 @@ async function runVerification({ request: rawRequest = providerRequest, command 
 async function recoverVerification(runId, { command = redisCommand, request = providerRequest } = {}) {
 	assert(UUID.test(runId));
 	const journal = JSON.parse(await command(['GET', `portal:provider-verification:journal:${runId}`]));
-	assert(journal?.runId === runId && journal.userIds?.length === 2 && journal.userIds.every((id) => UUID.test(id)) && Array.isArray(journal.writeKeys));
+	assert(journal?.runId === runId && journal.userIds?.length >= 2 && journal.userIds.length <= 4 && journal.userIds.every((id) => UUID.test(id)) && new Set(journal.userIds).size === journal.userIds.length && Array.isArray(journal.writeKeys));
 	assert(journal.writeKeys.every((key) => journal.userIds.some((id) => new RegExp(`^portal:(ticket-write|staff-write):${id}:provider_[a-f0-9]{32}$`).test(key))));
 	let passed = true;
 	for (const id of journal.userIds) {
@@ -158,7 +166,7 @@ async function recoverVerification(runId, { command = redisCommand, request = pr
 		await command(['DEL', ...keys]);
 	} catch { passed = false; }
 	if (passed) await command(['DEL', `portal:provider-verification:journal:${runId}`]);
-	return { passed, recovery: true, journalId: runId, cleanup: { passed, attemptedUsers: 2 } };
+	return { passed, recovery: true, journalId: runId, cleanup: { passed, attemptedUsers: journal.userIds.length } };
 }
 
 async function handleProviderVerification(req, res) {
