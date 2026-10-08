@@ -1,0 +1,48 @@
+{
+  "observedAt": "2026-10-08T19:22:02.4888294Z",
+  "stagedOrigin": "https://softhe-18z3s3wm2-suportsofthe-9420s-projects.vercel.app",
+  "sourceCommit": "758ab935f5698d4de5162243b9145ede97a4cfe0",
+  "fingerprint": "softhe-758ab93-stage1",
+  "status": "configuration-required",
+  "redisPingPassed": false,
+  "checks": {
+    "storage": false,
+    "portal": false,
+    "checkout": true,
+    "tickets": true,
+    "withdrawal": false,
+    "contact": false,
+    "fulfillment": false
+  },
+  "stagedQualificationRun": "https://github.com/gangan668/softhe.io/actions/runs/37831121606",
+  "processingQualification": {
+    "passed": false,
+    "failedPhase": "production.response",
+    "httpStatus": 503,
+    "failureReason": "Processing monitoring is temporarily unavailable",
+    "autoAssignCustomDomains": false,
+    "verifiedAt": "2026-10-08T19:20:23.264Z",
+    "targets": []
+  },
+  "isolatedProviderQualification": {
+    "deployment": "https://softhe-drvm0m8jq-suportsofthe-9420s-projects.vercel.app",
+    "sourceCommit": "ddef194f8c697cd7be3a78171ae3077aad98cb15",
+    "httpStatus": 503,
+    "passed": false,
+    "checks": [],
+    "cleanup": {
+      "passed": false,
+      "attemptedUsers": 0,
+      "createdUsers": 0,
+      "removedUsers": 0
+    },
+    "emailSent": false
+  },
+  "isolatedRunId": "a436b443-d66a-4fda-9d56-b9f4c18e2517",
+  "isolatedRedisDnsResult": "ENOTFOUND",
+  "stripeAlertRun": "https://github.com/gangan668/softhe.io/actions/runs/37830176614",
+  "fulfillmentAlertRun": "https://github.com/gangan668/softhe.io/actions/runs/37830181629",
+  "notificationReceiptVerified": false,
+  "processingSchedulingEnabled": false,
+  "productionPromoted": false
+}
