@@ -1,0 +1,10 @@
+{
+  "verifiedAt": "2026-10-07",
+  "project": "zbchdxptibehtizomwiq",
+  "method": "PostgreSQL transaction with credential-free synthetic identities and SET LOCAL ROLE authenticated/anon; explicit request.jwt.claims; full rollback",
+  "script": "test-isolated-rls.sql",
+  "assertions": "passed",
+  "checks": ["both customers own profile/ticket access", "cross-customer profile/ticket/message/order/item denial", "own profile update", "cross-customer profile update denied", "forged ticket owner denied", "cross-customer reply denied", "self-role escalation denied", "protected profile column denied", "staff audit table denied", "suspended customer profile/ticket/order denial", "anonymous profile denial"],
+  "cleanup": {"remainingSyntheticUsers": 0, "remainingSyntheticTickets": 0, "remainingSyntheticOrders": 0},
+  "limits": "Verifies live database grants and RLS only. Does not verify Auth API account creation/sign-in, JWT validation, browser-to-API flow, CAPTCHA, MFA, confirmation/recovery emails or notification delivery. No credentials generated, no emails sent and no records committed. Existing accounts and production were unchanged."
+}

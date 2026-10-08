@@ -1,0 +1,135 @@
+{
+  "fixtureOnly": true,
+  "widths": [
+    320,
+    390,
+    768,
+    1280,
+    1440
+  ],
+  "passedTests": 4,
+  "pngCount": 20,
+  "metricsCount": 4,
+  "artifacts": [
+    {
+      "file": "desktop-chromium-account-320.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-account-390.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-account-768.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-account-1280.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-account-1440.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-authenticated-account-layouts.json",
+      "project": "desktop-chromium",
+      "contentType": "application/json"
+    },
+    {
+      "file": "desktop-chromium-admin-320.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-admin-390.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-admin-768.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-admin-1280.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-admin-1440.png",
+      "project": "desktop-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "desktop-chromium-authenticated-admin-layouts.json",
+      "project": "desktop-chromium",
+      "contentType": "application/json"
+    },
+    {
+      "file": "mobile-chromium-account-320.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-account-390.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-account-768.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-account-1280.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-account-1440.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-authenticated-account-layouts.json",
+      "project": "mobile-chromium",
+      "contentType": "application/json"
+    },
+    {
+      "file": "mobile-chromium-admin-320.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-admin-390.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-admin-768.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-admin-1280.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-admin-1440.png",
+      "project": "mobile-chromium",
+      "contentType": "image/png"
+    },
+    {
+      "file": "mobile-chromium-authenticated-admin-layouts.json",
+      "project": "mobile-chromium",
+      "contentType": "application/json"
+    }
+  ]
+}

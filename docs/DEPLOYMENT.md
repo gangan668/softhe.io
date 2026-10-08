@@ -4,6 +4,8 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 
 ## Vercel
 
+As verified on 2026-10-07, `softhe.io` is already attached to Vercel project `softhe-io` (`prj_ivs19EGdAuvKZJ6nPd34WRtJ3Kki`). The setup steps below apply to a fresh environment; they are not instructions to repeat DNS cutover on the current site. Set `VITE_PUBLIC_ORIGIN=https://softhe.io` for public production metadata and callbacks. Use an explicitly isolated origin for provider-backed Preview verification.
+
 1. Import `gangan668/softhe.io` into Vercel.
 2. Keep the repository root as the project root. The checked-in `vercel.json` builds `react-app` and exposes `/api/*` functions.
 3. Attach the production domain and set `PUBLIC_SITE_URL` to its HTTPS origin.

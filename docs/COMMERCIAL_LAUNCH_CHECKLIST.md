@@ -2,6 +2,8 @@
 
 This checklist is intentionally fail-closed. Check an item only when evidence exists in the named system. Live commerce remains disabled until every **Launch blocker** is complete.
 
+The checked items below describe historical candidate evidence. For the 2026-10-07 remediation release, rebind and reverify the exact new candidate before treating them as current launch qualification. Current progress is in `audits/2026-10-07/EXECUTION_STATUS.md`; the human review package is `audits/2026-10-07/LEGAL_REVIEW_PACKAGE.md`.
+
 Record the evidence for every item in [`launch-evidence.json`](launch-evidence.json). The file
 deliberately starts with pending entries and the manual **Commercial Release Gate** workflow
 rejects missing, placeholder, stale-candidate, or unapproved evidence before it runs the strict

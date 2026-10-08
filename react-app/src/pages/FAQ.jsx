@@ -172,7 +172,7 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							Windows edition, memory settings, and GPU driver changed. Raw run captures are not yet published. The comparison cannot isolate the effect of one product or predict your result.
+							Windows edition, memory settings, and GPU driver changed. Four raw CapFrameX captures are published on the <a href="/performance">benchmark page</a>. The comparison cannot isolate the effect of one product or predict your result.
 						</p>
 					</div>
 				),

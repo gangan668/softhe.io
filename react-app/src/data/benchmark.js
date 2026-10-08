@@ -1,24 +1,16 @@
-const readEnv = (name, fallback) => import.meta.env[name] || fallback;
+import evidence from '../../../docs/benchmark-evidence.json';
 
-const parseRunCount = () => {
-	const runCount = Number.parseInt(import.meta.env.VITE_BENCHMARK_RUN_COUNT || '', 10);
-	return Number.isFinite(runCount) ? runCount : null;
-};
+export { benchmarkPublication } from './benchmarkPublication';
 
 export const benchmarkMethodology = {
-	hardware: readEnv('VITE_BENCHMARK_HARDWARE', 'Hardware details pending publication'),
-	software: readEnv('VITE_BENCHMARK_SOFTWARE', 'BIOS, driver, and Windows versions pending publication'),
-	scenario: readEnv('VITE_BENCHMARK_SCENARIO', 'Game settings and test procedure pending publication'),
-	captureDate: readEnv('VITE_BENCHMARK_CAPTURE_DATE', 'Capture date pending publication'),
-	runCount: parseRunCount(),
-	summaryMethod: readEnv('VITE_BENCHMARK_SUMMARY_METHOD', 'Method pending publication'),
+  hardware: evidence.hardware,
+  software: `${evidence.operatingSystem} ${evidence.bios} ${evidence.drivers}`,
+  scenario: `${evidence.scenario} ${evidence.graphicsSettings} ${evidence.warmupProcedure}`,
+  captureDate: evidence.captureDate,
+  runCount: Math.min(evidence.stock.runs.length, evidence.optimized.runs.length),
+  summaryMethod: evidence.summaryMethod,
+  gameVersion: evidence.gameVersion,
 };
 
-export const benchmarkEvidenceComplete = Boolean(
-	import.meta.env.VITE_BENCHMARK_HARDWARE
-		&& import.meta.env.VITE_BENCHMARK_SOFTWARE
-		&& import.meta.env.VITE_BENCHMARK_SCENARIO
-		&& import.meta.env.VITE_BENCHMARK_CAPTURE_DATE
-		&& benchmarkMethodology.runCount >= 2
-		&& benchmarkMethodology.summaryMethod.toLowerCase() === 'median',
-);
+// Publication does not establish full reproducibility or isolate one product.
+export const benchmarkEvidenceComplete = false;

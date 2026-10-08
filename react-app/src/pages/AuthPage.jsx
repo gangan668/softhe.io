@@ -19,7 +19,7 @@ const captchaEnabled = import.meta.env.VITE_CAPTCHA_ENABLED === 'true';
 const captchaSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
 export default function AuthPage({ mode }) {
-	const { configured, loading, user, supabase } = useAuth();
+	const { configured, loading, user, supabase, error: authError, retry } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const captchaRef = useRef(null);
@@ -36,11 +36,13 @@ export default function AuthPage({ mode }) {
 		if (mode === 'register' && !validateStrongPassword(form.password)) return setStatus({ loading: false, error: passwordRequirements, message: '' });
 		setStatus({ loading: true, error: '', message: '' });
 		let result;
+		try {
 		const captchaOptions = captchaEnabled ? { captchaToken } : {};
 		if (mode === 'register') result = await supabase.auth.signUp({ email: form.email, password: form.password, options: { data: { full_name: form.fullName }, emailRedirectTo: absoluteUrl('/login'), ...captchaOptions } });
 		else if (mode === 'forgot') result = await supabase.auth.resetPasswordForEmail(form.email, { redirectTo: absoluteUrl('/reset-password'), ...captchaOptions });
 		else if (mode === 'resend') result = await supabase.auth.resend({ type: 'signup', email: form.email, options: { emailRedirectTo: absoluteUrl('/login'), ...captchaOptions } });
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password, options: captchaOptions });
+		} catch { result = { error: { message: 'Authentication request failed. Please try again.' } }; }
 		if (captchaEnabled) { captchaRef.current?.reset(); setCaptchaToken(''); }
 		if (result.error && mode === 'login') return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
 		if (result.error) {
@@ -53,7 +55,7 @@ export default function AuthPage({ mode }) {
 
 	return <div className="portal-page auth-page"><SEO title={`${copy[mode][0]} | Softhe.io`} description={copy[mode][1]} />
 		<section className="portal-card auth-card"><h1>{copy[mode][0]}</h1><p>{copy[mode][1]}</p>
-			<form onSubmit={submit} className="portal-form">
+			<>{authError && <div className="portal-error" role="alert">{authError}<button className="btn btn-secondary" onClick={retry}>Try again</button></div>}</><form onSubmit={submit} className="portal-form">
 				{mode === 'register' && <label>Full name<input name="fullName" value={form.fullName} onChange={update} autoComplete="name" required maxLength="100" /></label>}
 				<label>Email<input name="email" type="email" value={form.email} onChange={update} autoComplete="email" required /></label>
 				{!['forgot', 'resend'].includes(mode) && <label>Password<input name="password" type="password" value={form.password} onChange={update} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 8} required />{mode === 'register' && <small>{passwordRequirements}</small>}</label>}

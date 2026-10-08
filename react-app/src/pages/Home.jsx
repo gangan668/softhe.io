@@ -1,3 +1,5 @@
+import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
+import { benchmarkPublication } from '../data/benchmarkPublication';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
@@ -104,7 +106,7 @@ function Home() {
 										<strong>2 × 109 sec</strong>
 									</div>
 								</div>
-								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. Raw runs are not yet published. This cannot isolate the effect of one product.</p>
+								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. {benchmarkPublication.status} <BenchmarkEvidenceLink /> This cannot isolate the effect of one product.</p>
 							</div>
 						</div>
 					</div>
@@ -138,7 +140,7 @@ function Home() {
 							<h2>Read the numbers and the test limits before you buy.</h2>
 							<p>
 								The sample compares two configurations of one PC. Windows edition, memory settings,
-								and GPU driver changed. Raw run evidence is still unpublished, and the result cannot
+								and GPU driver changed. The four raw captures are published. <BenchmarkEvidenceLink /> The result cannot
 								show what any one product contributed.
 							</p>
 							<Link to="/performance" className="text-link">
@@ -156,7 +158,7 @@ function Home() {
 								<strong>826 FPS</strong>
 							</div>
 							<div className="comparison-footnote">
-								Preliminary whole-system sample. Raw runs are not yet published.
+								Preliminary whole-system sample. {benchmarkPublication.status} <BenchmarkEvidenceLink />
 							</div>
 						</div>
 					</div>

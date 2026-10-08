@@ -1,5 +1,6 @@
 const crypto = require('node:crypto');
 const { redisCommand } = require('./redis');
+const { beginProcessing, finishProcessing } = require('./processing-attempts');
 
 const MAX_BODY_BYTES = 64 * 1024;
 const HEX_SIGNATURE = /^[a-f0-9]{64}$/;
@@ -70,15 +71,25 @@ async function orderFulfillment(req, res) {
 		res.setHeader('Allow', 'POST');
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
+	let verified = false;
+	let operationalContext;
 	try {
 		const payload = await readRawBody(req);
 		if (!validSignature(payload, req.headers['x-softhe-signature'], process.env.ORDER_FULFILLMENT_WEBHOOK_SECRET)) {
 			return res.status(401).json({ error: 'Invalid signature' });
 		}
+		verified = true;
 		const order = normalizeOrder(JSON.parse(payload.toString('utf8')));
 		if (req.headers['idempotency-key'] !== order.sessionId) return res.status(400).json({ error: 'Invalid idempotency key' });
-		return res.status(200).json({ status: await storeOrder(order) });
+		operationalContext = { attemptId: crypto.randomUUID(), eventId: order.eventId, sessionId: order.sessionId, timestamp: new Date().toISOString() };
+		console.info('fulfillment_processing_started', operationalContext);
+		const member = await beginProcessing('fulfillment', order.sessionId, operationalContext.attemptId);
+		const status = await storeOrder(order);
+		await finishProcessing(member, operationalContext.attemptId);
+		console.info('fulfillment_processing_finished', { ...operationalContext, timestamp: new Date().toISOString() });
+		return res.status(200).json({ status });
 	} catch (error) {
+		if (verified) console.error('fulfillment_processing_failed', { ...operationalContext, timestamp: new Date().toISOString() });
 		return res.status(error.statusCode || 503).json({ error: error.statusCode ? error.message : 'Fulfillment temporarily unavailable' });
 	}
 }

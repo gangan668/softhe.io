@@ -1,6 +1,8 @@
 const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
 const { adminRequest } = require('./_lib/supabase');
+const { reconcileProcessing } = require('./_lib/processing-attempts');
+const { redisCommand } = require('./_lib/redis');
 
 const safeEqual = (left, right) => {
 	const leftBuffer = Buffer.from(String(left || ''));
@@ -81,14 +83,32 @@ async function health(req, res) {
 			return res.status(401).json({ error: 'Unauthorized' });
 		}
 		const kind = req.body?.kind;
+		if (kind === 'verify-isolated-portal') {
+			return require('./_lib/provider-verification').handleProviderVerification(req, res);
+		}
 		if (kind === 'browser') console.error('browser_error', { monitorTest: true });
 		else if (kind === 'delivery') console.error('contact_delivery_failed', { monitorTest: true });
+		else if (kind === 'stripe') console.error('stripe_webhook_failed', { monitorTest: true });
+		else if (kind === 'fulfillment') console.error('fulfillment_delivery_failed', { monitorTest: true });
 		else return res.status(400).json({ error: 'Unsupported monitoring test' });
 		return res.status(202).json({ accepted: true, kind });
 	}
 	if (req.method !== 'GET') {
 		res.setHeader('Allow', 'GET, POST');
 		return res.status(405).json({ error: 'Method not allowed' });
+	}
+	if (req.query?.action === 'reconcile-processing') {
+		const secret = process.env.MONITORING_RECONCILIATION_SECRET;
+		const supplied = String(req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
+		if (!secret || secret.length < 32) return res.status(503).json({ error: 'Processing monitoring is not configured' });
+		if (!safeEqual(secret, supplied)) return res.status(401).json({ error: 'Unauthorized' });
+		try {
+			const result = await reconcileProcessing();
+			const attentionRequired = result.pending.stripe > 0 || result.pending.fulfillment > 0 || result.truncated;
+			return res.status(200).json({ ...result, status: attentionRequired ? 'attention-required' : 'ready' });
+		} catch {
+			return res.status(503).json({ error: 'Processing monitoring is temporarily unavailable' });
+		}
 	}
 
 	const configuration = getConfigurationStatus();
@@ -101,7 +121,11 @@ async function health(req, res) {
 	if (portalAccess) {
 		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
 	}
-	const ready = configuration.ready && portalAccess;
+	let storageAccess = readyFor(storageKeys);
+	if (storageAccess) {
+		try { storageAccess = await redisCommand(['PING']) === 'PONG'; } catch { storageAccess = false; }
+	}
+	const ready = configuration.ready && portalAccess && storageAccess;
 	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
 	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
 	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
@@ -114,13 +138,13 @@ async function health(req, res) {
 			fingerprint,
 		},
 		checks: {
-			portal: portalAccess && readyFor([...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
-			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
-			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
-			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
-			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
-			storage: readyFor(storageKeys),
-			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
+			portal: portalAccess && storageAccess && readyFor(['PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
+			checkout: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
+			contact: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
+			tickets: portalAccess && storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
+			withdrawal: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
+			storage: storageAccess,
+			fulfillment: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
 		},
 	});
 }

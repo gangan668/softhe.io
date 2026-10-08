@@ -1,0 +1,6 @@
+import { beforeEach, expect, it, vi } from 'vitest';
+const mock = vi.hoisted(() => ({ createClient: vi.fn() }));
+vi.mock('@supabase/supabase-js', () => ({ createClient: mock.createClient }));
+beforeEach(() => { vi.resetModules(); vi.clearAllMocks(); vi.stubEnv('VITE_SUPABASE_URL', 'https://project.supabase.co'); vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'publishable-test'); });
+it('retries client initialization after a rejected cached promise', async () => { mock.createClient.mockImplementationOnce(() => { throw new Error('initialization failed'); }).mockReturnValue({ auth: {} }); const { getSupabase } = await import('./supabase'); await expect(getSupabase()).rejects.toThrow('initialization failed'); await expect(getSupabase()).resolves.toEqual({ auth: {} }); expect(mock.createClient).toHaveBeenCalledTimes(2); });
+it('shares one successful client and stays disabled without configuration', async () => { mock.createClient.mockReturnValue({ auth: {} }); let module = await import('./supabase'); expect(module.getSupabase()).toBe(module.getSupabase()); await module.getSupabase(); expect(mock.createClient).toHaveBeenCalledOnce(); vi.resetModules(); vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', ''); module = await import('./supabase'); await expect(module.getSupabase()).resolves.toBeNull(); });

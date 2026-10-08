@@ -1,4 +1,7 @@
 import process from 'node:process';
+import { resolvePublicOrigin } from '../src/config/publicOrigin.js';
+
+resolvePublicOrigin(process.env);
 
 const isStrict = process.env.VITE_REQUIRE_PRODUCTION_CONFIG === 'true';
 

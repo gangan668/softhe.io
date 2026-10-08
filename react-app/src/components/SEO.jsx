@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { absoluteUrl } from '../config/site';
+import { isPrivateRoute } from '../config/routePolicy';
 
 function SEO({
 	title,
@@ -16,6 +17,7 @@ function SEO({
 }) {
 	const location = useLocation();
 	const fullUrl = absoluteUrl(location.pathname);
+	const privateRoute = isPrivateRoute(location.pathname);
 
 	useEffect(() => {
 		// Update document title
@@ -42,7 +44,7 @@ function SEO({
 		// Standard meta tags
 		updateMetaTag('description', description);
 		updateMetaTag('keywords', keywords);
-		updateMetaTag('robots', noIndex ? 'noindex, nofollow' : 'index, follow');
+		updateMetaTag('robots', noIndex || privateRoute ? 'noindex, nofollow' : 'index, follow');
 
 		// Open Graph tags
 		updateMetaTag('og:title', ogTitle || title, true);
@@ -83,7 +85,7 @@ function SEO({
 			structuredDataElement.remove();
 		}
 
-	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, noIndex, type, fullUrl]);
+	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, noIndex, type, fullUrl, privateRoute]);
 
 	return null; // This component doesn't render anything
 }

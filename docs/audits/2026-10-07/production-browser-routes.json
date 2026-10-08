@@ -1,0 +1,192 @@
+[
+  {
+    "requested": "/",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/",
+    "h1": "Cut Windows overhead. Tune the hardware.",
+    "overflow": false,
+    "path": "/",
+    "robots": "index, follow",
+    "title": "Softhe.io | Windows and BIOS tuning for gaming PCs"
+  },
+  {
+    "requested": "/services",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/services",
+    "h1": "PC optimization services",
+    "overflow": false,
+    "path": "/services",
+    "robots": "index, follow",
+    "title": "PC optimization services | Softhe.io"
+  },
+  {
+    "requested": "/store",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/store",
+    "h1": "Store",
+    "overflow": false,
+    "path": "/store",
+    "robots": "index, follow",
+    "title": "Windows builds and BIOS tuning | Softhe.io store"
+  },
+  {
+    "requested": "/performance",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/performance",
+    "h1": "Measured results from the current test PC",
+    "overflow": false,
+    "path": "/performance",
+    "robots": "index, follow",
+    "title": "PC performance benchmark results | Softhe.io"
+  },
+  {
+    "requested": "/contact",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/contact",
+    "h1": "Contact Softhe.io",
+    "overflow": false,
+    "path": "/contact",
+    "robots": "index, follow",
+    "title": "Contact Softhe.io | Product and setup support"
+  },
+  {
+    "requested": "/faq",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/faq",
+    "h1": "Questions about products and support",
+    "overflow": false,
+    "path": "/faq",
+    "robots": "index, follow",
+    "title": "Windows and BIOS tuning FAQ | Softhe.io"
+  },
+  {
+    "requested": "/checkout",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/store",
+    "h1": "Store",
+    "overflow": false,
+    "path": "/store",
+    "robots": "index, follow",
+    "title": "Windows builds and BIOS tuning | Softhe.io store"
+  },
+  {
+    "requested": "/privacy-policy",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/privacy-policy",
+    "h1": "Privacy Policy",
+    "overflow": false,
+    "path": "/privacy-policy",
+    "robots": "index, follow",
+    "title": "Privacy Policy | Softhe.io"
+  },
+  {
+    "requested": "/cookie-policy",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/cookie-policy",
+    "h1": "Cookie Policy",
+    "overflow": false,
+    "path": "/cookie-policy",
+    "robots": "index, follow",
+    "title": "Cookie Policy | Softhe.io"
+  },
+  {
+    "requested": "/terms",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/terms",
+    "h1": "Terms of Service",
+    "overflow": false,
+    "path": "/terms",
+    "robots": "index, follow",
+    "title": "Terms of Service | Softhe.io"
+  },
+  {
+    "requested": "/legal-notice",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/legal-notice",
+    "h1": "Legal Notice",
+    "overflow": false,
+    "path": "/legal-notice",
+    "robots": "index, follow",
+    "title": "Legal Notice | Softhe.io"
+  },
+  {
+    "requested": "/withdrawal",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/withdrawal",
+    "h1": "Withdraw from an Order",
+    "overflow": false,
+    "path": "/withdrawal",
+    "robots": "index, follow",
+    "title": "Withdraw from an Order | Softhe.io"
+  },
+  {
+    "requested": "/login",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/login",
+    "h1": "Welcome back",
+    "overflow": false,
+    "path": "/login",
+    "robots": "index, follow",
+    "title": "Welcome back | Softhe.io"
+  },
+  {
+    "requested": "/register",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/register",
+    "h1": "Create your account",
+    "overflow": false,
+    "path": "/register",
+    "robots": "index, follow",
+    "title": "Create your account | Softhe.io"
+  },
+  {
+    "requested": "/forgot-password",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/forgot-password",
+    "h1": "Reset your password",
+    "overflow": false,
+    "path": "/forgot-password",
+    "robots": "index, follow",
+    "title": "Reset your password | Softhe.io"
+  },
+  {
+    "requested": "/resend-confirmation",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/resend-confirmation",
+    "h1": "Resend confirmation",
+    "overflow": false,
+    "path": "/resend-confirmation",
+    "robots": "index, follow",
+    "title": "Resend confirmation | Softhe.io"
+  },
+  {
+    "requested": "/reset-password",
+    "brokenImages": [],
+    "canonical": "https://softhe.io/reset-password",
+    "h1": "Choose a new password",
+    "overflow": false,
+    "path": "/reset-password",
+    "robots": "noindex, nofollow",
+    "title": "Choose a New Password | Softhe.io"
+  },
+  {
+    "requested": "/account",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/login",
+    "h1": "Welcome back",
+    "overflow": false,
+    "path": "/login",
+    "robots": "index, follow",
+    "title": "Welcome back | Softhe.io"
+  },
+  {
+    "requested": "/admin",
+    "brokenImages": [],
+    "canonical": "https://softhe-io.vercel.app/login",
+    "h1": "Welcome back",
+    "overflow": false,
+    "path": "/login",
+    "robots": "index, follow",
+    "title": "Welcome back | Softhe.io"
+  }
+]

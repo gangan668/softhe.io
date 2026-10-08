@@ -1,6 +1,6 @@
-const trimTrailingSlash = (value) => value.replace(/\/$/, '');
+import { resolvePublicOrigin } from './publicOrigin';
 
-const siteUrl = trimTrailingSlash(import.meta.env.VITE_APP_URL || 'https://softhe.io');
+const siteUrl = resolvePublicOrigin(import.meta.env);
 const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'support@softhe.io';
 const legalName = import.meta.env.VITE_LEGAL_NAME || 'Softhe.io';
 

@@ -78,6 +78,7 @@ export default defineConfig(() => ({
 		},
 	},
 	build: {
+		manifest: true,
 		// Keep source maps out of public production deploys.
 		sourcemap: false,
 

@@ -58,6 +58,11 @@ try {
 		mkdirSync(outputDirectory, { recursive: true });
 		writeFileSync(join(outputDirectory, 'index.html'), renderRoute(template, route), 'utf8');
 	}
+	// The copied public assets must use the same origin as generated and hydrated metadata.
+	for (const filename of ['sitemap.xml', 'robots.txt']) {
+		const path = join(distPath, filename);
+		writeFileSync(path, readFileSync(path, 'utf8').replaceAll('https://softhe.io', siteUrl), 'utf8');
+	}
 	console.log(`Generated metadata entry points for ${routeMetadata.length} routes.`);
 } catch (error) {
 	console.error('Error generating route metadata:', error.message);

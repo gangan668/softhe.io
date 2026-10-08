@@ -1,3 +1,5 @@
+import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
+import { benchmarkPublication } from '../data/benchmark';
 import SEO from '../components/SEO';
 import { benchmarkEvidenceComplete, benchmarkMethodology } from '../data/benchmark';
 import "./Performance.css";
@@ -10,7 +12,7 @@ function Performance() {
 				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription="One PC measured 658 and 826 average FPS across two configurations. Raw runs remain unpublished and several variables changed."
+				ogDescription="One PC measured 658 and 826 average FPS across two configurations. Four raw captures are published and several variables changed."
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -24,7 +26,7 @@ function Performance() {
 						<p className="methodology-warning" role="note">
 							Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
 							 Runs per configuration: {benchmarkMethodology.runCount ?? 'not yet published'}.
-							 Raw run captures: not yet published.
+							 {benchmarkPublication.status} <BenchmarkEvidenceLink />
 						</p>
 						<div className="performance-stats">
 							<div>
@@ -130,7 +132,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">Summary</span>
 							<h2 className="section-title">Results at a glance</h2>
-							<p>Values from the preliminary CS2 comparison and separate idle snapshots. Raw runs are not yet published.</p>
+							<p>Values from the preliminary CS2 comparison and separate idle snapshots. {benchmarkPublication.status} <BenchmarkEvidenceLink /></p>
 						</div>
 
 						<div className="comparison-table">
@@ -220,11 +222,13 @@ function Performance() {
 								<div><dt>Captured</dt><dd>{benchmarkMethodology.captureDate}</dd></div>
 								<div><dt>Repeated runs</dt><dd>{benchmarkMethodology.runCount ?? 'Pending publication'}</dd></div>
 								<div><dt>Summary</dt><dd>{benchmarkMethodology.summaryMethod}</dd></div>
+								<div><dt>Game version</dt><dd>{benchmarkMethodology.gameVersion}</dd></div>
 							</dl>
 							{!benchmarkEvidenceComplete && (
 								<p className="methodology-warning" role="note">
-									Full reproducibility details and raw run evidence have not yet been published.
+									The exact CS2 build and chipset-driver versions were not recorded.
 									These figures cannot establish the effect of a single product.
+									The reported 1% low uses the 99th percentile frame time converted to FPS.
 								</p>
 							)}
 						</section>
@@ -233,7 +237,7 @@ function Performance() {
 							<i className="fas fa-circle-info" aria-hidden="true"></i>
 							<p>
 								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
-								workload. Raw screenshots should accompany each published run set, including
+								workload. The archive contains four original JSON captures, with
 								median FPS and 1% lows from at least two repeated stock and optimized runs.
 							</p>
 						</div>

@@ -16,15 +16,18 @@
 		"audit:ci": "npm audit --audit-level=high",
 		"e2e": "node scripts/run-e2e.js enabled",
 		"e2e:disabled": "node scripts/run-e2e.js disabled",
-		"e2e:all": "npm run e2e && npm run e2e:disabled",
+		"e2e:portal": "node scripts/run-e2e.js portal",
+		"e2e:all": "npm run e2e && npm run e2e:disabled && npm run e2e:portal",
 		"benchmark:verify": "node scripts/validate-benchmark-evidence.js",
 		"evidence:verify": "node scripts/validate-launch-evidence.js",
 		"smoke:production": "node scripts/production-smoke.js",
-		"budget": "node scripts/check-performance-budget.js"
+		"budget": "node scripts/check-performance-budget.js",
+		"test:coverage:inventory": "vitest --run --coverage --config vite.inventory.config.js"
 	},
 	"dependencies": {
 		"@marsidev/react-turnstile": "1.5.4",
 		"@supabase/supabase-js": "^2.110.8",
+		"@vercel/analytics": "2.0.1",
 		"react": "^19.1.1",
 		"react-dom": "^19.1.1",
 		"wouter": "3.10.0"

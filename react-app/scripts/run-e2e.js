@@ -2,14 +2,15 @@ import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 
 const mode = process.argv[2];
-if (!['enabled', 'disabled'].includes(mode)) {
-	throw new Error('Usage: node scripts/run-e2e.js <enabled|disabled>');
+if (!['enabled', 'disabled', 'portal'].includes(mode)) {
+	throw new Error('Usage: node scripts/run-e2e.js <enabled|disabled|portal>');
 }
 
 const featureEnabled = mode === 'enabled' ? 'true' : 'false';
 const environment = {
 	...process.env,
 	VITE_APP_URL: 'https://softhe.io',
+	VITE_PUBLIC_ORIGIN: 'https://softhe.io',
 	VITE_REQUIRE_PRODUCTION_CONFIG: 'true',
 	VITE_LEGAL_NAME: 'Softhe E2E Test Operator',
 	VITE_LEGAL_ADDRESS: 'Testgatan 1, 111 11 Stockholm, Sweden',
@@ -29,11 +30,17 @@ const environment = {
 	STRIPE_SECRET_KEY: 'sk_test_e2e_fixture_only',
 	STRIPE_WEBHOOK_SECRET: 'whsec_e2e_fixture_only',
 	PUBLIC_SITE_URL: 'https://softhe.io',
+	// Browser fixtures must never inherit a developer's live provider settings.
+	VITE_SUPABASE_URL: mode === 'portal' ? 'https://portal-fixture.supabase.co' : '',
+	VITE_SUPABASE_PUBLISHABLE_KEY: mode === 'portal' ? 'sb_publishable_e2e_fixture_only' : '',
+	VITE_CAPTCHA_ENABLED: 'false',
+	VITE_TURNSTILE_SITE_KEY: '',
 };
 
 const npmCli = process.env.npm_execpath;
 if (!npmCli) throw new Error('Run this script through npm so npm_execpath is available');
-const testFile = mode === 'enabled' ? 'e2e/smoke.spec.js' : 'e2e/disabled.spec.js';
+const testFiles = mode === 'portal' ? ['e2e/portal.spec.js', 'e2e/metadata.spec.js', 'e2e/analytics.spec.js']
+	: [mode === 'enabled' ? 'e2e/smoke.spec.js' : 'e2e/disabled.spec.js', 'e2e/metadata.spec.js', 'e2e/analytics.spec.js'];
 
 const run = (command, args) => {
 	const result = spawnSync(command, args, {
@@ -45,4 +52,4 @@ const run = (command, args) => {
 };
 
 run(process.execPath, [npmCli, 'run', 'build']);
-run(process.execPath, [npmCli, 'exec', '--', 'playwright', 'test', testFile]);
+run(process.execPath, [npmCli, 'exec', '--', 'playwright', 'test', ...testFiles]);
