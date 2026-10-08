@@ -80,7 +80,7 @@ describe('production health API', () => {
 		Object.assign(process.env, { PUBLIC_SITE_URL: 'https://softhe.io', VAT_STATUS: 'not-registered', BUSINESS_REGISTRATION_ID: '000000-0000', SUPPORT_EMAIL: 'support@example.com' });
 		const outbound = vi.fn(async (url, options) => { if (url === process.env.UPSTASH_REDIS_REST_URL) { expect(JSON.parse(options.body)).toEqual(['PING']); throw new Error('ENOTFOUND secret-provider-host'); } return jsonResponse([]); });
 		vi.stubGlobal('fetch', outbound); const response = createResponse(); await health({ method: 'GET' }, response);
-		expect(response.statusCode).toBe(503); expect(response.payload.checks).toMatchObject({ storage: false, portal: false, contact: false, withdrawal: false, fulfillment: false }); expect(JSON.stringify(response.payload)).not.toMatch(/ENOTFOUND|secret-provider-host|UPSTASH_REDIS/);
+		expect(response.statusCode).toBe(503); expect(response.payload.checks).toMatchObject({ storage: false, portal: false, checkout: false, tickets: false, contact: false, withdrawal: false, fulfillment: false }); expect(JSON.stringify(response.payload)).not.toMatch(/ENOTFOUND|secret-provider-host|UPSTASH_REDIS/);
 	});
 	it('skips the Redis probe when its required configuration is missing', async () => {
 		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example'; delete process.env.UPSTASH_REDIS_REST_TOKEN;

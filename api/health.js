@@ -139,9 +139,9 @@ async function health(req, res) {
 		},
 		checks: {
 			portal: portalAccess && storageAccess && readyFor(['PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
-			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
+			checkout: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
 			contact: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
-			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
+			tickets: portalAccess && storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
 			withdrawal: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
 			storage: storageAccess,
 			fulfillment: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
