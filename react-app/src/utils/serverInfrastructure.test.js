@@ -75,6 +75,19 @@ describe('durable Redis helpers', () => {
 });
 
 describe('production health API', () => {
+	it('fails readiness without exposing errors when configured Redis cannot be reached', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		Object.assign(process.env, { PUBLIC_SITE_URL: 'https://softhe.io', VAT_STATUS: 'not-registered', BUSINESS_REGISTRATION_ID: '000000-0000', SUPPORT_EMAIL: 'support@example.com' });
+		const outbound = vi.fn(async (url, options) => { if (url === process.env.UPSTASH_REDIS_REST_URL) { expect(JSON.parse(options.body)).toEqual(['PING']); throw new Error('ENOTFOUND secret-provider-host'); } return jsonResponse([]); });
+		vi.stubGlobal('fetch', outbound); const response = createResponse(); await health({ method: 'GET' }, response);
+		expect(response.statusCode).toBe(503); expect(response.payload.checks).toMatchObject({ storage: false, portal: false, contact: false, withdrawal: false, fulfillment: false }); expect(JSON.stringify(response.payload)).not.toMatch(/ENOTFOUND|secret-provider-host|UPSTASH_REDIS/);
+	});
+	it('skips the Redis probe when its required configuration is missing', async () => {
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example'; delete process.env.UPSTASH_REDIS_REST_TOKEN;
+		delete process.env.SUPABASE_URL; delete process.env.SUPABASE_PUBLISHABLE_KEY;
+		const outbound = vi.fn().mockResolvedValue(jsonResponse([])); vi.stubGlobal('fetch', outbound);
+		const response = createResponse(); await health({ method: 'GET' }, response); expect(response.statusCode).toBe(503); expect(response.payload.checks.storage).toBe(false); expect(outbound).not.toHaveBeenCalled();
+	});
 	it('reports missing server configuration without exposing values', async () => {
 		process.env.RELEASE_SOURCE_COMMIT = '0123456789abcdef';
 		process.env.RELEASE_FINGERPRINT = 'release-test-fingerprint';
@@ -106,18 +119,20 @@ describe('production health API', () => {
 		});
 	});
 
-	it('reports ready when every required variable exists', async () => {
+	it('reports ready when required configuration, Supabase and Redis are healthy', async () => {
 		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
 		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
 		process.env.VAT_STATUS = 'not-registered';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		vi.stubGlobal('fetch', vi.fn(async (url) => jsonResponse(url === process.env.UPSTASH_REDIS_REST_URL ? { result: 'PONG' } : [])));
 		const response = createResponse();
 		await health({ method: 'GET' }, response);
 
 		expect(response.statusCode).toBe(200);
 		expect(response.payload).toEqual(expect.objectContaining({ status: 'ready' }));
+		expect(response.payload.checks).toMatchObject({ storage: true, portal: true });
+		expect(fetch.mock.calls.some(([url, options]) => url === process.env.UPSTASH_REDIS_REST_URL && options.body === '["PING"]')).toBe(true);
 	});
 
 	it('fails readiness when privileged portal access is rejected', async () => {
@@ -174,7 +189,7 @@ describe('production health API', () => {
 		process.env.VAT_STATUS = 'not-registered';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		vi.stubGlobal('fetch', vi.fn(async (url) => jsonResponse(url === process.env.UPSTASH_REDIS_REST_URL ? { result: 'PONG' } : [])));
 		const response = createResponse();
 		await health({ method: 'GET' }, response);
 		expect(response.statusCode).toBe(200);
@@ -965,3 +980,4 @@ describe('monitoring test API', () => {
 		consoleError.mockRestore();
 	});
 });
+

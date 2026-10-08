@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
 const { adminRequest } = require('./_lib/supabase');
 const { reconcileProcessing } = require('./_lib/processing-attempts');
+const { redisCommand } = require('./_lib/redis');
 
 const safeEqual = (left, right) => {
 	const leftBuffer = Buffer.from(String(left || ''));
@@ -120,7 +121,11 @@ async function health(req, res) {
 	if (portalAccess) {
 		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
 	}
-	const ready = configuration.ready && portalAccess;
+	let storageAccess = readyFor(storageKeys);
+	if (storageAccess) {
+		try { storageAccess = await redisCommand(['PING']) === 'PONG'; } catch { storageAccess = false; }
+	}
+	const ready = configuration.ready && portalAccess && storageAccess;
 	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
 	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
 	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
@@ -133,13 +138,13 @@ async function health(req, res) {
 			fingerprint,
 		},
 		checks: {
-			portal: portalAccess && readyFor([...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
+			portal: portalAccess && storageAccess && readyFor(['PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
 			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
-			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
+			contact: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
 			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
-			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
-			storage: readyFor(storageKeys),
-			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
+			withdrawal: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
+			storage: storageAccess,
+			fulfillment: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
 		},
 	});
 }

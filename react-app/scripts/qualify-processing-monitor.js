@@ -13,7 +13,14 @@ const results = [];
 let phase = 'configuration';
 let httpStatus;
 let failureReason;
+let autoAssignCustomDomains;
 try {
+	phase = 'project.metadata';
+	const projectResponse = await fetch(`https://api.vercel.com/v9/projects/${project}?teamId=${team}`, { headers: { Authorization: `Bearer ${process.env.VERCEL_TOKEN}` }, signal: AbortSignal.timeout(15000) });
+	assert(projectResponse.ok); const projectMetadata = await projectResponse.json();
+	assert(projectMetadata.id === project);
+	autoAssignCustomDomains = projectMetadata.autoAssignCustomDomains;
+	phase = 'configuration';
 	const productionSecret = process.env.MONITORING_RECONCILIATION_SECRET;
 	const previewSecret = process.env.MONITORING_PREVIEW_RECONCILIATION_SECRET;
 	assert(productionSecret?.length >= 32 && previewSecret?.length >= 32 && productionSecret !== previewSecret);
@@ -35,10 +42,10 @@ try {
 		checkReconciliation(data);
 		results.push({ environment: name, deployment: metadata.id, origin, sourceCommit: metadata.meta?.githubCommitSha, response: data });
 	}
-	await writeFile('processing-qualification.json', JSON.stringify({ passed: true, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
+	await writeFile('processing-qualification.json', JSON.stringify({ passed: true, autoAssignCustomDomains, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
 	console.log('Separate Production and isolated Preview reconciliation credentials verified. Scheduling remains disabled.');
 } catch {
-	await writeFile('processing-qualification.json', JSON.stringify({ passed: false, failedPhase: phase, httpStatus, failureReason, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
+	await writeFile('processing-qualification.json', JSON.stringify({ passed: false, failedPhase: phase, httpStatus, failureReason, autoAssignCustomDomains, verifiedAt: new Date().toISOString(), targets: results }, null, 2) + '\n');
 	console.error('Processing qualification failed. Credentials and command arguments were not logged.');
 	process.exitCode = 1;
 }
