@@ -82,6 +82,9 @@ async function health(req, res) {
 			return res.status(401).json({ error: 'Unauthorized' });
 		}
 		const kind = req.body?.kind;
+		if (kind === 'verify-isolated-portal') {
+			return require('./_lib/provider-verification').handleProviderVerification(req, res);
+		}
 		if (kind === 'browser') console.error('browser_error', { monitorTest: true });
 		else if (kind === 'delivery') console.error('contact_delivery_failed', { monitorTest: true });
 		else if (kind === 'stripe') console.error('stripe_webhook_failed', { monitorTest: true });

@@ -3,6 +3,9 @@
 	"outputDirectory": "react-app/dist",
 	"cleanUrls": true,
 	"trailingSlash": false,
+	"functions": {
+		"api/health.js": { "maxDuration": 300 }
+	},
 	"rewrites": [
 		{ "source": "/api/order-fulfillment", "destination": "/api/stripe-webhook" },
 		{ "source": "/api/staff", "destination": "/api/portal-bootstrap?staff=1" },

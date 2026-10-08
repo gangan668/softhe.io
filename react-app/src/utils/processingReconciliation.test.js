@@ -1,4 +1,6 @@
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { checkReconciliation } from '../../scripts/check-processing-reconciliation.js';
 
@@ -9,6 +11,18 @@ const ready = { status: 'ready', checked: 1, reconciled: 1, pending: { stripe: 0
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 describe('durable processing monitor', () => {
+	it('keeps Preview credentials independent and requires an explicitly configured target', () => {
+		const workflow = readFileSync(join(process.cwd(), '..', '.github/workflows/processing-reconciliation.yml'), 'utf8');
+		const previewStep = workflow.slice(workflow.indexOf('- name: Reconcile configured protected Preview'));
+		expect(previewStep).toContain('${#MONITORING_PREVIEW_RECONCILIATION_SECRET} -lt 32');
+		expect(previewStep).toContain('-z "$MONITOR_PREVIEW_BRANCH"');
+		expect(previewStep).toContain('Bearer $MONITORING_PREVIEW_RECONCILIATION_SECRET');
+		expect(previewStep).not.toContain('Bearer $MONITORING_RECONCILIATION_SECRET');
+	});
+	it('requires explicit activation before scheduling while permitting manual qualification', () => {
+		const workflow = readFileSync(join(process.cwd(), '..', '.github/workflows/processing-reconciliation.yml'), 'utf8');
+		expect(workflow).toContain("github.event_name == 'workflow_dispatch' || vars.PROCESSING_MONITORING_ENABLED == 'true'");
+	});
 	it('requires its separate strong secret without touching storage', async () => {
 		const fetch = vi.fn(); vi.stubGlobal('fetch', fetch);
 		vi.stubEnv('MONITORING_RECONCILIATION_SECRET', '');
