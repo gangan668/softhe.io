@@ -19,7 +19,7 @@ try {
 	const metadataResponse = await fetch(`https://api.vercel.com/v13/deployments/${encodeURIComponent(url.hostname)}?teamId=${teamId}`, { headers: { Authorization: `Bearer ${process.env.VERCEL_TOKEN}` }, signal: AbortSignal.timeout(15000) });
 	if (!metadataResponse.ok) fail();
 	const metadata = await metadataResponse.json();
-	if (metadata.url !== url.hostname || metadata.projectId !== projectId || metadata.target === 'production' || metadata.readyState !== 'READY' || metadata.meta?.githubCommitRef !== 'customer-portal-test' || metadata.meta?.githubCommitSha !== commit) fail();
+	if (metadata.url !== url.hostname || (metadata.projectId || metadata.project?.id) !== projectId || metadata.target === 'production' || metadata.readyState !== 'READY' || metadata.meta?.githubCommitRef !== 'customer-portal-test' || metadata.meta?.githubCommitSha !== commit) fail();
 	const recoveryRunId = process.env.PROVIDER_RECOVERY_RUN_ID;
 	const runId = recoveryRunId || crypto.randomUUID();
 	if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/.test(runId)) fail();
@@ -39,7 +39,7 @@ try {
 	if (!report.cleanup.passed && Array.isArray(data.cleanup?.temporaryUserIds)) report.cleanup.temporaryUserIds = data.cleanup.temporaryUserIds.filter((id) => /^[a-f0-9-]{36}$/.test(id));
 	await writeFile('isolated-provider-verification.json', JSON.stringify(report, null, 2) + '\n');
 	if (!response.ok || !report.passed || !report.cleanup.passed || (!recoveryRunId && report.checks.length !== 7) || report.checks.some((check) => !check.passed) || report.emailSent) fail();
-	console.log('Isolated provider verification passed: seven stages and temporary-user cleanup confirmed. No inbox delivery was tested.');
+	console.log(recoveryRunId ? 'Isolated provider recovery passed: journal-owned cleanup confirmed.' : 'Isolated provider verification passed: seven stages and temporary-user cleanup confirmed. No inbox delivery was tested.');
 } catch {
 	console.error('Isolated provider verification refused or failed. No raw provider response or credential was logged.');
 	process.exitCode = 1;

@@ -3,6 +3,11 @@ name: Commercial Release Gate
 on:
   workflow_dispatch:
     inputs:
+      verify_processing_monitor:
+        description: Qualify separate reconciliation credentials on the staged Production candidate and configured isolated Preview
+        required: false
+        default: false
+        type: boolean
       verify_isolated_portal:
         description: Verify temporary synthetic Auth customers on the isolated Preview and clean them up
         required: false
@@ -50,6 +55,37 @@ on:
           - commerce
 
 jobs:
+  processing-monitor-qualification:
+    if: ${{ inputs.verify_processing_monitor && !inputs.verify_isolated_portal }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      MONITORING_RECONCILIATION_SECRET: ${{ secrets.MONITORING_RECONCILIATION_SECRET }}
+      MONITORING_PREVIEW_RECONCILIATION_SECRET: ${{ secrets.MONITORING_PREVIEW_RECONCILIATION_SECRET }}
+      PROCESSING_CANDIDATE_URL: ${{ inputs.candidate_url }}
+      PROCESSING_CANDIDATE_COMMIT: ${{ inputs.candidate_commit }}
+      MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}
+      MONITOR_PREVIEW_BRANCH: ${{ vars.MONITOR_PREVIEW_BRANCH }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Qualify exact Production and isolated Preview endpoints
+        run: |
+          mkdir -p .vercel
+          printf '%s\n' '{"orgId":"team_N2ebrhHRUamJXfQQ2LXBOEny","projectId":"prj_ivs19EGdAuvKZJ6nPd34WRtJ3Kki"}' > .vercel/project.json
+          node react-app/scripts/qualify-processing-monitor.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: processing-monitor-qualification
+          path: processing-qualification.json
+          if-no-files-found: ignore
+
   isolated-provider-verification:
     if: ${{ inputs.verify_isolated_portal }}
     runs-on: ubuntu-latest
@@ -87,7 +123,7 @@ jobs:
           if-no-files-found: ignore
 
   stage-candidate:
-    if: ${{ inputs.stage_candidate && !inputs.verify_isolated_portal }}
+    if: ${{ inputs.stage_candidate && !inputs.verify_isolated_portal && !inputs.verify_processing_monitor }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -134,7 +170,7 @@ jobs:
           EXPECTED_RELEASE_SOURCE_COMMIT="$GITHUB_SHA" EXPECTED_RELEASE_FINGERPRINT="softhe-${GITHUB_SHA:0:7}-stage1" node scripts/production-smoke.js
 
   release-gate:
-    if: ${{ !inputs.stage_candidate && !inputs.verify_isolated_portal }}
+    if: ${{ !inputs.stage_candidate && !inputs.verify_isolated_portal && !inputs.verify_processing_monitor }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
