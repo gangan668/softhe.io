@@ -17,7 +17,7 @@ const environment = {
 	VITE_BUSINESS_REGISTRATION_ID: '000000-0000',
 	VITE_LEGAL_JURISDICTION: 'Sweden',
 	VITE_VAT_STATUS: 'not-registered',
-	VITE_SUPPORT_EMAIL: 'support@softhe.io',
+	VITE_SUPPORT_EMAIL: 'suport.softhe@gmail.com',
 	VITE_BENCHMARK_HARDWARE: 'E2E benchmark fixture hardware',
 	VITE_BENCHMARK_SOFTWARE: 'E2E BIOS, drivers, and Windows fixture',
 	VITE_BENCHMARK_SCENARIO: 'E2E game settings and repeated capture procedure',

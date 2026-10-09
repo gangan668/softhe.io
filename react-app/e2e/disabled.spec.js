@@ -18,6 +18,6 @@ test.describe('fail-closed launch state', () => {
 		await page.goto('/contact');
 		await expect(page.getByLabel('Full Name *')).toHaveCount(0);
 		await expect(page.getByRole('button', { name: 'Send Message' })).toHaveCount(0);
-		await expect(page.getByRole('link', { name: 'Email support' })).toHaveAttribute('href', 'mailto:support@softhe.io');
+		await expect(page.getByRole('link', { name: 'Email support' })).toHaveAttribute('href', 'mailto:suport.softhe@gmail.com');
 	});
 });
