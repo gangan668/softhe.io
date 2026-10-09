@@ -62,6 +62,7 @@ const getIdempotencyKey = (submission) => {
 const sendWithdrawalEmails = async (record) => {
 	const templateParams = {
 		to_email: record.email,
+		support_email: process.env.SUPPORT_EMAIL || 'suport.softhe@gmail.com',
 		order_reference: record.orderReference,
 		requested_items: record.requestedItems.join(', '),
 		comments: record.comments || 'No additional comments',
@@ -132,7 +133,7 @@ async function withdrawal(req, res) {
 		const configurationError = /not configured/.test(error.message);
 		return res.status(configurationError ? 503 : 502).json({
 			error: configurationError
-				? 'The online withdrawal service is temporarily unavailable. Please email support@softhe.io.'
+				? `The online withdrawal service is temporarily unavailable. Please email ${process.env.SUPPORT_EMAIL || 'suport.softhe@gmail.com'}.`
 				: 'The request could not be confirmed. Please try again or contact support.',
 		});
 	}

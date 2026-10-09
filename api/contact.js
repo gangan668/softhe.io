@@ -102,7 +102,7 @@ async function contact(req, res) {
 		console.error('contact_delivery_failed', { configurationError, message: error.message });
 		return res.status(configurationError ? 503 : 502).json({
 			error: configurationError
-				? 'Contact service is temporarily unavailable. Please email support@softhe.io.'
+				? `Contact service is temporarily unavailable. Please email ${process.env.SUPPORT_EMAIL || 'suport.softhe@gmail.com'}.`
 				: 'Message delivery failed. Please try again.',
 		});
 	}

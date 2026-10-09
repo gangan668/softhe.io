@@ -75,7 +75,7 @@ describe("Contact Component", () => {
 		it("should render contact information", () => {
 			renderContact();
 
-			expect(screen.getByText(/support@softhe.io/i)).toBeInTheDocument();
+			expect(screen.getByText(/suport.softhe@gmail.com/i)).toBeInTheDocument();
 			expect(screen.getByText(/@softhecs/i)).toBeInTheDocument();
 		});
 

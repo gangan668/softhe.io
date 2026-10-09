@@ -132,3 +132,9 @@ The GitHub Pages workflow is manual-only and retained as a static, commerce-disa
 - Record a mobile and desktop Core Web Vitals baseline from the preview. Investigate LCP, INP, or CLS regressions before promotion.
 
 Do not enable live Stripe mode until this checklist passes and the fulfillment receiver has recorded an end-to-end test order.
+
+## Support mailbox
+
+The intended support mailbox is `suport.softhe@gmail.com`. Set both `SUPPORT_EMAIL` and `VITE_SUPPORT_EMAIL` to this address for each deployed environment. Public contact links and Auth delivery errors use the configured public address. The API uses the server address for unavailable-service instructions.
+
+EmailJS operator notifications have a separate destination configured in each EmailJS template. The inspected operator template previously targeted `suport.softhe@proton.me`; changing website environment variables does not update that destination. Verify and update the intended operator template recipient in EmailJS before qualifying contact and withdrawal delivery. The Gmail support mailbox does not supply a domain MX record for `softhe.io`.

@@ -1,7 +1,7 @@
 import { resolvePublicOrigin } from './publicOrigin';
 
 const siteUrl = resolvePublicOrigin(import.meta.env);
-const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'support@softhe.io';
+const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'suport.softhe@gmail.com';
 const legalName = import.meta.env.VITE_LEGAL_NAME || 'Softhe.io';
 
 export const siteConfig = Object.freeze({

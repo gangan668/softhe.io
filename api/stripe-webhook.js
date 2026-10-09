@@ -110,6 +110,7 @@ const sendOrderConfirmation = async (session) => {
 	if (!customerEmail) throw new Error('Paid checkout is missing a customer email');
 	const origin = getPublicOrigin();
 	const details = {
+		message_type: 'order_confirmation',
 		to_email: customerEmail,
 		order_reference: session.id,
 		items: items.map((item) => `${PRODUCTS[item.id].name} × ${item.quantity}`).join(', '),
