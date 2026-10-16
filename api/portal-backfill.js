@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { adminRequest, verifyStaff } = require('./_lib/supabase');
 const { persistPaidOrder } = require('./stripe-webhook');
@@ -33,5 +34,5 @@ async function portalBackfill(req, res) {
 	} catch (error) { return sendPublicError(res, error, 'Stripe history could not be imported'); }
 }
 
-module.exports = portalBackfill;
+module.exports = withHttp(portalBackfill);
 

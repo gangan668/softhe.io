@@ -1,7 +1,10 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { claimKey, deleteKey, incrementWithExpiry, setKey } = require('./_lib/redis');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertOperatorIdentity } = require('./_lib/config');
+const { readJsonBody } = require('./_lib/json-body');
+const { sendPublicError } = require('./_lib/portal-security');
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ORDER_REFERENCE_PATTERN = /^[A-Za-z0-9_-]{8,100}$/;
@@ -12,13 +15,13 @@ const cleanText = (value, maxLength) => typeof value === 'string'
 	: '';
 
 const normalizeWithdrawal = (body = {}) => ({
-	orderReference: cleanText(body.orderReference, 100),
-	email: cleanText(body.email, 100).toLowerCase(),
-	requestedItems: Array.isArray(body.requestedItems)
+	orderReference: cleanText(body?.orderReference, 100),
+	email: cleanText(body?.email, 100).toLowerCase(),
+	requestedItems: Array.isArray(body?.requestedItems)
 		? [...new Set(body.requestedItems.map((item) => cleanText(item, 40)).filter(Boolean))]
 		: [],
-	comments: cleanText(body.comments, 2000),
-	website: cleanText(body.website, 200),
+	comments: cleanText(body?.comments, 2000),
+	website: cleanText(body?.website, 200),
 });
 
 const validateWithdrawal = (submission) => {
@@ -86,7 +89,9 @@ async function withdrawal(req, res) {
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
-	const submission = normalizeWithdrawal(req.body);
+	let body;
+	try { body = await readJsonBody(req); } catch (error) { return sendPublicError(res, error); }
+	const submission = normalizeWithdrawal(body);
 	if (submission.website) {
 		return res.status(202).json({ received: true });
 	}
@@ -138,7 +143,8 @@ async function withdrawal(req, res) {
 	}
 }
 
-module.exports = withdrawal;
+module.exports = withHttp(withdrawal);
+module.exports.config = { api: { bodyParser: false } };
 module.exports.ALLOWED_ITEMS = ALLOWED_ITEMS;
 module.exports.getIdempotencyKey = getIdempotencyKey;
 module.exports.getRetentionSeconds = getRetentionSeconds;

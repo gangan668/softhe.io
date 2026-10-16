@@ -31,7 +31,7 @@ function CookiePolicy() {
 							<section>
 								<h2>Optional Analytics</h2>
 								<p>
-									Vercel Web Analytics and configured Google Analytics only load after you accept optional analytics. Vercel Web Analytics does not use analytics cookies. If you
+									Vercel Web Analytics only loads after you accept optional analytics. Vercel Web Analytics does not use analytics cookies. If you
 									decline, analytics will not initialize.
 								</p>
 							</section>
@@ -48,7 +48,7 @@ function CookiePolicy() {
 									Use the cookie settings link in the footer to reset your analytics preference.
 								</p>
 							</section>
-							<section><h2>Storage summary</h2><div className="legal-table-wrap"><table><thead><tr><th>Storage</th><th>Purpose</th><th>Type</th><th>Duration</th></tr></thead><tbody><tr><td>softhe_cart</td><td>Remember cart contents</td><td>Essential local storage</td><td>Until cleared</td></tr><tr><td>softhe_analytics_consent</td><td>Remember analytics choice</td><td>Essential local storage</td><td>Until reset</td></tr><tr><td>Google Analytics identifiers</td><td>Audience measurement</td><td>Optional cookies</td><td>Per analytics configuration</td></tr></tbody></table></div></section>
+							<section><h2>Storage summary</h2><div className="legal-table-wrap"><table><thead><tr><th>Storage</th><th>Purpose</th><th>Type</th><th>Duration</th></tr></thead><tbody><tr><td>softhe_cart</td><td>Remember cart contents</td><td>Essential local storage</td><td>Until cleared</td></tr><tr><td>softhe_analytics_consent</td><td>Remember analytics choice</td><td>Essential local storage</td><td>Until reset</td></tr></tbody></table></div></section>
 							<section><h2>Legal basis</h2><p>Essential storage is used to provide requested cart and consent functionality. Optional analytics storage is used only after consent and can be withdrawn through Cookie Settings.</p></section>
 						</div>
 					</div>

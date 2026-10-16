@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { claimKey, redisCommand, setKey } = require('./_lib/redis');
 const { beginProcessing, finishProcessing } = require('./_lib/processing-attempts');
@@ -33,7 +34,7 @@ const readRawBody = async (req) => {
 };
 
 const verifyStripeSignature = (payload, signatureHeader, secret, toleranceSeconds = 300) => {
-	if (!signatureHeader || !secret) return false;
+	if (typeof signatureHeader !== 'string' || !signatureHeader || !secret) return false;
 	const parts = signatureHeader.split(',').map((part) => part.split('='));
 	const timestamp = parts.find(([key]) => key === 't')?.[1];
 	const signatures = parts.filter(([key]) => key === 'v1').map(([, value]) => value);
@@ -48,7 +49,7 @@ const verifyStripeSignature = (payload, signatureHeader, secret, toleranceSecond
 		.digest('hex');
 
 	return signatures.some((signature) => {
-		if (signature.length !== expected.length) return false;
+		if (!/^[a-f0-9]{64}$/.test(signature || '')) return false;
 		return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 	});
 };
@@ -320,7 +321,7 @@ async function stripeWebhook(req, res) {
 	return res.status(200).json({ received: true });
 }
 
-module.exports = stripeWebhook;
+module.exports = withHttp(stripeWebhook, { raw: true });
 module.exports.config = { api: { bodyParser: false } };
 module.exports.verifyStripeSignature = verifyStripeSignature;
 module.exports.readRawBody = readRawBody;

@@ -24,6 +24,11 @@ const openMenu = async (page) => {
 test('Vercel analytics honors consent and sends sanitized fixed public pageviews', async ({ page }) => {
 	const events = [];
 	const scripts = [];
+	const googleRequests = [];
+	await page.route(/https:\/\/[^/]*(?:google-analytics\.com|googletagmanager\.com)\//, async (route) => {
+		googleRequests.push(route.request().url());
+		await route.abort();
+	});
 	await page.addInitScript(() => localStorage.removeItem('softhe_analytics_consent'));
 	await page.route('**/_vercel/insights/script.js', async (route) => {
 		scripts.push(route.request().url());
@@ -63,4 +68,6 @@ test('Vercel analytics honors consent and sends sanitized fixed public pageviews
 	await expect(page.locator('h1').first()).toBeVisible();
 	expect(events).toHaveLength(2);
 	expect(JSON.stringify(events)).not.toMatch(/private|token|customer_id|#/);
+	expect(googleRequests).toEqual([]);
+	await expect(page.locator('script[src*="googletagmanager"]')).toHaveCount(0);
 });

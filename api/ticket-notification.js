@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { sendTransactionalEmail } = require('./_lib/resend');
 const { userRequest, verifyActiveUser } = require('./_lib/supabase');
@@ -65,4 +66,4 @@ async function ticketNotification(req, res) {
 	}
 }
 
-module.exports = ticketNotification;
+module.exports = withHttp(ticketNotification);

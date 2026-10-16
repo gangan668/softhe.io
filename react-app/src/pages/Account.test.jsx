@@ -90,3 +90,37 @@ it('renders actual order and activity records without confusing empty-state copy
 	mock.recover.mockResolvedValue({ results: [{ data: { full_name: 'Customer' } }, { data: [{ id: 'order', stripe_session_id: 'fixture-order-12345', status: 'paid', created_at: '2026-10-01', currency: 'eur', amount_total: 2500, order_items: [{ product_name: 'Fixture product', quantity: 1 }] }] }, { data: [] }, { data: [{ id: 'event', event_type: 'profile.updated', created_at: '2026-10-01' }] }] });
 	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'orders', exact: true })); expect(screen.getByText('Fixture product × 1')).toBeInTheDocument(); expect(screen.queryByText(/No linked orders yet/)).not.toBeInTheDocument(); fireEvent.click(screen.getByRole('button', { name: 'history', exact: true })); expect(screen.getByText('profile updated')).toBeInTheDocument();
 });
+
+it('removes MFA enrollment secrets and unsent ticket drafts when the authenticated user changes', async () => {
+	supabase.auth.mfa.enroll.mockResolvedValue({ data: { id: 'old-factor', totp: { qr_code: 'data:image/svg+xml,old-secret' } } });
+	const tree = (id) => <MemoryRouter><AuthContext.Provider value={{ user: { id, email: `${id}@example.test` }, session: { access_token: id }, supabase }}><Account /></AuthContext.Provider></MemoryRouter>;
+	const view = render(tree('old')); await screen.findByText('Hello, Customer');
+	fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'New ticket' }));
+	fireEvent.change(screen.getByLabelText('Subject'), { target: { value: 'Private old draft' } }); fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Private old message' } });
+	fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Set up or verify MFA' }));
+	await screen.findByAltText('Authenticator enrollment QR code'); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } });
+	view.rerender(tree('new')); await screen.findByText('Hello, Customer');
+	fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); expect(screen.queryByAltText('Authenticator enrollment QR code')).not.toBeInTheDocument(); expect(screen.queryByLabelText('Six-digit code')).not.toBeInTheDocument();
+	fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'New ticket' })); expect(screen.getByLabelText('Subject')).toHaveValue(''); expect(screen.getByLabelText('Message')).toHaveValue('');
+});
+
+it('finishes the active account load after a token refresh for the same user', async () => {
+	let resolveLoad; mock.recover.mockReturnValue(new Promise((resolve) => { resolveLoad = resolve; }));
+	const tree = (token) => <MemoryRouter><AuthContext.Provider value={{ user: { id: 'customer', email: 'customer@example.test' }, session: { access_token: token }, supabase }}><Account /></AuthContext.Provider></MemoryRouter>;
+	const view = render(tree('old-token')); await waitFor(() => expect(mock.recover).toHaveBeenCalledOnce());
+	view.rerender(tree('refreshed-token')); await act(async () => resolveLoad(results()));
+	expect(screen.getByRole('heading', { name: 'Hello, Customer' })).toBeInTheDocument(); expect(screen.queryByText('Loading account…')).not.toBeInTheDocument();
+});
+
+it('clears MFA enrollment secrets when verification rotates the current user token', async () => {
+	let resolveVerification;
+	supabase.auth.mfa.enroll.mockResolvedValue({ data: { id: 'factor', totp: { qr_code: 'data:image/svg+xml,fixture-secret' } } });
+	supabase.auth.mfa.challenge.mockResolvedValue({ data: { id: 'challenge' } });
+	supabase.auth.mfa.verify.mockReturnValue(new Promise((resolve) => { resolveVerification = resolve; }));
+	supabase.auth.refreshSession = vi.fn().mockResolvedValue({ data: { session: { access_token: 'aal2-token' } } });
+	const tree = (token) => <MemoryRouter><AuthContext.Provider value={{ user: { id: 'customer', email: 'customer@example.test' }, session: { access_token: token }, supabase }}><Account /></AuthContext.Provider></MemoryRouter>;
+	const view = render(tree('aal1-token')); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Set up or verify MFA' }));
+	await screen.findByAltText('Authenticator enrollment QR code'); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } }); fireEvent.click(screen.getByRole('button', { name: 'Verify MFA' }));
+	view.rerender(tree('aal2-token')); await act(async () => resolveVerification({}));
+	await screen.findByText('MFA verified. This session now has AAL2 assurance.'); expect(screen.queryByAltText('Authenticator enrollment QR code')).not.toBeInTheDocument(); expect(screen.getByLabelText('Six-digit code')).toHaveValue('');
+});

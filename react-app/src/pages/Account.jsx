@@ -11,6 +11,11 @@ const tabs = ['overview', 'orders', 'tickets', 'history', 'security'];
 const formatDate = (value) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 
 export default function Account() {
+	const { user } = useAuth();
+	return <AccountSession key={user.id} />;
+}
+
+function AccountSession() {
 	const { user, session, staff, supabase } = useAuth();
 	const navigate = useNavigate();
 	const [tab, setTab] = useState('overview');
@@ -30,7 +35,8 @@ export default function Account() {
 	const requestScope = useRef(0);
 	const ticketRead = useRef(0);
 	const loadRead = useRef(0);
-	useEffect(() => { requestScope.current += 1; return () => { requestScope.current += 1; ticketRead.current += 1; }; }, [user.id, supabase, session?.access_token]);
+	// Token refresh keeps the same account. Identity changes and unmounts invalidate its requests.
+	useEffect(() => { requestScope.current += 1; return () => { requestScope.current += 1; ticketRead.current += 1; }; }, [user.id, supabase]);
 	const [mfa, setMfa] = useState({ factorId: '', qr: '', code: '', message: '', error: '' });
 
 	const load = useCallback(async () => {
@@ -67,7 +73,7 @@ export default function Account() {
 	const openTicket = async (ticket) => {
 		const request = ++ticketRead.current;
 		const scope = requestScope.current;
-		setSelectedTicket({ ...ticket, ownerId: user.id }); setMessages([]);
+		setSelectedTicket({ ...ticket, ownerId: user.id }); setMessages([]); setReply('');
 		try {
 			const result = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticket.id).order('created_at');
 			if (request !== ticketRead.current || scope !== requestScope.current) return;

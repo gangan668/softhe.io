@@ -11,6 +11,7 @@
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"test": "vitest",
+		"test:database": "node ../supabase/tests/run-customer-security.mjs",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest --coverage",
 		"audit:ci": "npm audit --audit-level=high",
@@ -33,6 +34,7 @@
 		"wouter": "3.10.0"
 	},
 	"devDependencies": {
+		"@electric-sql/pglite": "0.3.14",
 		"@eslint/js": "10.0.1",
 		"@playwright/test": "1.61.1",
 		"@testing-library/jest-dom": "^6.6.3",

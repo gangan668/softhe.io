@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const { assertCommerceConfiguration } = require('./_lib/config');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { verifyActiveUser } = require('./_lib/supabase');
@@ -22,7 +23,7 @@ const normalizeItems = (items) => {
 
 	const merged = new Map();
 	for (const item of items) {
-		if (!item || !PRODUCTS[item.id]) {
+		if (!item || typeof item.id !== 'string' || !Object.hasOwn(PRODUCTS, item.id)) {
 			throw new Error(`Unknown product: ${item?.id || 'missing'}`);
 		}
 
@@ -210,7 +211,7 @@ async function createCheckoutSession(req, res) {
 	}
 }
 
-module.exports = createCheckoutSession;
+module.exports = withHttp(createCheckoutSession, { maxBytes: 32768 });
 module.exports.PRODUCTS = PRODUCTS;
 module.exports.TERMS_VERSION = TERMS_VERSION;
 module.exports.WITHDRAWAL_NOTICE_VERSION = WITHDRAWAL_NOTICE_VERSION;

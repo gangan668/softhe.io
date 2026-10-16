@@ -5,6 +5,11 @@ import { staffRequest } from '../utils/staff';
 import './Portal.css';
 
 export default function Admin() {
+	const { user } = useAuth();
+	return <AdminSession key={user.id} />;
+}
+
+function AdminSession() {
 	const { user, session } = useAuth();
 	const replyInFlight = useRef(false);
 	const [cachedTickets, setTickets] = useState([]); const [cachedOrders, setOrders] = useState([]); const [cachedCustomers, setCustomers] = useState([]); const [cachedAccess, setAccess] = useState(null); const [cachedSelected, setSelected] = useState(null); const [cachedMessages, setMessages] = useState([]); const [reply, setReply] = useState(''); const [error, setError] = useState(''); const [replySending, setReplySending] = useState(false);
@@ -35,7 +40,7 @@ export default function Admin() {
 	useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
 	const open = async (ticket) => {
 		const generation = scope.current; const request = ++ticketRead.current;
-		setSelected(null); setMessages([]);
+		setSelected(null); setMessages([]); setReply('');
 		try { const data = await staffRequest(session, 'ticket', { query: { id: ticket.id } }); if (generation !== scope.current || request !== ticketRead.current) return; setSelected(data.ticket); setMessages(data.messages || []); setError(''); }
 		catch (openError) { if (generation === scope.current && request === ticketRead.current) setError(openError.message); }
 	};
@@ -48,7 +53,7 @@ export default function Admin() {
 		event.preventDefault(); if (replyInFlight.current || !reply.trim() || !selected) return;
 		const generation = scope.current; const ticket = selected; const read = ticketRead.current;
 		replyInFlight.current = true; setReplySending(true);
-		try { await staffRequest(session, 'reply', { method: 'POST', body: { ticketId: ticket.id, message: reply.trim() } }); if (generation !== scope.current) return; setReply(''); if (read === ticketRead.current) await open(ticket); await load(); }
+		try { await staffRequest(session, 'reply', { method: 'POST', body: { ticketId: ticket.id, message: reply.trim() } }); if (generation !== scope.current) return; if (read === ticketRead.current) { setReply(''); await open(ticket); } await load(); }
 		catch (sendError) { if (generation === scope.current) setError(sendError.message); }
 		finally { replyInFlight.current = false; if (generation === scope.current) setReplySending(false); }
 	};

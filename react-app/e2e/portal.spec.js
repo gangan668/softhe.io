@@ -2,9 +2,9 @@ import { Buffer } from 'node:buffer';
 import { expect, test } from '@playwright/test';
 
 const user = { id: '11111111-1111-4111-8111-111111111111', aud: 'authenticated', role: 'authenticated', email: 'customer@example.test', email_confirmed_at: '2026-10-01T12:00:00Z', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-10-01T12:00:00Z' };
-const jwt = (assurance = 'aal1') => [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: user.id, role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600, aal: assurance, session_id: 'fixture-session' })).toString('base64url'), 'fixture-signature'].join('.');
+const jwt = (assurance = 'aal1', subject = user.id) => [Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url'), Buffer.from(JSON.stringify({ sub: subject, role: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600, aal: assurance, session_id: 'fixture-session' })).toString('base64url'), 'fixture-signature'].join('.');
 async function fixture(page, { loginFails = false, staff = false } = {}) {
-	const state = { profile: { id: user.id, full_name: 'Fixture Customer', billing_address: {} }, tickets: [], messages: [], writes: [] };
+	const state = { currentUser: user, profile: { id: user.id, full_name: 'Fixture Customer', billing_address: {} }, tickets: [], messages: [], writes: [], deferredReply: null };
 	await page.addInitScript(() => localStorage.setItem('softhe_analytics_consent', 'false'));
 	await page.route('https://portal-fixture.supabase.co/**', async (route) => {
 		const request = route.request(); const url = new URL(request.url());
@@ -12,7 +12,8 @@ async function fixture(page, { loginFails = false, staff = false } = {}) {
 		if (url.pathname === '/auth/v1/token') {
 			if (loginFails) return route.fulfill({ status: 400, json: { code: 'invalid_credentials', message: 'Invalid login credentials' } });
 			body = { access_token: jwt(staff ? 'aal2' : 'aal1'), refresh_token: 'fixture-refresh-token', expires_in: 3600, token_type: 'bearer', user };
-		} else if (url.pathname === '/auth/v1/user') body = user;
+		} else if (url.pathname === '/auth/v1/user') body = state.currentUser;
+		else if (url.pathname === '/auth/v1/factors' && request.method() === 'POST') body = { id: '22222222-2222-4222-8222-222222222222', type: 'totp', totp: { qr_code: '<svg xmlns="http://www.w3.org/2000/svg"><text>fixture-mfa-secret</text></svg>', secret: 'FIXTURESECRET', uri: 'otpauth://totp/Fixture?secret=FIXTURESECRET' } };
 		else if (url.pathname === '/auth/v1/logout') return route.fulfill({ status: 204, body: '' });
 		else if (url.pathname === '/rest/v1/profiles') {
 			if (request.method() === 'PATCH') { state.profile = { ...state.profile, ...request.postDataJSON() }; return route.fulfill({ status: 204, body: '' }); }
@@ -23,7 +24,7 @@ async function fixture(page, { loginFails = false, staff = false } = {}) {
 		else return route.fulfill({ status: 404, json: { error: 'Unhandled fixture request' } });
 		return route.fulfill({ status: 200, json: body });
 	});
-	await page.route('**/api/staff?**', (route) => {
+	await page.route('**/api/staff?**', async (route) => {
 		if (!staff) return route.fulfill({ status: 403, json: { error: 'Staff access denied', authorized: false } });
 		const action = new URL(route.request().url()).searchParams.get('action');
 		const payload = route.request().method() === 'POST' ? route.request().postDataJSON() : null;
@@ -33,8 +34,8 @@ async function fixture(page, { loginFails = false, staff = false } = {}) {
 		else if (action === 'queue') body = { tickets: state.tickets };
 		else if (action === 'orders') body = { orders: [{ id: 'layout-order', customer_email: user.email, status: 'paid', amount_total: 2500, currency: 'eur' }] };
 		else if (action === 'customers') body = { customers: [{ id: user.id }] };
-		else if (action === 'ticket') body = { ticket: state.tickets[0], messages: state.messages };
-		else if (action === 'reply') { state.messages.push({ id: 'staff-reply', author_id: user.id, body: payload.message }); body = { saved: true }; }
+		else if (action === 'ticket') body = { ticket: state.tickets.find((ticket) => ticket.id === new URL(route.request().url()).searchParams.get('id')), messages: state.messages };
+		else if (action === 'reply') { state.writes.push(payload); if (state.deferredReply) await state.deferredReply; state.messages.push({ id: 'staff-reply', author_id: user.id, body: payload.message }); body = { saved: true }; }
 		else body = {};
 		return route.fulfill({ status: 200, json: body });
 	});
@@ -54,6 +55,50 @@ async function login(page) {
 	await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 	await expect(page.getByRole('heading', { name: 'Hello, Fixture Customer' })).toBeVisible();
 }
+
+async function replaceIdentity(page, state, assurance = 'aal1') {
+	const nextUser = { ...user, id: '33333333-3333-4333-8333-333333333333', email: 'replacement@example.test' };
+	state.currentUser = nextUser;
+	state.profile = { id: nextUser.id, full_name: 'Replacement Customer', billing_address: {} };
+	const session = { access_token: jwt(assurance, nextUser.id), refresh_token: 'replacement-fixture-refresh', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, token_type: 'bearer', user: nextUser };
+	await page.evaluate((nextSession) => {
+		const key = 'sb-portal-fixture-auth-token';
+		localStorage.setItem(key, JSON.stringify(nextSession));
+		const channel = new BroadcastChannel(key);
+		channel.postMessage({ event: 'SIGNED_IN', session: nextSession });
+		channel.close();
+	}, session);
+}
+
+test('cross-tab identity replacement discards MFA secrets and private ticket drafts', async ({ page }) => {
+	const state = await fixture(page); await login(page);
+	await page.getByRole('button', { name: 'tickets', exact: true }).click(); await page.getByRole('button', { name: 'New ticket' }).click();
+	await page.getByLabel('Subject', { exact: true }).fill('Old private draft'); await page.getByLabel('Message', { exact: true }).fill('Old private message');
+	await page.getByRole('button', { name: 'security', exact: true }).click(); await page.getByRole('button', { name: 'Set up or verify MFA' }).click();
+	await expect(page.getByAltText('Authenticator enrollment QR code')).toBeVisible(); await page.getByLabel('Six-digit code').fill('123456');
+	await replaceIdentity(page, state);
+	await expect(page.getByRole('heading', { name: 'Hello, Replacement Customer' })).toBeVisible();
+	await page.getByRole('button', { name: 'security', exact: true }).click();
+	await expect(page.getByAltText('Authenticator enrollment QR code')).toHaveCount(0); await expect(page.getByLabel('Six-digit code')).toHaveCount(0);
+	await page.getByRole('button', { name: 'tickets', exact: true }).click(); await page.getByRole('button', { name: 'New ticket' }).click();
+	await expect(page.getByLabel('Subject', { exact: true })).toHaveValue(''); await expect(page.getByLabel('Message', { exact: true })).toHaveValue('');
+});
+
+test('a deferred staff send cannot restore a previous ticket or leak drafts after identity replacement', async ({ page }) => {
+	const state = await fixture(page, { staff: true });
+	state.tickets.push({ id: 'first', subject: 'First staff ticket', status: 'open' }, { id: 'second', subject: 'Second staff ticket', status: 'open' });
+	let release; state.deferredReply = new Promise((resolve) => { release = resolve; });
+	await login(page); await page.goto('/admin'); await page.getByRole('button', { name: /First staff ticket/ }).click();
+	await page.locator('.conversation textarea').fill('Old staff private message'); await page.getByRole('button', { name: 'Reply as staff' }).click();
+	await expect.poll(() => state.writes.length).toBe(1);
+	await page.getByRole('button', { name: /Second staff ticket/ }).click(); await expect(page.getByRole('heading', { name: 'Second staff ticket' })).toBeVisible();
+	await expect(page.locator('.conversation textarea')).toHaveValue('');
+	await replaceIdentity(page, state, 'aal2');
+	await expect(page.getByRole('heading', { name: 'Second staff ticket' })).toHaveCount(0);
+	release(); await page.getByRole('button', { name: /Second staff ticket/ }).click();
+	await expect(page.getByRole('heading', { name: 'Second staff ticket' })).toBeVisible(); await expect(page.locator('.conversation textarea')).toHaveValue('');
+	expect(state.writes[0]).toMatchObject({ ticketId: 'first', message: 'Old staff private message' });
+});
 test('portal login, profile persistence, ticket history and signout', async ({ page }) => {
 	const state = await fixture(page);
 	await login(page);

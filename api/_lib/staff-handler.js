@@ -29,7 +29,7 @@ async function staffApi(req, res) {
 		if (req.method === 'GET' && action === 'queue') {
 			const page = safePage(req.query?.page); const from = (page - 1) * 25;
 			const tickets = await adminRequest(`tickets?select=id,user_id,subject,category,status,created_at,updated_at&order=updated_at.desc&offset=${from}&limit=25`);
-			const ids = [...new Set((tickets || []).map((t) => t.user_id))].filter(UUID.test);
+			const ids = [...new Set((tickets || []).map((t) => t.user_id))].filter((id) => UUID.test(id));
 			const profiles = ids.length ? await adminRequest(`profiles?id=in.(${ids.join(',')})&select=id,email,full_name`) : [];
 			const owners = Object.fromEntries((profiles || []).map((p) => [p.id, { email: p.email, fullName: p.full_name }]));
 			await audit(actor, 'staff.ticket_queue_read', 'ticket', null, { page, returned: tickets?.length || 0 });

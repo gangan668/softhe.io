@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const { adminRequest, getBearerToken, getConfig, verifyActiveUser, verifyUser } = require('./_lib/supabase');
 const { clientIp, enforceRateLimit, enforceSameOrigin, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 const { fetchWithTimeout } = require('./_lib/fetch');
@@ -36,4 +37,4 @@ async function portalBootstrap(req, res) {
 	}
 }
 
-module.exports = portalBootstrap;
+module.exports = withHttp(portalBootstrap);

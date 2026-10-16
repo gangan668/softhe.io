@@ -13,7 +13,7 @@ const serializeError = (error, context = {}) => ({
 	message: error?.message || String(error),
 	stack: error?.stack,
 	name: error?.name,
-	url: typeof window !== 'undefined' ? window.location.href : undefined,
+	url: typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : undefined,
 	environment: environment(),
 	context,
 	timestamp: new Date().toISOString(),

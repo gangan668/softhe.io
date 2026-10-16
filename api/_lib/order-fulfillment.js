@@ -12,7 +12,10 @@ const retentionSeconds = () => {
 };
 
 const readRawBody = async (req) => {
-	if (Buffer.isBuffer(req.body)) return req.body;
+	if (Buffer.isBuffer(req.body)) {
+		if (req.body.length > MAX_BODY_BYTES) throw Object.assign(new Error('Payload is too large'), { statusCode: 413 });
+		return req.body;
+	}
 	const chunks = [];
 	let total = 0;
 	for await (const chunk of req) {

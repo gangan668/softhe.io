@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
 const { adminRequest } = require('./_lib/supabase');
@@ -149,7 +150,7 @@ async function health(req, res) {
 	});
 }
 
-module.exports = health;
+module.exports = withHttp(health);
 module.exports.REQUIRED_CONFIGURATION = REQUIRED_CONFIGURATION;
 module.exports.getConfigurationStatus = getConfigurationStatus;
 module.exports.safeEqual = safeEqual;

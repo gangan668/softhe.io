@@ -490,7 +490,7 @@ function FAQ() {
 	const handleSearch = (value) => {
 		setSearchTerm(value.toLowerCase());
 		if (value.trim().length >= 3) {
-			trackEvent("faq_search", { search_term: value.trim().slice(0, 80) });
+			trackEvent("faq_search", { query_length: Math.min(value.trim().length, 200), category: activeCategory });
 		}
 		if (value) {
 			// Auto-expand all matching items

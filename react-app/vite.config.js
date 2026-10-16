@@ -45,7 +45,7 @@ export default defineConfig(() => ({
 				"style-src 'self' 'unsafe-inline'",
 				"font-src 'self'",
 				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' ws: wss: http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com",
+				"connect-src 'self' ws: wss: http: https: https://buy.stripe.com https://api.stripe.com",
 				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
 				"object-src 'none'",
 				"base-uri 'self'",
@@ -90,11 +90,11 @@ export default defineConfig(() => ({
 			// Apply same security headers for preview (relaxed for local testing)
 			"Content-Security-Policy": [
 				"default-src 'self' 'unsafe-inline'",
-				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://challenges.cloudflare.com",
+				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://challenges.cloudflare.com",
 				"style-src 'self' 'unsafe-inline'",
 				"font-src 'self'",
 				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com https://api.emailjs.com",
+				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://api.emailjs.com",
 				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
 				"object-src 'none'",
 				"base-uri 'self'",

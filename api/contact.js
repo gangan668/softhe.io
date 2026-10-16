@@ -1,7 +1,10 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { incrementWithExpiry } = require('./_lib/redis');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertOperatorIdentity } = require('./_lib/config');
+const { readJsonBody } = require('./_lib/json-body');
+const { sendPublicError } = require('./_lib/portal-security');
 
 const SUBJECTS = new Set(['general', 'technical', 'sales', 'custom', 'billing']);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,12 +38,12 @@ const cleanText = (value, maxLength) => typeof value === 'string'
 	: '';
 
 const normalizeSubmission = (body = {}) => ({
-	name: cleanText(body.name, 100),
-	email: cleanText(body.email, 100).toLowerCase(),
-	subject: cleanText(body.subject, 30),
-	hardware: cleanText(body.hardware, 500),
-	message: cleanText(body.message, 2000),
-	website: cleanText(body.website, 200),
+	name: cleanText(body?.name, 100),
+	email: cleanText(body?.email, 100).toLowerCase(),
+	subject: cleanText(body?.subject, 30),
+	hardware: cleanText(body?.hardware, 500),
+	message: cleanText(body?.message, 2000),
+	website: cleanText(body?.website, 200),
 });
 
 const validateSubmission = (submission) => {
@@ -82,7 +85,9 @@ async function contact(req, res) {
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
-	const submission = normalizeSubmission(req.body);
+	let body;
+	try { body = await readJsonBody(req); } catch (error) { return sendPublicError(res, error); }
+	const submission = normalizeSubmission(body);
 	if (submission.website) return res.status(200).json({ delivered: true });
 	const validationError = validateSubmission(submission);
 	if (validationError) return res.status(400).json({ error: validationError });
@@ -108,7 +113,8 @@ async function contact(req, res) {
 	}
 }
 
-module.exports = contact;
+module.exports = withHttp(contact);
+module.exports.config = { api: { bodyParser: false } };
 module.exports.configureCors = configureCors;
 module.exports.getClientIdentifier = getClientIdentifier;
 module.exports.normalizeSubmission = normalizeSubmission;

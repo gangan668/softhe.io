@@ -1,11 +1,7 @@
 import { getAnalyticsConsent } from './analytics';
 
-// Only fixed public routes are measured; auth, checkout, account, and unknown paths are excluded.
-const publicPaths = new Set(['/', '/services', '/store', '/performance', '/contact', '/faq', '/privacy-policy', '/cookie-policy', '/terms', '/legal-notice', '/withdrawal']);
-
-export function publicAnalyticsPath(pathname) {
-	return publicPaths.has(pathname) ? pathname : null;
-}
+import { publicAnalyticsPath } from '../config/routePolicy';
+export { publicAnalyticsPath } from '../config/routePolicy';
 
 export function beforeSendAnalytics(event) {
 	if (!getAnalyticsConsent() || event?.type !== 'pageview' || !publicAnalyticsPath(window.location.pathname)) return null;

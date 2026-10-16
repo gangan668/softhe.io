@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { setAnalyticsConsent, hasConsentDecision, initGA } from '../utils/analytics';
+import { setAnalyticsConsent, hasConsentDecision } from '../utils/analytics';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import './CookieConsent.css';
 
@@ -39,9 +39,6 @@ function CookieConsent() {
 				clearTimeout(timer);
 				window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
 			};
-		} else {
-			// User has already consented, initialize analytics
-			initGA();
 		}
 
 		return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
@@ -51,7 +48,6 @@ function CookieConsent() {
 		try {
 			await setAnalyticsConsent(true);
 			setShowBanner(false);
-			initGA();
 		} catch (error) {
 			console.error('Error setting analytics consent:', error);
 			// Still hide banner even if analytics fails
@@ -122,8 +118,8 @@ function CookieConsent() {
 									</h4>
 									<p>
 										Optional analytics help us understand visits to our public pages
-										after consent. We use cookie-free Vercel Web Analytics and configured Google
-										Analytics. Vercel events exclude private routes, query strings, and URL fragments.
+										after consent. We use cookie-free Vercel Web Analytics. Its events exclude
+										private routes, query strings, and URL fragments. Google Analytics is not used.
 									</p>
 									<span className="cookie-status optional">Optional</span>
 								</div>

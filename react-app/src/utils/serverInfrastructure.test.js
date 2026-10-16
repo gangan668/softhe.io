@@ -13,6 +13,8 @@ const ticketWrite = require('../../../api/ticket-write.js');
 const { runIdempotent } = ticketWrite;
 const portalBootstrap = require('../../../api/portal-bootstrap.js');
 const staffApi = require('../../../api/_lib/staff-handler.js');
+const { jsonOnly } = require('../../../api/_lib/portal-security.js');
+const orderFulfillment = require('../../../api/_lib/order-fulfillment.js');
 
 const vercelConfig = require('../../../vercel.json');
 
@@ -46,6 +48,16 @@ const createResponse = () => {
 	response.end = vi.fn(() => response);
 	return response;
 };
+
+describe('public API malformed input', () => {
+	it.each([['contact', contact], ['withdrawal', withdrawal], ['browser errors', browserErrors]])('rejects a JSON null body for %s without an unhandled exception', async (_name, handler) => {
+		const response = createResponse();
+		const outbound = vi.fn(); vi.stubGlobal('fetch', outbound);
+		await handler({ method: 'POST', headers: { 'content-type': 'application/json' }, body: null }, response);
+		expect(response.statusCode).toBe(400);
+		expect(outbound).not.toHaveBeenCalled();
+	});
+});
 
 describe('durable Redis helpers', () => {
 	beforeEach(() => {
@@ -310,6 +322,32 @@ describe('ticket write API', () => {
 });
 
 describe('staff authorization boundary', () => {
+	it('returns a nonempty ticket queue with the correct owner profiles', async () => {
+		Object.assign(process.env, {
+			STAFF_PORTAL_ENABLED: 'true', SUPABASE_URL: 'https://project.supabase.co',
+			SUPABASE_PUBLISHABLE_KEY: 'public-key', SUPABASE_SERVICE_ROLE_KEY: 'service-key',
+			PORTAL_RATE_LIMIT_SECRET: 'rate-secret', UPSTASH_REDIS_REST_URL: 'https://redis.example',
+			UPSTASH_REDIS_REST_TOKEN: 'redis-token',
+		});
+		const actorId = '11111111-1111-4111-8111-111111111111';
+		const ownerId = '22222222-2222-4222-8222-222222222222';
+		const claims = Buffer.from(JSON.stringify({ sub: actorId, aal: 'aal2', session_id: actorId })).toString('base64url');
+		const outbound = vi.fn(async (url) => {
+			if (url === 'https://redis.example') return jsonResponse({ result: 1 });
+			if (url.endsWith('/auth/v1/user')) return jsonResponse({ id: actorId, email: 'staff@example.com', email_confirmed_at: '2026-01-01' });
+			if (url.includes('select=account_status')) return jsonResponse([{ account_status: 'active' }]);
+			if (url.endsWith('/rpc/verify_staff_access')) return jsonResponse([{ role: 'staff' }]);
+			if (url.includes('/tickets?')) return jsonResponse([{ id: actorId, user_id: ownerId, subject: 'Support request' }]);
+			if (url.includes('/profiles?id=in.')) return jsonResponse([{ id: ownerId, email: 'customer@example.com', full_name: 'Customer' }]);
+			if (url.endsWith('/staff_audit_events')) return jsonResponse(null);
+			throw new Error(`Unexpected request: ${url}`);
+		});
+		vi.stubGlobal('fetch', outbound);
+		const response = createResponse();
+		await staffApi({ method: 'GET', headers: { authorization: `Bearer header.${claims}.signature` }, query: { action: 'queue' } }, response);
+		expect(response.statusCode).toBe(200);
+		expect(response.payload.tickets[0].owner).toEqual({ email: 'customer@example.com', fullName: 'Customer' });
+	});
 	it('keeps every staff endpoint unavailable unless explicitly enabled', async () => {
 		delete process.env.STAFF_PORTAL_ENABLED;
 		const response = createResponse();
@@ -341,6 +379,28 @@ describe('staff authorization boundary', () => {
 });
 
 describe('server configuration guards', () => {
+	it('rejects oversized headers before Vercel lazily parses the body', () => {
+		const req = { headers: { 'content-type': 'application/json', 'content-length': '100000' } };
+		const parseBody = vi.fn(() => { throw new Error('Body parsing must not run'); });
+		Object.defineProperty(req, 'body', { get: parseBody });
+		expect(() => jsonOnly(req, 16384)).toThrow('Request too large');
+		expect(parseBody).not.toHaveBeenCalled();
+	});
+	it('limits actual JSON bytes even when Content-Length is missing or understates the body', () => {
+		for (const headers of [{}, { 'content-length': '1' }]) {
+			expect(() => jsonOnly({ headers: { 'content-type': 'application/json', ...headers }, body: { message: 'é'.repeat(30) } }, 50)).toThrow('Request too large');
+		}
+		expect(() => jsonOnly({ headers: { 'content-type': 'application/json-invalid' }, body: {} })).toThrow('JSON content type required');
+		expect(() => jsonOnly({ headers: { 'content-type': 'application/json; charset=utf-8' }, body: { message: 'ok' } })).not.toThrow();
+	});
+
+	it('rejects oversized buffered fulfillment requests before authentication or storage', async () => {
+		const outbound = vi.fn(); vi.stubGlobal('fetch', outbound);
+		const response = createResponse();
+		await orderFulfillment({ method: 'POST', headers: {}, body: Buffer.alloc(65537) }, response);
+		expect(response.statusCode).toBe(413);
+		expect(outbound).not.toHaveBeenCalled();
+	});
 	it('requires a complete operator identity', () => {
 		expect(() => assertOperatorIdentity({})).toThrow(/operator identity/i);
 		expect(() => assertOperatorIdentity({
@@ -408,7 +468,7 @@ describe('contact API', () => {
 
 	it('validates submissions before external calls', async () => {
 		const response = createResponse();
-		await contact({ method: 'POST', body: {}, headers: {} }, response);
+		await contact({ method: 'POST', body: {}, headers: { 'content-type': 'application/json' } }, response);
 		expect(response.statusCode).toBe(400);
 		expect(response.payload.error).toMatch(/valid name/i);
 	});
@@ -418,7 +478,7 @@ describe('contact API', () => {
 		const response = createResponse();
 		await contact({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.10' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.10' },
 			body: { name: 'Jane Doe', email: 'jane@example.com', subject: 'general', message: 'A valid message.' },
 		}, response);
 		expect(response.statusCode).toBe(429);
@@ -433,7 +493,7 @@ describe('contact API', () => {
 		const response = createResponse();
 		await contact({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.20' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.20' },
 			body: {
 				name: ' Jane\u0000 Doe ',
 				email: 'JANE@EXAMPLE.COM',
@@ -458,7 +518,7 @@ describe('contact API', () => {
 		const response = createResponse();
 		await contact({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.21' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.21' },
 			body: {
 				name: 'Jane Doe',
 				email: 'jane@example.com',
@@ -523,7 +583,7 @@ describe('withdrawal API validation', () => {
 		const response = createResponse();
 		await withdrawal({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.30' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.30' },
 			body: {
 				orderReference: 'CS_TEST_12345678',
 				email: 'customer@example.com',
@@ -544,7 +604,7 @@ describe('withdrawal API validation', () => {
 		const response = createResponse();
 		await withdrawal({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.30' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.30' },
 			body: {
 				orderReference: 'CS_TEST_12345678',
 				email: 'customer@example.com',
@@ -944,7 +1004,7 @@ describe('browser error reporting API', () => {
 		const response = createResponse();
 		await browserErrors({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.20' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.20' },
 			body: { message: 'Failure\u0000message', stack: 'stack', url: 'https://softhe.io/store' },
 		}, response);
 

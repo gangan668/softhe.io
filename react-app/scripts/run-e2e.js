@@ -35,6 +35,8 @@ const environment = {
 	VITE_SUPABASE_PUBLISHABLE_KEY: mode === 'portal' ? 'sb_publishable_e2e_fixture_only' : '',
 	VITE_CAPTCHA_ENABLED: 'false',
 	VITE_TURNSTILE_SITE_KEY: '',
+	// A legacy configured ID must not enable the retired Google Analytics transport.
+	VITE_GA_MEASUREMENT_ID: 'G-E2EFIXTURE',
 };
 
 const npmCli = process.env.npm_execpath;

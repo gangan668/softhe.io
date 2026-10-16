@@ -62,12 +62,12 @@ describe("CookieConsent Component", () => {
 			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
 		});
 
-		it("should initialize analytics if consent already given", () => {
+		it("does not start legacy Google Analytics for existing consent", () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
 
 			render(<CookieConsent />);
 
-			expect(analytics.initGA).toHaveBeenCalled();
+			expect(analytics.initGA).not.toHaveBeenCalled();
 		});
 	});
 
@@ -135,7 +135,7 @@ describe("CookieConsent Component", () => {
 			});
 		});
 
-		it("should initialize Google Analytics when Accept is clicked", async () => {
+		it("does not start legacy Google Analytics when Accept is clicked", async () => {
 			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
@@ -144,7 +144,7 @@ describe("CookieConsent Component", () => {
 			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 			await user.click(acceptButton);
 
-			expect(analytics.initGA).toHaveBeenCalled();
+			expect(analytics.initGA).not.toHaveBeenCalled();
 		});
 
 		it("should not initialize Google Analytics when Decline is clicked", async () => {

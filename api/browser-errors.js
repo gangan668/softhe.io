@@ -1,20 +1,23 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { incrementWithExpiry } = require('./_lib/redis');
+const { readJsonBody } = require('./_lib/json-body');
+const { sendPublicError } = require('./_lib/portal-security');
 
 const cleanText = (value, maxLength) => typeof value === 'string'
 	? value.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, maxLength)
 	: '';
 
 const normalizeError = (body = {}) => ({
-	message: cleanText(body.message, 500),
-	name: cleanText(body.name, 100),
-	stack: cleanText(body.stack, 4000),
-	url: cleanText(body.url, 500),
-	environment: cleanText(body.environment, 50),
-	context: body.context && typeof body.context === 'object'
+	message: cleanText(body?.message, 500),
+	name: cleanText(body?.name, 100),
+	stack: cleanText(body?.stack, 4000),
+	url: cleanText(body?.url, 500),
+	environment: cleanText(body?.environment, 50),
+	context: body?.context && typeof body.context === 'object'
 		? JSON.stringify(body.context).slice(0, 2000)
 		: '',
-	timestamp: cleanText(body.timestamp, 50),
+	timestamp: cleanText(body?.timestamp, 50),
 });
 
 const getClientKey = (req) => {
@@ -33,7 +36,9 @@ async function browserErrors(req, res) {
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
-	const error = normalizeError(req.body);
+	let body;
+	try { body = await readJsonBody(req); } catch (error) { return sendPublicError(res, error); }
+	const error = normalizeError(body);
 	if (!error.message) return res.status(400).json({ error: 'Error message is required' });
 
 	try {
@@ -50,6 +55,7 @@ async function browserErrors(req, res) {
 	}
 }
 
-module.exports = browserErrors;
+module.exports = withHttp(browserErrors);
+module.exports.config = { api: { bodyParser: false } };
 module.exports.getClientKey = getClientKey;
 module.exports.normalizeError = normalizeError;

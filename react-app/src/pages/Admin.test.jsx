@@ -45,3 +45,26 @@ it('ignores old admin customer records when a replacement session loads support 
 	await act(async () => resolveOld({ orders: [{ id: 'private', customer_email: 'old-private@example.test', status: 'paid', amount_total: 100, currency: 'eur' }] }));
 	expect(screen.queryByText('old-private@example.test')).not.toBeInTheDocument(); expect(screen.getByText(/Role: support/)).toBeInTheDocument();
 });
+
+it('clears the staff draft when switching tickets while a reply is pending', async () => {
+	let resolveSend;
+	mock.request.mockImplementation(async (session, action, options) => {
+		if (action === 'queue') return { tickets: [ticket, { ...ticket, id: 'second', subject: 'Second ticket' }] };
+		if (action === 'ticket') return { ticket: { ...ticket, id: options.query.id, subject: options.query.id === 'second' ? 'Second ticket' : ticket.subject }, messages: [] };
+		if (action === 'reply') return new Promise((resolve) => { resolveSend = resolve; });
+		return handler(session, action, options);
+	});
+	mount(); await screen.findByText('Support question'); fireEvent.click(screen.getByRole('button', { name: /Support question/ })); await screen.findByRole('textbox');
+	fireEvent.change(screen.getByRole('textbox'), { target: { value: 'First ticket reply' } }); fireEvent.click(screen.getByRole('button', { name: 'Reply as staff' }));
+	fireEvent.click(screen.getByRole('button', { name: /Second ticket/ })); await screen.findByRole('heading', { name: 'Second ticket' }); expect(screen.getByRole('textbox')).toHaveValue('');
+	await act(async () => resolveSend({}));
+	fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Second private draft' } }); expect(screen.getByRole('textbox')).toHaveValue('Second private draft');
+});
+
+it('does not expose a previous operator draft to a replacement authenticated user', async () => {
+	const tree = (id) => <MemoryRouter><AuthContext.Provider value={{ user: { id }, session: { access_token: id } }}><Admin /></AuthContext.Provider></MemoryRouter>;
+	const view = render(tree('old')); await screen.findByText('Support question'); fireEvent.click(screen.getByRole('button', { name: /Support question/ })); await screen.findByRole('textbox');
+	fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Old private staff draft' } });
+	view.rerender(tree('new')); expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+	await screen.findByText('Support question'); fireEvent.click(screen.getByRole('button', { name: /Support question/ })); await screen.findByRole('textbox'); expect(screen.getByRole('textbox')).toHaveValue('');
+});

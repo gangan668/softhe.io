@@ -9,6 +9,13 @@ const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getIdempote
 const { verifyStripeSignature } = require('../../../api/stripe-webhook.js');
 
 describe('server checkout validation', () => {
+	it('rejects malformed Stripe signature headers without throwing', () => {
+		const payload = Buffer.from('{}');
+		const timestamp = Math.floor(Date.now() / 1000);
+		for (const header of [[], {}, `t=${timestamp},v1=${'é'.repeat(64)}`, `t=${timestamp},v1=`]) {
+			expect(verifyStripeSignature(payload, header, 'secret')).toBe(false);
+		}
+	});
 	it('fails closed at the API boundary when commerce is disabled', async () => {
 		const previous = process.env.COMMERCE_ENABLED;
 		process.env.COMMERCE_ENABLED = 'false';
@@ -36,6 +43,9 @@ describe('server checkout validation', () => {
 
 	it('rejects unknown products and invalid quantities', () => {
 		expect(() => normalizeItems([{ id: 'made-up', quantity: 1 }])).toThrow('Unknown product');
+		for (const id of ['__proto__', 'constructor', 'toString', ['windows-10']]) {
+			expect(() => normalizeItems([{ id, quantity: 1 }])).toThrow('Unknown product');
+		}
 		expect(() => normalizeItems([{ id: 'windows-10', quantity: 0 }])).toThrow('Invalid quantity');
 	});
 

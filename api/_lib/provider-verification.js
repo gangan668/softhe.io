@@ -95,6 +95,17 @@ async function runVerification({ request: rawRequest = providerRequest, command 
 			const messages = await rest(`ticket_messages?ticket_id=eq.${ticketId}&select=id,body`, { token: customer.token }); assert(messages.some((message) => message.body === bodyReply.message));
 			const cross = await rest(`tickets?id=eq.${ticketId}&select=id`, { token: staff.token }); assert(cross.length === 0);
 			const denied = await invoke(ticketHandler, staff.token, '/', bodyReply, ip, plannedKeys[2]); assert(denied.status >= 400);
+			const bypasses = [
+				['tickets', { user_id: customer.id, subject: 'Synthetic direct write must be denied', category: 'general' }],
+				['ticket_messages', { ticket_id: ticketId, author_id: customer.id, body: 'Synthetic direct reply must be denied' }],
+				['rpc/create_customer_ticket', { ticket_subject: 'Synthetic RPC write must be denied', ticket_category: 'general', first_message: 'Synthetic legacy customer RPC' }],
+				['rpc/add_customer_ticket_message', { target_ticket: ticketId, message_body: 'Synthetic legacy reply must be denied' }],
+			];
+			for (const [path, body] of bypasses) {
+				const bypass = await request(`/rest/v1/${path}`, { token: customer.token, method: 'POST', body });
+				// PostgREST may hide revoked functions with 404; table grants must deny access.
+				assert(path.startsWith('rpc/') ? [401,403,404].includes(bypass.status) : [401,403].includes(bypass.status));
+			}
 		});
 		await step('anonymous_and_aal1_staff_denial', async () => {
 			for (const token of [undefined, staff.token]) { const denial = await invoke(staffHandler, token, '/?action=status', undefined, ip); assert([401,403].includes(denial.status)); }
@@ -111,6 +122,10 @@ async function runVerification({ request: rawRequest = providerRequest, command 
 		await step('temporary_staff_grant_actions_and_revocation', async () => {
 			await rest('rpc/grant_staff_access', { admin: true, method: 'POST', body: { target_user: staff.id, actor_user: customer.id, target_role: 'staff', valid_until: new Date(Date.now() + 20 * 60000).toISOString(), reason: 'Temporary isolated provider verification' } });
 			const status = await invoke(staffHandler, staff.token, '/?action=status', undefined, ip); assert(status.status === 200 && status.data?.authorized === true && status.data?.mfa === 'aal2');
+			const queue = await invoke(staffHandler, staff.token, '/?action=queue', undefined, ip);
+			assert(queue.status === 200 && Array.isArray(queue.data?.tickets));
+			const queuedTicket = queue.data.tickets.find((entry) => entry.id === ticketId);
+			assert(queuedTicket?.user_id === customer.id && queuedTicket.owner?.email === `portal-${runId}-0@example.test`);
 			const conversation = await invoke(staffHandler, staff.token, `/?action=ticket&id=${ticketId}`, undefined, ip); assert(conversation.status === 200 && conversation.data?.ticket?.id === ticketId);
 			const reply = await invoke(staffHandler, staff.token, '/?action=reply', { ticketId, message: 'Synthetic verified staff reply' }, ip, plannedKeys[3]); assert(reply.status === 201);
 			await rest('rpc/revoke_staff_access', { admin: true, method: 'POST', body: { target_user: staff.id, revoker: customer.id, revoke_reason: 'Temporary isolated verification completed' } });
