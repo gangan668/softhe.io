@@ -9,6 +9,7 @@ if (!['enabled', 'disabled', 'portal'].includes(mode)) {
 const featureEnabled = mode === 'enabled' ? 'true' : 'false';
 const environment = {
 	...process.env,
+	SOFTHE_E2E_MODE: mode,
 	VITE_APP_URL: 'https://softhe.io',
 	VITE_PUBLIC_ORIGIN: 'https://softhe.io',
 	VITE_REQUIRE_PRODUCTION_CONFIG: 'true',

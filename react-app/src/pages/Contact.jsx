@@ -201,7 +201,7 @@ function Contact() {
 								<div className="contact-methods">
 									<div className="contact-method primary-contact">
 										<div className="contact-icon">
-											<i className="fas fa-envelope"></i>
+											<i className="fas fa-envelope" aria-hidden="true"></i>
 										</div>
 										<div className="contact-details">
 										<h3>Email support</h3>
@@ -223,7 +223,7 @@ function Contact() {
 
 									<div className="contact-method">
 										<div className="contact-icon">
-											<i className="fab fa-discord"></i>
+											<i className="fab fa-discord" aria-hidden="true"></i>
 										</div>
 										<div className="contact-details">
 										<h3>Discord support</h3>
@@ -247,7 +247,7 @@ function Contact() {
 
 								{/* Security & Privacy Notice */}
 								<div className="security-notice">
-									<i className="fas fa-shield-alt"></i>
+									<i className="fas fa-shield-alt" aria-hidden="true"></i>
 									<div>
 										<h4>How the form is delivered</h4>
 										<p>
@@ -266,7 +266,7 @@ function Contact() {
 									{/* Rate Limit Warning */}
 									{rateLimit.isBlocked && (
 										<div className="rate-limit-warning" role="alert" aria-live="polite">
-											<i className="fas fa-exclamation-triangle"></i>
+											<i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
 											<div>
 												<p>{rateLimit.getBlockMessage()}</p>
 											</div>
@@ -278,7 +278,7 @@ function Contact() {
 										rateLimit.attemptsLeft < 3 &&
 										rateLimit.attemptsLeft > 0 && (
 											<div className="attempts-notice">
-												<i className="fas fa-info-circle"></i>
+												<i className="fas fa-info-circle" aria-hidden="true"></i>
 												<span>
 													{rateLimit.attemptsLeft}{" "}
 													submission
@@ -530,19 +530,19 @@ function Contact() {
 										>
 											{isSubmitting ? (
 												<>
-													<i className="fas fa-spinner fa-spin"></i>
+													<i className="fas fa-spinner fa-spin" aria-hidden="true"></i>
 													Sending...
 												</>
 											) : (
 												<>
-													<i className="fas fa-paper-plane"></i>
+													<i className="fas fa-paper-plane" aria-hidden="true"></i>
 										Send message
 												</>
 											)}
 										</button>
 
 										<p className="form-note">
-											<i className="fas fa-lock"></i>
+											<i className="fas fa-lock" aria-hidden="true"></i>
 											Your message is processed by EmailJS and
 											delivered to our support inbox.
 										</p>

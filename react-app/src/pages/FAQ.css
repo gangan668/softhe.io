@@ -147,22 +147,11 @@
 	color: var(--primary-color);
 }
 
+/* Answers are toggled with the hidden attribute, so closed answers stay out of the accessibility tree. */
 .faq-answer {
-	max-height: 0;
-	opacity: 0;
-	transform: translateY(-4px);
-	overflow: hidden;
-	transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease, padding 0.35s ease;
-	padding: 0 1.15rem;
+	padding: 0 1.15rem 1.15rem;
 	color: var(--text-secondary);
 	line-height: 1.7;
-}
-
-.faq-item.active .faq-answer {
-	max-height: 2200px;
-	opacity: 1;
-	transform: translateY(0);
-	padding: 0 1.15rem 1.15rem;
 }
 
 .faq-answer p {

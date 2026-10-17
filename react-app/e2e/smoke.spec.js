@@ -164,16 +164,44 @@ test.describe('public website smoke tests', () => {
 	test('mobile navigation is opaque, traps focus, and closes with Escape', async ({ page }) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto('/');
-		const menuButton = page.getByRole('button', { name: /open navigation menu/i });
+		const menuButton = page.locator('button[aria-controls="primary-navigation"]');
 		await menuButton.click();
 		const menu = page.locator('#primary-navigation');
 		await expect(menu).toBeVisible();
 		await expect(menu).toHaveCSS('background-color', 'rgb(8, 10, 15)');
 		await expect(menu.getByRole('link', { name: 'Home', exact: true })).toBeFocused();
 		await page.keyboard.press('Shift+Tab');
+		await expect(menuButton).toBeFocused();
+		await page.keyboard.press('Shift+Tab');
 		await expect(menu.getByRole('link', { name: 'FAQ', exact: true })).toBeFocused();
+		await page.keyboard.press('Tab');
+		await expect(menuButton).toBeFocused();
+		await page.keyboard.press('Tab');
+		await expect(menu.getByRole('link', { name: 'Home', exact: true })).toBeFocused();
 		await page.keyboard.press('Escape');
 		await expect(menuButton).toBeFocused();
+	});
+
+	test('opening the cart from mobile navigation preserves cart focus and restores scrolling', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/');
+		const menuButton = page.locator('button[aria-controls="primary-navigation"]');
+		const cartButton = page.getByRole('button', { name: /shopping cart with/i });
+		await menuButton.click();
+		await cartButton.click();
+		await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+		const cart = page.getByRole('dialog', { name: /shopping cart/i });
+		const closeButton = cart.getByRole('button', { name: 'Close cart' });
+		await expect(closeButton).toBeFocused();
+		await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+		await page.keyboard.press('Tab');
+		await expect(cart.getByRole('link', { name: 'Browse Products' })).toBeFocused();
+		await page.keyboard.press('Tab');
+		await expect(closeButton).toBeFocused();
+		await page.keyboard.press('Escape');
+		await expect(cart).toBeHidden();
+		await expect(cartButton).toBeFocused();
+		await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
 	});
 
 	for (const width of [320, 390, 768, 1280, 1440]) {

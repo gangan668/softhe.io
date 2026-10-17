@@ -8,6 +8,8 @@ const COOKIE_SETTINGS_EVENT = 'softhe:open-cookie-settings';
 function CookieConsent() {
 	const [showBanner, setShowBanner] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
+	// Only move focus into the banner when the visitor opened it from Cookie Settings.
+	const [openedByUser, setOpenedByUser] = useState(false);
 	const dialogRef = useRef(null);
 	const declineButtonRef = useRef(null);
 	const dismissBanner = useCallback(() => setShowBanner(false), []);
@@ -18,10 +20,12 @@ function CookieConsent() {
 		initialFocusRef: declineButtonRef,
 		backgroundSelector: '.App',
 		modal: false,
+		autoFocus: openedByUser,
 	});
 
 	useEffect(() => {
 		const openSettings = () => {
+			setOpenedByUser(true);
 			setShowDetails(true);
 			setShowBanner(true);
 		};
