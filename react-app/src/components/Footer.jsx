@@ -72,7 +72,7 @@ function Footer() {
 						<h4>Contact</h4>
 						<ul>
 							<li>
-								<i className="fas fa-envelope"></i>
+								<i className="fas fa-envelope" aria-hidden="true"></i>
 								<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a>
 							</li>
 							<li>

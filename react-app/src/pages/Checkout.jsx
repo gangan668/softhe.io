@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
+import { getCartPricing } from '../utils/cart';
 import { createCheckoutSession } from '../utils/checkout';
 import { commerceEnabled } from '../utils/runtimeConfig';
 import { useAuth } from '../context/useAuth';
@@ -59,11 +60,9 @@ function Checkout() {
 		return null; // Will redirect via useEffect
 	}
 
-	const subtotal = getCartTotal();
-	const discount = cart.length >= 3 ? 0.10 : cart.length >= 2 ? 0.05 : 0;
-	const discountAmount = subtotal * discount;
-	const total = subtotal - discountAmount;
-	const hasBundle = cart.length > 1;
+	const { subtotal, discountRate, discount: discountAmount, total } = getCartPricing(cart);
+	const discountPercent = Math.round(discountRate * 100);
+	const hasBundle = discountRate > 0;
 
 	return (
 		<>
@@ -98,7 +97,7 @@ function Checkout() {
 							{/* Order Summary */}
 							<div className="order-summary">
 								<h2>
-									<i className="fas fa-shopping-bag"></i>
+									<i className="fas fa-shopping-bag" aria-hidden="true"></i>
 									Order Summary
 								</h2>
 
@@ -106,7 +105,7 @@ function Checkout() {
 									{cart.map((item) => (
 										<div key={item.id} className="order-item">
 											<div className="item-icon">
-												<i className={item.icon}></i>
+												<i className={item.icon} aria-hidden="true"></i>
 											</div>
 											<div className="item-details">
 												<h3>{item.name}</h3>
@@ -118,7 +117,7 @@ function Checkout() {
 													aria-label="Decrease quantity"
 													className="qty-btn"
 												>
-													<i className="fas fa-minus"></i>
+													<i className="fas fa-minus" aria-hidden="true"></i>
 												</button>
 												<span>{item.quantity}</span>
 												<button
@@ -126,7 +125,7 @@ function Checkout() {
 													aria-label="Increase quantity"
 													className="qty-btn"
 												>
-													<i className="fas fa-plus"></i>
+													<i className="fas fa-plus" aria-hidden="true"></i>
 												</button>
 											</div>
 											<div className="item-total">
@@ -137,7 +136,7 @@ function Checkout() {
 												onClick={() => removeFromCart(item.id)}
 												aria-label={`Remove ${item.name}`}
 											>
-												<i className="fas fa-trash"></i>
+												<i className="fas fa-trash" aria-hidden="true"></i>
 											</button>
 										</div>
 									))}
@@ -146,11 +145,11 @@ function Checkout() {
 								{/* Bundle Discount Banner */}
 								{hasBundle && (
 									<div className="bundle-banner">
-										<i className="fas fa-gift"></i>
+										<i className="fas fa-gift" aria-hidden="true"></i>
 										<div>
 											<strong>Bundle discount applied</strong>
 											<p>
-												Your {discount * 100}% discount is validated on the server and applied
+												Your {discountPercent}% discount is validated on the server and applied
 												at Stripe Checkout.
 											</p>
 										</div>
@@ -159,8 +158,8 @@ function Checkout() {
 
 								{cart.length === 1 && (
 									<div className="bundle-info">
-										<i className="fas fa-info-circle"></i>
-										<p>Add one more product to get 5% off your entire order!</p>
+										<i className="fas fa-info-circle" aria-hidden="true"></i>
+										<p>Add a different product to get 5% off your entire order.</p>
 									</div>
 								)}
 							</div>
@@ -168,7 +167,7 @@ function Checkout() {
 							{/* Payment Summary */}
 							<div className="payment-summary">
 								<h2>
-									<i className="fas fa-credit-card"></i>
+									<i className="fas fa-credit-card" aria-hidden="true"></i>
 									Payment Summary
 								</h2>
 
@@ -180,7 +179,7 @@ function Checkout() {
 
 									{hasBundle && (
 										<div className="summary-row discount">
-										<span>Bundle discount ({discount * 100}%)</span>
+										<span>Bundle discount ({discountPercent}%)</span>
 											<span>-€{discountAmount.toFixed(2)}</span>
 										</div>
 									)}
@@ -224,7 +223,7 @@ function Checkout() {
 									onClick={handleCheckout}
 									disabled={isStartingCheckout || !commerceEnabled || !termsAccepted || !earlyPerformanceAccepted}
 								>
-									<i className={isStartingCheckout ? 'fas fa-spinner fa-spin' : 'fas fa-lock'}></i>
+									<i className={isStartingCheckout ? 'fas fa-spinner fa-spin' : 'fas fa-lock'} aria-hidden="true"></i>
 									{!commerceEnabled ? 'Checkout not yet active' : isStartingCheckout ? 'Opening secure checkout...' : 'Pay Securely with Stripe'}
 								</button>
 
@@ -237,15 +236,15 @@ function Checkout() {
 
 								<div className="payment-features">
 									<div className="feature">
-										<i className="fas fa-shield-alt"></i>
+										<i className="fas fa-shield-alt" aria-hidden="true"></i>
 										<span>Secure Checkout</span>
 									</div>
 									<div className="feature">
-										<i className="fab fa-stripe"></i>
+										<i className="fab fa-stripe" aria-hidden="true"></i>
 										<span>Powered by Stripe</span>
 									</div>
 									<div className="feature">
-										<i className="fas fa-undo"></i>
+										<i className="fas fa-undo" aria-hidden="true"></i>
 										<span>Withdrawal and refund information</span>
 									</div>
 								</div>
@@ -255,7 +254,7 @@ function Checkout() {
 							</div>
 
 								<Link to="/store" className="continue-shopping">
-									<i className="fas fa-arrow-left"></i>
+									<i className="fas fa-arrow-left" aria-hidden="true"></i>
 									Continue Shopping
 								</Link>
 							</div>
@@ -263,26 +262,26 @@ function Checkout() {
 
 						{/* Trust Badges */}
 						<div className="trust-section">
-							<h3>Why Shop With Softhe.io?</h3>
+							<h3>Before you pay</h3>
 							<div className="trust-badges">
 								<div className="trust-badge">
-									<i className="fas fa-certificate"></i>
-									<h4>Professional Quality</h4>
-									<p>Focused optimization products for competitive gaming PCs</p>
+									<i className="fas fa-certificate" aria-hidden="true"></i>
+									<h4>Scope stated up front</h4>
+									<p>Each product lists what is included and which hardware it suits</p>
 								</div>
 								<div className="trust-badge">
-									<i className="fas fa-headset"></i>
-									<h4>Expert Support</h4>
+									<i className="fas fa-headset" aria-hidden="true"></i>
+									<h4>Setup support</h4>
 									<p>Email and Discord help for product and setup questions</p>
 								</div>
 								<div className="trust-badge">
-									<i className="fas fa-lock"></i>
-									<h4>Secure Payment</h4>
-									<p>Industry-standard encryption and secure checkout</p>
+									<i className="fas fa-lock" aria-hidden="true"></i>
+									<h4>Payment on Stripe</h4>
+									<p>Card details are entered on Stripe's hosted checkout, not on this site</p>
 								</div>
 								<div className="trust-badge">
-									<i className="fas fa-check-circle"></i>
-									<h4>Clear Refund Window</h4>
+									<i className="fas fa-check-circle" aria-hidden="true"></i>
+									<h4>Withdrawal information</h4>
 									<p>Withdrawal, complaint, and refund information remains available after purchase</p>
 								</div>
 							</div>

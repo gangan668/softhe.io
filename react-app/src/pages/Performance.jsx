@@ -1,8 +1,9 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
-import { benchmarkPublication } from '../data/benchmark';
 import SEO from '../components/SEO';
-import { benchmarkEvidenceComplete, benchmarkMethodology } from '../data/benchmark';
+import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange } from '../data/benchmark';
 import "./Performance.css";
+
+const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
 
 function Performance() {
 	return (
@@ -12,7 +13,7 @@ function Performance() {
 				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription="One PC measured 658 and 826 average FPS across two configurations. Four raw captures are published and several variables changed."
+				ogDescription={`One PC measured ${averageFps.stock} and ${averageFps.optimized} average FPS across two configurations. Four raw captures are published and several variables changed.`}
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -25,16 +26,16 @@ function Performance() {
 						</p>
 						<p className="methodology-warning" role="note">
 							Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
-							 Runs per configuration: {benchmarkMethodology.runCount ?? 'not yet published'}.
+							 Runs per configuration: {benchmarkMethodology.runCount ?? 'not yet published'}.{' '}
 							 {benchmarkPublication.status} <BenchmarkEvidenceLink />
 						</p>
 						<div className="performance-stats">
 							<div>
-								<strong>658 to 826</strong>
+								<strong>{averageFps.stock} to {averageFps.optimized}</strong>
 								<span>Average FPS in CS2 sample</span>
 							</div>
 							<div>
-								<strong>225 to 285</strong>
+								<strong>{onePercentLowFps.stock} to {onePercentLowFps.optimized}</strong>
 								<span>1% low FPS in CS2 sample</span>
 							</div>
 							<div>
@@ -61,19 +62,19 @@ function Performance() {
 							<div className="native-result-stage">
 								<div className="native-result before">
 									<span>Before · Default Windows</span>
-									<strong>658</strong>
+									<strong>{averageFps.stock}</strong>
 									<small>average FPS</small>
 								</div>
-								<div className="native-gain"><i className="fas fa-arrow-right" aria-hidden="true"></i><strong>+25%</strong><span>average FPS</span></div>
+								<div className="native-gain"><i className="fas fa-arrow-right" aria-hidden="true"></i><strong>{formatPercentChange(averageFps.change)}</strong><span>average FPS</span></div>
 								<div className="native-result after">
 									<span>After · SoftheOS + BIOS</span>
-									<strong>826</strong>
+									<strong>{averageFps.optimized}</strong>
 									<small>average FPS</small>
 								</div>
 							</div>
 							<div className="native-supporting-metrics">
-								<div><span>1% low</span><strong>225 <i className="fas fa-arrow-right" aria-hidden="true"></i> 285 FPS</strong><b>+27%</b></div>
-								<div><span>Average frame time</span><strong>1.52 <i className="fas fa-arrow-right" aria-hidden="true"></i> 1.21 ms</strong><b>-20%</b></div>
+								<div><span>1% low</span><strong>{onePercentLowFps.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {onePercentLowFps.optimized} FPS</strong><b>{formatPercentChange(onePercentLowFps.change)}</b></div>
+								<div><span>Average frame time</span><strong>{frameTimeMs.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {frameTimeMs.optimized} ms</strong><b>{formatPercentChange(frameTimeMs.change)}</b></div>
 								<div><span>Recorded sample</span><strong>2 × 109 seconds</strong><b>Median</b></div>
 							</div>
 						</div>
@@ -147,37 +148,37 @@ function Performance() {
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
-									<i className="fas fa-chart-line"></i>
+									<i className="fas fa-chart-line" aria-hidden="true"></i>
 									Frame Rate (CS2)
 								</div>
 								<div className="table-cell stock-value">
-									658 avg FPS
+									{averageFps.stock} avg FPS
 								</div>
 								<div className="table-cell optimized-value">
-									826 avg FPS
+									{averageFps.optimized} avg FPS
 								</div>
 								<div className="table-cell improvement">
-									+25% avg
+									{formatPercentChange(averageFps.change)} avg
 								</div>
 							</div>
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
-									<i className="fas fa-stopwatch"></i>
+									<i className="fas fa-stopwatch" aria-hidden="true"></i>
 									Frame Time
 								</div>
-								<div className="table-cell stock-value">1.52ms</div>
+								<div className="table-cell stock-value">{frameTimeMs.stock}ms</div>
 								<div className="table-cell optimized-value">
-									1.21ms
+									{frameTimeMs.optimized}ms
 								</div>
 								<div className="table-cell improvement">
-									-20% reduction
+									{formatPercentChange(frameTimeMs.change)} reduction
 								</div>
 							</div>
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
-									<i className="fas fa-list"></i>
+									<i className="fas fa-list" aria-hidden="true"></i>
 									Idle Processes
 								</div>
 								<div className="table-cell stock-value">111</div>
@@ -191,7 +192,7 @@ function Performance() {
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
-									<i className="fas fa-memory"></i>
+									<i className="fas fa-memory" aria-hidden="true"></i>
 									Idle Memory
 								</div>
 								<div className="table-cell stock-value">

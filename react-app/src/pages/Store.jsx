@@ -1,6 +1,7 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
 import { benchmarkPublication } from '../data/benchmarkPublication';
-import { useEffect, useState } from 'react';
+import { benchmarkResults } from '../data/benchmark';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { absoluteUrl } from '../config/site';
 import { useCart } from '../context/useCart';
@@ -18,7 +19,8 @@ function Store() {
 	const checkoutQuery = searchParams.get('checkout');
 	const checkoutSessionId = searchParams.get('session_id');
 	const [addedToCart, setAddedToCart] = useState(null);
-	const [quizChoice, setQuizChoice] = useState('windows-10');
+	const addedTimerRef = useRef(null);
+	const [quizChoice, setQuizChoice] = useState('windows-11');
 	const [checkoutStatus, setCheckoutStatus] = useState(null);
 	const checkoutDisplayStatus = checkoutStatus ?? (
 		checkoutQuery === 'success'
@@ -51,6 +53,8 @@ function Store() {
 			window.removeEventListener('hashchange', scrollToProduct);
 		};
 	}, []);
+
+	useEffect(() => () => window.clearTimeout(addedTimerRef.current), []);
 
 	useEffect(() => {
 		trackEvent('view_item_list', {
@@ -107,7 +111,8 @@ function Store() {
 			currency: 'EUR',
 		});
 		setAddedToCart(product.id);
-		setTimeout(() => setAddedToCart(null), 2000);
+		window.clearTimeout(addedTimerRef.current);
+		addedTimerRef.current = window.setTimeout(() => setAddedToCart(null), 2000);
 	};
 
 	const handleBuyNow = (product) => {
@@ -219,14 +224,14 @@ function Store() {
 								<span className="section-kicker">Benchmark context</span>
 								<h3>See the limits of the preliminary CS2 comparison.</h3>
 								<p>
-									One PC measured 658 and 826 average FPS across two configurations. Windows edition,
+									One PC measured {benchmarkResults.averageFps.stock} and {benchmarkResults.averageFps.optimized} average FPS across two configurations. Windows edition,
 									memory settings, and GPU driver changed. {benchmarkPublication.status} <BenchmarkEvidenceLink />
 								</p>
 							</div>
-							<a href="/performance" className="proof-link">
+							<Link to="/performance" className="proof-link">
 								Read the benchmark details
 								<i className="fas fa-arrow-right" aria-hidden="true"></i>
-							</a>
+							</Link>
 						</div>
 
 						<div className="product-finder">
@@ -238,21 +243,24 @@ function Store() {
 							<div className="finder-controls" role="group" aria-label="Product recommendation options">
 								<button
 									type="button"
-									className={quizChoice === 'windows-10' ? 'active' : ''}
-									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
-								>
-									I want a streamlined Windows 10 build
-								</button>
-								<button
-									type="button"
 									className={quizChoice === 'windows-11' ? 'active' : ''}
+									aria-pressed={quizChoice === 'windows-11'}
 									onClick={() => handleQuizChoice('windows-11', 'newer_pc_windows_11')}
 								>
 									My PC requires Windows 11
 								</button>
 								<button
 									type="button"
+									className={quizChoice === 'windows-10' ? 'active' : ''}
+									aria-pressed={quizChoice === 'windows-10'}
+									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
+								>
+									I want a streamlined Windows 10 build
+								</button>
+								<button
+									type="button"
 									className={quizChoice === 'bios-optimization' ? 'active' : ''}
+									aria-pressed={quizChoice === 'bios-optimization'}
 									onClick={() => handleQuizChoice('bios-optimization', 'untuned_hardware')}
 								>
 									I need my BIOS and memory settings checked
@@ -265,6 +273,10 @@ function Store() {
 							</div>
 						</div>
 
+						<p className="visually-hidden" role="status">
+							{addedToCart ? `${products.find((product) => product.id === addedToCart)?.name} added to cart.` : ''}
+						</p>
+
 						<div className="products-grid">
 							{products.map((product) => (
 								<div key={product.id} id={product.id} className="product-card">
@@ -272,7 +284,7 @@ function Store() {
 										<div className="product-badge">{product.badge}</div>
 									)}
 									<div className="product-image">
-										<i className={product.icon}></i>
+										<i className={product.icon} aria-hidden="true"></i>
 									</div>
 									<div className="product-info">
 										<div className="product-heading">
@@ -300,12 +312,12 @@ function Store() {
 											>
 												{addedToCart === product.id ? (
 													<>
-														<i className="fas fa-check"></i>
+														<i className="fas fa-check" aria-hidden="true"></i>
 														Added to Cart
 													</>
 												) : (
 													<>
-														<i className="fas fa-cart-plus"></i>
+														<i className="fas fa-cart-plus" aria-hidden="true"></i>
 														Add to Cart
 													</>
 												)}
@@ -314,7 +326,7 @@ function Store() {
 												onClick={() => handleBuyNow(product)}
 												className="btn btn-primary"
 											>
-												<i className="fas fa-bolt"></i>
+												<i className="fas fa-bolt" aria-hidden="true"></i>
 												Buy Now
 											</button>
 												</>
@@ -339,7 +351,7 @@ function Store() {
 								<i className="fas fa-tags" aria-hidden="true"></i>
 								<div>
 									<strong>Bundle discounts</strong>
-									<span>Two products save 5%; three products save 10% at checkout.</span>
+									<span>Two different products save 5%; all three save 10% at checkout.</span>
 								</div>
 							</div>
 							<div className="assurance-item">
@@ -356,7 +368,7 @@ function Store() {
 								<i className="fas fa-circle-info" aria-hidden="true"></i>
 								<span>Not sure which option fits your hardware?</span>
 							</div>
-							<a href="/contact">Ask before buying</a>
+							<Link to="/contact">Ask before buying</Link>
 						</div>
 					</div>
 				</section>

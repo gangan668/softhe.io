@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import evidence from '../../../docs/benchmark-evidence.json';
-import { benchmarkMethodology, benchmarkPublication, benchmarkEvidenceComplete } from './benchmark';
+import { benchmarkMethodology, benchmarkPublication, benchmarkEvidenceComplete, benchmarkResults, formatPercentChange } from './benchmark';
 
 describe('benchmark publication', () => {
   it('uses the evidence manifest for publication and methodology', () => {
@@ -14,5 +14,12 @@ describe('benchmark publication', () => {
     expect(benchmarkMethodology.software).toContain('591.86');
     expect(benchmarkMethodology.software).toContain('537.58');
     expect(benchmarkEvidenceComplete).toBe(false);
+  });
+  it('derives the displayed results from the reported medians', () => {
+    expect(benchmarkResults.averageFps).toEqual({ stock: 658, optimized: 826, change: 25 });
+    expect(benchmarkResults.onePercentLowFps).toEqual({ stock: 225, optimized: 285, change: 27 });
+    expect(benchmarkResults.frameTimeMs).toEqual({ stock: '1.52', optimized: '1.21', change: -20 });
+    expect(formatPercentChange(25)).toBe('+25%');
+    expect(formatPercentChange(-20)).toBe('-20%');
   });
 });

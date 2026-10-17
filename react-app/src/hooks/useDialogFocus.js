@@ -20,12 +20,20 @@ export function useDialogFocus({
 	initialFocusRef,
 	backgroundSelector,
 	modal = true,
+	autoFocus = true,
 }) {
 	useEffect(() => {
 		if (!isOpen || !dialogRef.current) return undefined;
 
 		const dialog = dialogRef.current;
-		const returnFocusTo = document.activeElement;
+		let returnFocusTo = document.activeElement;
+		// Without autoFocus, focus is only managed once the user moves into the dialog.
+		let focusEntered = autoFocus;
+		const handleFocusIn = (event) => {
+			if (focusEntered) return;
+			focusEntered = true;
+			if (event.relatedTarget && !dialog.contains(event.relatedTarget)) returnFocusTo = event.relatedTarget;
+		};
 		const previousOverflow = document.body.style.overflow;
 		const backgroundElements = modal && backgroundSelector
 			? [...document.querySelectorAll(backgroundSelector)].filter(
@@ -47,11 +55,15 @@ export function useDialogFocus({
 		const getFocusable = () => [...dialog.querySelectorAll(FOCUSABLE_SELECTOR)].filter(
 			(element) => !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true',
 		);
-		const focusTarget = initialFocusRef?.current || getFocusable()[0] || dialog;
-		focusTarget.focus();
+		if (autoFocus) {
+			const focusTarget = initialFocusRef?.current || getFocusable()[0] || dialog;
+			focusTarget.focus();
+		}
 
 		const handleKeyDown = (event) => {
 			if (event.key === 'Escape') {
+				// A non-modal dialog must not swallow Escape meant for other page controls.
+				if (!modal && !dialog.contains(document.activeElement)) return;
 				event.preventDefault();
 				onDismiss?.();
 				return;
@@ -77,8 +89,10 @@ export function useDialogFocus({
 		};
 
 		document.addEventListener('keydown', handleKeyDown);
+		dialog.addEventListener('focusin', handleFocusIn);
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
+			dialog.removeEventListener('focusin', handleFocusIn);
 			if (modal) document.body.style.overflow = previousOverflow;
 			previousBackgroundState.forEach(({ element, inert, ariaHidden }) => {
 				if (inert === null) element.removeAttribute('inert');
@@ -86,9 +100,9 @@ export function useDialogFocus({
 				if (ariaHidden === null) element.removeAttribute('aria-hidden');
 				else element.setAttribute('aria-hidden', ariaHidden);
 			});
-			if (returnFocusTo instanceof HTMLElement && returnFocusTo.isConnected) {
+			if (focusEntered && returnFocusTo instanceof HTMLElement && returnFocusTo.isConnected) {
 				returnFocusTo.focus();
 			}
 		};
-	}, [backgroundSelector, dialogRef, initialFocusRef, isOpen, modal, onDismiss]);
+	}, [autoFocus, backgroundSelector, dialogRef, initialFocusRef, isOpen, modal, onDismiss]);
 }

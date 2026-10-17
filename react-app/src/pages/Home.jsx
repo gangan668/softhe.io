@@ -1,10 +1,13 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
 import { benchmarkPublication } from '../data/benchmarkPublication';
+import { benchmarkResults, formatPercentChange } from '../data/benchmark';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
 import { commerceEnabled } from '../utils/runtimeConfig';
 import './Home.css';
+
+const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
 
 function Home() {
 	return (
@@ -64,7 +67,7 @@ function Home() {
 								<span>Email and Discord support</span>
 							</div>
 						</div>
-						<div className="hero-visual" aria-label="Performance comparison preview">
+						<div className="hero-visual" role="group" aria-label="Performance comparison preview">
 							<div className="benchmark-panel">
 								<div className="panel-topline">
 									<div>
@@ -77,29 +80,29 @@ function Home() {
 									<div className="result-column result-before">
 										<span className="result-label">Before</span>
 										<span className="result-profile">Default Windows</span>
-										<div className="result-number">658</div>
+										<div className="result-number">{averageFps.stock}</div>
 										<span className="result-unit">average FPS</span>
 									</div>
-									<div className="result-gain" aria-label="25 percent higher average FPS">
+									<div className="result-gain" aria-label={`${averageFps.change} percent higher average FPS`}>
 										<i className="fas fa-arrow-right" aria-hidden="true"></i>
-										<strong>+25%</strong>
+										<strong>{formatPercentChange(averageFps.change)}</strong>
 										<span>avg FPS</span>
 									</div>
 									<div className="result-column result-after">
 										<span className="result-label">After</span>
 										<span className="result-profile">SoftheOS + BIOS</span>
-										<div className="result-number">826</div>
+										<div className="result-number">{averageFps.optimized}</div>
 										<span className="result-unit">average FPS</span>
 									</div>
 								</div>
 								<div className="result-details">
 									<div>
 										<span>1% low</span>
-										<strong><span>225</span><i className="fas fa-arrow-right" aria-hidden="true"></i>285 FPS</strong>
+										<strong><span>{onePercentLowFps.stock}</span><span className="visually-hidden"> to </span><i className="fas fa-arrow-right" aria-hidden="true"></i>{onePercentLowFps.optimized} FPS</strong>
 									</div>
 									<div>
 										<span>Average frame time</span>
-										<strong><span>1.52</span><i className="fas fa-arrow-right" aria-hidden="true"></i>1.21 ms</strong>
+										<strong><span>{frameTimeMs.stock}</span><span className="visually-hidden"> to </span><i className="fas fa-arrow-right" aria-hidden="true"></i>{frameTimeMs.optimized} ms</strong>
 									</div>
 									<div>
 										<span>Capture</span>
@@ -115,11 +118,11 @@ function Home() {
 				<section className="proof-strip" aria-label="Preliminary test summary">
 					<div className="container proof-grid">
 						<div>
-							<strong>+25%</strong>
+							<strong>{formatPercentChange(averageFps.change)}</strong>
 							<span>Average FPS in one whole-system CS2 comparison</span>
 						</div>
 						<div>
-							<strong>-20%</strong>
+							<strong>{formatPercentChange(frameTimeMs.change)}</strong>
 							<span>Frame time change in the same comparison</span>
 						</div>
 						<div>
@@ -151,11 +154,11 @@ function Home() {
 						<div className="comparison-card">
 							<div className="comparison-row">
 								<span>Stock Windows</span>
-								<strong className="negative">658 FPS</strong>
+								<strong className="negative">{averageFps.stock} FPS</strong>
 							</div>
 							<div className="comparison-row featured">
 								<span>Softhe.io Optimized</span>
-								<strong>826 FPS</strong>
+								<strong>{averageFps.optimized} FPS</strong>
 							</div>
 							<div className="comparison-footnote">
 								Preliminary whole-system sample. {benchmarkPublication.status} <BenchmarkEvidenceLink />
@@ -199,28 +202,28 @@ function Home() {
 						<div className="features-grid">
 							<div className="feature-card">
 								<div className="feature-icon">
-									<i className="fas fa-layer-group"></i>
+									<i className="fas fa-layer-group" aria-hidden="true"></i>
 								</div>
 								<h3>Lean Windows builds</h3>
 								<p>Fewer preinstalled apps and gaming-focused defaults. You must supply a valid Windows licence.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">
-									<i className="fas fa-microchip"></i>
+									<i className="fas fa-microchip" aria-hidden="true"></i>
 								</div>
 								<h3>BIOS settings for your hardware</h3>
 								<p>Memory, CPU, boot, and power settings matched to your motherboard and components.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">
-									<i className="fas fa-chart-line"></i>
+									<i className="fas fa-chart-line" aria-hidden="true"></i>
 								</div>
 								<h3>Preliminary benchmark sample</h3>
 								<p>The current CS2 comparison shows the measured change and identifies missing evidence.</p>
 							</div>
 							<div className="feature-card">
 								<div className="feature-icon">
-									<i className="fas fa-headset"></i>
+									<i className="fas fa-headset" aria-hidden="true"></i>
 								</div>
 								<h3>Setup support</h3>
 								<p>Use email or Discord for product selection, compatibility checks, and installation questions.</p>

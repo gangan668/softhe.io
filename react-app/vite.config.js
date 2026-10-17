@@ -1,6 +1,30 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { readFileSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
+
+// Local servers reuse the production headers from vercel.json so policy drift shows up locally.
+const productionHeaders = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"))
+	.headers.find((rule) => rule.source === "/(.*)").headers;
+
+function localHeaders({ dev }) {
+	const headers = Object.fromEntries(productionHeaders.map(({ key, value }) => [key, value]));
+	const directives = headers["Content-Security-Policy"]
+		.split(";")
+		.map((directive) => directive.trim())
+		// localhost is served over plain HTTP.
+		.filter((directive) => directive && directive !== "upgrade-insecure-requests");
+	if (dev) {
+		// The Vite dev server injects the React refresh preamble and CSS inline, and uses a websocket for HMR.
+		const additions = { "script-src": "'unsafe-inline'", "style-src": "'unsafe-inline'", "connect-src": "ws: wss:" };
+		for (const [name, extra] of Object.entries(additions)) {
+			const index = directives.findIndex((directive) => directive.startsWith(`${name} `));
+			directives[index] = `${directives[index]} ${extra}`;
+		}
+	}
+	headers["Content-Security-Policy"] = directives.join("; ");
+	return headers;
+}
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
@@ -37,45 +61,7 @@ export default defineConfig(() => ({
 		},
 	},
 	server: {
-		headers: {
-			// Content Security Policy (relaxed for dev - no upgrade-insecure-requests)
-			"Content-Security-Policy": [
-				"default-src 'self' 'unsafe-inline' 'unsafe-eval'",
-				"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
-				"style-src 'self' 'unsafe-inline'",
-				"font-src 'self'",
-				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' ws: wss: http: https: https://buy.stripe.com https://api.stripe.com",
-				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
-				"object-src 'none'",
-				"base-uri 'self'",
-				"form-action 'self' https://buy.stripe.com",
-			].join("; "),
-
-			// Prevent clickjacking
-			"X-Frame-Options": "DENY",
-
-			// Prevent MIME type sniffing
-			"X-Content-Type-Options": "nosniff",
-
-			// Enable XSS protection
-			"X-XSS-Protection": "1; mode=block",
-
-			// Referrer Policy
-			"Referrer-Policy": "strict-origin-when-cross-origin",
-
-			// Permissions Policy (formerly Feature Policy)
-			"Permissions-Policy": [
-				"camera=()",
-				"microphone=()",
-				"geolocation=()",
-				'payment=(self "https://buy.stripe.com")',
-				"usb=()",
-				"magnetometer=()",
-				"accelerometer=()",
-				"gyroscope=()",
-			].join(", "),
-		},
+		headers: localHeaders({ dev: true }),
 	},
 	build: {
 		manifest: true,
@@ -86,34 +72,6 @@ export default defineConfig(() => ({
 		chunkSizeWarningLimit: 1000,
 	},
 	preview: {
-		headers: {
-			// Apply same security headers for preview (relaxed for local testing)
-			"Content-Security-Policy": [
-				"default-src 'self' 'unsafe-inline'",
-				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://challenges.cloudflare.com",
-				"style-src 'self' 'unsafe-inline'",
-				"font-src 'self'",
-				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://api.emailjs.com",
-				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
-				"object-src 'none'",
-				"base-uri 'self'",
-				"form-action 'self' https://buy.stripe.com",
-			].join("; "),
-			"X-Frame-Options": "DENY",
-			"X-Content-Type-Options": "nosniff",
-			"X-XSS-Protection": "1; mode=block",
-			"Referrer-Policy": "strict-origin-when-cross-origin",
-			"Permissions-Policy": [
-				"camera=()",
-				"microphone=()",
-				"geolocation=()",
-				'payment=(self "https://buy.stripe.com")',
-				"usb=()",
-				"magnetometer=()",
-				"accelerometer=()",
-				"gyroscope=()",
-			].join(", "),
-		},
+		headers: localHeaders({ dev: false }),
 	},
 }));

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Cart from './components/Cart';
 import CookieConsent from './components/CookieConsent';
@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { trackPageView } from './utils/analytics';
 import { initMonitoring } from './utils/monitoring';
 import { getAuthCallbackError } from './utils/authCallback';
+import './icons.css';
 import './App.css';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -72,6 +73,8 @@ function PageLoader() {
 
 function App() {
 	const [isCartOpen, setIsCartOpen] = useState(false);
+	// Stable so the cart's focus-management effect does not re-run on unrelated renders.
+	const closeCart = useCallback(() => setIsCartOpen(false), []);
 	useEffect(() => initMonitoring(), []);
 
 	return (
@@ -115,7 +118,7 @@ function App() {
 							</ErrorBoundary>
 						</main>
 						<Footer />
-						<Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+						<Cart isOpen={isCartOpen} onClose={closeCart} />
 					</div>
 					<CookieConsent />
 				</CartProvider>

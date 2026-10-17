@@ -10,7 +10,7 @@ function Navbar({ onCartClick }) {
 	const firstLinkRef = useRef(null);
 	const { getCartCount } = useCart();
 	const cartCount = getCartCount();
-	const { user } = useAuth();
+	const { user, loading: authLoading } = useAuth();
 
 	const toggleMenu = () => {
 		setIsOpen(!isOpen);
@@ -32,17 +32,14 @@ function Navbar({ onCartClick }) {
 				return;
 			}
 			if (event.key !== "Tab") return;
-			const links = [...document.querySelectorAll("#primary-navigation a")];
-			if (!links.length) return;
-			const first = links[0];
-			const last = links[links.length - 1];
-			if (event.shiftKey && document.activeElement === first) {
-				event.preventDefault();
-				last.focus();
-			} else if (!event.shiftKey && document.activeElement === last) {
-				event.preventDefault();
-				first.focus();
-			}
+			// Cycle through the close button and menu links so keyboard users are not limited to Escape.
+			const focusable = [menuButtonRef.current, ...document.querySelectorAll("#primary-navigation a")].filter(Boolean);
+			if (focusable.length < 2) return;
+			event.preventDefault();
+			const index = focusable.indexOf(document.activeElement);
+			const step = event.shiftKey ? -1 : 1;
+			const next = index === -1 ? 1 : (index + step + focusable.length) % focusable.length;
+			focusable[next].focus();
 		};
 		document.addEventListener("keydown", handleKeyDown);
 		return () => {
@@ -130,7 +127,8 @@ function Navbar({ onCartClick }) {
 						</NavLink>
 					</li>
 				</ul>
-				<Link className="nav-account-link" to={user ? "/account" : "/login"} onClick={closeMenu}>{user ? "Account" : "Login"}</Link>
+				{/* Hidden but space-reserving while a stored session is checked, so signed-in visitors do not see "Login" flash. */}
+				<Link className={"nav-account-link" + (authLoading && !user ? " pending" : "")} to={user ? "/account" : "/login"} onClick={closeMenu}>{user ? "Account" : "Login"}</Link>
 				<button
 					className="cart-icon-btn"
 					onClick={onCartClick}

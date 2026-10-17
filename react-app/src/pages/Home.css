@@ -30,8 +30,7 @@
 	max-width: 650px;
 }
 
-.hero-kicker,
-.section-kicker {
+.hero-kicker {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.55rem;
@@ -52,9 +51,9 @@
 }
 
 .hero-title {
-	font-size: clamp(3rem, 6vw, 5.8rem);
+	font-size: clamp(2.5rem, 4.6vw, 4.4rem);
 	font-weight: 800;
-	line-height: 0.95;
+	line-height: 1;
 	margin-bottom: 1.5rem;
 	letter-spacing: 0;
 }
@@ -536,7 +535,7 @@
 	}
 
 	.hero-title {
-		font-size: clamp(2.6rem, 14vw, 4rem);
+		font-size: clamp(2.25rem, 10.5vw, 3.2rem);
 	}
 
 	.hero-buttons .btn,
