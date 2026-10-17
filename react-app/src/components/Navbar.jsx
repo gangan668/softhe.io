@@ -131,7 +131,10 @@ function Navbar({ onCartClick }) {
 				<Link className={"nav-account-link" + (authLoading && !user ? " pending" : "")} to={user ? "/account" : "/login"} onClick={closeMenu}>{user ? "Account" : "Login"}</Link>
 				<button
 					className="cart-icon-btn"
-					onClick={onCartClick}
+					onClick={() => {
+						closeMenu();
+						onCartClick();
+					}}
 					aria-label={`Shopping cart with ${cartCount} items`}
 				>
 					<svg className="cart-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">

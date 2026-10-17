@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
+import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
 
 // Local servers reuse the production headers from vercel.json so policy drift shows up locally.
@@ -14,6 +15,11 @@ function localHeaders({ dev }) {
 		.map((directive) => directive.trim())
 		// localhost is served over plain HTTP.
 		.filter((directive) => directive && directive !== "upgrade-insecure-requests");
+	// Only the isolated portal browser suite may connect to its mocked provider.
+	if (!dev && process.env.SOFTHE_E2E_MODE === "portal") {
+		const index = directives.findIndex((directive) => directive.startsWith("connect-src "));
+		directives[index] += " https://portal-fixture.supabase.co";
+	}
 	if (dev) {
 		// The Vite dev server injects the React refresh preamble and CSS inline, and uses a websocket for HMR.
 		const additions = { "script-src": "'unsafe-inline'", "style-src": "'unsafe-inline'", "connect-src": "ws: wss:" };
