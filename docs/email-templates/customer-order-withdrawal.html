@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><body style="font-family:Arial,sans-serif;color:#172033;line-height:1.6;max-width:640px;margin:24px auto;padding:16px">
+<h1>Softhe.io</h1>
+{{#items}}
+<h2>Payment confirmed</h2>
+<p>Thank you for your order. Keep this message for your records.</p>
+<p><strong>Order reference:</strong> {{order_reference}}</p>
+<p><strong>Products:</strong> {{items}}</p>
+<p><strong>Total paid:</strong> {{amount_total}} {{currency}}</p>
+<p><strong>VAT treatment:</strong> {{vat_treatment}}<br><strong>VAT ID:</strong> {{vat_id}}</p>
+<p>{{fulfillment_status}}</p>
+<p><a href="{{terms_url}}">Terms</a> | <a href="{{withdrawal_url}}">Request withdrawal</a></p>
+<p>{{legal_name}}<br>Business registration: {{business_registration_id}}</p>
+{{/items}}
+{{#request_id}}
+<h2>Withdrawal request received</h2>
+<p>We received your withdrawal request. Keep this acknowledgement for your records. Receipt of this message does not confirm that a refund has been issued.</p>
+<p><strong>Request reference:</strong> {{request_id}}</p>
+<p><strong>Order reference:</strong> {{order_reference}}</p>
+<p><strong>Requested items:</strong> {{requested_items}}</p>
+<p><strong>Received at:</strong> {{received_at}}</p>
+<p><strong>Comments:</strong> {{comments}}</p>
+<p><a href="{{withdrawal_url}}">Withdrawal information</a></p>
+{{/request_id}}
+<p>For help, reply to this email or contact <a href="mailto:{{support_email}}">{{support_email}}</a>.</p>
+</body></html>

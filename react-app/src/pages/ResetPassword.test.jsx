@@ -12,7 +12,17 @@ it('settles rejected recovery verification and offers a new link', async () => {
 	window.history.replaceState(null, '', '/reset-password?token_hash=test'); auth.verifyOtp.mockRejectedValue(new Error('network')); mount(); await screen.findByRole('alert'); expect(screen.getByRole('link', { name: 'Request a new reset link' })).toBeInTheDocument(); expect(screen.queryByText('Verifying recovery link…')).not.toBeInTheDocument();
 });
 it('verifies a recovery token, removes it from the address, and updates the password', async () => {
-	window.history.replaceState(null, '', '/reset-password?token_hash=fixture'); mount(); await screen.findByText('Recovery link verified. Choose a new password.'); expect(auth.verifyOtp).toHaveBeenCalledWith({ token_hash: 'fixture', type: 'recovery' }); expect(window.location.search).toBe(''); submit(); await screen.findByText('Password updated. You can now return to your account.'); expect(auth.updateUser).toHaveBeenCalledWith({ password: 'StrongPassword123!' }); expect(screen.getByRole('link', { name: 'Return to account' })).toBeInTheDocument();
+	window.history.replaceState(null, '', '/reset-password?token_hash=fixture'); mount(); await screen.findByText('Choose a new password.'); expect(auth.verifyOtp).toHaveBeenCalledWith({ token_hash: 'fixture', type: 'recovery' }); expect(window.location.search).toBe(''); submit(); await screen.findByText('Password updated. You can now return to your account.'); expect(auth.updateUser).toHaveBeenCalledWith({ password: 'StrongPassword123!' }); expect(screen.getByRole('link', { name: 'Return to account' })).toBeInTheDocument();
+});
+it('shows a ready message after the auth client establishes the callback session', () => {
+	const context = { configured: true, loading: true, supabase: { auth }, user: null };
+	const view = mount(context);
+	expect(screen.getByRole('status')).toHaveTextContent('Verifying recovery link…');
+	view.rerender(<MemoryRouter><AuthContext.Provider value={{ ...context, loading: false, user: { id: 'recovered-customer' } }}><ResetPassword /></AuthContext.Provider></MemoryRouter>);
+	expect(screen.getByRole('button', { name: 'Update password' })).toBeEnabled();
+	expect(screen.getByRole('status')).toHaveTextContent('Choose a new password.');
+	expect(screen.queryByText(/invalid or has expired/)).not.toBeInTheDocument();
+	expect(auth.verifyOtp).not.toHaveBeenCalled();
 });
 it('rejects weak recovery passwords locally', async () => {
 	mount({ user: { id: 'customer' } }); submit('weakpassword'); await screen.findByText('Use at least 12 characters with uppercase, lowercase, a number, and a symbol.', { selector: '.portal-error' }); expect(auth.updateUser).not.toHaveBeenCalled();

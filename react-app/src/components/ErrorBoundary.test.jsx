@@ -95,9 +95,9 @@ describe('ErrorBoundary', () => {
 			</ErrorBoundary>
 		);
 
-		const supportLink = screen.getByText('support@softhe.io');
+		const supportLink = screen.getByText('suport.softhe@gmail.com');
 		expect(supportLink).toBeInTheDocument();
-		expect(supportLink).toHaveAttribute('href', 'mailto:support@softhe.io');
+		expect(supportLink).toHaveAttribute('href', 'mailto:suport.softhe@gmail.com');
 	});
 
 	it('should attempt to reset when Try Again button is clicked', () => {

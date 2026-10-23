@@ -4,7 +4,7 @@ import { getAuthDeliveryErrorMessage, getAuthErrorMessage } from './authErrors';
 describe('authentication error messages', () => {
 	it('replaces the Supabase email quota error with actionable customer copy', () => {
 		expect(getAuthErrorMessage({ message: 'email rate limit exceeded' })).toMatch(
-			/temporarily at capacity.*support@softhe\.io/i,
+			/temporarily at capacity.*suport\.softhe@gmail\.com/i,
 		);
 		expect(getAuthErrorMessage({ code: 'over_email_send_rate_limit' })).toMatch(
 			/wait before trying again/i,
@@ -24,7 +24,7 @@ describe('authentication error messages', () => {
 describe('authentication email delivery errors', () => {
 	it('surfaces provider, authorization, and capacity failures', () => {
 		expect(getAuthDeliveryErrorMessage({ code: 'email_address_not_authorized' })).toMatch(/could not be sent/i);
-		expect(getAuthDeliveryErrorMessage({ message: 'Error sending confirmation email through SMTP' })).toMatch(/support@softhe\.io/i);
+		expect(getAuthDeliveryErrorMessage({ message: 'Error sending confirmation email through SMTP' })).toMatch(/suport\.softhe@gmail\.com/i);
 		expect(getAuthDeliveryErrorMessage({ code: 'over_email_send_rate_limit' })).toMatch(/temporarily at capacity/i);
 	});
 

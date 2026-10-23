@@ -9,7 +9,7 @@ describe('Contact with delivery disabled', () => {
 	it('shows one email action without rendering an unusable form', () => {
 		render(<MemoryRouter><Contact /></MemoryRouter>);
 		expect(screen.queryByLabelText('Full Name *')).not.toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /email support/i })).toHaveAttribute('href', 'mailto:support@softhe.io');
+		expect(screen.getByRole('link', { name: /email support/i })).toHaveAttribute('href', 'mailto:suport.softhe@gmail.com');
 		expect(screen.getByText(/unavailable until its delivery and privacy checks pass/i)).toBeInTheDocument();
 	});
 });
