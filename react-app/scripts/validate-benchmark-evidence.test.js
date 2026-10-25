@@ -5,6 +5,7 @@ const validManifest = {
 	schemaVersion: 1,
 	captureDate: '2026-07-27',
 	summaryMethod: 'median',
+	captureSeconds: 109,
 	hardware: 'AMD Ryzen 7 7800X3D; RTX 4080; 32 GB DDR5-6000',
 	bios: 'Vendor 1.2.3; EXPO enabled',
 	drivers: 'NVIDIA 600.00; chipset 8.0',
@@ -51,6 +52,18 @@ describe('benchmark evidence validation', () => {
 		const { errors } = validateBenchmarkEvidence(manifest);
 		expect(errors).toContain('hardware is required and cannot be a placeholder');
 		expect(errors).toContain('optimized.runs[0].rawEvidence is required');
+	});
+
+	it('rejects unequal run counts between profiles', () => {
+		const manifest = structuredClone(validManifest);
+		manifest.optimized.runs.push({ id: 'optimized-3', averageFps: 920, onePercentLowFps: 490, rawEvidence: 'raw/optimized-3.png' });
+		expect(validateBenchmarkEvidence(manifest).errors).toContain('stock and optimized must contain the same number of runs');
+	});
+
+	it('rejects a missing capture duration', () => {
+		const manifest = structuredClone(validManifest);
+		manifest.captureSeconds = 0;
+		expect(validateBenchmarkEvidence(manifest).errors).toContain('captureSeconds must be a positive number');
 	});
 
 	it('rejects reported values that differ from calculated medians', () => {

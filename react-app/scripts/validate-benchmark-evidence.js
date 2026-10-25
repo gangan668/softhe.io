@@ -57,12 +57,18 @@ export const validateBenchmarkEvidence = (manifest) => {
 		errors.push('captureDate must be a valid YYYY-MM-DD date');
 	}
 
+	if (!validMetric(manifest.captureSeconds)) errors.push('captureSeconds must be a positive number');
+
 	for (const field of ['hardware', 'bios', 'drivers', 'operatingSystem', 'gameVersion', 'graphicsSettings', 'scenario', 'warmupProcedure']) {
 		if (!meaningful(manifest[field])) errors.push(`${field} is required and cannot be a placeholder`);
 	}
 
 	const stock = validateRuns('stock', manifest.stock?.runs, errors);
 	const optimized = validateRuns('optimized', manifest.optimized?.runs, errors);
+	// Pages show one shared run count, so both profiles must use the same number of runs.
+	if (stock && optimized && manifest.stock.runs.length !== manifest.optimized.runs.length) {
+		errors.push('stock and optimized must contain the same number of runs');
+	}
 	const medians = stock && optimized ? { stock, optimized } : null;
 
 	if (medians && manifest.reportedMedians) {

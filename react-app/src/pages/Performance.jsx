@@ -1,9 +1,11 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
 import SEO from '../components/SEO';
-import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange } from '../data/benchmark';
+import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import "./Performance.css";
 
 const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
+const { processes, memoryGb } = idleOverhead;
+const { runCount, captureSeconds } = benchmarkMethodology;
 
 function Performance() {
 	return (
@@ -13,7 +15,7 @@ function Performance() {
 				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription={`One PC measured ${averageFps.stock} and ${averageFps.optimized} average FPS across two configurations. Four raw captures are published and several variables changed.`}
+				ogDescription={`One PC measured ${averageFps.stock} and ${averageFps.optimized} average FPS across two configurations. ${benchmarkPublication.captureCountText.charAt(0).toUpperCase()}${benchmarkPublication.captureCountText.slice(1)} raw captures are published and several variables changed.`}
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -26,8 +28,7 @@ function Performance() {
 						</p>
 						<p className="methodology-warning" role="note">
 							Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
-							 Runs per configuration: {benchmarkMethodology.runCount ?? 'not yet published'}.{' '}
-							 {benchmarkPublication.status} <BenchmarkEvidenceLink />
+							 Runs per configuration: {runCount}. <BenchmarkEvidenceLink />
 						</p>
 						<div className="performance-stats">
 							<div>
@@ -36,7 +37,7 @@ function Performance() {
 							</div>
 							<div>
 								<strong>{onePercentLowFps.stock} to {onePercentLowFps.optimized}</strong>
-								<span>1% low FPS in CS2 sample</span>
+								<span>P1 FPS in CS2 sample</span>
 							</div>
 							<div>
 								<strong>Version 74</strong>
@@ -57,7 +58,7 @@ function Performance() {
 						<div className="native-benchmark-card">
 							<div className="native-card-topline">
 								<div><span>Preliminary result</span><strong>CS2 · Dust 2 benchmark</strong></div>
-								<b>2-run median</b>
+								<b>{runCount}-run median</b>
 							</div>
 							<div className="native-result-stage">
 								<div className="native-result before">
@@ -73,9 +74,9 @@ function Performance() {
 								</div>
 							</div>
 							<div className="native-supporting-metrics">
-								<div><span>1% low</span><strong>{onePercentLowFps.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {onePercentLowFps.optimized} FPS</strong><b>{formatPercentChange(onePercentLowFps.change)}</b></div>
+								<div><span>P1 FPS</span><strong>{onePercentLowFps.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {onePercentLowFps.optimized} FPS</strong><b>{formatPercentChange(onePercentLowFps.change)}</b></div>
 								<div><span>Average frame time</span><strong>{frameTimeMs.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {frameTimeMs.optimized} ms</strong><b>{formatPercentChange(frameTimeMs.change)}</b></div>
-								<div><span>Recorded sample</span><strong>2 × 109 seconds</strong><b>Median</b></div>
+								<div><span>Recorded sample</span><strong>{runCount} × {captureSeconds} seconds</strong><b>Median</b></div>
 							</div>
 						</div>
 					</div>
@@ -95,14 +96,14 @@ function Performance() {
 								<div><span>SoftheOS</span><strong>Optimized sample</strong></div>
 							</div>
 							<div className="overhead-metric">
-								<div><span>Background processes</span><strong>111</strong></div>
-								<div className="overhead-change"><b>-72%</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><strong>31</strong><span>Target shown in sample</span></div>
+								<div><span>Background processes</span><strong>{processes.stock}</strong></div>
+								<div className="overhead-change"><b>{formatPercentChange(processes.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
+								<div><strong>{processes.optimized}</strong><span>Observed in sample</span></div>
 							</div>
 							<div className="overhead-metric">
-								<div><span>Idle memory</span><strong>2.5 GB</strong></div>
-								<div className="overhead-change"><b>-68%</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><strong>0.8 GB</strong><span>Observed idle use</span></div>
+								<div><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
+								<div className="overhead-change"><b>{formatPercentChange(memoryGb.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
+								<div><strong>{memoryGb.optimized} GB</strong><span>Observed idle use</span></div>
 							</div>
 							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
 						</div>
@@ -133,7 +134,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">Summary</span>
 							<h2 className="section-title">Results at a glance</h2>
-							<p>Values from the preliminary CS2 comparison and separate idle snapshots. {benchmarkPublication.status} <BenchmarkEvidenceLink /></p>
+							<p>Values from the preliminary CS2 comparison and separate idle snapshots.</p>
 						</div>
 
 						<div className="comparison-table">
@@ -158,21 +159,37 @@ function Performance() {
 									{averageFps.optimized} avg FPS
 								</div>
 								<div className="table-cell improvement">
-									{formatPercentChange(averageFps.change)} avg
+									{formatPercentChange(averageFps.change)}
+								</div>
+							</div>
+
+							<div className="table-row">
+								<div className="table-cell feature-name">
+									<i className="fas fa-chart-line" aria-hidden="true"></i>
+									P1 FPS (CS2)
+								</div>
+								<div className="table-cell stock-value">
+									{onePercentLowFps.stock} FPS
+								</div>
+								<div className="table-cell optimized-value">
+									{onePercentLowFps.optimized} FPS
+								</div>
+								<div className="table-cell improvement">
+									{formatPercentChange(onePercentLowFps.change)}
 								</div>
 							</div>
 
 							<div className="table-row">
 								<div className="table-cell feature-name">
 									<i className="fas fa-stopwatch" aria-hidden="true"></i>
-									Frame Time
+									Average Frame Time
 								</div>
 								<div className="table-cell stock-value">{frameTimeMs.stock}ms</div>
 								<div className="table-cell optimized-value">
 									{frameTimeMs.optimized}ms
 								</div>
 								<div className="table-cell improvement">
-									{formatPercentChange(frameTimeMs.change)} reduction
+									{formatPercentChange(frameTimeMs.change)}
 								</div>
 							</div>
 
@@ -181,12 +198,12 @@ function Performance() {
 									<i className="fas fa-list" aria-hidden="true"></i>
 									Idle Processes
 								</div>
-								<div className="table-cell stock-value">111</div>
+								<div className="table-cell stock-value">{processes.stock}</div>
 								<div className="table-cell optimized-value">
-									31
+									{processes.optimized}
 								</div>
 								<div className="table-cell improvement">
-									-72%
+									{formatPercentChange(processes.change)}
 								</div>
 							</div>
 
@@ -196,13 +213,13 @@ function Performance() {
 									Idle Memory
 								</div>
 								<div className="table-cell stock-value">
-									2.5 GB
+									{memoryGb.stock} GB
 								</div>
 								<div className="table-cell optimized-value">
-									0.8 GB
+									{memoryGb.optimized} GB
 								</div>
 								<div className="table-cell improvement">
-									-68%
+									{formatPercentChange(memoryGb.change)}
 								</div>
 							</div>
 						</div>
@@ -218,18 +235,25 @@ function Performance() {
 							</div>
 							<dl className="methodology-grid">
 								<div><dt>Hardware</dt><dd>{benchmarkMethodology.hardware}</dd></div>
-								<div><dt>Software</dt><dd>{benchmarkMethodology.software}</dd></div>
-								<div><dt>Scenario</dt><dd>{benchmarkMethodology.scenario}</dd></div>
-								<div><dt>Captured</dt><dd>{benchmarkMethodology.captureDate}</dd></div>
-								<div><dt>Repeated runs</dt><dd>{benchmarkMethodology.runCount ?? 'Pending publication'}</dd></div>
-								<div><dt>Summary</dt><dd>{benchmarkMethodology.summaryMethod}</dd></div>
+								<div><dt>Operating system</dt><dd>{benchmarkMethodology.operatingSystem}</dd></div>
+								<div><dt>BIOS</dt><dd>{benchmarkMethodology.bios}</dd></div>
+								<div><dt>Drivers</dt><dd>{benchmarkMethodology.drivers}</dd></div>
 								<div><dt>Game version</dt><dd>{benchmarkMethodology.gameVersion}</dd></div>
+								<div>
+									<dt>Sample</dt>
+									<dd>
+										Captured {benchmarkMethodology.captureDate}.{' '}
+										{runCount} runs of {captureSeconds} seconds per configuration, summarized by {benchmarkMethodology.summaryMethod}.
+									</dd>
+								</div>
+								<div><dt>Scenario</dt><dd>{benchmarkMethodology.scenario}</dd></div>
+								<div><dt>Graphics settings</dt><dd>{benchmarkMethodology.graphicsSettings}</dd></div>
 							</dl>
 							{!benchmarkEvidenceComplete && (
 								<p className="methodology-warning" role="note">
 									The exact CS2 build and chipset-driver versions were not recorded.
 									These figures cannot establish the effect of a single product.
-									The reported 1% low uses the 99th percentile frame time converted to FPS.
+									P1 FPS is the 99th percentile frame time converted to FPS, not the average of the slowest 1% of frames.
 								</p>
 							)}
 						</section>
@@ -238,8 +262,9 @@ function Performance() {
 							<i className="fas fa-circle-info" aria-hidden="true"></i>
 							<p>
 								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
-								workload. The archive contains four original JSON captures, with
-								median FPS and 1% lows from at least two repeated stock and optimized runs.
+								workload. The archive contains {benchmarkPublication.captureCountText} original JSON captures, with
+								median average FPS and P1 FPS from at least two repeated stock and optimized runs.{' '}
+								<BenchmarkEvidenceLink />
 							</p>
 						</div>
 						<p className="version-stability-note">

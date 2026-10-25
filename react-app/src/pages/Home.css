@@ -125,8 +125,7 @@
 .panel-topline,
 .fps-readout,
 .metric-bar,
-.comparison-row,
-.proof-grid {
+.comparison-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -157,6 +156,8 @@
 }
 
 .live-pill {
+	flex-shrink: 0;
+	white-space: nowrap;
 	color: #03100d;
 	background: var(--gradient);
 	border-radius: 999px;
@@ -313,6 +314,7 @@
 
 .proof-grid div {
 	display: grid;
+	align-content: start;
 	gap: 0.25rem;
 }
 

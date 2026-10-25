@@ -50,6 +50,6 @@
     "Capture authenticity and original test execution were not independently observed.",
     "The exact CS2 build and chipset-driver versions were not recorded.",
     "Windows edition, memory settings, BIOS profile and GPU driver changed.",
-    "The reported 1% low is a frame-time percentile, not the mean of the slowest one percent."
+    "The reported P1 FPS is a frame-time percentile, not the mean of the slowest one percent."
   ]
 }

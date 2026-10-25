@@ -1,6 +1,5 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
-import { benchmarkPublication } from '../data/benchmarkPublication';
-import { benchmarkResults, formatPercentChange } from '../data/benchmark';
+import { benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
@@ -74,7 +73,7 @@ function Home() {
 									<span className="panel-eyebrow">Preliminary sample</span>
 										<strong>CS2 · Dust 2 benchmark</strong>
 									</div>
-									<span className="live-pill">2-run median</span>
+									<span className="live-pill">{benchmarkMethodology.runCount}-run median</span>
 								</div>
 								<div className="result-stage">
 									<div className="result-column result-before">
@@ -97,7 +96,7 @@ function Home() {
 								</div>
 								<div className="result-details">
 									<div>
-										<span>1% low</span>
+										<span>P1 FPS</span>
 										<strong><span>{onePercentLowFps.stock}</span><span className="visually-hidden"> to </span><i className="fas fa-arrow-right" aria-hidden="true"></i>{onePercentLowFps.optimized} FPS</strong>
 									</div>
 									<div>
@@ -106,10 +105,10 @@ function Home() {
 									</div>
 									<div>
 										<span>Capture</span>
-										<strong>2 × 109 sec</strong>
+										<strong>{benchmarkMethodology.runCount} × {benchmarkMethodology.captureSeconds} sec</strong>
 									</div>
 								</div>
-								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. {benchmarkPublication.status} <BenchmarkEvidenceLink /> This cannot isolate the effect of one product.</p>
+								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. This cannot isolate the effect of one product. <BenchmarkEvidenceLink /></p>
 							</div>
 						</div>
 					</div>
@@ -126,8 +125,8 @@ function Home() {
 							<span>Frame time change in the same comparison</span>
 						</div>
 						<div>
-							<strong>31</strong>
-							<span>Idle process target shown in benchmark</span>
+							<strong>{idleOverhead.processes.optimized}</strong>
+							<span>Idle processes in the optimized sample</span>
 						</div>
 						<div>
 							<strong>14 days</strong>
@@ -143,7 +142,7 @@ function Home() {
 							<h2>Read the numbers and the test limits before you buy.</h2>
 							<p>
 								The sample compares two configurations of one PC. Windows edition, memory settings,
-								and GPU driver changed. The four raw captures are published. <BenchmarkEvidenceLink /> The result cannot
+								and GPU driver changed. The {benchmarkPublication.captureCountText} raw captures are published on the benchmark page. The result cannot
 								show what any one product contributed.
 							</p>
 							<Link to="/performance" className="text-link">
@@ -161,7 +160,7 @@ function Home() {
 								<strong>{averageFps.optimized} FPS</strong>
 							</div>
 							<div className="comparison-footnote">
-								Preliminary whole-system sample. {benchmarkPublication.status} <BenchmarkEvidenceLink />
+								Preliminary whole-system sample from one PC.
 							</div>
 						</div>
 					</div>

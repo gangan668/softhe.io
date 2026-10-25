@@ -1,5 +1,5 @@
 .services-detailed {
-	padding: 72px 0;
+	padding: calc(var(--navbar-height) + 56px) 0 72px;
 }
 
 .services-intro {
@@ -10,7 +10,7 @@
 	margin-bottom: 2rem;
 }
 
-.services-intro h2 {
+.services-intro h1 {
 	font-size: clamp(2rem, 4vw, 3.4rem);
 	line-height: 1.04;
 }
@@ -36,11 +36,14 @@
 	box-shadow: var(--shadow-soft);
 }
 
+/* Cards share row tracks through subgrid so their sections line up across a row. */
 .service-card {
 	overflow: hidden;
 	position: relative;
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-row: span 6;
+	grid-template-rows: subgrid;
+	row-gap: 0;
 	transition: var(--transition);
 }
 
@@ -66,7 +69,9 @@
 	height: 112px;
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	/* Left-aligned so the right-hand badge never covers the icon on narrow cards. */
+	justify-content: flex-start;
+	padding: 0 1.25rem;
 	background: linear-gradient(135deg, rgba(66, 232, 196, 0.12), rgba(114, 167, 255, 0.08)), rgba(255, 255, 255, 0.02);
 	border-bottom: 1px solid var(--border-color);
 	font-size: 2.6rem;
@@ -74,9 +79,10 @@
 }
 
 .service-body {
-	display: flex;
-	flex: 1;
-	flex-direction: column;
+	display: grid;
+	grid-row: span 5;
+	grid-template-rows: subgrid;
+	row-gap: 0;
 	padding: 1.25rem;
 }
 
@@ -94,7 +100,7 @@
 	line-height: 1;
 }
 
-.service-card h3 {
+.service-card h2 {
 	font-size: 1.22rem;
 	font-weight: 800;
 	margin-bottom: 0.75rem;

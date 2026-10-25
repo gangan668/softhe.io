@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import SEO from "../components/SEO";
 import { absoluteUrl, siteConfig } from "../config/site";
-import { benchmarkResults } from "../data/benchmark";
+import { benchmarkPublication, benchmarkResults } from "../data/benchmark";
 import { trackEvent } from "../utils/analytics";
 import "./FAQ.css";
 
@@ -164,7 +164,7 @@ function FAQ() {
 								<strong>CS2 average FPS:</strong> {benchmarkResults.averageFps.stock} to {benchmarkResults.averageFps.optimized} in the two-run medians
 							</li>
 							<li>
-								<strong>CS2 1% low:</strong> {benchmarkResults.onePercentLowFps.stock} to {benchmarkResults.onePercentLowFps.optimized} FPS in the two-run medians
+								<strong>CS2 P1 FPS:</strong> {benchmarkResults.onePercentLowFps.stock} to {benchmarkResults.onePercentLowFps.optimized} FPS in the two-run medians
 							</li>
 							<li>
 								<strong>Idle processes:</strong> 111 to 31 in the Task Manager sample
@@ -174,7 +174,7 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							Windows edition, memory settings, and GPU driver changed. Four raw CapFrameX captures are published on the <Link to="/performance">benchmark page</Link>. The comparison cannot isolate the effect of one product or predict your result.
+							Windows edition, memory settings, and GPU driver changed. All {benchmarkPublication.captureCountText} raw CapFrameX captures are published on the <Link to="/performance">benchmark page</Link>. The comparison cannot isolate the effect of one product or predict your result.
 						</p>
 					</div>
 				),
