@@ -11,7 +11,11 @@ const loadMetadataTable = () => {
 	metadataTable ??= import('../config/pageMetadata').then(({ buildPageMetadata, socialCopy }) => ({
 		byPath: new Map(buildPageMetadata({ commerceEnabled }).map((entry) => [entry.path, entry])),
 		socialCopy,
-	}));
+	})).catch((error) => {
+		// Forget the failed load so the next navigation retries instead of reusing the rejection.
+		metadataTable = undefined;
+		throw error;
+	});
 	return metadataTable;
 };
 

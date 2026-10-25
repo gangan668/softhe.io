@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const setMeta = (attribute, name, content) => {
 	let element = document.querySelector(`meta[${attribute}="${name}"]`);
@@ -16,6 +17,9 @@ const setMeta = (attribute, name, content) => {
  * such as the not-found page.
  */
 function SEO({ title, description, canonicalUrl, structuredData, noIndex = false }) {
+	// RouteMetadata resets robots and canonical on every navigation, including between two paths that
+	// keep this page mounted (one unknown URL to another), so the overrides re-apply per path.
+	const { pathname } = useLocation();
 	useEffect(() => {
 		if (title) {
 			document.title = title;
@@ -39,7 +43,7 @@ function SEO({ title, description, canonicalUrl, structuredData, noIndex = false
 		document.getElementById(structuredDataElement.id)?.remove();
 		document.head.appendChild(structuredDataElement);
 		return () => structuredDataElement.remove();
-	}, [title, description, canonicalUrl, structuredData, noIndex]);
+	}, [title, description, canonicalUrl, structuredData, noIndex, pathname]);
 
 	return null;
 }

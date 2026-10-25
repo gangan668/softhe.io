@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { MemoryRouter, Link } from 'react-router-dom';
+import { MemoryRouter, Link, Route, Routes } from 'react-router-dom';
 import RouteMetadata from './RouteMetadata';
 import SEO from './SEO';
 import { absoluteUrl } from '../config/site';
@@ -44,6 +44,22 @@ describe('route metadata policy', () => {
 		render(<MemoryRouter initialEntries={['/store']}><RouteMetadata /><Link to="/reset-password">Reset</Link></MemoryRouter>);
 		await user.click(screen.getByRole('link', { name: 'Reset' }));
 		await waitFor(() => expect(document.title).toBe('Choose a New Password | Softhe.io'));
+	});
+	it('keeps not-found overrides when navigating between two unknown paths', async () => {
+		const user = userEvent.setup();
+		render(
+			<MemoryRouter initialEntries={['/missing-one']}>
+				<RouteMetadata />
+				<Routes>
+					<Route path="*" element={<><SEO noIndex canonicalUrl={absoluteUrl('/404')} /><Link to="/missing-two">Next</Link></>} />
+				</Routes>
+			</MemoryRouter>,
+		);
+		expect(robots()).toBe('noindex, nofollow');
+		// The same element stays mounted, so only a path-aware effect restores the overrides.
+		await user.click(screen.getByRole('link', { name: 'Next' }));
+		expect(robots()).toBe('noindex, nofollow');
+		expect(canonical()).toBe(absoluteUrl('/404'));
 	});
 	it('removes page structured data when the page unmounts', () => {
 		const view = render(<MemoryRouter><SEO structuredData={{ '@type': 'Organization' }} /></MemoryRouter>);
