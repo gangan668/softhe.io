@@ -10,7 +10,8 @@ export const benchmarkMethodology = {
   scenario: `${evidence.scenario} ${evidence.warmupProcedure}`,
   graphicsSettings: evidence.graphicsSettings,
   captureDate: evidence.captureDate,
-  runCount: Math.min(evidence.stock.runs.length, evidence.optimized.runs.length),
+  // validate-benchmark-evidence requires equal run counts for both profiles.
+  runCount: evidence.stock.runs.length,
   captureSeconds: evidence.captureSeconds,
   summaryMethod: evidence.summaryMethod,
   gameVersion: evidence.gameVersion,

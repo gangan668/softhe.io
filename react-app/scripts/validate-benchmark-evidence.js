@@ -65,6 +65,10 @@ export const validateBenchmarkEvidence = (manifest) => {
 
 	const stock = validateRuns('stock', manifest.stock?.runs, errors);
 	const optimized = validateRuns('optimized', manifest.optimized?.runs, errors);
+	// Pages show one shared run count, so both profiles must use the same number of runs.
+	if (stock && optimized && manifest.stock.runs.length !== manifest.optimized.runs.length) {
+		errors.push('stock and optimized must contain the same number of runs');
+	}
 	const medians = stock && optimized ? { stock, optimized } : null;
 
 	if (medians && manifest.reportedMedians) {

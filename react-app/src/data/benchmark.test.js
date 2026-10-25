@@ -7,6 +7,7 @@ describe('benchmark publication', () => {
     expect(benchmarkPublication.archiveUrl).toBe(evidence.rawEvidenceArchive.url);
     expect(benchmarkPublication.archiveSha256).toMatch(/^[a-f0-9]{64}$/);
     expect(benchmarkMethodology.runCount).toBe(2);
+    expect(evidence.optimized.runs).toHaveLength(evidence.stock.runs.length);
     expect(benchmarkMethodology.captureSeconds).toBe(109);
     expect(benchmarkMethodology.summaryMethod).toBe('median');
   });

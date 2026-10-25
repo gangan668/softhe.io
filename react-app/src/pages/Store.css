@@ -54,7 +54,7 @@
 	padding: 1.1rem 1.2rem;
 }
 
-.store-proof h3 {
+.store-proof h2 {
 	font-size: 1.35rem;
 	line-height: 1.2;
 	margin: 0.25rem 0 0.4rem;
@@ -85,7 +85,7 @@
 	margin-bottom: 1rem;
 }
 
-.product-finder h3 {
+.product-finder h2 {
 	font-size: 1.35rem;
 	margin-bottom: 0.4rem;
 }
@@ -225,7 +225,7 @@
 	margin-bottom: 0.85rem;
 }
 
-.product-info h3 {
+.product-info h2 {
 	font-size: 1.22rem;
 	font-weight: 750;
 	line-height: 1.18;

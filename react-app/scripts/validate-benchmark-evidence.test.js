@@ -54,6 +54,12 @@ describe('benchmark evidence validation', () => {
 		expect(errors).toContain('optimized.runs[0].rawEvidence is required');
 	});
 
+	it('rejects unequal run counts between profiles', () => {
+		const manifest = structuredClone(validManifest);
+		manifest.optimized.runs.push({ id: 'optimized-3', averageFps: 920, onePercentLowFps: 490, rawEvidence: 'raw/optimized-3.png' });
+		expect(validateBenchmarkEvidence(manifest).errors).toContain('stock and optimized must contain the same number of runs');
+	});
+
 	it('rejects a missing capture duration', () => {
 		const manifest = structuredClone(validManifest);
 		manifest.captureSeconds = 0;

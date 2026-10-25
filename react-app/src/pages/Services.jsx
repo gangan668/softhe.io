@@ -55,7 +55,7 @@ function Services() {
 									</div>
 									<div className="service-body">
 										<div className="service-heading">
-											<h3>{service.name}</h3>
+											<h2>{service.name}</h2>
 											<strong>€{service.price}</strong>
 										</div>
 										<p>{service.description}</p>
