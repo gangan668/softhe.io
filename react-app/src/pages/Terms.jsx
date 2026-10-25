@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import SEO from '../components/SEO';
-import { absoluteUrl, siteConfig } from '../config/site';
+import { siteConfig } from '../config/site';
 import './Legal.css';
 
 const { vatStatus } = siteConfig.legal;
@@ -9,7 +8,6 @@ const { supportEmail } = siteConfig;
 function Terms() {
 	return (
 		<>
-			<SEO title="Terms of Service | Softhe.io" description="Terms for Softhe.io digital products, optimization services, payments, delivery, support, and refunds." canonicalUrl={absoluteUrl('/terms')} />
 			<div className="legal-page">
 				<section className="page-header"><div className="container"><h1>Terms of Service</h1><p>Terms for purchasing and using Softhe.io products and services.</p></div></section>
 				<section className="legal-content"><div className="container"><div className="legal-card">

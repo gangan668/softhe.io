@@ -1,6 +1,6 @@
-import evidence from '../../../docs/benchmark-evidence.json';
+import evidence from '../../../docs/benchmark-evidence.json' with { type: 'json' };
 
-export { benchmarkPublication } from './benchmarkPublication';
+export { benchmarkPublication } from './benchmarkPublication.js';
 
 export const benchmarkMethodology = {
   hardware: evidence.hardware,

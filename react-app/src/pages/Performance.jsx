@@ -1,5 +1,4 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
-import SEO from '../components/SEO';
 import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import "./Performance.css";
 
@@ -10,13 +9,6 @@ const { runCount, captureSeconds } = benchmarkMethodology;
 function Performance() {
 	return (
 		<>
-			<SEO
-				title="PC performance benchmark results | Softhe.io"
-				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
-				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
-				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription={`One PC measured ${averageFps.stock} and ${averageFps.optimized} average FPS across two configurations. ${benchmarkPublication.captureCountText.charAt(0).toUpperCase()}${benchmarkPublication.captureCountText.slice(1)} raw captures are published and several variables changed.`}
-			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
 					<div className="container">

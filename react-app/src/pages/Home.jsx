@@ -12,17 +12,12 @@ function Home() {
 	return (
 		<>
 			<SEO
-				title="Softhe.io | Windows and BIOS tuning for gaming PCs"
-				description="Custom Windows builds and BIOS tuning for gaming PCs, with a documented whole-system CS2 sample, compatibility guidance, and setup support."
-				keywords="pc optimization, gaming optimization, fps boost, custom windows iso, bios optimization, esports performance, competitive gaming, windows optimization, gaming pc tuning"
-				ogTitle="Windows and BIOS tuning for gaming PCs | Softhe.io"
-				ogDescription="Custom Windows builds and BIOS tuning, with a preliminary whole-system CS2 comparison and setup support."
 				structuredData={{
 					"@context": "https://schema.org",
 					"@type": "Organization",
 					name: siteConfig.name,
 					url: siteConfig.url,
-					logo: absoluteUrl('/images/terminal-solid.svg'),
+					logo: absoluteUrl('/images/softhe-icon-v2-512.png'),
 					sameAs: [
 						siteConfig.social.twitter,
 						siteConfig.social.github,

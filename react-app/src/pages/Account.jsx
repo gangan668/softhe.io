@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import SEO from '../components/SEO';
 import { useAuth } from '../context/useAuth';
 import { notifyTicketReply, writeTicket } from '../utils/portal';
 import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
@@ -167,7 +166,7 @@ function AccountSession() {
 	};
 
 	const profile = data.profile || {}; const address = profile.billing_address || {};
-	return <div className="portal-page"><SEO title="Customer account | Softhe.io" description="Manage your Softhe.io profile, orders, support tickets, and account history." />
+	return <div className="portal-page">
 		<header className="portal-heading"><div><span className="eyebrow">Customer portal</span><h1>Hello, {profile.full_name || user.email}</h1><p>{user.email}</p></div><div className="portal-actions">{staff && <Link className="btn btn-secondary" to="/admin">Staff portal</Link>}<button className="btn btn-secondary" onClick={signOut}>Sign out</button></div></header>
 		<nav className="portal-tabs" aria-label="Account sections">{tabs.map((name) => <button key={name} className={tab === name ? 'active' : ''} onClick={() => setTab(name)}>{name}</button>)}</nav>
 		{status.loading && <div className="portal-state" role="status">Loading account…</div>}{status.error && <div className="portal-error" role="alert">{status.error}</div>}{status.message && <div className="portal-success" role="status">{status.message}</div>}

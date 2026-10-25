@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
-import SEO from '../components/SEO';
 import { trackEvent } from '../utils/analytics';
 import { getCartPricing } from '../utils/cart';
 import { createCheckoutSession } from '../utils/checkout';
@@ -66,11 +65,6 @@ function Checkout() {
 
 	return (
 		<>
-			<SEO
-				title="Checkout - Complete Your Order | Softhe.io"
-				description="Review your selected PC optimization products and continue to payment."
-				keywords="checkout, buy pc optimization, secure payment, bundle discount"
-			/>
 			<div className="checkout-page">
 				<section className="page-header">
 					<div className="container">

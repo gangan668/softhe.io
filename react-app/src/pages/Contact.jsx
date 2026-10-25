@@ -1,6 +1,5 @@
 import { useState } from "react";
 import useRateLimit from "../hooks/useRateLimit";
-import SEO from '../components/SEO';
 import { siteConfig } from '../config/site';
 import { trackFormSubmission } from '../utils/analytics';
 import { submitContactForm } from '../utils/contact';
@@ -170,13 +169,6 @@ function Contact() {
 
 	return (
 		<>
-			<SEO
-				title="Contact Softhe.io | Product and setup support"
-				description="Contact Softhe.io for PC optimization support. Get help with custom Windows ISOs, BIOS tuning, compatibility questions, and setup guidance."
-				keywords="contact pc optimization, gaming support, technical support, pc optimization help, custom windows support, bios tuning support, gaming pc help"
-				ogTitle="Contact Softhe.io"
-				ogDescription="Need help choosing or setting up a PC optimization product? Email and Discord support are available."
-			/>
 			<div className="contact-page">
 				<section className="page-header">
 					<div className="container">

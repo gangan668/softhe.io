@@ -1,5 +1,4 @@
-import SEO from '../components/SEO';
-import { absoluteUrl, siteConfig } from '../config/site';
+import { siteConfig } from '../config/site';
 import './Legal.css';
 
 function PrivacyPolicy() {
@@ -7,11 +6,6 @@ function PrivacyPolicy() {
 	const { supportEmail } = siteConfig;
 	return (
 		<>
-			<SEO
-				title="Privacy Policy | Softhe.io"
-				description="Privacy information for Softhe.io, including contact forms, analytics consent, Stripe Checkout, and data handling."
-				canonicalUrl={absoluteUrl('/privacy-policy')}
-			/>
 			<div className="legal-page">
 				<section className="page-header">
 					<div className="container">
