@@ -25,9 +25,12 @@ export default function AuthPage({ mode }) {
 	const captchaRef = useRef(null);
 	const [form, setForm] = useState({ email: '', password: '', fullName: '' });
 	const [captchaToken, setCaptchaToken] = useState('');
+	const [captchaError, setCaptchaError] = useState('');
 	const [status, setStatus] = useState({ loading: false, error: location.state?.authError || '', message: '' });
 	if (user && mode !== 'forgot') return <Navigate to="/account" replace />;
 	const update = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+	const failCaptcha = (message) => { setCaptchaToken(''); setCaptchaError(message); };
+	const resetCaptcha = () => { setCaptchaToken(''); setCaptchaError(''); captchaRef.current?.reset(); };
 
 	const submit = async (event) => {
 		event.preventDefault();
@@ -43,7 +46,7 @@ export default function AuthPage({ mode }) {
 		else if (mode === 'resend') result = await supabase.auth.resend({ type: 'signup', email: form.email, options: { emailRedirectTo: absoluteUrl('/login'), ...captchaOptions } });
 		else result = await supabase.auth.signInWithPassword({ email: form.email, password: form.password, options: captchaOptions });
 		} catch { result = { error: { message: 'Authentication request failed. Please try again.' } }; }
-		if (captchaEnabled) { captchaRef.current?.reset(); setCaptchaToken(''); }
+		if (captchaEnabled) resetCaptcha();
 		if (result.error && mode === 'login') return setStatus({ loading: false, error: getAuthErrorMessage(result.error), message: '' });
 		if (result.error) {
 			const deliveryError = getAuthDeliveryErrorMessage(result.error);
@@ -59,7 +62,18 @@ export default function AuthPage({ mode }) {
 				{mode === 'register' && <label>Full name<input name="fullName" value={form.fullName} onChange={update} autoComplete="name" required maxLength="100" /></label>}
 				<label>Email<input name="email" type="email" value={form.email} onChange={update} autoComplete="email" required /></label>
 				{!['forgot', 'resend'].includes(mode) && <label>Password<input name="password" type="password" value={form.password} onChange={update} autoComplete={mode === 'register' ? 'new-password' : 'current-password'} minLength={mode === 'register' ? 12 : 8} required />{mode === 'register' && <small>{passwordRequirements}</small>}</label>}
-				{captchaEnabled && captchaSiteKey && <div className="captcha-box"><Turnstile ref={captchaRef} siteKey={captchaSiteKey} onSuccess={setCaptchaToken} onExpire={() => setCaptchaToken('')} onError={() => setCaptchaToken('')} options={{ theme: 'dark' }} /></div>}
+				{captchaEnabled && captchaSiteKey && <div className="captcha-box"><Turnstile
+					ref={captchaRef}
+					siteKey={captchaSiteKey}
+					onSuccess={(token) => { setCaptchaToken(token); setCaptchaError(''); }}
+					onExpire={() => failCaptcha('Security verification expired. Complete the check again.')}
+					onError={() => failCaptcha('Security verification failed. Try the check again.')}
+					onTimeout={() => failCaptcha('Security verification timed out. Try the check again.')}
+					onUnsupported={() => failCaptcha('Security verification is not supported in this browser. Try an updated browser.')}
+					options={{ theme: 'dark' }}
+				/>
+				{captchaError && <div className="portal-error" role="alert">{captchaError}<button type="button" className="btn btn-secondary" onClick={resetCaptcha}>Retry security check</button></div>}
+				</div>}
 				{captchaEnabled && !captchaSiteKey && <div className="portal-error" role="alert">Security verification is not configured.</div>}
 				{status.error && <div className="portal-error" role="alert">{status.error}</div>}{status.message && <div className="portal-success" role="status">{status.message}</div>}
 				<button className="btn btn-primary" disabled={status.loading || loading || (captchaEnabled && (!captchaSiteKey || !captchaToken))}>{status.loading || loading ? 'Please wait…' : mode === 'login' ? 'Sign in' : mode === 'register' ? 'Create account' : mode === 'resend' ? 'Resend confirmation' : 'Send reset link'}</button>

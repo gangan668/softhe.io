@@ -88,6 +88,19 @@ npm run budget
 npm run e2e:all
 ```
 
+After the HTTP smoke, run `npm run smoke:browser` against the deployed origin with
+`PRODUCTION_BASE_URL`, `EXPECTED_RELEASE_SOURCE_COMMIT`, and
+`EXPECTED_RELEASE_FINGERPRINT` set for the exact candidate. This reads 20 routes at
+390px and 1440px, checks metadata before and after hydration, protects anonymous
+account/staff routes, and rejects static-404 CSP style violations, broken images,
+page exceptions, and horizontal overflow. It does not submit forms or test provider
+delivery. `EXPECTED_PUBLIC_ORIGIN` defaults to `https://softhe.io`; use the intended
+isolated canonical origin when qualifying an isolated Preview. Protected candidates
+can receive a short-lived connector share URL through `SMOKE_VERCEL_SHARE_URL` in the
+environment. Never print or save that URL in evidence. `SMOKE_BROWSER_EVIDENCE_FILE`
+optionally saves sanitized route observations. The scheduled Production Smoke
+workflow now runs this browser gate after its HTTP checks.
+
 Then verify all of the following in a deployed preview environment before moving the domain:
 
 - route-specific title, description, canonical, Open Graph image, sitemap, and a true HTTP 404 for an unknown path;
