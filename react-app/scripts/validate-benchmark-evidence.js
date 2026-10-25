@@ -57,6 +57,8 @@ export const validateBenchmarkEvidence = (manifest) => {
 		errors.push('captureDate must be a valid YYYY-MM-DD date');
 	}
 
+	if (!validMetric(manifest.captureSeconds)) errors.push('captureSeconds must be a positive number');
+
 	for (const field of ['hardware', 'bios', 'drivers', 'operatingSystem', 'gameVersion', 'graphicsSettings', 'scenario', 'warmupProcedure']) {
 		if (!meaningful(manifest[field])) errors.push(`${field} is required and cannot be a placeholder`);
 	}

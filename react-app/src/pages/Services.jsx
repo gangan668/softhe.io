@@ -33,19 +33,12 @@ function Services() {
 				ogDescription="Compare custom Windows builds, BIOS tuning, prices, and support for gaming PCs."
 			/>
 			<div className="services-page">
-				<section className="page-header">
-					<div className="container">
-						<h1>PC optimization services</h1>
-						<p>Compare Windows builds and BIOS tuning by scope, hardware fit, and price.</p>
-					</div>
-				</section>
-
 				<section className="services-detailed">
 					<div className="container">
 						<div className="services-intro">
 							<div>
-								<span className="section-kicker">Services</span>
-								<h2>Choose the work your PC needs.</h2>
+								<span className="section-kicker">PC optimization services</span>
+								<h1>Choose the work your PC needs.</h1>
 							</div>
 							<p>
 								Each service lists its use case, included work, and price. Check compatibility

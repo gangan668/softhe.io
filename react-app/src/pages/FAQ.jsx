@@ -164,7 +164,7 @@ function FAQ() {
 								<strong>CS2 average FPS:</strong> {benchmarkResults.averageFps.stock} to {benchmarkResults.averageFps.optimized} in the two-run medians
 							</li>
 							<li>
-								<strong>CS2 1% low:</strong> {benchmarkResults.onePercentLowFps.stock} to {benchmarkResults.onePercentLowFps.optimized} FPS in the two-run medians
+								<strong>CS2 P1 FPS:</strong> {benchmarkResults.onePercentLowFps.stock} to {benchmarkResults.onePercentLowFps.optimized} FPS in the two-run medians
 							</li>
 							<li>
 								<strong>Idle processes:</strong> 111 to 31 in the Task Manager sample

@@ -27,7 +27,7 @@ describe('Store', () => {
 	it('ignores a malformed product fragment without crashing', () => {
 		window.history.replaceState({}, '', '/store#%');
 		renderStore();
-		expect(screen.getByRole('heading', { name: 'Store' })).toBeInTheDocument();
+		expect(screen.getByRole('heading', { level: 1, name: /choose windows, bios tuning, or both/i })).toBeInTheDocument();
 	});
 
 	it('renders product cards and recommendation helper', () => {

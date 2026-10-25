@@ -1,5 +1,4 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
-import { benchmarkPublication } from '../data/benchmarkPublication';
 import { benchmarkResults } from '../data/benchmark';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -185,19 +184,12 @@ function Store() {
 						</div>
 					</div>
 				)}
-				<section className="page-header">
-					<div className="container">
-						<h1>Store</h1>
-						<p>Compare each product by price, included work, and hardware fit.{!commerceEnabled && ' Online ordering is currently unavailable.'}</p>
-					</div>
-				</section>
-
 				<section className="store">
 					<div className="container">
 						<div className="store-intro">
 							<div>
-								<span className="section-kicker">Products</span>
-								<h2>Choose Windows, BIOS tuning, or both.</h2>
+								<span className="section-kicker">Store</span>
+								<h1>Choose Windows, BIOS tuning, or both.</h1>
 								<p>
 									Choose a Windows build for operating-system changes or BIOS tuning for firmware
 								and memory settings. {commerceEnabled ? 'The server checks the order before Stripe opens.' : 'Online ordering is currently unavailable.'}
@@ -225,7 +217,7 @@ function Store() {
 								<h3>See the limits of the preliminary CS2 comparison.</h3>
 								<p>
 									One PC measured {benchmarkResults.averageFps.stock} and {benchmarkResults.averageFps.optimized} average FPS across two configurations. Windows edition,
-									memory settings, and GPU driver changed. {benchmarkPublication.status} <BenchmarkEvidenceLink />
+									memory settings, and GPU driver changed. <BenchmarkEvidenceLink />
 								</p>
 							</div>
 							<Link to="/performance" className="proof-link">

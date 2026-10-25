@@ -2,12 +2,8 @@
 	padding-top: 70px;
 }
 
-.store-page > .page-header {
-	padding-top: 60px;
-}
-
 .store {
-	padding: 24px 0 86px;
+	padding: 56px 0 86px;
 }
 
 .store-intro {
@@ -18,7 +14,7 @@
 	margin-bottom: 2rem;
 }
 
-.store-intro h2 {
+.store-intro h1 {
 	font-size: clamp(2rem, 4vw, 3.4rem);
 	line-height: 1.04;
 	margin-bottom: 0.9rem;
@@ -168,12 +164,16 @@
 	align-items: stretch;
 }
 
+/* Cards share row tracks through subgrid so descriptions, "Best for" boxes,
+   feature lists, and actions line up across a row. */
 .product-card {
 	overflow: hidden;
 	transition: var(--transition);
 	position: relative;
-	display: flex;
-	flex-direction: column;
+	display: grid;
+	grid-row: span 6;
+	grid-template-rows: subgrid;
+	row-gap: 0;
 }
 
 .product-card:hover {
@@ -201,7 +201,9 @@
 		rgba(255, 255, 255, 0.02);
 	display: flex;
 	align-items: center;
-	justify-content: center;
+	/* Left-aligned so the right-hand badge never covers the icon on narrow cards. */
+	justify-content: flex-start;
+	padding: 0 1.25rem;
 	font-size: 2.35rem;
 	color: var(--primary-color);
 	border-bottom: 1px solid var(--border-color);
@@ -209,9 +211,10 @@
 
 .product-info {
 	padding: 1.25rem;
-	display: flex;
-	flex: 1;
-	flex-direction: column;
+	display: grid;
+	grid-row: span 5;
+	grid-template-rows: subgrid;
+	row-gap: 0;
 }
 
 .product-heading {

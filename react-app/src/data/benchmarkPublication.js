@@ -5,5 +5,4 @@ export const benchmarkPublication = {
 	published: true,
 	archiveUrl: rawEvidenceArchive.url,
 	archiveSha256: rawEvidenceArchive.sha256,
-	status: 'Four raw CapFrameX captures are published.',
 };
