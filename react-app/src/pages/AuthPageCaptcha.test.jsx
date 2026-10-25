@@ -4,9 +4,9 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 const fixture = vi.hoisted(() => ({ state: {}, reset: vi.fn() }));
 vi.mock('../context/useAuth', () => ({ useAuth: () => fixture.state }));
-vi.mock('@marsidev/react-turnstile', () => ({ Turnstile: forwardRef(function Widget({ onSuccess, onExpire, onError }, ref) {
+vi.mock('@marsidev/react-turnstile', () => ({ Turnstile: forwardRef(function Widget({ onSuccess, onExpire, onError, onTimeout, onUnsupported }, ref) {
 	useImperativeHandle(ref, () => ({ reset: fixture.reset }));
-	return <><button type="button" onClick={() => onSuccess('fixture-captcha')}>Solve security check</button><button type="button" onClick={onExpire}>Expire security check</button><button type="button" onClick={onError}>Fail security check</button></>;
+	return <><button type="button" onClick={() => onSuccess('fixture-captcha')}>Solve security check</button><button type="button" onClick={onExpire}>Expire security check</button><button type="button" onClick={onError}>Fail security check</button><button type="button" onClick={onTimeout}>Time out security check</button><button type="button" onClick={onUnsupported}>Unsupported security check</button></>;
 }) }));
 async function mount(siteKey = 'fixture-site-key') {
 	vi.resetModules(); vi.stubEnv('VITE_CAPTCHA_ENABLED', 'true'); vi.stubEnv('VITE_TURNSTILE_SITE_KEY', siteKey);
@@ -16,6 +16,25 @@ async function mount(siteKey = 'fixture-site-key') {
 	fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'customer@example.test' } }); fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'StrongPassword123!' } });
 }
 afterEach(() => { cleanup(); vi.unstubAllEnvs(); fixture.reset.mockClear(); });
+it.each([
+	['Fail security check', 'Security verification failed. Try the check again.'],
+	['Expire security check', 'Security verification expired. Complete the check again.'],
+	['Time out security check', 'Security verification timed out. Try the check again.'],
+	['Unsupported security check', 'Security verification is not supported in this browser. Try an updated browser.'],
+])('explains %s and permits a fresh verification without sending credentials', async (action, message) => {
+	await mount();
+	fireEvent.click(screen.getByRole('button', { name: 'Solve security check' }));
+	fireEvent.click(screen.getByRole('button', { name: action }));
+	expect(screen.getByRole('alert')).toHaveTextContent(message);
+	expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
+	fireEvent.click(screen.getByRole('button', { name: 'Retry security check' }));
+	expect(fixture.reset).toHaveBeenCalledOnce();
+	expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+	expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
+	expect(fixture.state.supabase.auth.signInWithPassword).not.toHaveBeenCalled();
+	fireEvent.click(screen.getByRole('button', { name: 'Solve security check' }));
+	expect(screen.getByRole('button', { name: 'Sign in' })).toBeEnabled();
+});
 it('requires configured security verification and does not send provider requests without it', async () => {
 	await mount(''); expect(screen.getByRole('alert')).toHaveTextContent('Security verification is not configured.'); expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled(); fireEvent.submit(screen.getByLabelText('Email').closest('form')); expect(fixture.state.supabase.auth.signInWithPassword).not.toHaveBeenCalled();
 });

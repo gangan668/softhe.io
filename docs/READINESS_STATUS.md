@@ -1,5 +1,31 @@
 # Production readiness status
 
+## Audit follow-up checkpoint (2026-10-25)
+
+The current main source is `7ca108b5ce2a4abde28907cab912a9d520357ba8`. Vercel staged Production
+deployment `dpl_FBrzme7GnyDjLmpKByrcv6cMcPzn` reports this exact source and fingerprint
+`softhe-7ca108b-stage1`, with HTTP 200 ready and all seven checks true. An authenticated
+browser pass verified correct initial and hydrated metadata, private-route indexing,
+anonymous route protection, layout, and static-404 CSP behavior across 40 checks at
+390px and 1440px. Public `softhe.io` and `www.softhe.io` still point to
+`dpl_GqvggywWh9SNs1a9hjqYZDCU9weM`, which reports `77aead6`. They were not promoted.
+
+Local follow-up work repairs the dependency audit, adds a deployed-browser smoke gate,
+and gives CAPTCHA failure, expiry, timeout, and unsupported-browser states a visible
+retry path. These local changes are not part of the staged `7ca108b` deployment.
+Recovered historical provider evidence is documented in
+[`HISTORICAL_PROVIDER_EVIDENCE.md`](audits/2026-10-25/HISTORICAL_PROVIDER_EVIDENCE.md).
+The four technical evidence entries now retain their original verification dates and
+explicit historical scope. Legal and accounting sign-offs remain pending. The launch
+candidate record is still historical and has not been rebound to this work.
+
+Production Auth still reports the previously accepted leaked-password protection
+warning. This is covered by the scoped September 1 risk acceptance, not a new waived
+gate. The isolated project's advisor requests report hibernation, and a bounded
+read-only SQL check timed out. Current isolated Auth state and real CAPTCHA/login,
+confirmation, recovery, and MFA success are therefore unverified. No provider
+settings, account credentials, production routing, or commerce flags were changed.
+
 ## Security remediation checkpoint (2026-10-16)
 
 The source audit and follow-up changes are documented in [the remediation report](audits/2026-10-16/REMEDIATION.md). Both hosted databases have the compatible column restrictions and additive service ticket functions, verified with rolled-back synthetic tests. Final browser-write revocation must follow confirmation of the deployed service-mediated API. The public domain still served `77aead6` at this checkpoint and passed strict smoke after the compatible database changes. Source push, API deployment, final database enforcement, and commercial evidence qualification remain separate steps.

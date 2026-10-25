@@ -32,3 +32,16 @@ jobs:
           REQUIRE_SERVERLESS_API: ${{ vars.REQUIRE_SERVERLESS_API || 'false' }}
           EXPECTED_RELEASE_SOURCE_COMMIT: ${{ vars.EXPECTED_RELEASE_SOURCE_COMMIT }}
           EXPECTED_RELEASE_FINGERPRINT: ${{ vars.EXPECTED_RELEASE_FINGERPRINT }}
+
+      - name: Install browser smoke dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Check hydrated production metadata and rendering
+        run: npm run smoke:browser
+        env:
+          PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL || 'https://softhe.io' }}
+          EXPECTED_PUBLIC_ORIGIN: https://softhe.io
+          EXPECTED_RELEASE_SOURCE_COMMIT: ${{ vars.EXPECTED_RELEASE_SOURCE_COMMIT }}
+          EXPECTED_RELEASE_FINGERPRINT: ${{ vars.EXPECTED_RELEASE_FINGERPRINT }}

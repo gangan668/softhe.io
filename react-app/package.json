@@ -22,6 +22,7 @@
 		"benchmark:verify": "node scripts/validate-benchmark-evidence.js",
 		"evidence:verify": "node scripts/validate-launch-evidence.js",
 		"smoke:production": "node scripts/production-smoke.js",
+		"smoke:browser": "node scripts/production-browser-smoke.js",
 		"budget": "node scripts/check-performance-budget.js",
 		"test:coverage:inventory": "vitest --run --coverage --config vite.inventory.config.js"
 	},
@@ -41,14 +42,14 @@
 		"@testing-library/react": "^16.1.0",
 		"@testing-library/user-event": "^14.5.2",
 		"@vitejs/plugin-react": "^5.0.4",
-		"@vitest/coverage-v8": "4.1.11",
-		"@vitest/ui": "4.1.11",
+		"@vitest/coverage-v8": "4.1.12",
+		"@vitest/ui": "4.1.12",
 		"eslint": "10.8.0",
 		"eslint-plugin-react-hooks": "7.1.1",
 		"eslint-plugin-react-refresh": "0.5.3",
 		"globals": "^16.4.0",
 		"jsdom": "^25.0.1",
-		"vite": "^7.1.7",
-		"vitest": "4.1.11"
+		"vite": "7.3.7",
+		"vitest": "4.1.12"
 	}
 }
