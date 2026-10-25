@@ -46,8 +46,9 @@
 	margin: 0.75rem 0;
 }
 
-.legal-card a,
-.not-found-card a {
+/* Buttons keep their own colours; this would otherwise paint teal text on .btn-primary. */
+.legal-card a:not(.btn),
+.not-found-card a:not(.btn) {
 	color: var(--primary-color);
 	font-weight: 800;
 	text-decoration: none;

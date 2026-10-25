@@ -21,7 +21,7 @@
 	--accent-color: var(--primary-color);
 	--text-primary: #f7fbff;
 	--text-secondary: #a9b7c6;
-	--text-muted: #687786;
+	--text-muted: #8696a6; /* At least 4.9:1 on every card surface (WCAG AA). */
 	--border-color: rgba(174, 197, 218, 0.16);
 	--success-color: #35d28f;
 	--error-color: #ff5c75;
