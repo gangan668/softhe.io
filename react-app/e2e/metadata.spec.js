@@ -11,6 +11,11 @@ test('direct hydrated routes keep canonical and indexing policy', async ({ page 
 		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://softhe.io${actualPath}`);
 		await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', privateRoutes.includes(route) ? 'noindex, nofollow' : 'index, follow');
 		await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', `https://softhe.io${actualPath}`);
+		// Social platforms do not render SVG previews, so hydrated pages must keep the raster card.
+		if (publicRoutes.includes(route)) {
+			await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://softhe.io/images/social-share.png');
+			await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://softhe.io/images/social-share.png');
+		}
 	}
 });
 

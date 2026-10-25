@@ -17,7 +17,6 @@ function Home() {
 				keywords="pc optimization, gaming optimization, fps boost, custom windows iso, bios optimization, esports performance, competitive gaming, windows optimization, gaming pc tuning"
 				ogTitle="Windows and BIOS tuning for gaming PCs | Softhe.io"
 				ogDescription="Custom Windows builds and BIOS tuning, with a preliminary whole-system CS2 comparison and setup support."
-				ogImage={absoluteUrl('/images/cs2-optimized-capframex.svg')}
 				structuredData={{
 					"@context": "https://schema.org",
 					"@type": "Organization",
