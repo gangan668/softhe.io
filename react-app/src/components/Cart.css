@@ -83,7 +83,7 @@
 
 .cart-close-btn,
 .quantity-btn {
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--surface-tint-strong);
 	border: 1px solid var(--border-color);
 	color: var(--text-secondary);
 	border-radius: 8px;
@@ -102,9 +102,9 @@
 
 .cart-close-btn:hover,
 .quantity-btn:hover {
-	border-color: rgba(66, 232, 196, 0.38);
+	border-color: var(--accent-line-strong);
 	color: var(--primary-color);
-	background: rgba(66, 232, 196, 0.08);
+	background: var(--accent-wash);
 }
 
 .cart-content {
@@ -151,7 +151,7 @@
 	grid-template-columns: auto 1fr auto;
 	gap: 0.9rem;
 	padding: 1rem;
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: var(--surface-card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-md);
 	transition: var(--transition);
@@ -167,8 +167,8 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: rgba(66, 232, 196, 0.08);
-	border: 1px solid rgba(66, 232, 196, 0.2);
+	background: var(--accent-wash);
+	border: 1px solid var(--accent-line);
 	border-radius: 10px;
 	font-size: 1.15rem;
 }
@@ -249,7 +249,7 @@
 	align-items: center;
 	gap: 0.5rem;
 	padding: 0.75rem;
-	background: rgba(66, 232, 196, 0.08);
+	background: var(--accent-wash);
 	border: 1px dashed rgba(66, 232, 196, 0.42);
 	border-radius: 8px;
 	margin-bottom: 0.9rem;

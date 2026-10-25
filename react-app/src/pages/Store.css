@@ -39,7 +39,7 @@
 .product-finder,
 .product-card {
 	scroll-margin-top: 6rem;
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: var(--surface-card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
@@ -104,7 +104,7 @@
 	padding: 0.7rem 0.85rem;
 	border: 1px solid var(--border-color);
 	border-radius: 8px;
-	background: rgba(255, 255, 255, 0.035);
+	background: var(--surface-tint);
 	color: var(--text-secondary);
 	font: inherit;
 	font-size: 0.9rem;
@@ -116,8 +116,8 @@
 .finder-controls button:hover,
 .finder-controls button.active {
 	color: var(--primary-color);
-	border-color: rgba(66, 232, 196, 0.38);
-	background: rgba(66, 232, 196, 0.08);
+	border-color: var(--accent-line-strong);
+	background: var(--accent-wash);
 }
 
 .finder-result {
@@ -178,7 +178,7 @@
 
 .product-card:hover {
 	transform: translateY(-4px);
-	border-color: rgba(66, 232, 196, 0.38);
+	border-color: var(--accent-line-strong);
 }
 
 .product-badge {
@@ -186,7 +186,7 @@
 	top: 1rem;
 	right: 1rem;
 	background: var(--gradient);
-	color: #03100d;
+	color: var(--text-on-accent);
 	padding: 5px 12px;
 	border-radius: 999px;
 	font-size: 0.78rem;
@@ -197,7 +197,7 @@
 .product-image {
 	height: 96px;
 	background:
-		linear-gradient(135deg, rgba(66, 232, 196, 0.12), rgba(114, 167, 255, 0.08)),
+		linear-gradient(135deg, var(--accent-tint-strong), rgba(114, 167, 255, 0.08)),
 		rgba(255, 255, 255, 0.02);
 	display: flex;
 	align-items: center;
@@ -252,7 +252,7 @@
 }
 
 .best-for {
-	border: 1px solid rgba(66, 232, 196, 0.2);
+	border: 1px solid var(--accent-line);
 	background: rgba(66, 232, 196, 0.06);
 	border-radius: var(--radius-md);
 	padding: 0.85rem;
@@ -359,8 +359,8 @@
 	justify-content: center;
 	border-radius: 8px;
 	color: var(--primary-color);
-	background: rgba(66, 232, 196, 0.1);
-	border: 1px solid rgba(66, 232, 196, 0.2);
+	background: var(--accent-tint);
+	border: 1px solid var(--accent-line);
 }
 
 .assurance-item strong {
@@ -466,7 +466,7 @@
 
 .checkout-result-error {
 	background: rgba(255, 91, 91, 0.13);
-	color: #ffaaaa;
+	color: var(--text-error);
 }
 
 @media (max-width: 600px) {

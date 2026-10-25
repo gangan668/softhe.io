@@ -25,6 +25,28 @@
 	--border-color: rgba(174, 197, 218, 0.16);
 	--success-color: #35d28f;
 	--error-color: #ff5c75;
+	--warning-color: #f5b942;
+	/* Text on tinted status panels, lighter than the status colour itself for legibility. */
+	--text-error: #ff9cab;
+	--text-success: #78e8b4;
+	--text-on-accent: #03100d;
+	/* Teal text for navigation and account controls; softer than --primary-color on dark glass. */
+	--text-accent: #80e9e2;
+	--text-accent-hover: #8af3e5;
+	/* The "before" benchmark figure: readable but deliberately quieter than the result. */
+	--text-figure-muted: #aeb8c6;
+	/* Card surfaces and white washes layered on them. */
+	--surface-card: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	--surface-inset: #0b1718;
+	--surface-tint-subtle: rgba(255, 255, 255, 0.025);
+	--surface-tint: rgba(255, 255, 255, 0.035);
+	--surface-tint-strong: rgba(255, 255, 255, 0.04);
+	/* Primary-colour washes for hovered/selected fills, icon tiles, and their borders. */
+	--accent-wash: rgba(66, 232, 196, 0.08);
+	--accent-tint: rgba(66, 232, 196, 0.1);
+	--accent-tint-strong: rgba(66, 232, 196, 0.12);
+	--accent-line: rgba(66, 232, 196, 0.2);
+	--accent-line-strong: rgba(66, 232, 196, 0.38);
 	--gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--brand-cyan) 48%, var(--brand-blue) 100%);
 	--gradient-warm: linear-gradient(135deg, #ffb020 0%, #ff6b6b 100%);
 	--shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
@@ -39,13 +61,17 @@
 	--radius-md: 10px;
 	--radius-sm: 8px;
 	--glow-primary: 0 0 0 1px rgba(82, 218, 222, 0.22), 0 16px 36px rgba(66, 196, 216, 0.16);
+	/* Chart series: darker steps of the brand amber and teal, inside the dark-mode lightness band
+	   (OKLCH L 0.48-0.67) and validated for CVD separation and 3:1 contrast on --surface-color. */
+	--chart-stock: #c48225;
+	--chart-optimized: #1daa8d;
 }
 
 
 body {
 	font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	background:
-		radial-gradient(circle at 15% 0%, rgba(66, 232, 196, 0.12), transparent 32rem),
+		radial-gradient(circle at 15% 0%, var(--accent-tint-strong), transparent 32rem),
 		radial-gradient(circle at 85% 12%, rgba(114, 167, 255, 0.12), transparent 28rem),
 		var(--background-color);
 	color: var(--text-primary);
@@ -109,7 +135,7 @@ body {
 
 .btn-primary {
 	background: var(--gradient);
-	color: #03100d;
+	color: var(--text-on-accent);
 	box-shadow: var(--glow-primary);
 }
 
@@ -119,7 +145,7 @@ body {
 }
 
 .btn-secondary {
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--surface-tint-strong);
 	color: var(--text-primary);
 	border: 1px solid var(--border-color);
 }
@@ -127,7 +153,7 @@ body {
 .btn-secondary:hover {
 	border-color: var(--primary-color);
 	color: var(--primary-color);
-	background: rgba(66, 232, 196, 0.08);
+	background: var(--accent-wash);
 }
 
 a:focus-visible,
@@ -184,7 +210,7 @@ textarea:focus-visible {
 	text-align: center;
 	background:
 		linear-gradient(180deg, rgba(17, 24, 33, 0.74), rgba(8, 10, 15, 0)),
-		radial-gradient(ellipse at center, rgba(66, 232, 196, 0.12) 0%, transparent 66%);
+		radial-gradient(ellipse at center, var(--accent-tint-strong) 0%, transparent 66%);
 }
 
 .page-header h1 {

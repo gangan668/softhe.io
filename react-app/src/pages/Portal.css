@@ -21,10 +21,10 @@
 .portal-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr); gap: 20px; margin-bottom: 20px; }
 .portal-tabs { display: flex; overflow-x: auto; gap: 6px; margin-bottom: 20px; padding-bottom: 4px; }
 .portal-tabs button { text-transform: capitalize; background: transparent; color: var(--text-secondary); border: 1px solid transparent; padding: 10px 16px; border-radius: 999px; cursor: pointer; }
-.portal-tabs button.active { color: var(--primary-color); border-color: rgba(66,232,196,.34); background: rgba(66,232,196,.08); }
+.portal-tabs button.active { color: var(--primary-color); border-color: rgba(66,232,196,.34); background: var(--accent-wash); }
 .portal-error, .portal-success, .portal-state { padding: 14px 16px; border-radius: var(--radius-sm); margin: 14px 0; }
-.portal-error { background: rgba(255,92,117,.1); border: 1px solid rgba(255,92,117,.32); color: #ff9cab; }
-.portal-success { background: rgba(53,210,143,.1); border: 1px solid rgba(53,210,143,.32); color: #78e8b4; }
+.portal-error { background: rgba(255,92,117,.1); border: 1px solid rgba(255,92,117,.32); color: var(--text-error); }
+.portal-success { background: rgba(53,210,143,.1); border: 1px solid rgba(53,210,143,.32); color: var(--text-success); }
 .portal-state { text-align: center; color: var(--text-secondary); padding: 160px 20px; }
 .metric-card { display: grid; grid-template-columns: auto 1fr; align-content: start; gap: 6px 12px; }
 .metric-card h2, .metric-card .btn { grid-column: 1 / -1; }
@@ -42,14 +42,14 @@
 .ticket-workspace { display: grid; grid-template-columns: minmax(230px, .36fr) minmax(0, 1fr); height: min(68vh, 720px); min-height: 480px; }
 .ticket-list { display: flex; flex-direction: column; gap: 8px; padding: 18px; overflow-y: auto; border-right: 1px solid var(--border-color); }
 .ticket-list button { display: grid; text-align: left; gap: 4px; background: rgba(255,255,255,.03); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; }
-.ticket-list button.active { border-color: var(--primary-color); background: rgba(66,232,196,.08); }
+.ticket-list button.active { border-color: var(--primary-color); background: var(--accent-wash); }
 .ticket-list span { color: var(--text-secondary); font-size: .82rem; }
 .conversation-panel { min-width: 0; min-height: 0; overflow: hidden; }
 .conversation { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 14px; height: 100%; padding: 22px; }
 .conversation-messages { min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 8px; overflow-wrap: anywhere; }
 .conversation form { display: grid; gap: 10px; margin-top: 10px; }
 .message { justify-self: start; max-width: 88%; padding: 12px 14px; background: rgba(255,255,255,.06); border-radius: 4px 12px 12px; }
-.message.own { justify-self: end; background: rgba(66,232,196,.12); border-radius: 12px 4px 12px 12px; }
+.message.own { justify-self: end; background: var(--accent-tint-strong); border-radius: 12px 4px 12px 12px; }
 .message small { color: var(--text-secondary); }
 .message p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .ticket-empty { margin: auto; padding: 24px; text-align: center; }

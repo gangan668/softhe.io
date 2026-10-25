@@ -1,12 +1,12 @@
-/* Uses the site tokens from App.css; the fallbacks match them in case the crash happens before App.css applies. */
+/* Uses the site tokens from App.css, which ships in the same entry stylesheet. */
 .error-boundary {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background:
-    radial-gradient(circle at 50% 0%, rgba(66, 232, 196, 0.1), transparent 32rem),
-    var(--background-color, #080a0f);
+    radial-gradient(circle at 50% 0%, var(--accent-tint), transparent 32rem),
+    var(--background-color);
   padding: 20px;
 }
 
@@ -14,16 +14,16 @@
   max-width: 600px;
   width: 100%;
   text-align: center;
-  background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
-  border: 1px solid var(--border-color, rgba(174, 197, 218, 0.16));
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 48px 32px;
-  box-shadow: var(--shadow, 0 20px 60px rgba(0, 0, 0, 0.35));
+  box-shadow: var(--shadow);
 }
 
 .error-icon {
   font-size: 64px;
-  color: var(--secondary-color, #ffb020);
+  color: var(--secondary-color);
   margin-bottom: 24px;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -42,9 +42,9 @@
 .error-title {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-primary, #f7fbff);
+  color: var(--text-primary);
   margin-bottom: 16px;
-  background: var(--gradient, linear-gradient(135deg, #42e8c4 0%, #4fd8e8 48%, #72a7ff 100%));
+  background: var(--gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -52,7 +52,7 @@
 
 .error-message {
   font-size: 1.1rem;
-  color: var(--text-secondary, #a9b7c6);
+  color: var(--text-secondary);
   margin-bottom: 32px;
   line-height: 1.6;
 }
@@ -81,8 +81,8 @@
 }
 
 .error-actions .btn-primary {
-  background: var(--gradient, linear-gradient(135deg, #42e8c4 0%, #4fd8e8 48%, #72a7ff 100%));
-  color: #03100d;
+  background: var(--gradient);
+  color: var(--text-on-accent);
 }
 
 .error-actions .btn-primary:hover {
@@ -91,15 +91,15 @@
 }
 
 .error-actions .btn-secondary {
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #f7fbff);
-  border-color: var(--border-color, rgba(174, 197, 218, 0.16));
+  background: var(--surface-tint-strong);
+  color: var(--text-primary);
+  border-color: var(--border-color);
 }
 
 .error-actions .btn-secondary:hover {
-  border-color: var(--primary-color, #42e8c4);
-  color: var(--primary-color, #42e8c4);
-  background: rgba(66, 232, 196, 0.08);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  background: var(--accent-wash);
   transform: translateY(-2px);
 }
 
@@ -107,7 +107,7 @@
   margin-top: 32px;
   text-align: left;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid var(--border-color, rgba(174, 197, 218, 0.16));
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 16px;
 }
@@ -115,13 +115,13 @@
 .error-details summary {
   cursor: pointer;
   font-weight: 600;
-  color: var(--text-primary, #f7fbff);
+  color: var(--text-primary);
   margin-bottom: 12px;
   user-select: none;
 }
 
 .error-details summary:hover {
-  color: var(--primary-color, #42e8c4);
+  color: var(--primary-color);
 }
 
 .error-stack {
@@ -129,7 +129,7 @@
 }
 
 .error-stack h3 {
-  color: var(--text-primary, #f7fbff);
+  color: var(--text-primary);
   font-size: 0.9rem;
   margin-top: 16px;
   margin-bottom: 8px;
@@ -137,7 +137,7 @@
 
 .error-stack pre {
   background: rgba(0, 0, 0, 0.5);
-  color: var(--error-color, #ff5c75);
+  color: var(--error-color);
   padding: 12px;
   border-radius: 4px;
   overflow-x: auto;
@@ -150,11 +150,11 @@
 .error-support {
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid var(--border-color, rgba(174, 197, 218, 0.16));
+  border-top: 1px solid var(--border-color);
 }
 
 .error-support p {
-  color: var(--text-secondary, #a9b7c6);
+  color: var(--text-secondary);
   margin-bottom: 12px;
   font-size: 0.95rem;
 }
@@ -163,14 +163,14 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--primary-color, #42e8c4);
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 600;
   transition: all 0.22s ease;
 }
 
 .support-link:hover {
-  color: var(--brand-blue, #72a7ff);
+  color: var(--brand-blue);
   transform: translateX(4px);
 }
 

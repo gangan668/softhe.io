@@ -64,7 +64,7 @@
 .social-links a {
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-tint-strong);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   display: flex;
@@ -76,7 +76,7 @@
 }
 
 .social-links a:hover {
-  background: rgba(66, 232, 196, 0.1);
+  background: var(--accent-tint);
   border-color: rgba(66, 232, 196, 0.42);
   color: var(--primary-color);
 }

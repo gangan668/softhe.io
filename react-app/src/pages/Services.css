@@ -30,7 +30,7 @@
 
 .service-card,
 .services-cta {
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: var(--surface-card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
@@ -49,7 +49,7 @@
 
 .service-card:hover {
 	transform: translateY(-4px);
-	border-color: rgba(66, 232, 196, 0.38);
+	border-color: var(--accent-line-strong);
 }
 
 .service-badge {
@@ -60,7 +60,7 @@
 	padding: 5px 12px;
 	border-radius: 999px;
 	background: var(--gradient);
-	color: #03100d;
+	color: var(--text-on-accent);
 	font-size: 0.78rem;
 	font-weight: 800;
 }
@@ -72,7 +72,7 @@
 	/* Left-aligned so the right-hand badge never covers the icon on narrow cards. */
 	justify-content: flex-start;
 	padding: 0 1.25rem;
-	background: linear-gradient(135deg, rgba(66, 232, 196, 0.12), rgba(114, 167, 255, 0.08)), rgba(255, 255, 255, 0.02);
+	background: linear-gradient(135deg, var(--accent-tint-strong), rgba(114, 167, 255, 0.08)), rgba(255, 255, 255, 0.02);
 	border-bottom: 1px solid var(--border-color);
 	font-size: 2.6rem;
 	color: var(--primary-color);
@@ -114,7 +114,7 @@
 }
 
 .service-fit {
-	border: 1px solid rgba(66, 232, 196, 0.2);
+	border: 1px solid var(--accent-line);
 	background: rgba(66, 232, 196, 0.06);
 	border-radius: var(--radius-md);
 	padding: 0.85rem;
@@ -188,7 +188,7 @@
 }
 
 .process-step {
-	background: rgba(255, 255, 255, 0.035);
+	background: var(--surface-tint);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	padding: 1.25rem;
@@ -198,7 +198,7 @@
 .step-number {
 	width: 42px;
 	height: 42px;
-	background: rgba(66, 232, 196, 0.1);
+	background: var(--accent-tint);
 	border: 1px solid rgba(66, 232, 196, 0.25);
 	border-radius: 10px;
 	display: flex;

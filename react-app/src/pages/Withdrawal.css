@@ -26,7 +26,7 @@
 	padding: 0.8rem;
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-sm);
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--surface-tint-strong);
 	color: var(--text-primary);
 	font: inherit;
 }
@@ -45,7 +45,7 @@
 	padding: 0.65rem 0.75rem;
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-sm);
-	background: rgba(255, 255, 255, 0.025);
+	background: var(--surface-tint-subtle);
 	cursor: pointer;
 }
 
@@ -64,7 +64,7 @@
 	padding: 0.8rem;
 	border-radius: var(--radius-sm);
 	border: 1px solid rgba(66, 232, 196, 0.34);
-	background: rgba(66, 232, 196, 0.08);
+	background: var(--accent-wash);
 }
 
 .withdrawal-status.error {
