@@ -1,5 +1,5 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
-import { benchmarkMethodology, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
+import { benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
@@ -142,7 +142,7 @@ function Home() {
 							<h2>Read the numbers and the test limits before you buy.</h2>
 							<p>
 								The sample compares two configurations of one PC. Windows edition, memory settings,
-								and GPU driver changed. The four raw captures are published on the benchmark page. The result cannot
+								and GPU driver changed. The {benchmarkPublication.captureCountText} raw captures are published on the benchmark page. The result cannot
 								show what any one product contributed.
 							</p>
 							<Link to="/performance" className="text-link">

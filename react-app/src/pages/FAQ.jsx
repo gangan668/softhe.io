@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import SEO from "../components/SEO";
 import { absoluteUrl, siteConfig } from "../config/site";
-import { benchmarkResults } from "../data/benchmark";
+import { benchmarkPublication, benchmarkResults } from "../data/benchmark";
 import { trackEvent } from "../utils/analytics";
 import "./FAQ.css";
 
@@ -174,7 +174,7 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							Windows edition, memory settings, and GPU driver changed. Four raw CapFrameX captures are published on the <Link to="/performance">benchmark page</Link>. The comparison cannot isolate the effect of one product or predict your result.
+							Windows edition, memory settings, and GPU driver changed. All {benchmarkPublication.captureCountText} raw CapFrameX captures are published on the <Link to="/performance">benchmark page</Link>. The comparison cannot isolate the effect of one product or predict your result.
 						</p>
 					</div>
 				),

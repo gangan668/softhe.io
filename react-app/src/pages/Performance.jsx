@@ -1,6 +1,6 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
 import SEO from '../components/SEO';
-import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
+import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import "./Performance.css";
 
 const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
@@ -15,7 +15,7 @@ function Performance() {
 				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
 				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
 				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription={`One PC measured ${averageFps.stock} and ${averageFps.optimized} average FPS across two configurations. Four raw captures are published and several variables changed.`}
+				ogDescription={`One PC measured ${averageFps.stock} and ${averageFps.optimized} average FPS across two configurations. ${benchmarkPublication.captureCountText.charAt(0).toUpperCase()}${benchmarkPublication.captureCountText.slice(1)} raw captures are published and several variables changed.`}
 			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
@@ -262,7 +262,7 @@ function Performance() {
 							<i className="fas fa-circle-info" aria-hidden="true"></i>
 							<p>
 								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
-								workload. The archive contains four original JSON captures, with
+								workload. The archive contains {benchmarkPublication.captureCountText} original JSON captures, with
 								median average FPS and P1 FPS from at least two repeated stock and optimized runs.{' '}
 								<BenchmarkEvidenceLink />
 							</p>
