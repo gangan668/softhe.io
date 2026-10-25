@@ -1,4 +1,6 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
+import FrameTimeChart from '../components/FrameTimeChart';
+import { framesPerRun } from '../data/benchmarkFrametimes';
 import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import "./Performance.css";
 
@@ -70,6 +72,23 @@ function Performance() {
 								<div><span>Average frame time</span><strong>{frameTimeMs.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {frameTimeMs.optimized} ms</strong><b>{formatPercentChange(frameTimeMs.change)}</b></div>
 								<div><span>Recorded sample</span><strong>{runCount} × {captureSeconds} seconds</strong><b>Median</b></div>
 							</div>
+						</div>
+					</div>
+				</section>
+
+				<section className="fps-comparison frametime-section" aria-labelledby="frametime-title">
+					<div className="container">
+						<div className="performance-section-heading">
+							<span className="section-kicker">Every recorded frame</span>
+							<h2 id="frametime-title" className="section-title">Frame-time distribution</h2>
+							<p>
+								Each line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
+								drawn from the published raw captures. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
+								Averages hide this tail, and it is where stutter shows up.
+							</p>
+						</div>
+						<div className="native-benchmark-card frametime-card">
+							<FrameTimeChart />
 						</div>
 					</div>
 				</section>

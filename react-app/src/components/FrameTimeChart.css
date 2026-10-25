@@ -1,0 +1,253 @@
+/* Series colours are --chart-* tokens (validated for CVD and contrast on the card surface);
+   every piece of text uses text tokens, never a series colour. */
+.frametime-chart {
+	margin: 0;
+}
+
+.frametime-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem 1.5rem;
+	margin: 0 0 0.75rem;
+	padding: 0;
+	list-style: none;
+	color: var(--text-primary);
+	font-size: 0.9rem;
+}
+
+.frametime-legend li {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.frametime-legend-note {
+	color: var(--text-muted);
+	font-size: 0.8rem;
+}
+
+.frametime-key {
+	display: inline-block;
+	flex-shrink: 0;
+	width: 16px;
+	height: 2px;
+	border-radius: 2px;
+}
+
+.frametime-key--stock { background: var(--chart-stock); }
+.frametime-key--optimized { background: var(--chart-optimized); }
+
+.frametime-plot {
+	position: relative;
+	width: 100%;
+	border-radius: var(--radius-sm);
+	touch-action: pan-y;
+	cursor: crosshair;
+}
+
+.frametime-plot:focus-visible {
+	outline: 2px solid rgba(66, 232, 196, 0.72);
+	outline-offset: 4px;
+}
+
+.frametime-plot svg {
+	display: block;
+	overflow: visible;
+}
+
+.frametime-grid {
+	stroke: var(--border-color);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+.frametime-tick,
+.frametime-axis-title,
+.frametime-reference-label {
+	fill: var(--text-muted);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.frametime-axis-title {
+	fill: var(--text-secondary);
+}
+
+.frametime-reference {
+	stroke: var(--text-muted);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+.frametime-line {
+	fill: none;
+	stroke-width: 2;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+
+.frametime-line--stock { stroke: var(--chart-stock); }
+.frametime-line--optimized { stroke: var(--chart-optimized); }
+
+.frametime-end-label {
+	fill: var(--text-primary);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.frametime-crosshair {
+	stroke: var(--text-secondary);
+	stroke-width: 1;
+	shape-rendering: crispEdges;
+}
+
+/* The surface-coloured ring keeps each dot legible where the two runs of a profile overlap. */
+.frametime-dot {
+	stroke: var(--surface-color);
+	stroke-width: 2;
+}
+
+.frametime-dot--stock { fill: var(--chart-stock); }
+.frametime-dot--optimized { fill: var(--chart-optimized); }
+
+.frametime-tooltip {
+	position: absolute;
+	z-index: 1;
+	display: grid;
+	gap: 0.35rem;
+	min-width: 13.5rem;
+	margin-left: 12px;
+	padding: 0.65rem 0.75rem;
+	border: 1px solid var(--border-color);
+	border-radius: var(--radius-sm);
+	background: var(--surface-raised);
+	box-shadow: var(--shadow-soft);
+	pointer-events: none;
+}
+
+.frametime-tooltip--left {
+	transform: translateX(calc(-100% - 24px));
+}
+
+/* On narrow plots a floating box would cover the curves or leave the card, so it sits below. */
+.frametime-tooltip--docked {
+	position: static;
+	min-width: 0;
+	margin: 0.5rem 0 0;
+	box-shadow: none;
+}
+
+.frametime-tooltip-title {
+	color: var(--text-secondary);
+	font-size: 0.78rem;
+	line-height: 1.35;
+}
+
+.frametime-tooltip-row {
+	display: grid;
+	grid-template-columns: 16px auto auto 1fr;
+	align-items: center;
+	gap: 0.5rem;
+	color: var(--text-secondary);
+	font-size: 0.8rem;
+	white-space: nowrap;
+}
+
+.frametime-tooltip-label::before {
+	content: "· ";
+}
+
+/* Docked rows always take two lines (value and FPS, then the profile) and the title always reserves
+   two, so the readout keeps one height whether a point is selected or not and the table never moves. */
+.frametime-tooltip--docked .frametime-tooltip-title {
+	min-height: calc(2 * 1.35em);
+}
+
+.frametime-tooltip--docked .frametime-tooltip-row {
+	grid-template-columns: 16px auto 1fr;
+	row-gap: 0.1rem;
+}
+
+.frametime-tooltip--docked .frametime-tooltip-label {
+	grid-column: 2 / -1;
+	grid-row: 2;
+}
+
+.frametime-tooltip--docked .frametime-tooltip-label::before {
+	content: none;
+}
+
+.frametime-tooltip-row strong {
+	color: var(--text-primary);
+	font-size: 0.92rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.frametime-table {
+	width: 100%;
+	margin-top: 1.25rem;
+	border-collapse: collapse;
+	font-size: 0.92rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.frametime-table caption {
+	margin-bottom: 0.5rem;
+	color: var(--text-muted);
+	font-size: 0.8rem;
+	text-align: left;
+}
+
+.frametime-table th,
+.frametime-table td {
+	padding: 0.7rem 0.75rem;
+	border-top: 1px solid var(--border-color);
+	text-align: right;
+	vertical-align: top;
+}
+
+.frametime-table thead th {
+	border-top: none;
+	color: var(--text-secondary);
+	font-size: 0.8rem;
+	font-weight: 700;
+}
+
+.frametime-table th:first-child {
+	text-align: left;
+}
+
+.frametime-table tbody th {
+	color: var(--text-primary);
+	font-weight: 600;
+}
+
+.frametime-table td {
+	color: var(--text-primary);
+}
+
+.frametime-table tbody th span,
+.frametime-table td span {
+	display: block;
+	color: var(--text-muted);
+	font-size: 0.78rem;
+	font-weight: 400;
+}
+
+@media (max-width: 520px) {
+	.frametime-table th,
+	.frametime-table td {
+		padding: 0.6rem 0.4rem;
+	}
+
+	.frametime-table {
+		font-size: 0.85rem;
+	}
+}
+
+@media (forced-colors: active) {
+	.frametime-line { stroke: CanvasText; }
+	.frametime-line--optimized { stroke: Highlight; }
+	.frametime-key--stock { background: CanvasText; }
+	.frametime-key--optimized { background: Highlight; }
+}

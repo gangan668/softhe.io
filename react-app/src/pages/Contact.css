@@ -32,7 +32,7 @@
 .contact-method,
 .security-notice,
 .contact-form-section {
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: var(--surface-card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
@@ -48,13 +48,13 @@
 
 .contact-method:hover,
 .contact-method.primary-contact {
-	border-color: rgba(66, 232, 196, 0.38);
+	border-color: var(--accent-line-strong);
 }
 
 .contact-icon {
 	width: 48px;
 	height: 48px;
-	background: rgba(66, 232, 196, 0.1);
+	background: var(--accent-tint);
 	border: 1px solid rgba(66, 232, 196, 0.24);
 	border-radius: 12px;
 	display: flex;
@@ -148,7 +148,7 @@
 .form-group textarea {
 	width: 100%;
 	padding: 12px 14px;
-	background: rgba(255, 255, 255, 0.035);
+	background: var(--surface-tint);
 	border: 1px solid var(--border-color);
 	border-radius: 8px;
 	color: var(--text-primary);
@@ -164,7 +164,7 @@
 	padding: 1.25rem;
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-md);
-	background: rgba(255, 255, 255, 0.025);
+	background: var(--surface-tint-subtle);
 	color: var(--text-secondary);
 }
 
@@ -173,7 +173,7 @@
 .form-group textarea:focus {
 	outline: none;
 	border-color: rgba(66, 232, 196, 0.55);
-	box-shadow: 0 0 0 3px rgba(66, 232, 196, 0.1);
+	box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 .form-group textarea {

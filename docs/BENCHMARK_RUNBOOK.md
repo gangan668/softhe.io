@@ -31,7 +31,16 @@ do not equal the calculated medians.
 After the command passes:
 
 1. Set the six `VITE_BENCHMARK_*` values from the verified methodology.
-2. Update site claims and charts to the calculated medians.
+2. Update site claims and charts to the calculated medians. Regenerate the frame-time curves on
+   `/performance` from the published archive:
+
+   ```powershell
+   npm run benchmark:frametimes -- <path to raw-evidence.zip>
+   ```
+
+   The script reads the captures from inside the checksum-verified archive, never from an extracted
+   copy, and rewrites `docs/benchmark-frametimes.json`. Its unit test fails until the curves come
+   from the archive named in the manifest and reproduce every run's P1 FPS.
 3. Have a named reviewer compare the page, manifest, and every raw capture.
 4. Record the immutable evidence references and review timestamp under
    `benchmark.methodology-and-raw-runs` in `launch-evidence.json`.

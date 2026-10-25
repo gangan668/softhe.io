@@ -18,7 +18,7 @@
 .overhead-showcase,
 .comparison-table,
 .method-note {
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: var(--surface-card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
@@ -94,7 +94,7 @@
 	padding: 0.38rem 0.7rem;
 	border-radius: 999px;
 	background: var(--gradient);
-	color: #03100d;
+	color: var(--text-on-accent);
 	font-size: 0.78rem;
 }
 
@@ -114,7 +114,7 @@
 	right: -12rem;
 	top: -15rem;
 	border-radius: 50%;
-	background: rgba(66, 232, 196, 0.12);
+	background: var(--accent-tint-strong);
 	filter: blur(55px);
 	pointer-events: none;
 }
@@ -134,7 +134,7 @@
 	justify-content: center;
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
-	background: rgba(255, 255, 255, 0.025);
+	background: var(--surface-tint-subtle);
 }
 
 .native-result.after {
@@ -157,7 +157,7 @@
 
 .native-result > strong {
 	margin: 0.35rem 0 0.15rem;
-	color: #aeb8c6;
+	color: var(--text-figure-muted);
 	font-size: clamp(4.6rem, 10vw, 8rem);
 	font-weight: 850;
 	letter-spacing: -0.06em;
@@ -181,7 +181,7 @@
 	padding: 1rem 0.65rem;
 	border: 1px solid rgba(66, 232, 196, 0.4);
 	border-radius: 16px;
-	background: #0b1718;
+	background: var(--surface-inset);
 	color: var(--primary-color);
 	box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35), 0 0 30px rgba(66, 232, 196, 0.09);
 }
@@ -370,7 +370,7 @@
 	padding: 1.1rem;
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-md);
-	background: rgba(255, 255, 255, 0.035);
+	background: var(--surface-tint);
 }
 
 .evolution-steps span {
@@ -521,7 +521,7 @@
 	padding: 18px;
 	border: 1px solid rgba(255, 255, 255, 0.08);
 	border-radius: 14px;
-	background: rgba(255, 255, 255, 0.025);
+	background: var(--surface-tint-subtle);
 }
 
 .methodology-grid dt {
@@ -539,7 +539,7 @@
 	text-align: left;
 	margin: 20px 0 0;
 	padding: 14px 16px;
-	border-left: 3px solid #f5b942;
+	border-left: 3px solid var(--warning-color);
 	background: rgba(245, 185, 66, 0.08);
 }
 
@@ -674,4 +674,9 @@
 	.feature-name {
 		justify-content: space-between;
 	}
+}
+
+/* Charts sit on a flat surface: the series colours are validated against it, and the glow would tint the plot. */
+.frametime-card::before {
+	content: none;
 }

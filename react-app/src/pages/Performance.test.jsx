@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import Performance from './Performance';
 
@@ -33,6 +34,41 @@ describe('Performance', () => {
 		expect(screen.getByText('After · SoftheOS + BIOS')).toBeInTheDocument();
 		expect(screen.getByText('2 × 109 seconds')).toBeInTheDocument();
 		expect(screen.getByText(/build has been revised over many releases/i)).toBeInTheDocument();
-		expect(screen.queryByRole('img')).not.toBeInTheDocument();
+		// Results are drawn from data; the legacy raster screenshots must not return.
+		expect(document.querySelector('img')).toBeNull();
+	});
+
+	it('charts frame times from the raw captures with a table twin', () => {
+		render(
+			<MemoryRouter>
+				<Performance />
+			</MemoryRouter>
+		);
+
+		expect(screen.getByRole('heading', { name: /frame-time distribution/i })).toBeInTheDocument();
+		expect(screen.getByRole('img', { name: /frame-time percentile curves/i })).toBeInTheDocument();
+		const table = screen.getByRole('table', { name: /median of each profile/i });
+		const p1Row = within(table).getByRole('row', { name: /99th percentile \(P1 FPS\)/i });
+		// The 1% point reproduces the published P1 FPS medians.
+		expect(p1Row).toHaveTextContent('225 FPS');
+		expect(p1Row).toHaveTextContent('285 FPS');
+	});
+
+	it('reads chart values from the keyboard', async () => {
+		const user = userEvent.setup();
+		render(
+			<MemoryRouter>
+				<Performance />
+			</MemoryRouter>
+		);
+
+		const plot = screen.getByRole('group', { name: /frame-time chart/i });
+		act(() => plot.focus());
+		const status = within(plot.closest('figure')).getByRole('status');
+		expect(status).toHaveTextContent('1 in 100 frames slower');
+		await user.keyboard('{End}');
+		expect(status).toHaveTextContent('1 in 1,000 frames slower');
+		await user.keyboard('{Escape}');
+		expect(status).toHaveTextContent('');
 	});
 });

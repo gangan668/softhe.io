@@ -10,7 +10,7 @@
 .faq-item,
 .no-results,
 .faq-cta {
-	background: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
+	background: var(--surface-card);
 	border: 1px solid var(--border-color);
 	border-radius: var(--radius-lg);
 	box-shadow: var(--shadow-soft);
@@ -43,11 +43,11 @@
 
 .category-btn:hover {
 	color: var(--primary-color);
-	background: rgba(255, 255, 255, 0.04);
+	background: var(--surface-tint-strong);
 }
 
 .category-btn.active {
-	background: rgba(66, 232, 196, 0.12);
+	background: var(--accent-tint-strong);
 	color: var(--primary-color);
 	border-color: rgba(66, 232, 196, 0.24);
 }
@@ -76,7 +76,7 @@
 	padding: 0.95rem 1rem 0.95rem 2.8rem;
 	border-radius: var(--radius-md);
 	border: 1px solid var(--border-color);
-	background: rgba(255, 255, 255, 0.035);
+	background: var(--surface-tint);
 	color: var(--text-primary);
 	font: inherit;
 	transition: var(--transition);
@@ -85,7 +85,7 @@
 .faq-search input:focus {
 	outline: none;
 	border-color: rgba(66, 232, 196, 0.55);
-	box-shadow: 0 0 0 3px rgba(66, 232, 196, 0.1);
+	box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
 .faq-category {
