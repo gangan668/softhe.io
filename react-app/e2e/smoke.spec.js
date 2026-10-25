@@ -204,6 +204,44 @@ test.describe('public website smoke tests', () => {
 		await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
 	});
 
+	test('closed mobile navigation links are out of the tab order', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/');
+		await page.getByRole('link', { name: 'Softhe.io home' }).focus();
+		await page.keyboard.press('Tab');
+		// The off-screen menu used to receive focus here before the account link.
+		await expect(page.locator('.nav-account-link')).toBeFocused();
+		await expect(page.locator('#primary-navigation')).toHaveCSS('visibility', 'hidden');
+	});
+
+	test('cart drawer header is not covered by the fixed navbar', async ({ page }) => {
+		await page.goto('/');
+		await page.getByRole('button', { name: /shopping cart with/i }).click();
+		const closeButton = page.getByRole('dialog', { name: /shopping cart/i }).getByRole('button', { name: 'Close cart' });
+		await expect(closeButton).toBeInViewport();
+		// The open dialog makes the navbar inert, so hit-testing passes through it even while it is
+		// painted over the drawer header. Compare the stacking order of the two fixed layers instead.
+		const layers = await page.evaluate(() => ['.cart-sidebar', '.navbar'].map((selector) => Number(getComputedStyle(document.querySelector(selector)).zIndex)));
+		expect(layers[0]).toBeGreaterThan(layers[1]);
+	});
+
+	test('not found page primary action keeps dark text on the gradient', async ({ page }) => {
+		await page.goto('/this-route-does-not-exist');
+		await expect(page.locator('.not-found-actions .btn-primary')).toHaveCSS('color', 'rgb(3, 16, 13)');
+	});
+
+	test('stacked idle overhead values name their profile on mobile', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/performance');
+		// Side-by-side column headings would sit above stacked values and mislabel them.
+		await expect(page.locator('.overhead-heading')).toBeHidden();
+		const firstMetric = page.locator('.overhead-metric').first();
+		await expect(firstMetric.locator('.overhead-profile').first()).toHaveText('Default Windows');
+		await expect(firstMetric.locator('.overhead-profile').first()).toBeVisible();
+		await expect(firstMetric.locator('.overhead-profile').last()).toHaveText('SoftheOS');
+		await expect(firstMetric.locator('.overhead-profile').last()).toBeVisible();
+	});
+
 	for (const width of [320, 390, 768, 1280, 1440]) {
 		test(`store has no horizontal overflow at ${width}px`, async ({ page }) => {
 			await page.setViewportSize({ width, height: 900 });
@@ -240,6 +278,16 @@ test.describe('cookie consent controls', () => {
 		const initialScroll = await page.evaluate(() => window.scrollY);
 		await page.mouse.wheel(0, 700);
 		await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll);
+	});
+
+	test('decline and accept are presented with equal prominence', async ({ page }) => {
+		await page.goto('/');
+		const dialog = page.getByRole('dialog', { name: /we value your privacy/i });
+		const style = (name) => dialog.getByRole('button', { name }).evaluate((button) => {
+			const computed = getComputedStyle(button);
+			return [computed.backgroundColor, computed.color, computed.borderColor, computed.fontWeight, computed.fontSize];
+		});
+		expect(await style(/decline cookies/i)).toEqual(await style(/accept cookies/i));
 	});
 
 	test('details, accept, persistence, and settings reopening work', async ({ page }) => {

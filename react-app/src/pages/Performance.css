@@ -192,7 +192,7 @@
 
 .native-gain span {
 	color: var(--text-muted);
-	font-size: 0.65rem;
+	font-size: 0.7rem;
 	text-transform: uppercase;
 }
 
@@ -290,6 +290,16 @@
 
 .overhead-metric > div:last-child strong {
 	color: var(--primary-color);
+}
+
+/* Read by assistive technology everywhere; shown only once the column headings are hidden on mobile. */
+.overhead-profile {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
 }
 
 .overhead-change {
@@ -480,9 +490,9 @@
 .benchmark-methodology {
 	margin: 72px 0 24px;
 	padding: 32px;
-	border: 1px solid rgba(124, 92, 255, 0.24);
+	border: 1px solid var(--border-color);
 	border-radius: 20px;
-	background: rgba(17, 20, 29, 0.78);
+	background: rgba(17, 24, 33, 0.78);
 }
 
 .methodology-heading {
@@ -578,12 +588,37 @@
 		transform: rotate(90deg);
 	}
 
+	/* Two side-by-side headings would sit above stacked values and pair the wrong profile with each number. */
 	.overhead-heading {
-		gap: 1rem;
+		display: none;
 	}
 
 	.overhead-metric {
 		grid-template-columns: 1fr;
+	}
+
+	.overhead-metric > div:not(.overhead-change) {
+		flex-wrap: wrap;
+		row-gap: 0.25rem;
+	}
+
+	.overhead-profile {
+		position: static;
+		order: -1;
+		flex-basis: 100%;
+		width: auto;
+		height: auto;
+		overflow: visible;
+		clip: auto;
+		color: var(--primary-color);
+		font-size: 0.72rem;
+		font-weight: 800;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.overhead-heading + .overhead-metric {
+		border-top: none;
 	}
 
 	.overhead-metric strong {

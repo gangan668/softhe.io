@@ -225,27 +225,19 @@
   font-family: inherit;
 }
 
-.cookie-actions .btn-accept {
-	background: var(--primary-color, #42e8c4);
-  color: #041015;
+/* Consent choices share one style so declining is as easy and as prominent as accepting. */
+.cookie-actions .btn-accept,
+.cookie-actions .btn-decline {
+	background: var(--brand-surface-strong, rgba(67, 220, 211, 0.14));
+	color: var(--text-primary, #f7fbff);
+	border: 1px solid var(--brand-border, rgba(82, 218, 222, 0.32));
 	min-width: 116px;
 }
 
-.cookie-actions .btn-accept:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--glow-primary, 0 16px 36px rgba(66, 232, 196, 0.18));
-}
-
-.cookie-actions .btn-decline {
-  background: rgba(255, 92, 117, 0.1);
-  color: var(--error-color, #ff5c75);
-  border: 1px solid rgba(255, 92, 117, 0.28);
-	min-width: 100px;
-}
-
+.cookie-actions .btn-accept:hover,
 .cookie-actions .btn-decline:hover {
-  background: rgba(255, 92, 117, 0.18);
-  transform: translateY(-2px);
+	border-color: var(--primary-color, #42e8c4);
+	transform: translateY(-2px);
 }
 
 .cookie-note {
@@ -254,7 +246,7 @@
   gap: 0.5rem;
   margin-top: 1rem;
   font-size: 0.8rem;
-  color: var(--text-muted, #687786);
+  color: var(--text-muted, #8696a6);
   font-style: italic;
 }
 

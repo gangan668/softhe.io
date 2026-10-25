@@ -53,7 +53,8 @@
 	-webkit-mask: url("/images/softhe-icon-v2-192.png") center / contain no-repeat;
 	mask: url("/images/softhe-icon-v2-192.png") center / contain no-repeat;
 	filter: drop-shadow(0 0 8px rgba(79, 216, 232, 0.18));
-	transition: transform var(--transition), filter var(--transition);
+	/* --transition is a full "all …" shorthand, so it cannot be reused per property here. */
+	transition: transform 0.22s ease, filter 0.22s ease;
 }
 
 .nav-logo a::after {
@@ -90,7 +91,8 @@
 	color: var(--text-secondary);
 	text-decoration: none;
 	font-weight: 500;
-	transition: var(--transition);
+	/* Not "all": the links would animate the menu's inherited visibility and refuse focus while opening. */
+	transition: color 0.22s ease, background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 	position: relative;
 	padding: 8px 12px;
 	border: 1px solid transparent;
@@ -236,7 +238,9 @@
 		min-height: calc(100dvh - 70px);
 		overflow-y: auto;
 		text-align: center;
-		transition: var(--transition);
+		/* Hidden once the slide-out finishes so off-screen links leave the tab order and accessibility tree. */
+		visibility: hidden;
+		transition: left 0.22s ease, visibility 0s linear 0.22s;
 		box-shadow: var(--shadow);
 		border-top: 1px solid var(--border-color);
 		padding: 1rem 0 1.25rem;
@@ -245,6 +249,8 @@
 
 	.nav-menu.active {
 		left: 0;
+		visibility: visible;
+		transition: left 0.22s ease;
 	}
 
 	.nav-menu li {

@@ -91,19 +91,20 @@ function Performance() {
 						</div>
 
 						<div className="overhead-showcase">
-							<div className="overhead-heading">
+							<div className="overhead-heading" aria-hidden="true">
 								<div><span>Default Windows</span><strong>Stock sample</strong></div>
 								<div><span>SoftheOS</span><strong>Optimized sample</strong></div>
 							</div>
+							{/* Each value names its profile because the column headings disappear once the metrics stack on mobile. */}
 							<div className="overhead-metric">
-								<div><span>Background processes</span><strong>{processes.stock}</strong></div>
+								<div><small className="overhead-profile">Default Windows</small><span>Background processes</span><strong>{processes.stock}</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(processes.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><strong>{processes.optimized}</strong><span>Observed in sample</span></div>
+								<div><small className="overhead-profile">SoftheOS</small><strong>{processes.optimized}</strong><span>Observed in sample</span></div>
 							</div>
 							<div className="overhead-metric">
-								<div><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
+								<div><small className="overhead-profile">Default Windows</small><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(memoryGb.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><strong>{memoryGb.optimized} GB</strong><span>Observed idle use</span></div>
+								<div><small className="overhead-profile">SoftheOS</small><strong>{memoryGb.optimized} GB</strong><span>Observed idle use</span></div>
 							</div>
 							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
 						</div>

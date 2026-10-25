@@ -255,7 +255,7 @@
 
 .result-gain span {
 	color: var(--text-muted);
-	font-size: 0.62rem;
+	font-size: 0.68rem;
 	text-transform: uppercase;
 }
 
@@ -275,7 +275,7 @@
 
 .result-details span {
 	color: var(--text-muted);
-	font-size: 0.7rem;
+	font-size: 0.75rem;
 }
 
 .result-details strong {
@@ -296,7 +296,8 @@
 .result-note {
 	margin: 0.8rem 0 0;
 	color: var(--text-muted);
-	font-size: 0.68rem;
+	/* The benchmark disclaimer must stay legible; do not shrink below the body caption size. */
+	font-size: 0.78rem;
 	line-height: 1.45;
 }
 
