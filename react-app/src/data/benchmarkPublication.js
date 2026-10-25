@@ -1,4 +1,6 @@
-import { optimized, rawEvidenceArchive, stock } from '../../../docs/benchmark-evidence.json';
+import evidence from '../../../docs/benchmark-evidence.json' with { type: 'json' };
+
+const { optimized, rawEvidenceArchive, stock } = evidence;
 
 const numberWords = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
 // The raw verifier requires one archived capture per manifest run.

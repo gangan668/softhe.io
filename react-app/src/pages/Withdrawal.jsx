@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import SEO from '../components/SEO';
-import { absoluteUrl, siteConfig } from '../config/site';
+import { siteConfig } from '../config/site';
 import { submitWithdrawal } from '../utils/withdrawal';
 import './Legal.css';
 import './Withdrawal.css';
@@ -56,11 +55,6 @@ function Withdrawal() {
 
 	return (
 		<>
-			<SEO
-				title="Withdraw from an Order | Softhe.io"
-				description="Submit and receive confirmation of a withdrawal request for an eligible Softhe.io distance contract."
-				canonicalUrl={absoluteUrl('/withdrawal')}
-			/>
 			<div className="legal-page withdrawal-page">
 				<section className="page-header">
 					<div className="container">

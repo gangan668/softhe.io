@@ -13,9 +13,37 @@ test('direct hydrated routes keep canonical and indexing policy', async ({ page 
 		await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', `https://softhe.io${actualPath}`);
 		// Social platforms do not render SVG previews, so hydrated pages must keep the raster card.
 		if (publicRoutes.includes(route)) {
-			await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://softhe.io/images/social-share.png');
-			await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://softhe.io/images/social-share.png');
+			await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://softhe.io/images/social-share.jpg');
+			await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', 'https://softhe.io/images/social-share.jpg');
 		}
+	}
+});
+
+test('static HTML and hydrated pages declare the same copy', async ({ page, request }) => {
+	// Reads the live document, or parses served HTML without running any of its scripts.
+	const head = (html) => page.evaluate((source) => {
+		const doc = source ? new DOMParser().parseFromString(source, 'text/html') : document;
+		const value = (selector) => doc.head.querySelector(selector)?.getAttribute('content') ?? null;
+		return {
+			title: doc.title,
+			description: value('meta[name="description"]'),
+			ogTitle: value('meta[property="og:title"]'),
+			ogDescription: value('meta[property="og:description"]'),
+			twitterTitle: value('meta[name="twitter:title"]'),
+			twitterDescription: value('meta[name="twitter:description"]'),
+		};
+	}, html ?? null);
+	for (const route of [...publicRoutes, ...privateRoutes]) {
+		// Crawlers and link previews read the served file without running the app. Vercel serves each
+		// route's generated index.html; vite preview would answer with its SPA fallback, so ask for the file.
+		const file = route === '/' ? '/' : `${route}/index.html`;
+		const served = await head(await (await request.get(file)).text());
+		expect(served.title, route).not.toBe('Softhe.io');
+		await page.goto(route);
+		await expect(page.locator('h1, .portal-state, .portal-error').first()).toBeVisible();
+		// Redirects (for example checkout or account) hydrate as a different route and are compared there.
+		if (new URL(page.url()).pathname !== route) continue;
+		expect(await head(), route).toEqual(served);
 	}
 });
 

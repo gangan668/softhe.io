@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import SEO from '../components/SEO';
 import { PRODUCTS } from '../data/products';
 import './Services.css';
 
@@ -25,13 +24,6 @@ const processSteps = [
 function Services() {
 	return (
 		<>
-			<SEO
-				title="PC optimization services | Softhe.io"
-				description="Compare custom Windows builds and BIOS tuning for gaming PCs. See the scope, price, compatibility guidance, and support included with each service."
-				keywords="pc optimization services, windows iso, bios tuning, gaming pc optimization, custom windows, performance tuning, gaming services, esports optimization"
-				ogTitle="PC optimization services for gaming PCs"
-				ogDescription="Compare custom Windows builds, BIOS tuning, prices, and support for gaming PCs."
-			/>
 			<div className="services-page">
 				<section className="services-detailed">
 					<div className="container">

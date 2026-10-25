@@ -139,11 +139,6 @@ function Store() {
 	return (
 		<>
 			<SEO
-				title="Windows builds and BIOS tuning | Softhe.io store"
-				description="Compare custom Windows builds and BIOS tuning for gaming PCs. Products start at €50 and include clear scope and compatibility guidance."
-				keywords="buy windows iso, custom windows, bios optimization service, gaming pc products, windows optimization, pc optimization store"
-				ogTitle="Windows builds and BIOS tuning | Softhe.io"
-				ogDescription="Compare the price, scope, and hardware fit of each Softhe.io product."
 				structuredData={{
 					"@context": "https://schema.org",
 					"@type": "ItemList",

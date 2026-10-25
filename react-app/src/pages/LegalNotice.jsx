@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
-import SEO from '../components/SEO';
-import { absoluteUrl, siteConfig } from '../config/site';
+import { siteConfig } from '../config/site';
 import './Legal.css';
 
 const {
@@ -18,7 +17,6 @@ const {
 function LegalNotice() {
 	return (
 		<>
-			<SEO title="Legal Notice | Softhe.io" description="Operator and contact information for the Softhe.io website and services." canonicalUrl={absoluteUrl('/legal-notice')} />
 			<div className="legal-page">
 				<section className="page-header"><div className="container"><h1>Legal Notice</h1><p>Operator and contact information for Softhe.io.</p></div></section>
 				<section className="legal-content"><div className="container"><div className="legal-card">

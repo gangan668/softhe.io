@@ -1,93 +1,51 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { absoluteUrl } from '../config/site';
-import { isPrivateRoute } from '../config/routePolicy';
 
-function SEO({
-	title,
-	description,
-	keywords,
-	ogTitle,
-	ogDescription,
-	ogImage,
-	canonicalUrl,
-	structuredData,
-	noIndex = false,
-	type = 'website'
-}) {
-	const location = useLocation();
-	const fullUrl = absoluteUrl(location.pathname);
-	const privateRoute = isPrivateRoute(location.pathname);
+const setMeta = (attribute, name, content) => {
+	let element = document.querySelector(`meta[${attribute}="${name}"]`);
+	if (!element) {
+		element = document.createElement('meta');
+		element.setAttribute(attribute, name);
+		document.head.appendChild(element);
+	}
+	element.setAttribute('content', content);
+};
 
+/**
+ * Page-specific head additions. Route titles, descriptions, and social copy come from
+ * config/pageMetadata via RouteMetadata; pass them here only for pages outside that table,
+ * such as the not-found page.
+ */
+function SEO({ title, description, canonicalUrl, structuredData, noIndex = false }) {
+	// RouteMetadata resets robots and canonical on every navigation, including between two paths that
+	// keep this page mounted (one unknown URL to another), so the overrides re-apply per path.
+	const { pathname } = useLocation();
 	useEffect(() => {
-		// Update document title
 		if (title) {
 			document.title = title;
+			setMeta('property', 'og:title', title);
+			setMeta('name', 'twitter:title', title);
 		}
-
-		// Update or create meta tags
-		const updateMetaTag = (name, content, property = false) => {
-			if (!content) return;
-
-			const attribute = property ? 'property' : 'name';
-			let element = document.querySelector(`meta[${attribute}="${name}"]`);
-
-			if (!element) {
-				element = document.createElement('meta');
-				element.setAttribute(attribute, name);
-				document.head.appendChild(element);
-			}
-
-			element.setAttribute('content', content);
-		};
-
-		// Standard meta tags
-		updateMetaTag('description', description);
-		updateMetaTag('keywords', keywords);
-		updateMetaTag('robots', noIndex || privateRoute ? 'noindex, nofollow' : 'index, follow');
-
-		// Open Graph tags
-		updateMetaTag('og:title', ogTitle || title, true);
-		updateMetaTag('og:description', ogDescription || description, true);
-		updateMetaTag('og:type', type, true);
-		updateMetaTag('og:url', fullUrl, true);
-		updateMetaTag('og:image', ogImage || absoluteUrl('/images/social-share.png'), true);
-
-		// Twitter Card tags
-		updateMetaTag('twitter:card', 'summary_large_image');
-		updateMetaTag('twitter:title', ogTitle || title);
-		updateMetaTag('twitter:description', ogDescription || description);
-		updateMetaTag('twitter:image', ogImage || absoluteUrl('/images/social-share.png'));
-		updateMetaTag('twitter:site', '@SoftheCS');
-		updateMetaTag('twitter:creator', '@SoftheCS');
-
-		// Canonical URL
-		let canonical = document.querySelector('link[rel="canonical"]');
-		if (!canonical) {
-			canonical = document.createElement('link');
-			canonical.setAttribute('rel', 'canonical');
-			document.head.appendChild(canonical);
+		if (description) {
+			setMeta('name', 'description', description);
+			setMeta('property', 'og:description', description);
+			setMeta('name', 'twitter:description', description);
 		}
-		canonical.setAttribute('href', canonicalUrl || fullUrl);
+		if (noIndex) setMeta('name', 'robots', 'noindex, nofollow');
+		if (canonicalUrl) document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonicalUrl);
 
-		// Structured data
-		const structuredDataId = 'softhe-structured-data';
-		let structuredDataElement = document.getElementById(structuredDataId);
-		if (structuredData) {
-			if (!structuredDataElement) {
-				structuredDataElement = document.createElement('script');
-				structuredDataElement.id = structuredDataId;
-				structuredDataElement.type = 'application/ld+json';
-				document.head.appendChild(structuredDataElement);
-			}
-			structuredDataElement.textContent = JSON.stringify(structuredData);
-		} else if (structuredDataElement) {
-			structuredDataElement.remove();
-		}
+		if (!structuredData) return undefined;
+		// Owned by the page that rendered it, so it leaves with that page.
+		const structuredDataElement = document.createElement('script');
+		structuredDataElement.id = 'softhe-structured-data';
+		structuredDataElement.type = 'application/ld+json';
+		structuredDataElement.textContent = JSON.stringify(structuredData);
+		document.getElementById(structuredDataElement.id)?.remove();
+		document.head.appendChild(structuredDataElement);
+		return () => structuredDataElement.remove();
+	}, [title, description, canonicalUrl, structuredData, noIndex, pathname]);
 
-	}, [title, description, keywords, ogTitle, ogDescription, ogImage, canonicalUrl, structuredData, noIndex, type, fullUrl, privateRoute]);
-
-	return null; // This component doesn't render anything
+	return null;
 }
 
 export default SEO;

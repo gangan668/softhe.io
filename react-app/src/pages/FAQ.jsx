@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import SEO from "../components/SEO";
-import { absoluteUrl, siteConfig } from "../config/site";
+import { siteConfig } from "../config/site";
 import { benchmarkPublication, benchmarkResults } from "../data/benchmark";
 import { trackEvent } from "../utils/analytics";
 import "./FAQ.css";
@@ -545,12 +544,6 @@ function FAQ() {
 
 	return (
 		<div className="faq-page">
-			<SEO
-				title="Windows and BIOS tuning FAQ | Softhe.io"
-				description="Answers about Softhe.io Windows builds, BIOS tuning, compatibility, benchmark limits, orders, and support."
-				keywords="PC optimization FAQ, Windows ISO questions, BIOS tuning help, gaming optimization FAQ"
-				canonicalUrl={absoluteUrl('/faq')}
-			/>
 
 			<section className="page-header">
 				<div className="container">

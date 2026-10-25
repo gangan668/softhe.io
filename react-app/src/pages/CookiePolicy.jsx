@@ -1,15 +1,8 @@
-import SEO from '../components/SEO';
-import { absoluteUrl } from '../config/site';
 import './Legal.css';
 
 function CookiePolicy() {
 	return (
 		<>
-			<SEO
-				title="Cookie Policy | Softhe.io"
-				description="Cookie policy for Softhe.io, including essential storage and optional analytics cookies."
-				canonicalUrl={absoluteUrl('/cookie-policy')}
-			/>
 			<div className="legal-page">
 				<section className="page-header">
 					<div className="container">

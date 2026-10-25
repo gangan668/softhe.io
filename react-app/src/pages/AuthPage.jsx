@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import SEO from '../components/SEO';
 import { absoluteUrl } from '../config/site';
 import { useAuth } from '../context/useAuth';
 import { getAuthDeliveryErrorMessage, getAuthErrorMessage } from '../utils/authErrors';
@@ -56,7 +55,7 @@ export default function AuthPage({ mode }) {
 		else setStatus({ loading: false, error: '', message: mode === 'forgot' ? 'If an account exists for this address, a reset email will arrive shortly.' : 'If this address is awaiting verification, a confirmation email will arrive shortly.' });
 	};
 
-	return <div className="portal-page auth-page"><SEO title={`${copy[mode][0]} | Softhe.io`} description={copy[mode][1]} />
+	return <div className="portal-page auth-page">
 		<section className="portal-card auth-card"><h1>{copy[mode][0]}</h1><p>{copy[mode][1]}</p>
 			<>{authError && <div className="portal-error" role="alert">{authError}<button className="btn btn-secondary" onClick={retry}>Try again</button></div>}</><form onSubmit={submit} className="portal-form">
 				{mode === 'register' && <label>Full name<input name="fullName" value={form.fullName} onChange={update} autoComplete="name" required maxLength="100" /></label>}
