@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import evidence from '../../../docs/benchmark-evidence.json';
-import { benchmarkMethodology, benchmarkPublication, benchmarkEvidenceComplete, benchmarkResults, formatPercentChange, idleOverhead } from './benchmark';
+import { benchmarkMethodology, benchmarkPublication, benchmarkEvidenceComplete, benchmarkResults, formatPercentChange, idleOverhead, percentChange } from './benchmark';
 
 describe('benchmark publication', () => {
   it('uses the evidence manifest for publication and methodology', () => {
@@ -27,5 +27,10 @@ describe('benchmark publication', () => {
     expect(idleOverhead.memoryGb).toEqual({ stock: 2.5, optimized: 0.8, change: -68 });
     expect(formatPercentChange(25)).toBe('+25%');
     expect(formatPercentChange(-20)).toBe('-20%');
+  });
+  it('rounds equal-sized gains and reductions symmetrically', () => {
+    expect(percentChange(200, 201)).toBe(1);
+    expect(percentChange(200, 199)).toBe(-1);
+    expect(percentChange(200, 200)).toBe(0);
   });
 });

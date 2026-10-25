@@ -19,7 +19,7 @@ export const benchmarkMethodology = {
 
 const { stock, optimized } = evidence.reportedMedians;
 // Round half away from zero so equal-sized gains and reductions display symmetrically.
-const percentChange = (from, to) => {
+export const percentChange = (from, to) => {
   const change = ((to - from) / from) * 100;
   return Math.sign(change) * Math.round(Math.abs(change));
 };
