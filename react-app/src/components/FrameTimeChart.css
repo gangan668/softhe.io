@@ -137,23 +137,44 @@
 	box-shadow: none;
 }
 
-.frametime-tooltip--docked .frametime-tooltip-row {
-	white-space: normal;
-}
-
 .frametime-tooltip-title {
 	color: var(--text-secondary);
 	font-size: 0.78rem;
+	line-height: 1.35;
 }
 
 .frametime-tooltip-row {
 	display: grid;
-	grid-template-columns: 16px auto 1fr;
+	grid-template-columns: 16px auto auto 1fr;
 	align-items: center;
 	gap: 0.5rem;
 	color: var(--text-secondary);
 	font-size: 0.8rem;
 	white-space: nowrap;
+}
+
+.frametime-tooltip-label::before {
+	content: "· ";
+}
+
+/* Docked rows always take two lines (value and FPS, then the profile) and the title always reserves
+   two, so the readout keeps one height whether a point is selected or not and the table never moves. */
+.frametime-tooltip--docked .frametime-tooltip-title {
+	min-height: calc(2 * 1.35em);
+}
+
+.frametime-tooltip--docked .frametime-tooltip-row {
+	grid-template-columns: 16px auto 1fr;
+	row-gap: 0.1rem;
+}
+
+.frametime-tooltip--docked .frametime-tooltip-label {
+	grid-column: 2 / -1;
+	grid-row: 2;
+}
+
+.frametime-tooltip--docked .frametime-tooltip-label::before {
+	content: none;
 }
 
 .frametime-tooltip-row strong {

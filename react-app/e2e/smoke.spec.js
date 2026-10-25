@@ -242,6 +242,32 @@ test.describe('public website smoke tests', () => {
 		await expect(firstMetric.locator('.overhead-profile').last()).toBeVisible();
 	});
 
+	for (const width of [320, 360, 390]) {
+		test(`frame-time readout never moves the table at ${width}px`, async ({ page }) => {
+			await page.setViewportSize({ width, height: 800 });
+			await page.goto('/performance');
+			const plot = page.getByRole('group', { name: /frame-time chart/i });
+			const table = page.getByRole('table', { name: /median of each profile/i });
+			await plot.scrollIntoViewIfNeeded();
+			// Measured relative to the plot so page scrolling cannot mask a shift.
+			const offset = () => page.evaluate(() => {
+				const plotBox = document.querySelector('.frametime-plot').getBoundingClientRect();
+				return Math.round(document.querySelector('.frametime-table').getBoundingClientRect().top - plotBox.top);
+			});
+			const idle = await offset();
+			await expect(table).toBeVisible();
+			await plot.focus();
+			await page.keyboard.press('Home');
+			// Step through every percentile, the longest and shortest readouts included.
+			for (let step = 0; step < 51; step += 1) {
+				expect(await offset(), `point ${step}`).toBe(idle);
+				await page.keyboard.press('ArrowRight');
+			}
+			const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+			expect(scrollWidth).toBeLessThanOrEqual(width);
+		});
+	}
+
 	for (const width of [320, 390, 768, 1280, 1440]) {
 		test(`store has no horizontal overflow at ${width}px`, async ({ page }) => {
 			await page.setViewportSize({ width, height: 900 });

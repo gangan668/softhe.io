@@ -128,14 +128,15 @@ export default function FrameTimeChart() {
 				{(active !== null || compact) && (
 					<div className={tooltipClass} style={tooltipPlacement ?? undefined} aria-hidden="true">
 						<span className="frametime-tooltip-title">{active === null ? 'Tap or drag across the chart to read values' : `${oneIn(exceedance[active])} frames slower (${formatShare(exceedance[active])})`}</span>
+						{/* The placeholder uses the same row structure, so the docked readout keeps one height. */}
 						{profiles.map(({ id, label }) => {
-							if (active === null) return <span key={id} className="frametime-tooltip-row"><span className={`frametime-key frametime-key--${id}`} aria-hidden="true"></span><strong>–</strong><span>{label}</span></span>;
-							const value = profileFrameTime(id, active);
+							const value = active === null ? null : profileFrameTime(id, active);
 							return (
 								<span key={id} className="frametime-tooltip-row">
 									<span className={`frametime-key frametime-key--${id}`} aria-hidden="true"></span>
-									<strong>{formatMs(value)}</strong>
-									<span>{formatFps(value)} · {label}</span>
+									<strong>{value === null ? '–' : formatMs(value)}</strong>
+									<span className="frametime-tooltip-fps">{value === null ? '' : formatFps(value)}</span>
+									<span className="frametime-tooltip-label">{label}</span>
 								</span>
 							);
 						})}
