@@ -116,16 +116,37 @@ mgmt() { # usage: mgmt METHOD [json-body-file]
     curl -sS --fail-with-body -K - -X "$1" -H "Content-Type: application/json" ${2:+--data-binary "@$2"} "$API"
 }
 
+# Drops only fields whose names end in a secret suffix (smtp_pass, *_secret, *_token, *_api_key ...).
+# The pattern deliberately does not match "password", so non-secret settings such as
+# password_min_length and security_update_password_require_current_password are kept.
+REDACT='with_entries(select(.key | test("(secret|secrets|_pass|token|_key)$"; "i") | not))'
+
+# Prints the current Auth config with secret fields removed. Never print raw `mgmt GET` output:
+# it contains SMTP, CAPTCHA and provider secrets, and Codex output may be shared.
+auth_get_redacted() {
+  local raw; raw="$(mktemp)"
+  if ! mgmt GET > "$raw"; then rm -f -- "$raw"; echo "GET FAILED" >&2; return 1; fi
+  jq "$REDACT" "$raw"; local rc=$?; rm -f -- "$raw"; return "$rc"
+}
+
+# Applies a JSON body file, then deletes it. On failure, prints the error response with
+# secret-looking fields masked, and stops the rollout.
+auth_patch() {
+  local out; out="$(mktemp)"
+  if mgmt PATCH "$1" > "$out" 2>&1; then rm -f -- "$out" "$1"; echo "PATCH ok"; return 0; fi
+  echo "PATCH FAILED: stop the rollout. Sanitized response:" >&2
+  jq "$REDACT" "$out" >&2 2>/dev/null \
+    || sed -E 's/("[^"]*(secret|_pass|token|_key)"[[:space:]]*:[[:space:]]*)"[^"]*"/\1"[redacted]"/Ig' "$out" >&2
+  rm -f -- "$out" "$1"; exit 1
+}
+
 # The unredacted response contains secrets: keep it in a private, auto-deleted file.
 auth_full="$(mktemp)"
 trap 'rm -f -- "$auth_full"' EXIT
 mgmt GET > "$auth_full"
-# Drop only fields whose names end in a secret suffix (smtp_pass, *_secret, *_token, *_api_key ...).
-# The pattern deliberately does not match "password", so non-secret settings such as
-# password_min_length and security_update_password_require_current_password stay in the backup.
 # mktemp creates a new private file, so a pre-planted path or symlink cannot redirect the backup.
 auth_backup="$(mktemp /tmp/supabase-auth-<ref>-before.XXXXXX)"
-jq 'with_entries(select(.key | test("(secret|secrets|_pass|token|_key)$"; "i") | not))' "$auth_full" > "$auth_backup"
+jq "$REDACT" "$auth_full" > "$auth_backup"
 chmod 600 "$auth_backup"
 printf 'Redacted backup: %s\n' "$auth_backup"
 # Rollback needs these keys. Confirm each one that the live config has survived redaction.
@@ -135,7 +156,7 @@ jq -e --slurpfile full "$auth_full" '. as $backup | ["password_min_length", "pas
   | all(. as $k | ($full[0] | has($k) | not) or ($backup | has($k)))' "$auth_backup"
 ```
 
-Run every later Management API call through `mgmt`. Never pass `-H "Authorization: ..."` on the command line.
+Make every later Management API call through `auth_get_redacted` or `auth_patch`. Never call `mgmt GET` directly in a way that prints its output, and never pass `-H "Authorization: ..."` on the command line.
 
 ### 3a. Core settings (always apply)
 
@@ -154,18 +175,22 @@ body="$(mktemp)"
 cat > "$body" <<'JSON'
 {"mailer_autoconfirm":false,"mailer_secure_email_change_enabled":true,"security_update_password_require_reauthentication":true,"password_min_length":12,"password_required_characters":"<value from spec>","mfa_totp_enroll_enabled":true,"mfa_totp_verify_enabled":true}
 JSON
-if mgmt PATCH "$body" > /dev/null; then echo "PATCH ok"; else rm -f -- "$body"; echo "PATCH FAILED: stop the rollout and report" >&2; exit 1; fi
-rm -f -- "$body"
+auth_patch "$body"
 ```
 
-Expect `PATCH ok`. `--fail-with-body` makes curl exit non-zero on an HTTP error. On `PATCH FAILED`, stop the rollout: do not run any later step or the other project. Run `mgmt GET` to see which fields changed, restore them from the backup if needed, and report the response body.
+Expect `PATCH ok`. `--fail-with-body` makes curl exit non-zero on an HTTP error. On `PATCH FAILED`, the rollout stops: do not run any later step or the other project. Run `auth_get_redacted` and compare it with `$auth_backup` to see which fields changed. Restore them from the backup if needed, and report the sanitized error and the differences.
 
 ### 3a-2. Require current password (Preview check first)
 
 Supabase skips the emailed reauthentication code for sessions created in the last 24 hours. The "Require current password when changing password" setting closes that gap. The Security tab already sends `current_password`.
 
-1. Confirm the field name in the OpenAPI spec. It is expected to be `security_update_password_require_current_password`. If the spec has no such field, skip this step and report it as unavailable. Apply it with `mgmt PATCH` and a body file, as in 3a.
-2. **Preview:** enable it (stop on `PATCH FAILED`, as in 3a), then repeat the password-recovery check in step 4 (item 2b). If a recovery-link reset is rejected because no current password was sent, disable the setting again and report that it conflicts with password recovery.
+1. Confirm the field name in the OpenAPI spec. It is expected to be `security_update_password_require_current_password`. If the spec has no such field, skip this step and report it as unavailable. Apply it with a body file and `auth_patch`, as in 3a.
+2. **Preview:** enable it (stop on `PATCH FAILED`, as in 3a), then repeat the password-recovery check in step 4 (item 2b). If a recovery-link reset is rejected because no current password was sent, restore the setting's **previous value from the backup** (do not hard-code `false`, because it may already have been on), then report that it conflicts with password recovery:
+   ```bash
+   body="$(mktemp)"
+   jq '{security_update_password_require_current_password}' "$auth_backup" > "$body"
+   auth_patch "$body"
+   ```
 3. **Production:** enable it only if the Preview recovery check passed.
 
 ### 3b. Redirect URLs (check only)
@@ -174,13 +199,17 @@ Read `site_url` and `uri_allow_list` from the backup. `uri_allow_list` must incl
 
 ### 3c. CAPTCHA (only if `TURNSTILE_SECRET_KEY` is set)
 
-If `TURNSTILE_SECRET_KEY` is set, build the body inside `jq` from the environment. The secret is never a command argument and never printed:
+If `TURNSTILE_SECRET_KEY` is set, first make sure the change can be rolled back. The backup removes `security_captcha_secret`, so the previous secret cannot be restored from it:
+
+- If `jq -r '.security_captcha_enabled' "$auth_backup"` is `false` or `null`, CAPTCHA is currently off. Rolling back means setting `security_captcha_enabled` to `false`, and the old secret is not needed.
+- If it is `true`, CAPTCHA is already configured and this step would overwrite its secret. Continue only if the owner has also provided the current secret as `TURNSTILE_PREVIOUS_SECRET_KEY`. Otherwise skip 3c and report that rollback would be impossible.
+
+Then build the body inside `jq` from the environment. The secret is never a command argument and never printed:
 
 ```bash
 body="$(mktemp)"
 jq -n '{security_captcha_enabled: true, security_captcha_provider: "turnstile", security_captcha_secret: env.TURNSTILE_SECRET_KEY}' > "$body"
-if mgmt PATCH "$body" > /dev/null; then echo "PATCH ok"; else rm -f -- "$body"; echo "PATCH FAILED: stop the rollout and report" >&2; exit 1; fi
-rm -f -- "$body"
+auth_patch "$body"
 ```
 
 After that, tell the owner to set `VITE_CAPTCHA_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` in the matching Vercel environment and redeploy. Login fails while Supabase requires CAPTCHA but the site does not send a token, so enable both in the same release window.
@@ -193,7 +222,7 @@ Read `smtp_host` from the backup. If it is empty, the project uses Supabase's bu
 
 ### Verify
 
-Run `mgmt GET` again. Confirm every field from 3a (and 3a-2 or 3c if applied) has the new value, and that all other non-secret fields match the backup. Report any difference.
+Run `auth_get_redacted` again. Confirm every field from 3a (and 3a-2 or 3c if applied) has the new value, and that all other non-secret fields match the backup. Report any difference.
 
 ## Step 4: Functional checks (Preview only)
 
@@ -229,7 +258,8 @@ Give the owner one summary covering:
 
 ## Rollback
 
-- **Auth settings:** PATCH the values from the redacted backup for the fields changed in step 3.
+- **Auth settings:** build a body from the redacted backup with only the fields changed in step 3, for example `jq '{mailer_autoconfirm, password_min_length}' "$auth_backup"`, and apply it with `auth_patch`.
+- **CAPTCHA:** if CAPTCHA was off before, PATCH `{"security_captcha_enabled": false}`. If it was on, restore the previous secret from `TURNSTILE_PREVIOUS_SECRET_KEY` by building the body with `jq -n '... env.TURNSTILE_PREVIOUS_SECRET_KEY'`.
 - **Migrations:** do not reverse them automatically. Report the failure and wait for the owner.
   - The MFA policies can be removed with `drop policy <name>_mfa_required on public.<table>;`.
   - `claim_verified_orders` is not needed by the new code. Restore it from `supabase/migrations/202607310001_customer_portal_security_hardening.sql` only if the owner asks.
