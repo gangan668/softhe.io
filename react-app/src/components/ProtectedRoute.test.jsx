@@ -10,3 +10,11 @@ describe('ProtectedRoute access boundaries', () => {
 	it('waits for the current user staff check', () => { mount({ user: { id: 'new' }, staffCheckedUserId: 'old', staff: true }, true); expect(screen.getByText('Checking staff access…')).toBeInTheDocument(); expect(screen.queryByText('Private data')).not.toBeInTheDocument(); });
 	it('allows verified staff and exposes recoverable initialization failure', () => { const view = mount({ user: { id: 'staff' }, staffCheckedUserId: 'staff', staff: true }, true); expect(screen.getByText('Private data')).toBeInTheDocument(); view.unmount(); mount({ error: 'Initialization failed', retry: vi.fn() }); expect(screen.getByRole('alert')).toHaveTextContent('Initialization failed'); expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument(); });
 });
+
+describe('ProtectedRoute second factor', () => {
+	it('requires the authenticator code before rendering private data', () => {
+		mount({ user: { id: 'customer' }, mfaRequired: true, supabase: { auth: {} } });
+		expect(screen.getByRole('heading', { name: 'Two-step verification' })).toBeInTheDocument();
+		expect(screen.queryByText('Private data')).not.toBeInTheDocument();
+	});
+});

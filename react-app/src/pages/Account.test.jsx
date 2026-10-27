@@ -3,9 +3,9 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Account from './Account';
-const mock = vi.hoisted(() => ({ recover: vi.fn(), write: vi.fn(), notify: vi.fn() }));
+const mock = vi.hoisted(() => ({ recover: vi.fn(), write: vi.fn(), notify: vi.fn(), revoke: vi.fn() }));
 vi.mock('../utils/portalSession', () => ({ runPortalQueriesWithSessionRecovery: mock.recover }));
-vi.mock('../utils/portal', () => ({ writeTicket: mock.write, notifyTicketReply: mock.notify }));
+vi.mock('../utils/portal', () => ({ writeTicket: mock.write, notifyTicketReply: mock.notify, revokeOtherSessions: mock.revoke }));
 let supabase;
 const ticket = { id: 'ticket-1', subject: 'Existing ticket', status: 'open' };
 const results = (tickets = []) => ({ results: [{ data: { full_name: 'Customer' } }, { data: [] }, { data: tickets }, { data: [] }] });
@@ -13,10 +13,12 @@ function mount() { render(<MemoryRouter><AuthContext.Provider value={{ user: { i
 beforeEach(() => {
 	vi.clearAllMocks();
 	const chain = { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockResolvedValue({ data: [{ id: 'message-1', author_id: 'customer', body: 'Earlier reply', created_at: '2026-10-01' }] }), update: vi.fn().mockReturnThis(), then: (resolve) => Promise.resolve({ error: null }).then(resolve) };
-	supabase = { from: vi.fn(() => chain), auth: { signOut: vi.fn().mockResolvedValue({}), updateUser: vi.fn().mockResolvedValue({}), mfa: { listFactors: vi.fn().mockResolvedValue({ data: { totp: [] } }), enroll: vi.fn().mockResolvedValue({ error: { message: 'denied' } }), challenge: vi.fn().mockResolvedValue({ error: { message: 'denied' } }), verify: vi.fn() } } };
-	mock.recover.mockResolvedValue(results()); mock.notify.mockResolvedValue(true); mock.write.mockResolvedValue({ id: 'new-ticket' });
+	supabase = { from: vi.fn(() => chain), auth: { signOut: vi.fn().mockResolvedValue({}), reauthenticate: vi.fn().mockResolvedValue({}), updateUser: vi.fn().mockResolvedValue({}), mfa: { listFactors: vi.fn().mockResolvedValue({ data: { totp: [] } }), enroll: vi.fn().mockResolvedValue({ error: { message: 'denied' } }), challenge: vi.fn().mockResolvedValue({ error: { message: 'denied' } }), verify: vi.fn() } } };
+	mock.recover.mockResolvedValue(results()); mock.notify.mockResolvedValue(true); mock.write.mockResolvedValue({ id: 'new-ticket' }); mock.revoke.mockResolvedValue(true);
 });
-it('shows empty orders and tickets', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'orders', exact: true })); expect(screen.getByText(/No linked orders yet/)).toBeInTheDocument(); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); expect(screen.getByText(/You have not created any support tickets yet/)).toBeInTheDocument(); });
+async function openPasswordForm() { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Email me a verification code' })); await screen.findByLabelText('Verification code'); }
+function changePassword(code = '123456', password = 'StrongPassword123!') { fireEvent.change(screen.getByLabelText('Verification code'), { target: { value: code } }); fireEvent.change(screen.getByLabelText(/New password/), { target: { value: password } }); fireEvent.click(screen.getByRole('button', { name: 'Change password' })); }
+it('shows empty orders and tickets', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'orders', exact: true })); expect(screen.getByText(/No orders yet/)).toBeInTheDocument(); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); expect(screen.getByText(/You have not created any support tickets yet/)).toBeInTheDocument(); });
 it('settles rejected account loading', async () => { mock.recover.mockRejectedValue(new Error('network failed')); mount(); await screen.findByRole('alert'); expect(screen.getByRole('alert')).toHaveTextContent('Account could not be loaded'); expect(screen.queryByText('Loading account…')).not.toBeInTheDocument(); });
 it('persists profile updates scoped to the customer id', async () => { mount(); await screen.findByLabelText('Full name'); fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Updated Customer' } }); fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Berlin' } }); fireEvent.click(screen.getByRole('button', { name: 'Save profile' })); await waitFor(() => expect(supabase.from().update).toHaveBeenCalled()); expect(supabase.from).toHaveBeenCalledWith('profiles'); expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({ full_name: 'Updated Customer', billing_address: expect.objectContaining({ city: 'Berlin' }) })); expect(supabase.from().eq).toHaveBeenCalledWith('id', 'customer'); });
 it('creates tickets and preserves success when email delivery fails', async () => { mock.notify.mockResolvedValue(false); mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'New ticket' })); fireEvent.change(screen.getByLabelText('Subject'), { target: { value: 'New question' } }); fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Please help' } }); fireEvent.click(screen.getByRole('button', { name: 'Create ticket' })); await screen.findByText('Ticket new-tick created.'); expect(mock.write).toHaveBeenCalledWith({ access_token: 'fixture' }, { action: 'create', subject: 'New question', category: 'general', message: 'Please help' }); expect(screen.getByRole('alert')).toHaveTextContent('Ticket saved, but the email notification could not be sent.'); });
@@ -24,16 +26,37 @@ it('blocks duplicate replies while a request is pending and permits retry after 
 it('clears the invalid session locally and navigates to login', async () => { mock.recover.mockResolvedValue({ ...results(), sessionInvalid: true, error: new Error('Session expired') }); mount(); await screen.findByText('Signed out destination'); expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' }); expect(screen.queryByText('Hello, Customer')).not.toBeInTheDocument(); });
 it('reports MFA enrollment and challenge failures', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Set up or verify MFA' })); await screen.findByText('MFA enrollment could not be started.'); supabase.auth.mfa.listFactors.mockResolvedValue({ data: { totp: [{ id: 'factor', status: 'verified' }] } }); fireEvent.click(screen.getByRole('button', { name: 'Set up or verify MFA' })); await screen.findByLabelText('Six-digit code'); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } }); fireEvent.click(screen.getByRole('button', { name: 'Verify MFA' })); await screen.findByText('MFA challenge could not be created.'); expect(supabase.auth.mfa.verify).not.toHaveBeenCalled(); });
 it('signs out and removes customer data from the view', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'Sign out' })); await screen.findByText('Signed out destination'); expect(supabase.auth.signOut).toHaveBeenCalledOnce(); });
-it('completes password rotation and clears the submitted password after revoking other sessions', async () => {
-	vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true }));
-	mount(); await screen.findByText('Hello, Customer');
-	fireEvent.click(screen.getByRole('button', { name: 'security', exact: true }));
-	const password = screen.getByLabelText(/New password/);
-	fireEvent.change(password, { target: { value: 'StrongPassword123!' } });
-	fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
+it('requires an emailed reauthentication code, rotates the password, and revokes other sessions', async () => {
+	await openPasswordForm();
+	expect(supabase.auth.reauthenticate).toHaveBeenCalledOnce();
+	expect(screen.getByRole('status')).toHaveTextContent('We emailed a verification code to customer@example.test.');
+	changePassword();
 	await screen.findByText('Password updated and other sessions revoked.');
-	expect(password).toHaveValue('');
-	expect(fetch).toHaveBeenCalledWith('/api/session-revoke-others', expect.objectContaining({ method: 'POST', headers: expect.objectContaining({ Authorization: 'Bearer fixture' }) }));
+	expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: 'StrongPassword123!', nonce: '123456' });
+	expect(mock.revoke).toHaveBeenCalledWith({ access_token: 'fixture' });
+	expect(screen.getByRole('button', { name: 'Email me a verification code' })).toBeInTheDocument();
+});
+it('keeps the form available when the reauthentication code is rejected', async () => {
+	supabase.auth.updateUser.mockResolvedValue({ error: new Error('invalid nonce') });
+	await openPasswordForm(); changePassword('000000');
+	await screen.findByText('Password could not be updated. Check the verification code or request a new one.');
+	expect(mock.revoke).not.toHaveBeenCalled();
+	expect(screen.getByLabelText('Verification code')).toBeInTheDocument();
+});
+it('reports a failure to send the reauthentication code', async () => {
+	supabase.auth.reauthenticate.mockResolvedValue({ error: new Error('rate limited') });
+	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true }));
+	fireEvent.click(screen.getByRole('button', { name: 'Email me a verification code' }));
+	await screen.findByText('The verification code could not be sent. Please wait a minute and try again.');
+	expect(screen.queryByLabelText('Verification code')).not.toBeInTheDocument();
+});
+it('signs out other devices on request', async () => {
+	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true }));
+	fireEvent.click(screen.getByRole('button', { name: 'Sign out other devices' }));
+	await screen.findByText('All other devices have been signed out.');
+	mock.revoke.mockRejectedValue(new Error('network'));
+	fireEvent.click(screen.getByRole('button', { name: 'Sign out other devices' }));
+	await screen.findByText('Other devices could not be signed out. Please try again.');
 });
 it('prevents duplicate ticket creation while the first save is pending', async () => {
 	let resolve; mock.write.mockReturnValue(new Promise((done) => { resolve = done; }));
@@ -73,7 +96,7 @@ it('reports a thrown MFA lookup and verification request', async () => {
 	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Set up or verify MFA' })); await screen.findByText('MFA enrollment could not be started.'); fireEvent.click(screen.getByRole('button', { name: 'Set up or verify MFA' })); await screen.findByLabelText('Six-digit code'); supabase.auth.mfa.challenge.mockRejectedValue(new Error('network')); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } }); fireEvent.click(screen.getByRole('button', { name: 'Verify MFA' })); await screen.findByText('MFA verification could not be completed. Please try again.');
 });
 it('reports password changed when session revocation throws after successful rotation', async () => {
-	vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network'))); mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.change(screen.getByLabelText(/New password/), { target: { value: 'StrongPassword123!' } }); fireEvent.click(screen.getByRole('button', { name: 'Change password' })); await screen.findByText('Password changed, but other sessions could not be revoked. Please sign out of all devices.');
+	mock.revoke.mockRejectedValue(new Error('network')); await openPasswordForm(); changePassword(); await screen.findByText('Password changed, but other sessions could not be revoked. Use "Sign out other devices" below.');
 });
 it('ignores an old customer load after the authenticated user changes', async () => {
 	let resolveOld; mock.recover.mockReturnValueOnce(new Promise((resolve) => { resolveOld = resolve; })).mockResolvedValue({ results: [{ data: { full_name: 'New Customer' } }, { data: [] }, { data: [] }, { data: [] }] });
@@ -88,7 +111,7 @@ it('completes verified MFA and exposes its refreshed session result', async () =
 });
 it('renders actual order and activity records without confusing empty-state copy', async () => {
 	mock.recover.mockResolvedValue({ results: [{ data: { full_name: 'Customer' } }, { data: [{ id: 'order', stripe_session_id: 'fixture-order-12345', status: 'paid', created_at: '2026-10-01', currency: 'eur', amount_total: 2500, order_items: [{ product_name: 'Fixture product', quantity: 1 }] }] }, { data: [] }, { data: [{ id: 'event', event_type: 'profile.updated', created_at: '2026-10-01' }] }] });
-	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'orders', exact: true })); expect(screen.getByText('Fixture product × 1')).toBeInTheDocument(); expect(screen.queryByText(/No linked orders yet/)).not.toBeInTheDocument(); fireEvent.click(screen.getByRole('button', { name: 'history', exact: true })); expect(screen.getByText('profile updated')).toBeInTheDocument();
+	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'orders', exact: true })); expect(screen.getByText('Fixture product × 1')).toBeInTheDocument(); expect(screen.queryByText(/No orders yet/)).not.toBeInTheDocument(); fireEvent.click(screen.getByRole('button', { name: 'history', exact: true })); expect(screen.getByText('profile updated')).toBeInTheDocument();
 });
 
 it('removes MFA enrollment secrets and unsent ticket drafts when the authenticated user changes', async () => {

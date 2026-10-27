@@ -99,7 +99,7 @@ function App() {
 									<Route path="/performance" element={<Performance />} />
 									<Route path="/contact" element={<Contact />} />
 									<Route path="/faq" element={<FAQ />} />
-									<Route path="/checkout" element={<Checkout />} />
+									<Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
 									<Route path="/privacy-policy" element={<PrivacyPolicy />} />
 									<Route path="/cookie-policy" element={<CookiePolicy />} />
 									<Route path="/terms" element={<Terms />} />

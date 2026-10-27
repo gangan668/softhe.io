@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { notifyTicketReply, writeTicket } from './portal';
+import { notifyTicketReply, revokeOtherSessions, writeTicket } from './portal';
 
 describe('notifyTicketReply', () => {
 	it('does nothing without an authenticated session', async () => {
@@ -32,5 +32,15 @@ describe('writeTicket', () => {
 			method: 'POST',
 			headers: expect.objectContaining({ Authorization: 'Bearer token', 'Idempotency-Key': expect.stringMatching(/^[0-9a-f-]{36}$/i) }),
 		}));
+	});
+});
+
+describe('revokeOtherSessions', () => {
+	it('authenticates revocation and reports the outcome', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+		await expect(revokeOtherSessions({ access_token: 'token' }, fetchImpl)).resolves.toBe(true);
+		expect(fetchImpl).toHaveBeenCalledWith('/api/session-revoke-others', expect.objectContaining({ method: 'POST', headers: expect.objectContaining({ Authorization: 'Bearer token' }) }));
+		await expect(revokeOtherSessions(null, fetchImpl)).resolves.toBe(false);
+		expect(fetchImpl).toHaveBeenCalledOnce();
 	});
 });

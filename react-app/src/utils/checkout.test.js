@@ -3,6 +3,13 @@ import { createCheckoutSession, verifyCheckoutSession } from './checkout';
 
 describe('createCheckoutSession', () => {
 	const legalAcceptance = { termsAccepted: true, earlyPerformanceRequested: true, withdrawalAcknowledged: true };
+	const sessionToken = 'customer-session-token';
+
+	it('refuses to start checkout without a signed-in session', async () => {
+		const fetchImpl = vi.fn();
+		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl)).rejects.toThrow('Sign in to your account before checking out.');
+		expect(fetchImpl).not.toHaveBeenCalled();
+	});
 
 	it('sends only product identifiers and quantities to the server', async () => {
 		const fetchImpl = vi.fn().mockResolvedValue({
@@ -12,7 +19,7 @@ describe('createCheckoutSession', () => {
 
 		const result = await createCheckoutSession([
 			{ id: 'windows-10', name: 'Untrusted name', price: 1, quantity: 2 },
-		], legalAcceptance, fetchImpl);
+		], legalAcceptance, fetchImpl, sessionToken);
 
 		expect(fetchImpl).toHaveBeenCalledWith('/api/create-checkout-session', expect.objectContaining({
 			method: 'POST',
@@ -27,7 +34,7 @@ describe('createCheckoutSession', () => {
 			json: async () => ({ error: 'Stripe checkout is not configured' }),
 		});
 
-		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl))
+		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl, sessionToken))
 			.rejects.toThrow('Stripe checkout is not configured');
 	});
 
@@ -36,8 +43,8 @@ describe('createCheckoutSession', () => {
 		const fetchImpl = vi.fn()
 			.mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({ error: 'Checkout is unavailable' }) })
 			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
-		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Checkout is unavailable');
-		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Checkout is unavailable');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken);
 		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
 			.not.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
 	});
@@ -47,8 +54,8 @@ describe('createCheckoutSession', () => {
 		const fetchImpl = vi.fn()
 			.mockResolvedValueOnce({ ok: false, status, json: async () => ({ error: 'Unable to reach Stripe. Please try again.' }) })
 			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
-		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Unable to reach Stripe');
-		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Unable to reach Stripe');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken);
 		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
 			.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
 	});
@@ -58,8 +65,8 @@ describe('createCheckoutSession', () => {
 		const fetchImpl = vi.fn()
 			.mockResolvedValueOnce({ ok: status === 200, status, json: async () => { throw new SyntaxError('Invalid JSON'); } })
 			.mockResolvedValueOnce({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
-		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Checkout could not be started');
-		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Checkout could not be started');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken);
 		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
 			.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
 	});
@@ -67,8 +74,8 @@ describe('createCheckoutSession', () => {
 	it('releases the key after a successful Stripe checkout response', async () => {
 		const cart = [{ id: 'successful-checkout', quantity: 1 }];
 		const fetchImpl = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: 'cs_success', url: 'https://checkout.stripe.com/success' }) });
-		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
-		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken);
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken);
 		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key'])
 			.not.toBe(fetchImpl.mock.calls[0][1].headers['Idempotency-Key']);
 	});
@@ -78,11 +85,11 @@ describe('createCheckoutSession', () => {
 		const fetchImpl = vi.fn()
 			.mockRejectedValueOnce(new Error('Network timeout'))
 			.mockResolvedValue({ ok: true, json: async () => ({ id: 'cs_retry', url: 'https://checkout.stripe.com/retry' }) });
-		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
-		await createCheckoutSession(cart, legalAcceptance, fetchImpl);
+		await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Network timeout');
+		await createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken);
 		const firstKey = fetchImpl.mock.calls[0][1].headers['Idempotency-Key'];
 		expect(fetchImpl.mock.calls[1][1].headers['Idempotency-Key']).toBe(firstKey);
-		await createCheckoutSession([{ id: 'windows-10', quantity: 4 }], legalAcceptance, fetchImpl);
+		await createCheckoutSession([{ id: 'windows-10', quantity: 4 }], legalAcceptance, fetchImpl, sessionToken);
 		expect(fetchImpl.mock.calls[2][1].headers['Idempotency-Key']).not.toBe(firstKey);
 	});
 
@@ -112,11 +119,11 @@ describe('createCheckoutSession', () => {
 		vi.useFakeTimers();
 		try {
 			vi.setSystemTime(new Date('2026-09-29T00:00:00.000Z'));
-			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Network timeout');
 			vi.setSystemTime(new Date('2026-09-29T22:59:59.000Z'));
-			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Network timeout');
 			vi.setSystemTime(new Date('2026-09-29T23:00:00.000Z'));
-			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			await expect(createCheckoutSession(cart, legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Network timeout');
 			const keys = fetchImpl.mock.calls.map((call) => call[1].headers['Idempotency-Key']);
 			expect(keys[1]).toBe(keys[0]);
 			expect(keys[2]).not.toBe(keys[0]);
@@ -129,9 +136,9 @@ describe('createCheckoutSession', () => {
 		const fetchImpl = vi.fn().mockRejectedValue(new Error('Network timeout'));
 		const cartFor = (index) => [{ id: `test-product-${index}`, quantity: 1 }];
 		for (let index = 0; index <= 100; index += 1) {
-			await expect(createCheckoutSession(cartFor(index), legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+			await expect(createCheckoutSession(cartFor(index), legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Network timeout');
 		}
-		await expect(createCheckoutSession(cartFor(0), legalAcceptance, fetchImpl)).rejects.toThrow('Network timeout');
+		await expect(createCheckoutSession(cartFor(0), legalAcceptance, fetchImpl, sessionToken)).rejects.toThrow('Network timeout');
 		const keys = fetchImpl.mock.calls.map((call) => call[1].headers['Idempotency-Key']);
 		expect(keys.at(-1)).not.toBe(keys[0]);
 	});
@@ -142,7 +149,7 @@ describe('createCheckoutSession', () => {
 			json: async () => ({ url: 'https://attacker.example/checkout' }),
 		});
 
-		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl))
+		await expect(createCheckoutSession([{ id: 'windows-10', quantity: 1 }], legalAcceptance, fetchImpl, sessionToken))
 			.rejects.toThrow('Checkout could not be started');
 	});
 });

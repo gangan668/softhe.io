@@ -229,12 +229,14 @@ describe('ticket notification API', () => {
 		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
 		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
 		vi.stubGlobal('fetch', vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ id: 'staff', email: 'staff@example.com' }))
+			.mockResolvedValueOnce(jsonResponse({ id: 'customer', email: 'customer@example.com' }))
 			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: 'Reply' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
-			.mockResolvedValueOnce(jsonResponse([{ role: 'staff' }]))
 			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }])));
+		process.env.SUPPORT_EMAIL = 'support@softhe.io';
+		delete process.env.EMAILJS_TICKET_TEMPLATE_ID;
+		delete process.env.RESEND_API_KEY;
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const response = createResponse();
 		await ticketNotification({
@@ -267,7 +269,6 @@ describe('ticket notification API', () => {
 			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: '<test>' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
-			.mockResolvedValueOnce(jsonResponse([]))
 			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }]))
 			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
 			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
@@ -356,25 +357,15 @@ describe('staff authorization boundary', () => {
 		expect(response.payload).toEqual({ error: 'Not found' });
 	});
 
-	it('never grants or renews a role during customer bootstrap', async () => {
+	it('no longer claims orders by email during customer bootstrap', async () => {
 		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
 		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
-		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
-		process.env.PORTAL_RATE_LIMIT_SECRET = 'rate-secret';
-		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
-		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
-		const fetchMock = vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ id: '11111111-1111-4111-8111-111111111111', email: 'test@example.com', email_confirmed_at: '2026-08-13T00:00:00Z' }))
-			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
-			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
-			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
-			.mockResolvedValueOnce(jsonResponse([]));
+		const fetchMock = vi.fn();
 		vi.stubGlobal('fetch', fetchMock);
 		const response = createResponse();
 		await portalBootstrap({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' }, body: {}, query: {} }, response);
-		expect(response.statusCode).toBe(200);
-		expect(fetchMock.mock.calls.some(([url]) => String(url).includes('user_roles'))).toBe(false);
-		expect(response.payload).not.toHaveProperty('staff');
+		expect(response.statusCode).toBe(404);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });
 

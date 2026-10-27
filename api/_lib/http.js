@@ -14,6 +14,8 @@ const withHttp = (handler, { raw = false, maxBytes = 16384 } = {}) => async (req
 			return res;
 		};
 	}
+	// API responses carry account data; handlers may tighten this further.
+	if (typeof res.setHeader === 'function') res.setHeader('Cache-Control', 'no-store');
 	try {
 		if (req.query === undefined) {
 			const query = Object.create(null);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { notifyTicketReply, writeTicket } from '../utils/portal';
+import { notifyTicketReply, revokeOtherSessions, writeTicket } from '../utils/portal';
 import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
 import { runPortalQueriesWithSessionRecovery } from '../utils/portalSession';
 import './Portal.css';
@@ -37,6 +37,7 @@ function AccountSession() {
 	// Token refresh keeps the same account. Identity changes and unmounts invalidate its requests.
 	useEffect(() => { requestScope.current += 1; return () => { requestScope.current += 1; ticketRead.current += 1; }; }, [user.id, supabase]);
 	const [mfa, setMfa] = useState({ factorId: '', qr: '', code: '', message: '', error: '' });
+	const [passwordCodeSent, setPasswordCodeSent] = useState(false);
 
 	const load = useCallback(async () => {
 		const scope = requestScope.current; const request = ++loadRead.current;
@@ -117,24 +118,38 @@ function AccountSession() {
 		finally { replyInFlight.current = false; if (scope === requestScope.current) setReplySending(false); }
 	};
 	const signOut = async () => { const scope = requestScope.current; setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); try { const result = await supabase.auth.signOut(); if (result?.error) throw result.error; if (scope === requestScope.current) navigate('/login', { replace: true }); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Sign-out could not be completed. Please try again.', message: '' })); } };
+	// Supabase emails a one-time nonce; updateUser rejects a password change without it
+	// when "Secure password change" is enabled, so a stolen session cannot rotate it.
+	const sendPasswordCode = async () => {
+		const scope = requestScope.current;
+		try {
+			const { error } = await supabase.auth.reauthenticate();
+			if (scope !== requestScope.current) return;
+			if (error) throw error;
+			setPasswordCodeSent(true);
+			setStatus((s) => ({ ...s, error: '', message: `We emailed a verification code to ${user.email}.` }));
+		} catch { if (scope === requestScope.current) setStatus((s) => ({ ...s, error: 'The verification code could not be sent. Please wait a minute and try again.', message: '' })); }
+	};
 	const updatePassword = async (event) => {
 		event.preventDefault();
 		const passwordForm = event.currentTarget; const scope = requestScope.current;
-		const lastSignIn = Date.parse(user.last_sign_in_at || '');
-		if (!Number.isFinite(lastSignIn) || Date.now() - lastSignIn > 15 * 60 * 1000) return setStatus((s) => ({ ...s, error: 'Please sign out and sign in again before changing your password.', message: '' }));
-		const password = new FormData(passwordForm).get('password');
+		const fields = new FormData(passwordForm);
+		const password = fields.get('password'); const nonce = String(fields.get('nonce') || '').trim();
 		if (!validateStrongPassword(password)) return setStatus((s) => ({ ...s, error: passwordRequirements, message: '' }));
 		let passwordChanged = false;
-		try { const { error } = await supabase.auth.updateUser({ password });
+		try { const { error } = await supabase.auth.updateUser({ password, nonce });
 		if (scope !== requestScope.current) return;
-		if (!error) {
-			passwordChanged = true;
-			const response = await fetch('/api/session-revoke-others', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: '{}' });
-			if (scope !== requestScope.current) return;
-			if (!response.ok) return setStatus((s) => ({ ...s, error: 'Password changed, but other sessions could not be revoked. Please sign out of all devices.', message: '' }));
-		}
-		setStatus((s) => ({ ...s, error: error ? 'Password could not be updated. Sign in again and retry.' : '', message: error ? '' : 'Password updated and other sessions revoked.' })); passwordForm.reset();
-		} catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: passwordChanged ? 'Password changed, but other sessions could not be revoked. Please sign out of all devices.' : 'Password could not be updated. Sign in again and retry.', message: '' })); }
+		if (error) return setStatus((s) => ({ ...s, error: 'Password could not be updated. Check the verification code or request a new one.', message: '' }));
+		passwordChanged = true; passwordForm.reset(); setPasswordCodeSent(false);
+		const revoked = await revokeOtherSessions(session);
+		if (scope !== requestScope.current) return;
+		setStatus((s) => revoked ? { ...s, error: '', message: 'Password updated and other sessions revoked.' } : { ...s, error: 'Password changed, but other sessions could not be revoked. Use "Sign out other devices" below.', message: '' });
+		} catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: passwordChanged ? 'Password changed, but other sessions could not be revoked. Use "Sign out other devices" below.' : 'Password could not be updated. Sign in again and retry.', message: '' })); }
+	};
+	const signOutOtherDevices = async () => {
+		const scope = requestScope.current;
+		const revoked = await revokeOtherSessions(session).catch(() => false);
+		if (scope === requestScope.current) setStatus((s) => revoked ? { ...s, error: '', message: 'All other devices have been signed out.' } : { ...s, error: 'Other devices could not be signed out. Please try again.', message: '' });
 	};
 	const beginMfa = async () => {
 		const scope = requestScope.current;
@@ -171,9 +186,9 @@ function AccountSession() {
 		<nav className="portal-tabs" aria-label="Account sections">{tabs.map((name) => <button key={name} className={tab === name ? 'active' : ''} onClick={() => setTab(name)}>{name}</button>)}</nav>
 		{status.loading && <div className="portal-state" role="status">Loading account…</div>}{status.error && <div className="portal-error" role="alert">{status.error}</div>}{status.message && <div className="portal-success" role="status">{status.message}</div>}
 		{!status.loading && tab === 'overview' && <div className="portal-grid"><section className="portal-card"><h2>Profile</h2><form className="portal-form" onSubmit={saveProfile}><label>Full name<input name="full_name" defaultValue={profile.full_name} required /></label><label>Phone<input name="phone" defaultValue={profile.phone} autoComplete="tel" /></label><div className="form-row"><label>Address<input name="line1" defaultValue={address.line1} /></label><label>Address line 2<input name="line2" defaultValue={address.line2} /></label></div><div className="form-row"><label>City<input name="city" defaultValue={address.city} /></label><label>Postal code<input name="postal_code" defaultValue={address.postal_code} /></label></div><div className="form-row"><label>Country<input name="country" defaultValue={address.country} maxLength="2" placeholder="SE" /></label><label>Locale<select name="locale" defaultValue={profile.locale || 'en'}><option value="en">English</option><option value="sv">Svenska</option></select></label></div><button className="btn btn-primary">Save profile</button></form></section><section className="portal-card metric-card"><h2>At a glance</h2><strong>{data.orders.length}</strong><span>orders</span><strong>{data.tickets.filter((t) => t.status !== 'closed').length}</strong><span>open tickets</span><button className="btn btn-secondary" onClick={() => setTab('tickets')}>Get support</button></section></div>}
-		{tab === 'orders' && <section className="portal-card"><h2>Orders</h2>{!data.orders.length ? <p>No linked orders yet. Guest purchases are claimed after your verified email matches the Stripe receipt.</p> : <div className="portal-list">{data.orders.map((order) => <article key={order.id}><div><strong>Order {order.stripe_session_id.slice(-10)}</strong><p>{formatDate(order.created_at)} · {order.status}</p><small>{order.order_items?.map((item) => `${item.product_name} × ${item.quantity}`).join(', ')}</small></div><strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: order.currency.toUpperCase() }).format(order.amount_total / 100)}</strong></article>)}</div>}</section>}
+		{tab === 'orders' && <section className="portal-card"><h2>Orders</h2>{!data.orders.length ? <p>No orders yet. Purchases made while signed in appear here after payment is confirmed.</p> : <div className="portal-list">{data.orders.map((order) => <article key={order.id}><div><strong>Order {order.stripe_session_id.slice(-10)}</strong><p>{formatDate(order.created_at)} · {order.status}</p><small>{order.order_items?.map((item) => `${item.product_name} × ${item.quantity}`).join(', ')}</small></div><strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: order.currency.toUpperCase() }).format(order.amount_total / 100)}</strong></article>)}</div>}</section>}
 		{tab === 'tickets' && <section className="portal-card tickets-card"><div className="tickets-heading"><div><h2>Support history</h2><p>Review your tickets and continue existing conversations.</p></div><button className={showTicketComposer ? 'btn btn-secondary' : 'btn btn-primary'} onClick={() => setShowTicketComposer((visible) => !visible)}>{showTicketComposer ? 'Cancel' : 'New ticket'}</button></div>{showTicketComposer ? <form className="portal-form ticket-composer" onSubmit={createTicket}><label>Subject<input value={newTicket.subject} onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })} minLength="3" maxLength="120" required /></label><label>Category<select value={newTicket.category} onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}><option value="general">General</option><option value="technical">Technical</option><option value="sales">Sales</option><option value="billing">Billing</option></select></label><label>Message<textarea value={newTicket.message} onChange={(e) => setNewTicket({ ...newTicket, message: e.target.value })} maxLength="4000" required /></label><button className="btn btn-primary" disabled={ticketSending}>{ticketSending ? 'Creating…' : 'Create ticket'}</button></form> : <div className="ticket-workspace"><div className="ticket-list" aria-label="Your tickets">{data.tickets.length ? data.tickets.map((ticket) => <button key={ticket.id} onClick={() => openTicket(ticket)} className={selectedTicket?.id === ticket.id ? 'active' : ''}><strong>{ticket.subject}</strong><span>{ticket.status.replaceAll('_', ' ')}</span></button>) : <p className="ticket-empty">You have not created any support tickets yet.</p>}</div><div className="conversation-panel">{selectedTicket ? <div className="conversation"><h3>{selectedTicket.subject}</h3><div className="conversation-messages">{messages.map((message) => <div className={message.author_id === user.id ? 'message own' : 'message'} key={message.id}><p>{message.body}</p><small>{formatDate(message.created_at)}</small></div>)}</div>{selectedTicket.status !== 'closed' && <form onSubmit={sendReply}><textarea value={reply} onChange={(e) => setReply(e.target.value)} maxLength="4000" aria-label="Reply" disabled={replySending} required /><button className="btn btn-primary" disabled={replySending}>{replySending ? 'Sending…' : 'Send reply'}</button></form>}</div> : <div className="ticket-empty ticket-empty-detail"><strong>Select a ticket</strong><p>Choose a conversation from the history to view its messages.</p></div>}</div></div>}</section>}
 		{tab === 'history' && <section className="portal-card"><h2>Activity history</h2><div className="timeline">{data.activity.map((event) => <article key={event.id}><span></span><div><strong>{event.event_type.replaceAll('.', ' ')}</strong><p>{formatDate(event.created_at)}</p></div></article>)}</div></section>}
-		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><form className="portal-form" onSubmit={updatePassword}><label>New password<input name="password" type="password" minLength="12" autoComplete="new-password" required /><small>{passwordRequirements}</small></label><button className="btn btn-primary">Change password</button></form><hr /><h3>Authenticator app</h3><p>Staff access requires a verified authenticator and an AAL2 session.</p>{mfa.error && <div className="portal-error" role="alert">{mfa.error}</div>}{mfa.message && <div className="portal-success" role="status">{mfa.message}</div>}{mfa.qr && <img src={mfa.qr} alt="Authenticator enrollment QR code" width="220" height="220" />}{!mfa.factorId ? <button className="btn btn-secondary" onClick={beginMfa}>Set up or verify MFA</button> : <form className="portal-form" onSubmit={verifyMfa}><label>Six-digit code<input value={mfa.code} onChange={(event) => setMfa((value) => ({ ...value, code: event.target.value.replace(/\D/g, '').slice(0, 6) }))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required /></label><button className="btn btn-primary">Verify MFA</button></form>}</section>}
+		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><h3>Change password</h3>{!passwordCodeSent ? <><p>For your protection we first email a verification code to {user.email}.</p><button className="btn btn-secondary" onClick={sendPasswordCode}>Email me a verification code</button></> : <form className="portal-form" onSubmit={updatePassword}><label>Verification code<input name="nonce" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,10}" maxLength="10" required /></label><label>New password<input name="password" type="password" minLength="12" autoComplete="new-password" required /><small>{passwordRequirements}</small></label><button className="btn btn-primary">Change password</button></form>}<hr /><h3>Devices</h3><p>Sign out every other browser or device that is using this account.</p><button className="btn btn-secondary" onClick={signOutOtherDevices}>Sign out other devices</button><hr /><h3>Authenticator app</h3><p>Staff access requires a verified authenticator and an AAL2 session.</p>{mfa.error && <div className="portal-error" role="alert">{mfa.error}</div>}{mfa.message && <div className="portal-success" role="status">{mfa.message}</div>}{mfa.qr && <img src={mfa.qr} alt="Authenticator enrollment QR code" width="220" height="220" />}{!mfa.factorId ? <button className="btn btn-secondary" onClick={beginMfa}>Set up or verify MFA</button> : <form className="portal-form" onSubmit={verifyMfa}><label>Six-digit code<input value={mfa.code} onChange={(event) => setMfa((value) => ({ ...value, code: event.target.value.replace(/\D/g, '').slice(0, 6) }))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required /></label><button className="btn btn-primary">Verify MFA</button></form>}</section>}
 	</div>;
 }

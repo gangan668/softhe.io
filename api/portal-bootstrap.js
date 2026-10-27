@@ -1,11 +1,15 @@
 const { withHttp } = require('./_lib/http');
-const { adminRequest, getBearerToken, getConfig, verifyActiveUser, verifyUser } = require('./_lib/supabase');
+const { getBearerToken, getConfig, verifyUser } = require('./_lib/supabase');
 const { clientIp, enforceRateLimit, enforceSameOrigin, jsonOnly, sendPublicError } = require('./_lib/portal-security');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const staffHandler = require('./_lib/staff-handler');
 
 const revokeOtherSessions = async (req, res) => {
 	const user = await verifyUser(req);
+	await Promise.all([
+		enforceRateLimit('revoke-others:user', user.id, 5, 600),
+		enforceRateLimit('revoke-others:ip', clientIp(req), 20, 600),
+	]);
 	const { url, publishableKey } = getConfig();
 	const response = await fetchWithTimeout(`${url}/auth/v1/logout?scope=others`, { method: 'POST', headers: { apikey: publishableKey, Authorization: `Bearer ${getBearerToken(req)}` } });
 	if (!response.ok) throw new Error('Session revocation failed');
@@ -20,18 +24,8 @@ async function portalBootstrap(req, res) {
 		enforceSameOrigin(req);
 		if (req.query?.action === 'revoke-others') return await revokeOtherSessions(req, res);
 		if (['revoke-staff', 'account-status'].includes(req.query?.action)) return res.status(410).json({ error: 'Legacy staff operation disabled' });
-		const user = await verifyActiveUser(req);
-		if (!user.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before using the portal' });
-		await Promise.all([
-			enforceRateLimit('bootstrap:user', user.id, 10, 60),
-			enforceRateLimit('bootstrap:ip', clientIp(req), 30, 60),
-		]);
-		// Bootstrap is deliberately incapable of granting or renewing privileged roles.
-		const claimed = await adminRequest('rpc/claim_verified_orders', { method: 'POST', body: { claim_user: user.id, claim_email: user.email } });
-		if (claimed?.length) await adminRequest('activity_events', { method: 'POST', body: claimed.map((order) => ({
-			user_id: user.id, actor_id: user.id, event_type: 'order.claimed', resource_type: 'order', resource_id: order.id,
-		})) });
-		return res.status(200).json({ ready: true, claimedOrders: claimed?.length || 0 });
+		// Orders are bound to an account at checkout; email-based order claiming is retired.
+		return res.status(404).json({ error: 'Not found' });
 	} catch (error) {
 		return sendPublicError(res, error, 'Customer portal is temporarily unavailable');
 	}

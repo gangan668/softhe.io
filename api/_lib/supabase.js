@@ -13,6 +13,11 @@ const getBearerToken = (req) => {
 	return typeof value === 'string' && value.startsWith('Bearer ') ? value.slice(7).trim() : null;
 };
 
+const jwtClaims = (token) => {
+	try { return JSON.parse(Buffer.from(String(token).split('.')[1] || '', 'base64url').toString('utf8')); }
+	catch { return {}; }
+};
+
 const verifyUser = async (req, { required = true } = {}) => {
 	const token = getBearerToken(req);
 	if (!token) {
@@ -26,6 +31,11 @@ const verifyUser = async (req, { required = true } = {}) => {
 	if (!response.ok) throw Object.assign(new Error('Invalid or expired session'), { statusCode: 401 });
 	const user = await response.json();
 	if (!user?.id || !user?.email) throw Object.assign(new Error('Invalid user session'), { statusCode: 401 });
+	// A password alone must not unlock an account that has enrolled a second factor.
+	const hasVerifiedFactor = Array.isArray(user.factors) && user.factors.some((factor) => factor?.status === 'verified');
+	if (hasVerifiedFactor && jwtClaims(token).aal !== 'aal2') {
+		throw Object.assign(new Error('MFA required'), { statusCode: 403, publicMessage: 'Multi-factor authentication is required.' });
+	}
 	return { ...user, token };
 };
 
@@ -56,7 +66,9 @@ const userRequest = async (user, path, { method = 'GET', body, headers = {} } = 
 	});
 	if (!response.ok) {
 		const data = await response.json().catch(() => ({}));
-		throw Object.assign(new Error(data.message || data.error || `Customer data request failed (${response.status})`), { statusCode: response.status });
+		// Keep upstream details in logs; clients only receive a generic message.
+		const publicMessage = response.status === 401 ? 'Your session has expired. Please sign in again.' : 'Request could not be completed';
+		throw Object.assign(new Error(data.message || data.error || `Customer data request failed (${response.status})`), { statusCode: response.status, publicMessage });
 	}
 	if (response.status === 204) return null;
 	return response.json().catch(() => null);
@@ -82,11 +94,6 @@ const authAdminRequest = async (path, { method = 'POST', body } = {}) => {
 	});
 	if (!response.ok) throw new Error(`Authentication administration failed (${response.status})`);
 	return response.status === 204 ? null : response.json().catch(() => null);
-};
-
-const jwtClaims = (token) => {
-	try { return JSON.parse(Buffer.from(String(token).split('.')[1] || '', 'base64url').toString('utf8')); }
-	catch { return {}; }
 };
 
 const staffPortalEnabled = () => process.env.STAFF_PORTAL_ENABLED === 'true';

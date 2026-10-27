@@ -64,3 +64,41 @@ it('redirects a signed-in user away from signup while allowing recovery requests
 it('retains a recovery callback error from router state', async () => {
 	window.history.replaceState({ authError: 'Expired recovery callback' }, '', '/'); mount('forgot'); await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('Expired recovery callback'));
 });
+it('explains that checkout requires an account and returns there after sign-in', async () => {
+	window.history.replaceState({ from: '/checkout' }, '', '/');
+	auth.signInWithPassword = vi.fn().mockResolvedValue({ data: {}, error: null });
+	render(<MemoryRouter><AuthContext.Provider value={{ configured: true, loading: false, supabase: { auth } }}><Routes><Route path="/" element={<AuthPage mode="login" />} /><Route path="/checkout" element={<div>Checkout destination</div>} /></Routes></AuthContext.Provider></MemoryRouter>);
+	expect(screen.getByRole('status')).toHaveTextContent('Sign in or create an account to complete your purchase. Your cart is saved.');
+	fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'customer@example.test' } });
+	fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'StrongPassword123!' } });
+	fireEvent.submit(screen.getByLabelText('Email').closest('form'));
+	await screen.findByText('Checkout destination');
+	window.history.replaceState(null, '', '/');
+});
+it('returns a customer who signed up from checkout to checkout after email confirmation', async () => {
+	localStorage.clear();
+	window.history.replaceState({ from: '/checkout' }, '', '/');
+	auth.signUp = vi.fn().mockResolvedValue({ data: {}, error: null });
+	const view = mount('register');
+	expect(screen.getByRole('status')).toHaveTextContent('Your cart is saved.');
+	fill('register'); fireEvent.submit(screen.getByLabelText('Email').closest('form'));
+	await waitFor(() => expect(auth.signUp).toHaveBeenCalled());
+	view.unmount();
+	// The confirmation link opens a fresh page: no router state, but a signed-in user.
+	window.history.replaceState(null, '', '/');
+	render(<MemoryRouter><AuthContext.Provider value={{ configured: true, loading: false, supabase: { auth }, user: { id: 'customer' } }}><Routes><Route path="/" element={<AuthPage mode="login" />} /><Route path="/checkout" element={<div>Checkout destination</div>} /></Routes></AuthContext.Provider></MemoryRouter>);
+	expect(await screen.findByText('Checkout destination')).toBeInTheDocument();
+	localStorage.clear();
+});
+it('keeps the checkout destination when switching from login to registration', () => {
+	window.history.replaceState({ from: '/checkout' }, '', '/');
+	mount('login');
+	fireEvent.click(screen.getByRole('link', { name: 'Create account' }));
+	expect(window.history.state).toEqual(expect.objectContaining({ from: '/checkout' }));
+	window.history.replaceState(null, '', '/');
+});
+it('sends ordinary sign-ins to the account page', async () => {
+	localStorage.clear(); window.history.replaceState(null, '', '/');
+	mount('login', { user: { id: 'customer' } });
+	expect(await screen.findByText('Account destination')).toBeInTheDocument();
+});
