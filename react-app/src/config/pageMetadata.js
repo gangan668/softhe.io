@@ -60,6 +60,7 @@ export function buildPageMetadata({ commerceEnabled }) {
 			path: '/checkout',
 			title: 'Checkout | Softhe.io',
 			description: `Review your selected Softhe.io products and order terms before payment.${orderingNote}`,
+			robots: 'noindex, nofollow',
 		},
 		{
 			path: '/faq',
