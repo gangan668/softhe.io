@@ -8,8 +8,8 @@ import { absoluteUrl } from '../config/site';
 import { buildPageMetadata, socialCopy } from '../config/pageMetadata';
 import { commerceEnabled } from '../utils/runtimeConfig';
 
-const privateRoutes = ['/login', '/register', '/forgot-password', '/resend-confirmation', '/reset-password', '/account', '/admin'];
-const publicRoutes = ['/', '/services', '/store', '/performance', '/contact', '/faq', '/checkout', '/privacy-policy', '/cookie-policy', '/terms', '/legal-notice', '/withdrawal'];
+const privateRoutes = ['/login', '/register', '/forgot-password', '/resend-confirmation', '/reset-password', '/account', '/admin', '/checkout'];
+const publicRoutes = ['/', '/services', '/store', '/performance', '/contact', '/faq', '/privacy-policy', '/cookie-policy', '/terms', '/legal-notice', '/withdrawal'];
 const robots = () => document.querySelector('meta[name="robots"]').content;
 const canonical = () => document.querySelector('link[rel="canonical"]').href;
 const meta = (attribute, name) => document.querySelector(`meta[${attribute}="${name}"]`)?.content ?? null;

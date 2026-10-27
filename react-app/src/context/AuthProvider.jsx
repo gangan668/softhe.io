@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AuthContext } from './AuthContext';
 import { getSupabase, portalConfigured } from '../lib/supabase';
+import { mfaStepRequired } from '../utils/mfa';
 
 function hasStoredSession() {
 	try {
@@ -24,6 +25,8 @@ export function AuthProvider({ children }) {
 	const [staffCheckedUserId, setStaffCheckedUserId] = useState(null);
 	const [staffCheckedToken, setStaffCheckedToken] = useState(null);
 	const [supabase, setSupabase] = useState(null);
+	// Only a recovery-link session may set a new password without the current one.
+	const [recoveryUserId, setRecoveryUserId] = useState(null);
 	const sessionUserId = session?.user?.id;
 	const enabled = required || started;
 	const retry = useCallback(() => { setError(''); setLoading(true); setAttempt((value) => value + 1); }, []);
@@ -41,9 +44,11 @@ export function AuthProvider({ children }) {
 				if (!active) return;
 				if (!client) throw new Error('Authentication client unavailable');
 				setSupabase(client);
-			subscription = client.auth.onAuthStateChange((_event, nextSession) => {
+			subscription = client.auth.onAuthStateChange((event, nextSession) => {
 					if (!active) return;
 					authChanged = true;
+					const nextUserId = nextSession?.user?.id || null;
+					setRecoveryUserId((current) => event === 'PASSWORD_RECOVERY' ? nextUserId : current === nextUserId ? current : null);
 					if (!nextSession) { setStaff(false); setStaffCheckedUserId(null); setStaffCheckedToken(null); }
 					setSession(nextSession); setError(''); setLoading(false);
 				}).data.subscription;
@@ -78,6 +83,6 @@ export function AuthProvider({ children }) {
 		return () => { active = false; window.clearInterval(refresh); };
 	}, [session?.access_token, sessionUserId]);
 
-	const value = useMemo(() => ({ configured: portalConfigured, session, user: session?.user || null, loading: loading || (required && !started), error, retry, staff: Boolean(sessionUserId && staffCheckedUserId === sessionUserId && staffCheckedToken === session?.access_token && staff), staffCheckedUserId: staffCheckedToken === session?.access_token ? staffCheckedUserId : null, supabase }), [session, loading, required, started, error, retry, staff, staffCheckedUserId, staffCheckedToken, sessionUserId, supabase]);
+	const value = useMemo(() => ({ configured: portalConfigured, session, user: session?.user || null, loading: loading || (required && !started), error, retry, staff: Boolean(sessionUserId && staffCheckedUserId === sessionUserId && staffCheckedToken === session?.access_token && staff), staffCheckedUserId: staffCheckedToken === session?.access_token ? staffCheckedUserId : null, supabase, mfaRequired: mfaStepRequired(session), passwordRecovery: Boolean(sessionUserId && recoveryUserId === sessionUserId) }), [session, loading, required, started, error, retry, staff, staffCheckedUserId, staffCheckedToken, sessionUserId, supabase, recoveryUserId]);
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

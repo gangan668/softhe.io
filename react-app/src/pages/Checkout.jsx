@@ -6,6 +6,7 @@ import { getCartPricing } from '../utils/cart';
 import { createCheckoutSession } from '../utils/checkout';
 import { commerceEnabled } from '../utils/runtimeConfig';
 import { useAuth } from '../context/useAuth';
+import { clearPostAuthDestination } from '../utils/postAuthRedirect';
 import './Checkout.css';
 
 function Checkout() {
@@ -17,6 +18,9 @@ function Checkout() {
 	const [termsAccepted, setTermsAccepted] = useState(false);
 	const [earlyPerformanceAccepted, setEarlyPerformanceAccepted] = useState(false);
 	const { session } = useAuth();
+
+	// The customer is back at checkout, so a pending sign-up return is fulfilled.
+	useEffect(() => { clearPostAuthDestination(); }, []);
 
 	useEffect(() => {
 		// Redirect to store if cart is empty
@@ -45,9 +49,7 @@ function Checkout() {
 				earlyPerformanceRequested: earlyPerformanceAccepted,
 				withdrawalAcknowledged: earlyPerformanceAccepted,
 			};
-			const { url } = session?.access_token
-				? await createCheckoutSession(cart, legalAcceptance, fetch, session.access_token)
-				: await createCheckoutSession(cart, legalAcceptance);
+			const { url } = await createCheckoutSession(cart, legalAcceptance, fetch, session?.access_token);
 			window.location.assign(url);
 		} catch (error) {
 			setCheckoutError(error.message);

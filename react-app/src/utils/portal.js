@@ -15,3 +15,9 @@ export const writeTicket = async (session, payload, fetchImpl = fetch) => {
 	return data;
 };
 
+
+export const revokeOtherSessions = async (session, fetchImpl = fetch) => {
+	if (!session?.access_token) return false;
+	const response = await fetchImpl('/api/session-revoke-others', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: '{}' });
+	return response.ok;
+};

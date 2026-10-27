@@ -1,4 +1,16 @@
+import { Buffer } from 'node:buffer';
 import { expect, test } from '@playwright/test';
+
+const customer = { id: '11111111-1111-4111-8111-111111111111', aud: 'authenticated', role: 'authenticated', email: 'customer@example.test', email_confirmed_at: '2026-10-01T12:00:00Z', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-10-01T12:00:00Z' };
+const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+const customerToken = () => `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode({ sub: customer.id, role: 'authenticated', aal: 'aal1', exp: Math.floor(Date.now() / 1000) + 3600, session_id: '22222222-2222-4222-8222-222222222222' })}.fixture-signature`;
+
+// Seeds a stored Supabase session and answers the intercepted fixture project.
+async function signInCustomer(page) {
+	const session = { access_token: customerToken(), refresh_token: 'fixture-refresh-token', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, token_type: 'bearer', user: customer };
+	await page.addInitScript((stored) => localStorage.setItem('sb-portal-fixture-auth-token', JSON.stringify(stored)), session);
+	await page.route('https://portal-fixture.supabase.co/**', (route) => route.fulfill({ status: 200, json: new URL(route.request().url()).pathname === '/auth/v1/user' ? customer : [] }));
+}
 
 const routes = ['/', '/services', '/store', '/performance', '/faq', '/contact', '/terms', '/privacy-policy', '/legal-notice', '/withdrawal'];
 
@@ -116,7 +128,19 @@ test.describe('public website smoke tests', () => {
 		await expect(page.locator('#main-content')).toBeFocused();
 	});
 
+	test('signed-out shoppers are asked to sign in before checkout and keep their cart', async ({ page }) => {
+		let checkoutRequests = 0;
+		await page.route('**/api/create-checkout-session', (route) => { checkoutRequests += 1; return route.fulfill({ status: 500, json: {} }); });
+		await page.goto('/store');
+		await page.getByRole('button', { name: /buy now/i }).first().click();
+		await expect(page).toHaveURL(/\/login$/);
+		await expect(page.getByRole('status')).toContainText('Sign in or create an account to complete your purchase. Your cart is saved.');
+		await expect(page.getByRole('button', { name: /pay securely with stripe/i })).toHaveCount(0);
+		expect(checkoutRequests).toBe(0);
+	});
+
 	test('checkout requires terms consent and exposes server failures safely', async ({ page }) => {
+		await signInCustomer(page);
 		await page.route('**/api/create-checkout-session', (route) => route.fulfill({
 			status: 503,
 			contentType: 'application/json',

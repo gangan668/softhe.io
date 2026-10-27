@@ -40,7 +40,7 @@ describe('cart pricing', () => {
 		const combinations = PRODUCTS.flatMap((_, index) => [PRODUCTS.slice(0, index + 1), PRODUCTS.slice(index)]);
 		for (const products of combinations) {
 			const cart = products.map((product, index) => ({ ...product, quantity: index + 1 }));
-			const { form } = createStripeForm(cart.map(({ id, quantity }) => ({ id, quantity })), 'https://softhe.io');
+			const { form } = createStripeForm(cart.map(({ id, quantity }) => ({ id, quantity })), 'https://softhe.io', undefined, undefined, { id: 'customer-id', email: 'customer@example.test' });
 			let stripeTotalCents = 0;
 			cart.forEach((item, index) => {
 				stripeTotalCents += Number(form.get(`line_items[${index}][price_data][unit_amount]`)) * item.quantity;

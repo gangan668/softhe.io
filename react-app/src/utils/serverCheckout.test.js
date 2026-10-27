@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import crypto from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PRODUCTS as clientProducts } from '../data/products';
 
 const require = createRequire(import.meta.url);
@@ -63,7 +63,7 @@ describe('server checkout validation', () => {
 			{ id: 'windows-10', quantity: 1 },
 			{ id: 'bios-optimization', quantity: 1 },
 		]);
-		const { form, discountRate } = createStripeForm(items, 'https://softhe.io');
+		const { form, discountRate } = createStripeForm(items, 'https://softhe.io', undefined, undefined, { id: 'customer-id', email: 'customer@example.test' });
 
 		expect(getDiscountRate(2)).toBe(0.05);
 		expect(discountRate).toBe(0.05);
@@ -115,5 +115,47 @@ describe('Stripe webhook verification', () => {
 		expect(verifyStripeSignature(payload, `t=${timestamp},v1=${signature}`, secret)).toBe(true);
 		expect(verifyStripeSignature(payload, `t=${timestamp},v1=${'0'.repeat(64)}`, secret)).toBe(false);
 		expect(verifyStripeSignature(payload, `t=not-a-number,v1=${signature}`, secret)).toBe(false);
+	});
+});
+
+describe('account-only checkout', () => {
+	const env = {
+		COMMERCE_ENABLED: 'true', STRIPE_SECRET_KEY: 'sk_test_fixture', LEGAL_NAME: 'Fixture Operator', LEGAL_ADDRESS: 'Testgatan 1, Stockholm',
+		BUSINESS_REGISTRATION_ID: '000000-0000', SUPPORT_EMAIL: 'support@softhe.io', VAT_STATUS: 'not-registered', PUBLIC_SITE_URL: 'https://softhe.io',
+		SUPABASE_URL: 'https://project.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'public-key',
+	};
+	const request = (headers = {}) => ({
+		method: 'POST',
+		headers: { 'content-type': 'application/json', 'idempotency-key': '12345678901234567890', ...headers },
+		body: { items: [{ id: 'windows-10', quantity: 1 }], legalAcceptance: { termsAccepted: true, earlyPerformanceRequested: true, withdrawalAcknowledged: true } },
+	});
+	const response = () => ({ statusCode: null, payload: null, setHeader() {}, status(code) { this.statusCode = code; return this; }, json(payload) { this.payload = payload; return this; } });
+	afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
+
+	it('refuses anonymous checkout before contacting Stripe', async () => {
+		for (const [name, value] of Object.entries(env)) vi.stubEnv(name, value);
+		const outbound = vi.fn(); vi.stubGlobal('fetch', outbound);
+		const res = response();
+		await checkoutApi(request(), res);
+		expect(res.statusCode).toBe(401);
+		expect(outbound).not.toHaveBeenCalled();
+	});
+	it('refuses accounts whose email is not confirmed', async () => {
+		for (const [name, value] of Object.entries(env)) vi.stubEnv(name, value);
+		const outbound = vi.fn(async (url) => url.endsWith('/auth/v1/user')
+			? { ok: true, status: 200, json: async () => ({ id: 'customer-id', email: 'customer@example.test', email_confirmed_at: null }) }
+			: { ok: true, status: 200, json: async () => [{ account_status: 'active' }] });
+		vi.stubGlobal('fetch', outbound);
+		const res = response();
+		await checkoutApi(request({ authorization: 'Bearer token' }), res);
+		expect(res.statusCode).toBe(403);
+		expect(res.payload).toEqual({ error: 'Verify your email before placing an order' });
+		expect(outbound.mock.calls.some(([url]) => new URL(String(url)).hostname === 'api.stripe.com')).toBe(false);
+	});
+	it('always binds the Stripe session to the signed-in customer', () => {
+		const { form } = createStripeForm([{ id: 'windows-10', quantity: 1 }], 'https://softhe.io', undefined, undefined, { id: 'customer-id', email: 'customer@example.test' });
+		expect(form.get('metadata[portal_user_id]')).toBe('customer-id');
+		expect(form.get('customer_email')).toBe('customer@example.test');
+		expect(() => createStripeForm([{ id: 'windows-10', quantity: 1 }], 'https://softhe.io')).toThrow('Checkout requires a signed-in customer');
 	});
 });

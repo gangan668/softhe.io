@@ -27,6 +27,10 @@ try {
     create function auth.uid() returns uuid language sql stable as $$
       select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid
     $$;
+    create function auth.jwt() returns jsonb language sql stable as $$
+      select coalesce(nullif(current_setting('request.jwt.claims',true),'')::jsonb, '{}'::jsonb)
+    $$;
+    create table auth.mfa_factors(id uuid primary key default gen_random_uuid(), user_id uuid, status text);
   `);
   for (const file of readdirSync(resolve(root, 'supabase/migrations')).sort()) {
     if (file.endsWith('_mediate_customer_ticket_writes.sql')) {
@@ -40,7 +44,8 @@ try {
   await db.exec(readFileSync(resolve(root, 'supabase/tests/customer_service_writes.sql'), 'utf8'));
   await db.exec(readFileSync(resolve(root, 'supabase/tests/ticket_write_preflight.sql'), 'utf8'));
   await db.exec(readFileSync(resolve(root, 'supabase/tests/ticket_write_catalog.sql'), 'utf8'));
-  console.log('All migrations replayed. Column hardening passed. Service create/reply RPCs succeeded; browser bypasses, cross-customer replies, closed replies, suspended accounts, and invalid input were denied.');
+  await db.exec(readFileSync(resolve(root, 'supabase/tests/customer_mfa_and_email.sql'), 'utf8'));
+  console.log('All migrations replayed. Column hardening passed. Service create/reply RPCs succeeded; browser bypasses, cross-customer replies, closed replies, suspended accounts, and invalid input were denied. MFA-enrolled AAL1 sessions were denied and profile emails stayed synchronized.');
 } catch (error) {
   console.error(error.message);
   process.exitCode = 1;

@@ -1,13 +1,15 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
+import MfaChallenge from './MfaChallenge';
 
 export default function ProtectedRoute({ children, staffOnly = false }) {
-	const { configured, loading, user, staff, staffCheckedUserId, error, retry } = useAuth();
+	const { configured, loading, user, staff, staffCheckedUserId, error, retry, mfaRequired } = useAuth();
 	const location = useLocation();
 	if (!configured) return <div className="portal-state" role="alert">Customer portal is not configured.</div>;
 	if (loading) return <div className="portal-state" role="status">Loading your account…</div>;
 	if (error) return <div className="portal-state" role="alert">{error}<button className="btn btn-primary" onClick={retry}>Try again</button></div>;
 	if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+	if (mfaRequired) return <MfaChallenge />;
 	if (staffOnly && staffCheckedUserId !== user.id) return <div className="portal-state" role="status">Checking staff access…</div>;
 	if (staffOnly && !staff) return <Navigate to="/account" replace />;
 	return children;

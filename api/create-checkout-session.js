@@ -105,11 +105,10 @@ const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), 
 	form.append('billing_address_collection', 'auto');
 	form.append('invoice_creation[enabled]', 'true');
 	form.append('customer_creation', 'always');
-	if (customer) {
-		form.append('customer_email', customer.email);
-		form.append('client_reference_id', customer.id);
-		form.append('metadata[portal_user_id]', customer.id);
-	}
+	if (!customer?.id || !customer?.email) throw new Error('Checkout requires a signed-in customer');
+	form.append('customer_email', customer.email);
+	form.append('client_reference_id', customer.id);
+	form.append('metadata[portal_user_id]', customer.id);
 	if (vatStatus === 'registered') form.append('automatic_tax[enabled]', 'true');
 	form.append('metadata[item_count]', String(itemCount));
 	form.append('metadata[product_count]', String(items.length));
@@ -172,10 +171,11 @@ async function createCheckoutSession(req, res) {
 	let form;
 	let discountRate;
 	try {
-		const customer = await verifyActiveUser(req, { required: false });
-		if (customer && !customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before linking this order' });
+		// Every order belongs to a verified account, so no order is ever matched by email later.
+		const customer = await verifyActiveUser(req);
+		if (!customer.email_confirmed_at) return res.status(403).json({ error: 'Verify your email before placing an order' });
 		const [, , acceptedAt] = await Promise.all([
-			enforceRateLimit('checkout:actor', customer?.id || clientIp(req), 10, 600),
+			enforceRateLimit('checkout:actor', customer.id, 10, 600),
 			enforceRateLimit('checkout:ip', clientIp(req), 10, 600),
 			getIdempotentAcceptedAt(idempotencyKey),
 		]);

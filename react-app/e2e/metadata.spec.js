@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
-const privateRoutes = ['/login', '/register', '/forgot-password', '/resend-confirmation', '/reset-password', '/account', '/admin'];
-const publicRoutes = ['/', '/services', '/store', '/performance', '/contact', '/faq', '/checkout', '/privacy-policy', '/cookie-policy', '/terms', '/legal-notice', '/withdrawal'];
+const privateRoutes = ['/login', '/register', '/forgot-password', '/resend-confirmation', '/reset-password', '/account', '/admin', '/checkout'];
+const publicRoutes = ['/', '/services', '/store', '/performance', '/contact', '/faq', '/privacy-policy', '/cookie-policy', '/terms', '/legal-notice', '/withdrawal'];
 
 test('direct hydrated routes keep canonical and indexing policy', async ({ page }) => {
 	for (const route of [...publicRoutes, ...privateRoutes]) {

@@ -68,3 +68,10 @@ it('does not expose a previous operator draft to a replacement authenticated use
 	view.rerender(tree('new')); expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
 	await screen.findByText('Support question'); fireEvent.click(screen.getByRole('button', { name: /Support question/ })); await screen.findByRole('textbox'); expect(screen.getByRole('textbox')).toHaveValue('');
 });
+it('warns staff when a saved reply could not be emailed to the customer', async () => {
+	mock.request.mockImplementation(async (...args) => args[1] === 'reply' ? { id: 'reply', notified: false } : handler(...args));
+	mount(); await screen.findByText('Support question'); fireEvent.click(screen.getByRole('button', { name: /Support question/ })); await screen.findByText('Customer message');
+	fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Response' } }); fireEvent.click(screen.getByRole('button', { name: 'Reply as staff' }));
+	expect(await screen.findByRole('alert')).toHaveTextContent('Reply saved, but the customer could not be emailed.');
+	expect(screen.getByRole('textbox')).toHaveValue('');
+});
