@@ -104,6 +104,10 @@ describe('staff reply notification', () => {
 		await staffApi(staffRequest(), response);
 		expect(response.statusCode).toBe(201);
 		expect(response.payload).toEqual({ id: 'message-1', notified: true });
+		// The replay entry is stored before the email request, so a retry cannot post the reply again.
+		const urls = outbound.mock.calls.map(([url, options]) => (url === 'https://redis.example' && JSON.parse(options.body)[0] === 'SET' && JSON.parse(options.body)[1].startsWith('portal:staff-write:') && !JSON.parse(options.body)[1].endsWith(':lock') ? 'replay-saved' : url));
+		expect(urls.indexOf('replay-saved')).toBeGreaterThan(-1);
+		expect(urls.indexOf('replay-saved')).toBeLessThan(urls.indexOf('https://api.emailjs.com/api/v1.0/email/send'));
 		const email = outbound.mock.calls.find(([url]) => url === 'https://api.emailjs.com/api/v1.0/email/send');
 		expect(JSON.parse(email[1].body).template_params).toMatchObject({ to_email: 'customer@example.invalid', ticket_id: ticketId, reply_preview: 'We fixed it' });
 	});

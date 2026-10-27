@@ -20,7 +20,8 @@ These settings are enforced by Supabase, not by browser code. Each one is availa
 |---|---|---|
 | Email provider → Confirm email | On | Checkout and staff checks require `email_confirmed_at`. |
 | Email provider → Secure email change | On | Both the old and new address must confirm a change. |
-| Email provider → Secure password change | On | The Security tab sends a reauthentication code; this makes Supabase reject a password change without it. |
+| Email provider → Secure password change | On | Supabase requires the emailed reauthentication code for password changes from sessions older than 24 hours. Sessions created in the last 24 hours are exempt. |
+| Require current password when changing password | On, after the Preview check in the rollout handoff confirms password recovery still works | Closes the 24-hour window: a stolen fresh session cannot change the password without knowing the current one. The Security tab already sends `current_password`. |
 | Password requirements | Minimum length 12; lowercase, uppercase, digits and symbols | Matches the client policy so direct Auth API calls cannot set weaker passwords. |
 | Multi-Factor → TOTP | Enroll and verify enabled | Customers and staff can enroll an authenticator app. |
 | Attack Protection → CAPTCHA | Turnstile, with the same site key as `VITE_TURNSTILE_SITE_KEY` | Enable together with `VITE_CAPTCHA_ENABLED=true`. The browser flag alone does not protect the Auth API. |
@@ -34,7 +35,8 @@ Checkout requires a signed-in account with a confirmed email. `/checkout` is a p
 
 ## Account takeover protections
 
-- Password changes from the Security tab require a code emailed by `supabase.auth.reauthenticate()`. Other sessions are revoked after every change.
+- The Security tab asks for the current password and a code emailed by `supabase.auth.reauthenticate()`. Supabase enforces these only through the settings above. Without "Require current password", a session created in the last 24 hours can change the password without either.
+- After every password change the portal tries to revoke other sessions. Revocation can fail independently, in which case the new password stays in effect and the customer is told to use **Sign out other devices**.
 - `/reset-password` accepts only a verified recovery link. An ordinary signed-in session is sent to the Security tab instead.
 - Accounts with a verified authenticator must complete a TOTP challenge after sign-in. The API (`verifyUser`) and restrictive RLS policies (`security.mfa_satisfied()`) reject AAL1 sessions for those accounts, so skipping the browser prompt grants no data.
 - Supabase has no recovery codes. A customer who loses their authenticator must contact support. Remove the factor with the Auth admin API only after verifying the customer through an independent channel.
@@ -65,4 +67,5 @@ Set `FULFILLMENT_TEST_FAIL_FIRST=true` only for the retry test. The first delive
 - Confirm authenticated browser queries remain ownership-only even for staff accounts.
 - Rotate the service-role key immediately if it is ever exposed.
 - Confirm an account with a verified TOTP factor cannot read portal tables or call portal APIs with an AAL1 session.
-- Confirm a signed-in session without a recovery link cannot set a password at `/reset-password`, and that a Security tab change fails without the emailed code.
+- Confirm a signed-in session without a recovery link cannot set a password at `/reset-password`.
+- Confirm `updateUser({ password })` without `current_password` is rejected for a fresh session (Require current password), and without `nonce` for a session older than 24 hours (Secure password change).

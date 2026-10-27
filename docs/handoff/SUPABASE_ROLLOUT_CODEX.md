@@ -18,7 +18,7 @@ Confirm both refs with `supabase projects list` before starting. If either ref i
 Read these from the environment. Never print, log, commit, or paste them into files, and never invent a value.
 
 - `SUPABASE_ACCESS_TOKEN`: a personal access token for the Supabase CLI and Management API.
-- `SUPABASE_DB_PASSWORD_PREVIEW` and `SUPABASE_DB_PASSWORD_PRODUCTION`: the database passwords, used by `supabase link` and `supabase db push`.
+- `SUPABASE_DB_PASSWORD_PREVIEW` and `SUPABASE_DB_PASSWORD_PRODUCTION`: the database passwords. Pass them to the CLI only through its `SUPABASE_DB_PASSWORD` environment variable. Never use `--password`, because command-line arguments are visible to other processes (`ps`, `/proc/<pid>/cmdline`).
 - `TURNSTILE_SECRET_KEY`: optional. Needed only for step 3c.
 
 If a required credential is missing, stop and ask the owner. Do not work around it.
@@ -37,7 +37,7 @@ If a required credential is missing, stop and ask the owner. Do not work around 
    ```bash
    cd react-app && npm ci && npm run test:database && cd ..
    ```
-2. Link the project: `supabase link --project-ref <ref> --password "$SUPABASE_DB_PASSWORD_<ENV>"`.
+2. Link the project without putting the password in the arguments: `SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase link --project-ref <ref>`.
 3. Run `supabase migration list --linked`. Every migration up to and including `20261016011448_enforce_customer_ticket_api` must show as applied on the remote. Exactly these three must be pending:
    - `20261027120000_require_mfa_for_enrolled_customers.sql`
    - `20261027120100_sync_profile_email.sql`
@@ -51,7 +51,15 @@ If a required credential is missing, stop and ask the owner. Do not work around 
           to_regprocedure('public.claim_verified_orders(uuid,text)') is not null as claim_function_present;
    ```
    The first two must be `true`. The third should be `true` before migrating and `false` afterwards.
-5. Check that no profile email would collide when it is synchronized. This query must return zero rows:
+5. Count paid orders that are not linked to an account. Migration `20261027130000` removes email-based order claiming, so these would otherwise stay unlinked:
+   ```sql
+   select count(*) as unlinked_orders,
+          count(*) filter (where status = 'paid') as unlinked_paid
+     from public.orders where user_id is null;
+   ```
+   - **Preview:** any count is acceptable, because these are sandbox test orders. Record the numbers.
+   - **Production:** if `unlinked_paid` is greater than 0, stop before step 2 and report the count to the owner. Do not link orders by email yourself. The owner decides each case and links an order manually (`update public.orders set user_id = '<verified account id>' where id = '<order id>'`) only after confirming ownership through Stripe and the customer.
+6. Check that no profile email would collide when it is synchronized. This query must return zero rows:
    ```sql
    select lower(u.email) as email, count(*) from auth.users u
    join public.profiles p on p.id = u.id
@@ -61,7 +69,7 @@ If a required credential is missing, stop and ask the owner. Do not work around 
 ## Step 2: Apply the migrations (each project)
 
 ```bash
-supabase db push --linked --password "$SUPABASE_DB_PASSWORD_<ENV>"
+SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase db push --linked
 ```
 
 Confirm that the push lists exactly the three pending files, and nothing else, before it applies them.
@@ -100,10 +108,17 @@ Use the Management API. Before sending anything, download the current OpenAPI sp
 
 ```bash
 API=https://api.supabase.com/v1/projects/<ref>/config/auth
-curl -sS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$API" > /tmp/auth-full.json
-# Save a redacted backup outside the repository, then delete the full copy.
-jq 'with_entries(select(.key | test("secret|pass|key|token"; "i") | not))' /tmp/auth-full.json > /tmp/supabase-auth-<ref>-before.json
-rm /tmp/auth-full.json
+# The unredacted response contains secrets: keep it in a private, auto-deleted file.
+umask 077
+auth_full="$(mktemp)"
+trap 'rm -f -- "$auth_full"' EXIT
+curl -sS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$API" > "$auth_full"
+# Drop only fields whose names END in a secret suffix (smtp_pass, *_secret, *_token, *_api_key ...).
+# Non-secret settings such as password_min_length must stay in the backup so rollback can restore them.
+jq 'with_entries(select(.key | test("(secret|secrets|pass|password|token|api_key|_key)$"; "i") | not))' "$auth_full" > /tmp/supabase-auth-<ref>-before.json
+chmod 600 /tmp/supabase-auth-<ref>-before.json
+# Rollback needs these keys. Confirm they survived redaction.
+jq -e 'has("password_min_length") and has("password_required_characters") and has("security_update_password_require_reauthentication")' /tmp/supabase-auth-<ref>-before.json
 ```
 
 ### 3a. Core settings (always apply)
@@ -126,6 +141,14 @@ curl -sS -X PATCH "$API" \
 ```
 
 Expect HTTP 200.
+
+### 3a-2. Require current password (Preview check first)
+
+Supabase skips the emailed reauthentication code for sessions created in the last 24 hours. The "Require current password when changing password" setting closes that gap. The Security tab already sends `current_password`.
+
+1. Find this setting's field name in the OpenAPI spec. Do not guess it. If the spec has no such field, skip this step and report it as unavailable.
+2. **Preview:** enable it, then repeat the password-recovery check in step 4 (item 2b). If a recovery-link reset is rejected because no current password was sent, disable the setting again and report that it conflicts with password recovery.
+3. **Production:** enable it only if the Preview recovery check passed.
 
 ### 3b. Redirect URLs (check only)
 
@@ -152,7 +175,11 @@ GET the config again. Confirm every field from 3a (and 3c if applied) has the ne
 Use throwaway test accounts on the Preview deployment. Never use real customer accounts.
 
 1. **Password policy:** sign up with `weakpassword1`. Supabase must reject it.
-2. **Reauthentication:** signed in as a test user, call `updateUser({ password })` without a `nonce`. It must fail with a reauthentication error. On the Security tab, request a code, then submit it with a new password. This must succeed.
+2. **Password changes:**
+   a. **Fresh session** (signed in just now): `updateUser({ password })` without `current_password` must fail if step 3a-2 was applied. Without that setting it succeeds, and this is the expected 24-hour exemption: record it rather than reporting a failure.
+   b. **Recovery:** request a reset email, open the link, and set a new password on `/reset-password`. This must succeed, including after step 3a-2.
+   c. **Security tab:** request a code, then submit it with the current password and a new password. This must succeed.
+   d. **Stale session:** if you can use a session older than 24 hours (or one whose creation time was moved back on Preview only), `updateUser({ password })` without `nonce` must fail.
 3. **MFA gate:** enroll TOTP on a test user and sign out. Sign in with the password only. With that AAL1 token:
    - `GET /rest/v1/profiles` must return `[]`
    - `POST /api/tickets/write` must return 403 `Multi-factor authentication is required.`

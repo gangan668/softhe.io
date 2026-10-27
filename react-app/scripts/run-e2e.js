@@ -32,8 +32,9 @@ const environment = {
 	STRIPE_WEBHOOK_SECRET: 'whsec_e2e_fixture_only',
 	PUBLIC_SITE_URL: 'https://softhe.io',
 	// Browser fixtures must never inherit a developer's live provider settings.
-	VITE_SUPABASE_URL: mode === 'portal' ? 'https://portal-fixture.supabase.co' : '',
-	VITE_SUPABASE_PUBLISHABLE_KEY: mode === 'portal' ? 'sb_publishable_e2e_fixture_only' : '',
+	// Checkout requires an account, so the enabled storefront also gets the intercepted fixture project.
+	VITE_SUPABASE_URL: mode === 'disabled' ? '' : 'https://portal-fixture.supabase.co',
+	VITE_SUPABASE_PUBLISHABLE_KEY: mode === 'disabled' ? '' : 'sb_publishable_e2e_fixture_only',
 	VITE_CAPTCHA_ENABLED: 'false',
 	VITE_TURNSTILE_SITE_KEY: '',
 	// A legacy configured ID must not enable the retired Google Analytics transport.

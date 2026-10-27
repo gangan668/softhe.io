@@ -17,7 +17,7 @@ beforeEach(() => {
 	mock.recover.mockResolvedValue(results()); mock.notify.mockResolvedValue(true); mock.write.mockResolvedValue({ id: 'new-ticket' }); mock.revoke.mockResolvedValue(true);
 });
 async function openPasswordForm() { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Email me a verification code' })); await screen.findByLabelText('Verification code'); }
-function changePassword(code = '123456', password = 'StrongPassword123!') { fireEvent.change(screen.getByLabelText('Verification code'), { target: { value: code } }); fireEvent.change(screen.getByLabelText(/New password/), { target: { value: password } }); fireEvent.click(screen.getByRole('button', { name: 'Change password' })); }
+function changePassword(code = '123456', password = 'StrongPassword123!') { fireEvent.change(screen.getByLabelText('Verification code'), { target: { value: code } }); fireEvent.change(screen.getByLabelText('Current password'), { target: { value: 'OldPassword123!' } }); fireEvent.change(screen.getByLabelText(/New password/), { target: { value: password } }); fireEvent.click(screen.getByRole('button', { name: 'Change password' })); }
 it('shows empty orders and tickets', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'orders', exact: true })); expect(screen.getByText(/No orders yet/)).toBeInTheDocument(); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); expect(screen.getByText(/You have not created any support tickets yet/)).toBeInTheDocument(); });
 it('settles rejected account loading', async () => { mock.recover.mockRejectedValue(new Error('network failed')); mount(); await screen.findByRole('alert'); expect(screen.getByRole('alert')).toHaveTextContent('Account could not be loaded'); expect(screen.queryByText('Loading account…')).not.toBeInTheDocument(); });
 it('persists profile updates scoped to the customer id', async () => { mount(); await screen.findByLabelText('Full name'); fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Updated Customer' } }); fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Berlin' } }); fireEvent.click(screen.getByRole('button', { name: 'Save profile' })); await waitFor(() => expect(supabase.from().update).toHaveBeenCalled()); expect(supabase.from).toHaveBeenCalledWith('profiles'); expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({ full_name: 'Updated Customer', billing_address: expect.objectContaining({ city: 'Berlin' }) })); expect(supabase.from().eq).toHaveBeenCalledWith('id', 'customer'); });
@@ -32,14 +32,14 @@ it('requires an emailed reauthentication code, rotates the password, and revokes
 	expect(screen.getByRole('status')).toHaveTextContent('We emailed a verification code to customer@example.test.');
 	changePassword();
 	await screen.findByText('Password updated and other sessions revoked.');
-	expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: 'StrongPassword123!', nonce: '123456' });
+	expect(supabase.auth.updateUser).toHaveBeenCalledWith({ password: 'StrongPassword123!', nonce: '123456', current_password: 'OldPassword123!' });
 	expect(mock.revoke).toHaveBeenCalledWith({ access_token: 'fixture' });
 	expect(screen.getByRole('button', { name: 'Email me a verification code' })).toBeInTheDocument();
 });
 it('keeps the form available when the reauthentication code is rejected', async () => {
 	supabase.auth.updateUser.mockResolvedValue({ error: new Error('invalid nonce') });
 	await openPasswordForm(); changePassword('000000');
-	await screen.findByText('Password could not be updated. Check the verification code or request a new one.');
+	await screen.findByText('Password could not be updated. Check your current password and the verification code, or request a new code.');
 	expect(mock.revoke).not.toHaveBeenCalled();
 	expect(screen.getByLabelText('Verification code')).toBeInTheDocument();
 });
@@ -146,4 +146,10 @@ it('clears MFA enrollment secrets when verification rotates the current user tok
 	await screen.findByAltText('Authenticator enrollment QR code'); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } }); fireEvent.click(screen.getByRole('button', { name: 'Verify MFA' }));
 	view.rerender(tree('aal2-token')); await act(async () => resolveVerification({}));
 	await screen.findByText('MFA verified. This session now has AAL2 assurance.'); expect(screen.queryByAltText('Authenticator enrollment QR code')).not.toBeInTheDocument(); expect(screen.getByLabelText('Six-digit code')).toHaveValue('');
+});
+it('lets the customer request a new reauthentication code from the password form', async () => {
+	await openPasswordForm();
+	fireEvent.click(screen.getByRole('button', { name: 'Send a new code' }));
+	await waitFor(() => expect(supabase.auth.reauthenticate).toHaveBeenCalledTimes(2));
+	expect(screen.getByLabelText('Verification code')).toBeInTheDocument();
 });

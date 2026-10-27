@@ -99,8 +99,13 @@ async function staffApi(req, res) {
 			const message = await adminRequest('ticket_messages', { method: 'POST', body: { ticket_id: ticketId, author_id: actor.id, body }, headers: { Prefer: 'return=representation' } });
 			await adminRequest(`tickets?id=eq.${ticketId}`, { method: 'PATCH', body: { status: 'waiting_for_customer', updated_at: new Date().toISOString() } });
 			await audit(actor, 'staff.ticket_replied', 'ticket', ticketId, { messageId: message?.[0]?.id });
+			// Record the saved reply before emailing, so a retry after a slow or
+			// interrupted delivery replays this result instead of posting it twice.
+			const saved = { id: message?.[0]?.id };
+			await setKey(replayKey, JSON.stringify(saved), 24 * 3600);
+			activeLock = null;
 			const notified = await notifyCustomer(ticketId, message?.[0]);
-			return complete(201, { id: message?.[0]?.id, notified });
+			return res.status(201).json({ ...saved, notified });
 		}
 		if (action === 'status') {
 			const ticketId = String(req.body?.ticketId || ''); const status = String(req.body?.status || '');
