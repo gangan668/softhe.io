@@ -143,17 +143,27 @@ auth_patch() {
 # The unredacted response contains secrets: keep it in a private, auto-deleted file.
 auth_full="$(mktemp)"
 trap 'rm -f -- "$auth_full"' EXIT
-mgmt GET > "$auth_full"
+if ! mgmt GET > "$auth_full"; then echo "Initial Auth GET failed: stop, nothing was changed" >&2; exit 1; fi
+# Require a real Auth config, not an error body, before anything is changed. These fields must
+# exist in the live response; without them there is no usable rollback snapshot.
+jq -e 'type == "object" and (. as $cfg | ["mailer_autoconfirm", "mailer_secure_email_change_enabled",
+  "security_update_password_require_reauthentication", "password_min_length", "password_required_characters",
+  "mfa_totp_enroll_enabled", "mfa_totp_verify_enabled"] | all(. as $k | $cfg | has($k)))' "$auth_full" > /dev/null \
+  || { echo "Initial Auth GET is not a usable snapshot: stop, nothing was changed" >&2; exit 1; }
 # mktemp creates a new private file, so a pre-planted path or symlink cannot redirect the backup.
 auth_backup="$(mktemp /tmp/supabase-auth-<ref>-before.XXXXXX)"
 jq "$REDACT" "$auth_full" > "$auth_backup"
 chmod 600 "$auth_backup"
 printf 'Redacted backup: %s\n' "$auth_backup"
-# Rollback needs these keys. Confirm each one that the live config has survived redaction.
-jq -e --slurpfile full "$auth_full" '. as $backup | ["password_min_length", "password_required_characters",
-  "security_update_password_require_reauthentication", "security_update_password_require_current_password",
-  "mailer_autoconfirm", "mailer_secure_email_change_enabled", "mfa_totp_enroll_enabled", "mfa_totp_verify_enabled"]
-  | all(. as $k | ($full[0] | has($k) | not) or ($backup | has($k)))' "$auth_backup"
+# Rollback needs these keys. All required ones must be in the backup. The optional ones
+# (current-password and CAPTCHA provider fields) must be kept whenever the live config has them.
+jq -e --slurpfile full "$auth_full" '. as $backup
+  | (["password_min_length", "password_required_characters", "security_update_password_require_reauthentication",
+      "mailer_autoconfirm", "mailer_secure_email_change_enabled", "mfa_totp_enroll_enabled", "mfa_totp_verify_enabled"]
+     | all(. as $k | $backup | has($k)))
+  and (["security_update_password_require_current_password", "security_captcha_enabled", "security_captcha_provider"]
+     | all(. as $k | ($full[0] | has($k) | not) or ($backup | has($k))))' "$auth_backup" > /dev/null \
+  || { echo "Backup is missing rollback fields: stop, nothing was changed" >&2; exit 1; }
 ```
 
 Make every later Management API call through `auth_get_redacted` or `auth_patch`. Never call `mgmt GET` directly in a way that prints its output, and never pass `-H "Authorization: ..."` on the command line.
@@ -202,7 +212,8 @@ Read `site_url` and `uri_allow_list` from the backup. `uri_allow_list` must incl
 If `TURNSTILE_SECRET_KEY` is set, first make sure the change can be rolled back. The backup removes `security_captcha_secret`, so the previous secret cannot be restored from it:
 
 - If `jq -r '.security_captcha_enabled' "$auth_backup"` is `false` or `null`, CAPTCHA is currently off. Rolling back means setting `security_captcha_enabled` to `false`, and the old secret is not needed.
-- If it is `true`, CAPTCHA is already configured and this step would overwrite its secret. Continue only if the owner has also provided the current secret as `TURNSTILE_PREVIOUS_SECRET_KEY`. Otherwise skip 3c and report that rollback would be impossible.
+- If it is `true` and `jq -r '.security_captcha_provider' "$auth_backup"` is not `turnstile` (for example `hcaptcha`), skip 3c. Switching providers is an owner decision; report the current provider.
+- If it is `true` and the provider is already `turnstile`, this step would overwrite its secret. Continue only if the owner has also provided the current secret as `TURNSTILE_PREVIOUS_SECRET_KEY`. Otherwise skip 3c and report that rollback would be impossible.
 
 Then build the body inside `jq` from the environment. The secret is never a command argument and never printed:
 
@@ -259,7 +270,7 @@ Give the owner one summary covering:
 ## Rollback
 
 - **Auth settings:** build a body from the redacted backup with only the fields changed in step 3, for example `jq '{mailer_autoconfirm, password_min_length}' "$auth_backup"`, and apply it with `auth_patch`.
-- **CAPTCHA:** if CAPTCHA was off before, PATCH `{"security_captcha_enabled": false}`. If it was on, restore the previous secret from `TURNSTILE_PREVIOUS_SECRET_KEY` by building the body with `jq -n '... env.TURNSTILE_PREVIOUS_SECRET_KEY'`.
+- **CAPTCHA:** if CAPTCHA was off before, PATCH `{"security_captcha_enabled": false}` and restore `security_captcha_provider` from the backup. If it was on (step 3c only runs then when the provider was already `turnstile`), restore the provider from the backup together with the matching previous secret: `jq --slurpfile b "$auth_backup" -n '{security_captcha_enabled: true, security_captcha_provider: $b[0].security_captcha_provider, security_captcha_secret: env.TURNSTILE_PREVIOUS_SECRET_KEY}'`.
 - **Migrations:** do not reverse them automatically. Report the failure and wait for the owner.
   - The MFA policies can be removed with `drop policy <name>_mfa_required on public.<table>;`.
   - `claim_verified_orders` is not needed by the new code. Restore it from `supabase/migrations/202607310001_customer_portal_security_hardening.sql` only if the owner asks.
