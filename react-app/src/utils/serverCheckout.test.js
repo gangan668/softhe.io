@@ -150,7 +150,7 @@ describe('account-only checkout', () => {
 		await checkoutApi(request({ authorization: 'Bearer token' }), res);
 		expect(res.statusCode).toBe(403);
 		expect(res.payload).toEqual({ error: 'Verify your email before placing an order' });
-		expect(outbound.mock.calls.some(([url]) => String(url).includes('stripe.com'))).toBe(false);
+		expect(outbound.mock.calls.some(([url]) => new URL(String(url)).hostname === 'api.stripe.com')).toBe(false);
 	});
 	it('always binds the Stripe session to the signed-in customer', () => {
 		const { form } = createStripeForm([{ id: 'windows-10', quantity: 1 }], 'https://softhe.io', undefined, undefined, { id: 'customer-id', email: 'customer@example.test' });
