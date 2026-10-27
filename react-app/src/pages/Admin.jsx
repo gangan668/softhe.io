@@ -53,7 +53,11 @@ function AdminSession() {
 		event.preventDefault(); if (replyInFlight.current || !reply.trim() || !selected) return;
 		const generation = scope.current; const ticket = selected; const read = ticketRead.current;
 		replyInFlight.current = true; setReplySending(true);
-		try { await staffRequest(session, 'reply', { method: 'POST', body: { ticketId: ticket.id, message: reply.trim() } }); if (generation !== scope.current) return; if (read === ticketRead.current) { setReply(''); await open(ticket); } await load(); }
+		try {
+			const saved = await staffRequest(session, 'reply', { method: 'POST', body: { ticketId: ticket.id, message: reply.trim() } }); if (generation !== scope.current) return; if (read === ticketRead.current) { setReply(''); await open(ticket); } await load();
+			// The reply is stored either way; tell staff when the customer was not emailed.
+			if (saved?.notified === false && generation === scope.current) setError('Reply saved, but the customer could not be emailed. Contact them another way if it is urgent.');
+		}
 		catch (sendError) { if (generation === scope.current) setError(sendError.message); }
 		finally { replyInFlight.current = false; if (generation === scope.current) setReplySending(false); }
 	};

@@ -108,18 +108,31 @@ Use the Management API. Before sending anything, download the current OpenAPI sp
 
 ```bash
 API=https://api.supabase.com/v1/projects/<ref>/config/auth
-# The unredacted response contains secrets: keep it in a private, auto-deleted file.
 umask 077
+# Sends the access token through a private curl config on stdin. printf is a shell builtin,
+# so the token never appears in any process's arguments (ps, /proc/<pid>/cmdline).
+mgmt() { # usage: mgmt METHOD [json-body-file]
+  printf 'header = "Authorization: Bearer %s"\n' "$SUPABASE_ACCESS_TOKEN" |
+    curl -sS --fail-with-body -K - -X "$1" -H "Content-Type: application/json" ${2:+--data-binary "@$2"} "$API"
+}
+
+# The unredacted response contains secrets: keep it in a private, auto-deleted file.
 auth_full="$(mktemp)"
 trap 'rm -f -- "$auth_full"' EXIT
-curl -sS -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" "$API" > "$auth_full"
-# Drop only fields whose names END in a secret suffix (smtp_pass, *_secret, *_token, *_api_key ...).
-# Non-secret settings such as password_min_length must stay in the backup so rollback can restore them.
-jq 'with_entries(select(.key | test("(secret|secrets|pass|password|token|api_key|_key)$"; "i") | not))' "$auth_full" > /tmp/supabase-auth-<ref>-before.json
+mgmt GET > "$auth_full"
+# Drop only fields whose names end in a secret suffix (smtp_pass, *_secret, *_token, *_api_key ...).
+# The pattern deliberately does not match "password", so non-secret settings such as
+# password_min_length and security_update_password_require_current_password stay in the backup.
+jq 'with_entries(select(.key | test("(secret|secrets|_pass|token|_key)$"; "i") | not))' "$auth_full" > /tmp/supabase-auth-<ref>-before.json
 chmod 600 /tmp/supabase-auth-<ref>-before.json
-# Rollback needs these keys. Confirm they survived redaction.
-jq -e 'has("password_min_length") and has("password_required_characters") and has("security_update_password_require_reauthentication")' /tmp/supabase-auth-<ref>-before.json
+# Rollback needs these keys. Confirm each one that the live config has survived redaction.
+jq -e --slurpfile full "$auth_full" '. as $backup | ["password_min_length", "password_required_characters",
+  "security_update_password_require_reauthentication", "security_update_password_require_current_password",
+  "mailer_autoconfirm", "mailer_secure_email_change_enabled", "mfa_totp_enroll_enabled", "mfa_totp_verify_enabled"]
+  | all(. as $k | ($full[0] | has($k) | not) or ($backup | has($k)))' /tmp/supabase-auth-<ref>-before.json
 ```
+
+Run every later Management API call through `mgmt`. Never pass `-H "Authorization: ..."` on the command line.
 
 ### 3a. Core settings (always apply)
 
@@ -134,19 +147,21 @@ jq -e 'has("password_min_length") and has("password_required_characters") and ha
 | `mfa_totp_verify_enabled` | `true` | MFA → TOTP verify |
 
 ```bash
-curl -sS -X PATCH "$API" \
-  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" -H "Content-Type: application/json" \
-  -d '{"mailer_autoconfirm":false,"mailer_secure_email_change_enabled":true,"security_update_password_require_reauthentication":true,"password_min_length":12,"password_required_characters":"<value from spec>","mfa_totp_enroll_enabled":true,"mfa_totp_verify_enabled":true}' \
-  -o /dev/null -w '%{http_code}\n'
+body="$(mktemp)"
+cat > "$body" <<'JSON'
+{"mailer_autoconfirm":false,"mailer_secure_email_change_enabled":true,"security_update_password_require_reauthentication":true,"password_min_length":12,"password_required_characters":"<value from spec>","mfa_totp_enroll_enabled":true,"mfa_totp_verify_enabled":true}
+JSON
+mgmt PATCH "$body" > /dev/null && echo "PATCH ok"
+rm -f -- "$body"
 ```
 
-Expect HTTP 200.
+Expect `PATCH ok`. `--fail-with-body` makes curl exit non-zero on an HTTP error.
 
 ### 3a-2. Require current password (Preview check first)
 
 Supabase skips the emailed reauthentication code for sessions created in the last 24 hours. The "Require current password when changing password" setting closes that gap. The Security tab already sends `current_password`.
 
-1. Find this setting's field name in the OpenAPI spec. Do not guess it. If the spec has no such field, skip this step and report it as unavailable.
+1. Confirm the field name in the OpenAPI spec. It is expected to be `security_update_password_require_current_password`. If the spec has no such field, skip this step and report it as unavailable. Apply it with `mgmt PATCH` and a body file, as in 3a.
 2. **Preview:** enable it, then repeat the password-recovery check in step 4 (item 2b). If a recovery-link reset is rejected because no current password was sent, disable the setting again and report that it conflicts with password recovery.
 3. **Production:** enable it only if the Preview recovery check passed.
 
@@ -156,7 +171,14 @@ Read `site_url` and `uri_allow_list` from the backup. `uri_allow_list` must incl
 
 ### 3c. CAPTCHA (only if `TURNSTILE_SECRET_KEY` is set)
 
-If `TURNSTILE_SECRET_KEY` is set, PATCH `{"security_captcha_enabled":true,"security_captcha_provider":"turnstile","security_captcha_secret":"$TURNSTILE_SECRET_KEY"}`. Build the request body so the secret never appears in shell history or output.
+If `TURNSTILE_SECRET_KEY` is set, build the body inside `jq` from the environment. The secret is never a command argument and never printed:
+
+```bash
+body="$(mktemp)"
+jq -n '{security_captcha_enabled: true, security_captcha_provider: "turnstile", security_captcha_secret: env.TURNSTILE_SECRET_KEY}' > "$body"
+mgmt PATCH "$body" > /dev/null && echo "PATCH ok"
+rm -f -- "$body"
+```
 
 After that, tell the owner to set `VITE_CAPTCHA_ENABLED=true` and `VITE_TURNSTILE_SITE_KEY` in the matching Vercel environment and redeploy. Login fails while Supabase requires CAPTCHA but the site does not send a token, so enable both in the same release window.
 
@@ -168,7 +190,7 @@ Read `smtp_host` from the backup. If it is empty, the project uses Supabase's bu
 
 ### Verify
 
-GET the config again. Confirm every field from 3a (and 3c if applied) has the new value, and that all other non-secret fields match the backup. Report any difference.
+Run `mgmt GET` again. Confirm every field from 3a (and 3a-2 or 3c if applied) has the new value, and that all other non-secret fields match the backup. Report any difference.
 
 ## Step 4: Functional checks (Preview only)
 
