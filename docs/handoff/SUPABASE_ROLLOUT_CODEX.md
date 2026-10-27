@@ -27,7 +27,7 @@ If a required credential is missing, stop and ask the owner. Do not work around 
 
 - Do not run `supabase db reset`, drop tables, or delete data. The only destructive statements allowed are those inside the three migration files below.
 - Do not edit the migration files. If one fails, stop and report the error.
-- Before each Auth settings change, save the current settings to a file **outside the repository**, for example `/tmp/supabase-auth-<ref>-before.json`, with every key containing `secret`, `pass`, `key`, or `token` removed. Never commit this file.
+- Before each Auth settings change, save the current settings to a file **outside the repository**, created with `mktemp` (step 3), with secret-valued keys removed. Never commit this file.
 - Change only the Auth fields listed in step 3. Leave every other setting as it is.
 - After each step, run its verification. If verification fails, stop, report, and do not continue to Production.
 
@@ -123,13 +123,16 @@ mgmt GET > "$auth_full"
 # Drop only fields whose names end in a secret suffix (smtp_pass, *_secret, *_token, *_api_key ...).
 # The pattern deliberately does not match "password", so non-secret settings such as
 # password_min_length and security_update_password_require_current_password stay in the backup.
-jq 'with_entries(select(.key | test("(secret|secrets|_pass|token|_key)$"; "i") | not))' "$auth_full" > /tmp/supabase-auth-<ref>-before.json
-chmod 600 /tmp/supabase-auth-<ref>-before.json
+# mktemp creates a new private file, so a pre-planted path or symlink cannot redirect the backup.
+auth_backup="$(mktemp /tmp/supabase-auth-<ref>-before.XXXXXX)"
+jq 'with_entries(select(.key | test("(secret|secrets|_pass|token|_key)$"; "i") | not))' "$auth_full" > "$auth_backup"
+chmod 600 "$auth_backup"
+printf 'Redacted backup: %s\n' "$auth_backup"
 # Rollback needs these keys. Confirm each one that the live config has survived redaction.
 jq -e --slurpfile full "$auth_full" '. as $backup | ["password_min_length", "password_required_characters",
   "security_update_password_require_reauthentication", "security_update_password_require_current_password",
   "mailer_autoconfirm", "mailer_secure_email_change_enabled", "mfa_totp_enroll_enabled", "mfa_totp_verify_enabled"]
-  | all(. as $k | ($full[0] | has($k) | not) or ($backup | has($k)))' /tmp/supabase-auth-<ref>-before.json
+  | all(. as $k | ($full[0] | has($k) | not) or ($backup | has($k)))' "$auth_backup"
 ```
 
 Run every later Management API call through `mgmt`. Never pass `-H "Authorization: ..."` on the command line.
@@ -151,18 +154,18 @@ body="$(mktemp)"
 cat > "$body" <<'JSON'
 {"mailer_autoconfirm":false,"mailer_secure_email_change_enabled":true,"security_update_password_require_reauthentication":true,"password_min_length":12,"password_required_characters":"<value from spec>","mfa_totp_enroll_enabled":true,"mfa_totp_verify_enabled":true}
 JSON
-mgmt PATCH "$body" > /dev/null && echo "PATCH ok"
+if mgmt PATCH "$body" > /dev/null; then echo "PATCH ok"; else rm -f -- "$body"; echo "PATCH FAILED: stop the rollout and report" >&2; exit 1; fi
 rm -f -- "$body"
 ```
 
-Expect `PATCH ok`. `--fail-with-body` makes curl exit non-zero on an HTTP error.
+Expect `PATCH ok`. `--fail-with-body` makes curl exit non-zero on an HTTP error. On `PATCH FAILED`, stop the rollout: do not run any later step or the other project. Run `mgmt GET` to see which fields changed, restore them from the backup if needed, and report the response body.
 
 ### 3a-2. Require current password (Preview check first)
 
 Supabase skips the emailed reauthentication code for sessions created in the last 24 hours. The "Require current password when changing password" setting closes that gap. The Security tab already sends `current_password`.
 
 1. Confirm the field name in the OpenAPI spec. It is expected to be `security_update_password_require_current_password`. If the spec has no such field, skip this step and report it as unavailable. Apply it with `mgmt PATCH` and a body file, as in 3a.
-2. **Preview:** enable it, then repeat the password-recovery check in step 4 (item 2b). If a recovery-link reset is rejected because no current password was sent, disable the setting again and report that it conflicts with password recovery.
+2. **Preview:** enable it (stop on `PATCH FAILED`, as in 3a), then repeat the password-recovery check in step 4 (item 2b). If a recovery-link reset is rejected because no current password was sent, disable the setting again and report that it conflicts with password recovery.
 3. **Production:** enable it only if the Preview recovery check passed.
 
 ### 3b. Redirect URLs (check only)
@@ -176,7 +179,7 @@ If `TURNSTILE_SECRET_KEY` is set, build the body inside `jq` from the environmen
 ```bash
 body="$(mktemp)"
 jq -n '{security_captcha_enabled: true, security_captcha_provider: "turnstile", security_captcha_secret: env.TURNSTILE_SECRET_KEY}' > "$body"
-mgmt PATCH "$body" > /dev/null && echo "PATCH ok"
+if mgmt PATCH "$body" > /dev/null; then echo "PATCH ok"; else rm -f -- "$body"; echo "PATCH FAILED: stop the rollout and report" >&2; exit 1; fi
 rm -f -- "$body"
 ```
 
@@ -196,7 +199,7 @@ Run `mgmt GET` again. Confirm every field from 3a (and 3a-2 or 3c if applied) ha
 
 Use throwaway test accounts on the Preview deployment. Never use real customer accounts.
 
-1. **Password policy:** sign up with `weakpassword1`. Supabase must reject it.
+1. **Password policy:** sign-ups with `weakpassword1` (no uppercase or symbol) and `Shrt-Pass1!` (11 characters, every required class) must both be rejected. `Short-Pass1!` (12 characters, every class) must be accepted, so the length minimum is tested on its own.
 2. **Password changes:**
    a. **Fresh session** (signed in just now): `updateUser({ password })` without `current_password` must fail if step 3a-2 was applied. Without that setting it succeeds, and this is the expected 24-hour exemption: record it rather than reporting a failure.
    b. **Recovery:** request a reset email, open the link, and set a new password on `/reset-password`. This must succeed, including after step 3a-2.
@@ -206,8 +209,8 @@ Use throwaway test accounts on the Preview deployment. Never use real customer a
    - `GET /rest/v1/profiles` must return `[]`
    - `POST /api/tickets/write` must return 403 `Multi-factor authentication is required.`
    - after entering the TOTP code, the account page must load normally.
-4. **Email sync:** change a test user's email and confirm the change. `public.profiles.email` must equal the new address.
-5. **Checkout (only if commerce is enabled on Preview):** signed out, opening `/checkout` must go to `/login` with the "Your cart is saved" notice. Calling `/api/create-checkout-session` with no token must return 401.
+4. **Email sync:** change a test user's email and confirm the change. `public.profiles.email` must equal `lower(<new address>)`, because the migration stores emails in lowercase. Use a mixed-case address to exercise this.
+5. **Checkout (only if commerce is enabled on Preview):** signed out, opening `/checkout` must go to `/login` with the "Your cart is saved" notice. Calling `/api/create-checkout-session` with no token must return 401. With the token of a test account whose email is not yet confirmed, it must return 403 (`Verify your email before placing an order`). In both cases no Checkout Session may appear in the Stripe test dashboard.
 
 Delete the test users afterwards (Authentication → Users, or `auth.admin.deleteUser`).
 
@@ -222,7 +225,7 @@ Give the owner one summary covering:
 - the migration list before and after
 - any field-name substitutions from the OpenAPI spec
 - pending owner actions: CAPTCHA secret, SMTP, missing redirect URLs
-- the paths of the redacted backup files (do not include their contents if anything sensitive remains)
+- the `mktemp` paths of the redacted backup files (do not include their contents if anything sensitive remains)
 
 ## Rollback
 
