@@ -178,12 +178,12 @@ function AccountSession() {
 		const refreshed = await supabase.auth.refreshSession();
 		if (scope !== requestScope.current) return;
 		if (refreshed.error || !refreshed.data?.session) return setMfa((value) => ({ ...value, error: 'Your authenticator app was verified, but this session could not be refreshed. Sign out and sign in again to finish.', message: '' }));
-		setMfa((value) => ({ ...value, code: '', qr: '', message: 'Authenticator app verified. You will be asked for a code each time you sign in.', error: '' }));
+		setMfa((value) => ({ ...value, factorId: '', verified: true, code: '', qr: '', message: 'Authenticator app verified. You will be asked for a code each time you sign in.', error: '' }));
 		} catch { if (scope === requestScope.current) setMfa((value) => ({ ...value, error: 'That code could not be verified. Please try again.', message: '' })); }
 	};
 
 	const profile = data.profile || {}; const address = profile.billing_address || {};
-	const authenticatorOn = hasVerifiedFactor(user);
+	const authenticatorOn = hasVerifiedFactor(user) || mfa.verified;
 	return <div className="portal-page">
 		<header className="portal-heading"><div><span className="eyebrow">Customer portal</span><h1>{profile.full_name ? `Hello, ${profile.full_name}` : 'Welcome back'}</h1><p>{user.email}</p></div><div className="portal-actions">{staff && <Link className="btn btn-secondary" to="/admin">Staff portal</Link>}<button className="btn btn-secondary" onClick={signOut}>Sign out</button></div></header>
 		<nav className="portal-tabs" aria-label="Account sections">{tabs.map((name) => <button key={name} className={tab === name ? 'active' : ''} onClick={() => setTab(name)}>{name}</button>)}</nav>

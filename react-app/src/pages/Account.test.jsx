@@ -145,7 +145,7 @@ it('clears MFA enrollment secrets when verification rotates the current user tok
 	const view = render(tree('aal1-token')); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Set up authenticator app' }));
 	await screen.findByAltText('Authenticator enrollment QR code'); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } }); fireEvent.click(screen.getByRole('button', { name: 'Verify code' }));
 	view.rerender(tree('aal2-token')); await act(async () => resolveVerification({}));
-	await screen.findByText('Authenticator app verified. You will be asked for a code each time you sign in.'); expect(screen.queryByAltText('Authenticator enrollment QR code')).not.toBeInTheDocument(); expect(screen.getByLabelText('Six-digit code')).toHaveValue('');
+	await screen.findByText('Authenticator app verified. You will be asked for a code each time you sign in.'); expect(screen.queryByAltText('Authenticator enrollment QR code')).not.toBeInTheDocument(); expect(screen.queryByLabelText('Six-digit code')).not.toBeInTheDocument(); expect(screen.getByText(/Your authenticator app is on/)).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Set up authenticator app' })).not.toBeInTheDocument();
 });
 it('lets the customer request a new reauthentication code from the password form', async () => {
 	await openPasswordForm();
