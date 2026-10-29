@@ -100,6 +100,12 @@ select count(*) from public.profiles p join auth.users u on u.id = p.id
 -- Email-based order claiming removed
 select to_regprocedure('public.claim_verified_orders(uuid,text)') is null as claim_removed;
 -- expect true
+
+-- Password-free path only: every migration applied in this run recorded its SQL
+select version from supabase_migrations.schema_migrations
+ where version in (<versions applied in this run>)
+   and coalesce(cardinality(statements), 0) = 0;
+-- expect 0 rows; otherwise stop and report
 ```
 
 Then run `supabase migration list --linked` again and confirm all three now show as applied.
@@ -263,7 +269,7 @@ Only after steps 1–4 pass on Preview **and** the related pull request is merge
 ### What the Preview run (2026-10-27) and Production preflight (2026-10-28) showed
 
 - **Token scope.** A scoped token with only Auth Config write gets HTTP 403 on `PATCH /config/auth`. Create a token limited to the one project, with **Auth Config, Project Settings, Database and Migrations** read-write and a 1-day expiry. Revoke it when finished.
-- **No database password needed.** Instead of `supabase db push`, each migration may be applied with the Management API's SQL query endpoint, inserting the repository version, name and `statements` into `supabase_migrations.schema_migrations` in the same transaction (see step 2). Use the unmodified file contents. If any Preview rows written this way have empty `statements`, report it; do not backfill without owner approval.
+- **No database password needed.** Instead of `supabase db push`, each migration may be applied with the Management API's SQL query endpoint, inserting the repository version, name and `statements` into `supabase_migrations.schema_migrations` in the same transaction (see step 2). Use the unmodified file contents. Step 2's verification stops the run on either project if a row written this way has empty `statements`. The four Preview rows from 2026-10-27 predate this rule: check them too, and report any that are empty. Do not backfill without owner approval.
 - **Migration history uses different version numbers.** The migrations were originally applied with other version numbers. Renumbering the history is allowed only after comparing every stored SQL body with its repository file, showing the owner the mapping, and getting approval. Never replay an old migration to "fix" the history.
 - **Production differs from Preview.** The preflight found the following. Re-check it; do not trust this list blindly.
   - Before applying `20261016011448_enforce_customer_ticket_api`, confirm Production serves the ticket API it depends on. That migration removes customers' direct ticket writes, so creating or replying to a ticket through the old route would break. Check that the live Production deployment is built from `main` at or after `6ef6677`, and that `POST https://softhe.io/api/tickets/write` with no token returns 401 rather than 404. If either check fails, stop and report.
