@@ -18,10 +18,10 @@ Confirm both refs with `supabase projects list` before starting. If either ref i
 Read these from the environment. Never print, log, commit, or paste them into files, and never invent a value.
 
 - `SUPABASE_ACCESS_TOKEN`: a personal access token for the Supabase CLI and Management API.
-- `SUPABASE_DB_PASSWORD_PREVIEW` and `SUPABASE_DB_PASSWORD_PRODUCTION`: the database passwords. Pass them to the CLI only through its `SUPABASE_DB_PASSWORD` environment variable. Never use `--password`, because command-line arguments are visible to other processes (`ps`, `/proc/<pid>/cmdline`).
+- `SUPABASE_DB_PASSWORD_PREVIEW` and `SUPABASE_DB_PASSWORD_PRODUCTION`: the database passwords. Needed only for the CLI path below; the Management API path (see "Applying migrations without the database password" in step 2) needs only the access token. Pass them to the CLI only through its `SUPABASE_DB_PASSWORD` environment variable. Never use `--password`, because command-line arguments are visible to other processes (`ps`, `/proc/<pid>/cmdline`).
 - `TURNSTILE_SECRET_KEY`: optional. Needed only for step 3c.
 
-If a required credential is missing, stop and ask the owner. Do not work around it.
+If a credential required by the chosen path is missing, stop and ask the owner. Do not work around it.
 
 ## Rules
 
@@ -37,8 +37,8 @@ If a required credential is missing, stop and ask the owner. Do not work around 
    ```bash
    cd react-app && npm ci && npm run test:database && cd ..
    ```
-2. Link the project without putting the password in the arguments: `SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase link --project-ref <ref>`.
-3. Run `supabase migration list --linked`. Every migration up to and including `20261016011448_enforce_customer_ticket_api` must show as applied on the remote. Exactly these three must be pending:
+2. CLI path only: link the project without putting the password in the arguments: `SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase link --project-ref <ref>`.
+3. List the remote migration history (`supabase migration list --linked`, or `select version, name from supabase_migrations.schema_migrations order by version` through the Management API). On Preview, every migration up to and including `20261016011448_enforce_customer_ticket_api` must show as applied, and exactly these three must be pending. On Production, step 5 lists the expected differences instead; anything beyond them is a stop:
    - `20261027120000_require_mfa_for_enrolled_customers.sql`
    - `20261027120100_sync_profile_email.sql`
    - `20261027130000_retire_guest_order_claiming.sql`
@@ -72,7 +72,9 @@ If a required credential is missing, stop and ask the owner. Do not work around 
 SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase db push --linked
 ```
 
-Confirm that the push lists exactly the three pending files, and nothing else, before it applies them.
+Confirm that the push lists exactly the pending files expected for this project, and nothing else, before it applies them. That is the three files above on Preview, and the seven files listed in step 5 on Production.
+
+**Applying migrations without the database password:** use the Management API's SQL query endpoint instead. Apply each pending file unmodified and in version order. In the same transaction, insert its repository version and name into `supabase_migrations.schema_migrations`. The same rule applies: only the expected pending files.
 
 ### Verify
 
