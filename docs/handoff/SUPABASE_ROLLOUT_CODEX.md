@@ -25,7 +25,7 @@ If a credential required by the chosen path is missing, stop and ask the owner. 
 
 ## Rules
 
-- Do not run `supabase db reset`, drop tables, or delete data. The only destructive statements allowed are those inside the three migration files below.
+- Do not run `supabase db reset`, drop tables, or delete data. The only destructive statements allowed are those inside the pending migration files, plus the owner-approved migration-history repair in step 5. That repair may change only `supabase_migrations.schema_migrations` rows, and only the ones named there.
 - Do not edit the migration files. If one fails, stop and report the error.
 - Before each Auth settings change, save the current settings to a file **outside the repository**, created with `mktemp` (step 3), with secret-valued keys removed. Never commit this file.
 - Change only the Auth fields listed in step 3. Leave every other setting as it is.
@@ -44,7 +44,7 @@ If a credential required by the chosen path is missing, stop and ask the owner. 
    - `20261027130000_retire_guest_order_claiming.sql`
 
    If older migrations show as pending, or the remote has versions that are not in the repository, stop and report the full list. Do not run `migration repair` unless the owner approves it.
-4. Confirm the schema objects these migrations depend on exist. Run each query with `supabase db query --linked "<sql>"`, or use `psql` against the linked database:
+4. Confirm the schema objects these migrations depend on exist. Run each SQL check in this runbook (here, steps 1.5–1.6, step 2's verification and the history listings) in one of two ways. On the CLI path, use `supabase db query --linked "<sql>"` or `psql` against the linked database. On the password-free path, use the Management API's `POST https://api.supabase.com/v1/projects/<ref>/database/query` with body `{"query": "<sql>"}`. Send the token through a stdin curl config as the `mgmt` helper in step 3 does, never as a command argument. Both paths have the same expected results:
    ```sql
    select to_regprocedure('security.is_active_user()') is not null as has_is_active_user,
           to_regclass('auth.mfa_factors') is not null as has_mfa_factors,
@@ -272,7 +272,7 @@ Only after steps 1–4 pass on Preview **and** the related pull request is merge
     - `20260727025008_restrict_is_staff_execution` is undone by the later `restore_is_staff_policy_execution`.
     - `20260731174301_record_ticket_creation_activity` together with the shorter Production `fix_ticket_category_type` equals the repository's `202607310002_fix_ticket_category_type`.
 
-    After owner approval, renumber Production's `fix_ticket_category_type` row to the repository version `202607310002`, as with the other mapped rows, so it is recorded as applied without running again. Then remove the two Production-only rows (`supabase migration repair --status reverted <version>`, or delete them in the same transaction). Afterwards, the history must list every repository version through `20261016011336` and no Production-only versions; only the seven missing files may show as pending.
+    After owner approval, renumber Production's `fix_ticket_category_type` row to the repository version `202607310002`, as with the other mapped rows, so it is recorded as applied without running again. Then remove the two Production-only rows (`supabase migration repair --status reverted <version>`, or, on the password-free path, delete exactly those two `schema_migrations` rows by version in one transaction). Afterward, the history must list every repository version through `20261016011336` and no Production-only versions; only the seven missing files may show as pending.
   - The other "different" bodies differ only in comments and whitespace.
   - Production has 0 unlinked orders, so step 1.5 passes.
   - Production Auth already matches step 3a. Only `security_update_password_require_current_password` (step 3a-2) is still `false`. Preview proved it does not break recovery-link resets, so enable it.
