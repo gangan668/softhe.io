@@ -258,6 +258,23 @@ Delete the test users afterwards (Authentication → Users, or `auth.admin.delet
 
 Only after steps 1–4 pass on Preview **and** the related pull request is merged and deployed to Production, repeat steps 1–3 for `mbwsmyqofkxmxkelqviy`. Do not create test accounts on Production.
 
+### What the Preview run (2026-10-27) and Production preflight (2026-10-28) showed
+
+- **Token scope.** A scoped token with only Auth Config write gets HTTP 403 on `PATCH /config/auth`. Create a token limited to the one project, with **Auth Config, Project Settings, Database and Migrations** read-write and a 1-day expiry. Revoke it when finished.
+- **No database password needed.** Instead of `supabase db push`, each migration may be applied with the Management API's SQL query endpoint, inserting the repository version into `supabase_migrations.schema_migrations` in the same transaction. Use the unmodified file contents.
+- **Migration history uses different version numbers.** The migrations were originally applied with other version numbers. Renumbering the history is allowed only after comparing every stored SQL body with its repository file, showing the owner the mapping, and getting approval. Never replay an old migration to "fix" the history.
+- **Production differs from Preview.** The preflight found the following. Re-check it; do not trust this list blindly.
+  - 7 repository migrations are missing on Production, not 3. Apply them in version order: `20260813095000_make_customer_ticket_rpcs_invoker`, `20260827152811_least_privilege_portal_grants`, `20260827160512_transactional_staff_revocation_audit`, `20261016011448_enforce_customer_ticket_api`, then the three migrations in this runbook.
+  - 2 migrations exist only on Production. They are already covered by repository files, so the schema matches:
+    - `20260727025008_restrict_is_staff_execution` is undone by the later `restore_is_staff_policy_execution`.
+    - `20260731174301_record_ticket_creation_activity` together with the shorter Production `fix_ticket_category_type` equals the repository's `202607310002_fix_ticket_category_type`.
+
+    Propose marking both as reverted (`supabase migration repair --status reverted <version>`, or deleting their history rows) and wait for owner approval.
+  - The other "different" bodies differ only in comments and whitespace.
+  - Production has 0 unlinked orders, so step 1.5 passes.
+  - Production Auth already matches step 3a. Only `security_update_password_require_current_password` (step 3a-2) is still `false`. Preview proved it does not break recovery-link resets, so enable it.
+- **CAPTCHA.** Turnstile is on in both projects. Never disable it on Production, not even temporarily; Production has no automated test accounts that would need it off.
+
 ## Report back
 
 Give the owner one summary covering:
