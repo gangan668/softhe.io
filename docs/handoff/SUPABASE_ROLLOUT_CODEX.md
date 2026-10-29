@@ -18,14 +18,14 @@ Confirm both refs with `supabase projects list` before starting. If either ref i
 Read these from the environment. Never print, log, commit, or paste them into files, and never invent a value.
 
 - `SUPABASE_ACCESS_TOKEN`: a personal access token for the Supabase CLI and Management API.
-- `SUPABASE_DB_PASSWORD_PREVIEW` and `SUPABASE_DB_PASSWORD_PRODUCTION`: the database passwords. Pass them to the CLI only through its `SUPABASE_DB_PASSWORD` environment variable. Never use `--password`, because command-line arguments are visible to other processes (`ps`, `/proc/<pid>/cmdline`).
+- `SUPABASE_DB_PASSWORD_PREVIEW` and `SUPABASE_DB_PASSWORD_PRODUCTION`: the database passwords. Needed only for the CLI path below; the Management API path (see "Applying migrations without the database password" in step 2) needs only the access token. Pass them to the CLI only through its `SUPABASE_DB_PASSWORD` environment variable. Never use `--password`, because command-line arguments are visible to other processes (`ps`, `/proc/<pid>/cmdline`).
 - `TURNSTILE_SECRET_KEY`: optional. Needed only for step 3c.
 
-If a required credential is missing, stop and ask the owner. Do not work around it.
+If a credential required by the chosen path is missing, stop and ask the owner. Do not work around it.
 
 ## Rules
 
-- Do not run `supabase db reset`, drop tables, or delete data. The only destructive statements allowed are those inside the three migration files below.
+- Do not run `supabase db reset`, drop tables, or delete data. The only destructive statements allowed are those inside the pending migration files, plus the owner-approved migration-history repair in step 5. That repair may change only `supabase_migrations.schema_migrations` rows, and only the ones named there.
 - Do not edit the migration files. If one fails, stop and report the error.
 - Before each Auth settings change, save the current settings to a file **outside the repository**, created with `mktemp` (step 3), with secret-valued keys removed. Never commit this file.
 - Change only the Auth fields listed in step 3. Leave every other setting as it is.
@@ -37,14 +37,14 @@ If a required credential is missing, stop and ask the owner. Do not work around 
    ```bash
    cd react-app && npm ci && npm run test:database && cd ..
    ```
-2. Link the project without putting the password in the arguments: `SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase link --project-ref <ref>`.
-3. Run `supabase migration list --linked`. Every migration up to and including `20261016011448_enforce_customer_ticket_api` must show as applied on the remote. Exactly these three must be pending:
+2. CLI path only: link the project without putting the password in the arguments: `SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase link --project-ref <ref>`.
+3. List the remote migration history (`supabase migration list --linked`, or `select version, name from supabase_migrations.schema_migrations order by version` through the Management API). On Preview, every migration up to and including `20261016011448_enforce_customer_ticket_api` must show as applied, and exactly these three must be pending. On Production, step 5 lists the expected differences instead; anything beyond them is a stop:
    - `20261027120000_require_mfa_for_enrolled_customers.sql`
    - `20261027120100_sync_profile_email.sql`
    - `20261027130000_retire_guest_order_claiming.sql`
 
    If older migrations show as pending, or the remote has versions that are not in the repository, stop and report the full list. Do not run `migration repair` unless the owner approves it.
-4. Confirm the schema objects these migrations depend on exist. Run each query with `supabase db query --linked "<sql>"`, or use `psql` against the linked database:
+4. Confirm the schema objects these migrations depend on exist. Run each SQL check in this runbook (here, steps 1.5–1.6, step 2's verification and the history listings) in one of two ways. On the CLI path, use `supabase db query --linked "<sql>"` or `psql` against the linked database. On the password-free path, use the Management API's `POST https://api.supabase.com/v1/projects/<ref>/database/query` with body `{"query": "<sql>"}`. Send the token through a stdin curl config as the `mgmt` helper in step 3 does, never as a command argument. Both paths have the same expected results:
    ```sql
    select to_regprocedure('security.is_active_user()') is not null as has_is_active_user,
           to_regclass('auth.mfa_factors') is not null as has_mfa_factors,
@@ -72,7 +72,9 @@ If a required credential is missing, stop and ask the owner. Do not work around 
 SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase db push --linked
 ```
 
-Confirm that the push lists exactly the three pending files, and nothing else, before it applies them.
+Confirm that the push lists exactly the pending files expected for this project, and nothing else, before it applies them. That is the three files above on Preview, and the seven files listed in step 5 on Production.
+
+**Applying migrations without the database password:** use the Management API's SQL query endpoint instead. Apply each pending file unmodified and in version order. In the same transaction, insert its repository version, name and `statements` (a text array holding the file's SQL) into `supabase_migrations.schema_migrations`. Supabase uses `statements` to rebuild migration files, and step 5's history comparison reads it. The same rule applies: only the expected pending files.
 
 ### Verify
 
@@ -98,6 +100,12 @@ select count(*) from public.profiles p join auth.users u on u.id = p.id
 -- Email-based order claiming removed
 select to_regprocedure('public.claim_verified_orders(uuid,text)') is null as claim_removed;
 -- expect true
+
+-- Password-free path only: every migration applied in this run recorded its SQL
+select version from supabase_migrations.schema_migrations
+ where version in (<versions applied in this run>)
+   and coalesce(cardinality(statements), 0) = 0;
+-- expect 0 rows; otherwise stop and report
 ```
 
 Then run `supabase migration list --linked` again and confirm all three now show as applied.
@@ -257,6 +265,24 @@ Delete the test users afterwards (Authentication → Users, or `auth.admin.delet
 ## Step 5: Production
 
 Only after steps 1–4 pass on Preview **and** the related pull request is merged and deployed to Production, repeat steps 1–3 for `mbwsmyqofkxmxkelqviy`. Do not create test accounts on Production.
+
+### What the Preview run (2026-10-27) and Production preflight (2026-10-28) showed
+
+- **Token scope.** A scoped token with only Auth Config write gets HTTP 403 on `PATCH /config/auth`. Create a token limited to the one project, with **Auth Config, Project Settings, Database and Migrations** read-write and a 1-day expiry. Revoke it when finished.
+- **No database password needed.** Instead of `supabase db push`, each migration may be applied with the Management API's SQL query endpoint, inserting the repository version, name and `statements` into `supabase_migrations.schema_migrations` in the same transaction (see step 2). Use the unmodified file contents. Step 2's verification stops the run on either project if a row written this way has empty `statements`. The four Preview rows from 2026-10-27 predate this rule: check them too, and report any that are empty. Do not backfill without owner approval.
+- **Migration history uses different version numbers.** The migrations were originally applied with other version numbers. Renumbering the history is allowed only after comparing every stored SQL body with its repository file, showing the owner the mapping, and getting approval. Never replay an old migration to "fix" the history.
+- **Production differs from Preview.** The preflight found the following. Re-check it; do not trust this list blindly.
+  - Before applying `20261016011448_enforce_customer_ticket_api`, confirm Production serves the ticket API it depends on. That migration removes customers' direct ticket writes, so creating or replying to a ticket through the old route would break. Check that the live Production deployment is built from `main` at or after `6ef6677`, and that `POST https://softhe.io/api/tickets/write` with no token returns 401 rather than 404. If either check fails, stop and report.
+  - 7 repository migrations are missing on Production, not 3. Apply them in version order: `20260813095000_make_customer_ticket_rpcs_invoker`, `20260827152811_least_privilege_portal_grants`, `20260827160512_transactional_staff_revocation_audit`, `20261016011448_enforce_customer_ticket_api`, then the three migrations in this runbook.
+  - 2 migrations exist only on Production. They are already covered by repository files, so the schema matches:
+    - `20260727025008_restrict_is_staff_execution` is undone by the later `restore_is_staff_policy_execution`.
+    - `20260731174301_record_ticket_creation_activity` together with the shorter Production `fix_ticket_category_type` equals the repository's `202607310002_fix_ticket_category_type`.
+
+    After owner approval, renumber Production's `fix_ticket_category_type` row to the repository version `202607310002`, as with the other mapped rows, so it is recorded as applied without running again. Then remove the two Production-only rows (`supabase migration repair --status reverted <version>`, or, on the password-free path, delete exactly those two `schema_migrations` rows by version in one transaction). Afterward, the history must list every repository version through `20261016011336` and no Production-only versions; only the seven missing files may show as pending.
+  - The other "different" bodies differ only in comments and whitespace.
+  - Production has 0 unlinked orders, so step 1.5 passes.
+  - Production Auth already matches step 3a. Only `security_update_password_require_current_password` (step 3a-2) is still `false`. Preview proved it does not break recovery-link resets, so enable it.
+- **CAPTCHA.** Turnstile is on in both projects. Never disable it on Production, not even temporarily; Production has no automated test accounts that would need it off.
 
 ## Report back
 

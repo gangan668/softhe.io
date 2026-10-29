@@ -74,7 +74,7 @@ test('cross-tab identity replacement discards MFA secrets and private ticket dra
 	const state = await fixture(page); await login(page);
 	await page.getByRole('button', { name: 'tickets', exact: true }).click(); await page.getByRole('button', { name: 'New ticket' }).click();
 	await page.getByLabel('Subject', { exact: true }).fill('Old private draft'); await page.getByLabel('Message', { exact: true }).fill('Old private message');
-	await page.getByRole('button', { name: 'security', exact: true }).click(); await page.getByRole('button', { name: 'Set up or verify MFA' }).click();
+	await page.getByRole('button', { name: 'security', exact: true }).click(); await page.getByRole('button', { name: 'Set up authenticator app' }).click();
 	await expect(page.getByAltText('Authenticator enrollment QR code')).toBeVisible(); await page.getByLabel('Six-digit code').fill('123456');
 	await replaceIdentity(page, state);
 	await expect(page.getByRole('heading', { name: 'Hello, Replacement Customer' })).toBeVisible();
