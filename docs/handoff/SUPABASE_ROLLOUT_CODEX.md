@@ -74,7 +74,7 @@ SUPABASE_DB_PASSWORD="$SUPABASE_DB_PASSWORD_<ENV>" supabase db push --linked
 
 Confirm that the push lists exactly the pending files expected for this project, and nothing else, before it applies them. That is the three files above on Preview, and the seven files listed in step 5 on Production.
 
-**Applying migrations without the database password:** use the Management API's SQL query endpoint instead. Apply each pending file unmodified and in version order. In the same transaction, insert its repository version and name into `supabase_migrations.schema_migrations`. The same rule applies: only the expected pending files.
+**Applying migrations without the database password:** use the Management API's SQL query endpoint instead. Apply each pending file unmodified and in version order. In the same transaction, insert its repository version, name and `statements` (a text array holding the file's SQL) into `supabase_migrations.schema_migrations`. Supabase uses `statements` to rebuild migration files, and step 5's history comparison reads it. The same rule applies: only the expected pending files.
 
 ### Verify
 
@@ -263,7 +263,7 @@ Only after steps 1–4 pass on Preview **and** the related pull request is merge
 ### What the Preview run (2026-10-27) and Production preflight (2026-10-28) showed
 
 - **Token scope.** A scoped token with only Auth Config write gets HTTP 403 on `PATCH /config/auth`. Create a token limited to the one project, with **Auth Config, Project Settings, Database and Migrations** read-write and a 1-day expiry. Revoke it when finished.
-- **No database password needed.** Instead of `supabase db push`, each migration may be applied with the Management API's SQL query endpoint, inserting the repository version into `supabase_migrations.schema_migrations` in the same transaction. Use the unmodified file contents.
+- **No database password needed.** Instead of `supabase db push`, each migration may be applied with the Management API's SQL query endpoint, inserting the repository version, name and `statements` into `supabase_migrations.schema_migrations` in the same transaction (see step 2). Use the unmodified file contents. If any Preview rows written this way have empty `statements`, report it; do not backfill without owner approval.
 - **Migration history uses different version numbers.** The migrations were originally applied with other version numbers. Renumbering the history is allowed only after comparing every stored SQL body with its repository file, showing the owner the mapping, and getting approval. Never replay an old migration to "fix" the history.
 - **Production differs from Preview.** The preflight found the following. Re-check it; do not trust this list blindly.
   - Before applying `20261016011448_enforce_customer_ticket_api`, confirm Production serves the ticket API it depends on. That migration removes customers' direct ticket writes, so creating or replying to a ticket through the old route would break. Check that the live Production deployment is built from `main` at or after `6ef6677`, and that `POST https://softhe.io/api/tickets/write` with no token returns 401 rather than 404. If either check fails, stop and report.
