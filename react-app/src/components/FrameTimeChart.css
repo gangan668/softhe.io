@@ -1,5 +1,5 @@
 /* Series colours are --chart-* tokens (validated for CVD and contrast on the card surface);
-   every piece of text uses text tokens, never a series colour. */
+   text uses text tokens, except the end labels, which match their line and clear 4.8:1 on the card. */
 .frametime-chart {
 	margin: 0;
 }
@@ -12,18 +12,13 @@
 	padding: 0;
 	list-style: none;
 	color: var(--text-primary);
-	font-size: 0.9rem;
+	font-size: var(--font-md);
 }
 
 .frametime-legend li {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
-}
-
-.frametime-legend-note {
-	color: var(--text-muted);
-	font-size: 0.8rem;
 }
 
 .frametime-key {
@@ -46,7 +41,7 @@
 }
 
 .frametime-plot:focus-visible {
-	outline: 2px solid rgba(66, 232, 196, 0.72);
+	outline: 2px solid var(--accent-focus);
 	outline-offset: 4px;
 }
 
@@ -90,10 +85,12 @@
 .frametime-line--optimized { stroke: var(--chart-optimized); }
 
 .frametime-end-label {
-	fill: var(--text-primary);
 	font-size: 13px;
 	font-weight: 600;
 }
+
+.frametime-end-label--stock { fill: var(--chart-stock); }
+.frametime-end-label--optimized { fill: var(--chart-optimized); }
 
 .frametime-crosshair {
 	stroke: var(--text-secondary);
@@ -139,7 +136,7 @@
 
 .frametime-tooltip-title {
 	color: var(--text-secondary);
-	font-size: 0.78rem;
+	font-size: var(--font-md);
 	line-height: 1.35;
 }
 
@@ -149,7 +146,7 @@
 	align-items: center;
 	gap: 0.5rem;
 	color: var(--text-secondary);
-	font-size: 0.8rem;
+	font-size: var(--font-sm);
 	white-space: nowrap;
 }
 
@@ -179,7 +176,7 @@
 
 .frametime-tooltip-row strong {
 	color: var(--text-primary);
-	font-size: 0.92rem;
+	font-size: var(--font-md);
 	font-variant-numeric: tabular-nums;
 }
 
@@ -187,14 +184,14 @@
 	width: 100%;
 	margin-top: 1.25rem;
 	border-collapse: collapse;
-	font-size: 0.92rem;
+	font-size: var(--font-md);
 	font-variant-numeric: tabular-nums;
 }
 
 .frametime-table caption {
 	margin-bottom: 0.5rem;
 	color: var(--text-muted);
-	font-size: 0.8rem;
+	font-size: var(--font-md);
 	text-align: left;
 }
 
@@ -209,7 +206,7 @@
 .frametime-table thead th {
 	border-top: none;
 	color: var(--text-secondary);
-	font-size: 0.8rem;
+	font-size: var(--font-md);
 	font-weight: 700;
 }
 
@@ -230,22 +227,24 @@
 .frametime-table td span {
 	display: block;
 	color: var(--text-muted);
-	font-size: 0.78rem;
+	font-size: var(--font-md);
 	font-weight: 400;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 640px) {
 	.frametime-table th,
 	.frametime-table td {
 		padding: 0.6rem 0.4rem;
 	}
 
 	.frametime-table {
-		font-size: 0.85rem;
+		font-size: var(--font-md);
 	}
 }
 
 @media (forced-colors: active) {
+	.frametime-end-label { fill: CanvasText; }
+	.frametime-end-label--optimized { fill: Highlight; }
 	.frametime-line { stroke: CanvasText; }
 	.frametime-line--optimized { stroke: Highlight; }
 	.frametime-key--stock { background: CanvasText; }

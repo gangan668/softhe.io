@@ -206,60 +206,6 @@ function Store() {
 							</div>
 						</div>
 
-						<div className="store-proof" aria-label="Benchmark evidence">
-							<div>
-								<span className="section-kicker">Benchmark context</span>
-								<h2>See the limits of the preliminary CS2 comparison.</h2>
-								<p>
-									One PC measured {benchmarkResults.averageFps.stock} and {benchmarkResults.averageFps.optimized} average FPS across two configurations. Windows edition,
-									memory settings, and GPU driver changed. <BenchmarkEvidenceLink />
-								</p>
-							</div>
-							<Link to="/performance" className="proof-link">
-								Read the benchmark details
-								<i className="fas fa-arrow-right" aria-hidden="true"></i>
-							</Link>
-						</div>
-
-						<div className="product-finder">
-							<div>
-								<span className="section-kicker">Quick fit</span>
-							<h2>Find the closest match for your PC</h2>
-							<p>Choose the statement that matches your requirement. Contact support if none of them fit.</p>
-							</div>
-							<div className="finder-controls" role="group" aria-label="Product recommendation options">
-								<button
-									type="button"
-									className={quizChoice === 'windows-11' ? 'active' : ''}
-									aria-pressed={quizChoice === 'windows-11'}
-									onClick={() => handleQuizChoice('windows-11', 'newer_pc_windows_11')}
-								>
-									My PC requires Windows 11
-								</button>
-								<button
-									type="button"
-									className={quizChoice === 'windows-10' ? 'active' : ''}
-									aria-pressed={quizChoice === 'windows-10'}
-									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
-								>
-									I want a streamlined Windows 10 build
-								</button>
-								<button
-									type="button"
-									className={quizChoice === 'bios-optimization' ? 'active' : ''}
-									aria-pressed={quizChoice === 'bios-optimization'}
-									onClick={() => handleQuizChoice('bios-optimization', 'untuned_hardware')}
-								>
-									I need my BIOS and memory settings checked
-								</button>
-							</div>
-							<div className="finder-result">
-								<span>Recommended</span>
-								<strong>{recommendedProduct.name}</strong>
-								<p>{recommendedProduct.bestFor}</p>
-							</div>
-						</div>
-
 						<p className="visually-hidden" role="status">
 							{addedToCart ? `${products.find((product) => product.id === addedToCart)?.name} added to cart.` : ''}
 						</p>
@@ -326,6 +272,45 @@ function Store() {
 							))}
 						</div>
 
+						<div className="product-finder">
+							<div>
+								<span className="section-kicker">Quick fit</span>
+							<h2>Find the closest match for your PC</h2>
+							<p>Choose the statement that matches your requirement. Contact support if none of them fit.</p>
+							</div>
+							<div className="finder-controls" role="group" aria-label="Product recommendation options">
+								<button
+									type="button"
+									className={quizChoice === 'windows-11' ? 'active' : ''}
+									aria-pressed={quizChoice === 'windows-11'}
+									onClick={() => handleQuizChoice('windows-11', 'newer_pc_windows_11')}
+								>
+									My PC requires Windows 11
+								</button>
+								<button
+									type="button"
+									className={quizChoice === 'windows-10' ? 'active' : ''}
+									aria-pressed={quizChoice === 'windows-10'}
+									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
+								>
+									I want a streamlined Windows 10 build
+								</button>
+								<button
+									type="button"
+									className={quizChoice === 'bios-optimization' ? 'active' : ''}
+									aria-pressed={quizChoice === 'bios-optimization'}
+									onClick={() => handleQuizChoice('bios-optimization', 'untuned_hardware')}
+								>
+									I need my BIOS and memory settings checked
+								</button>
+							</div>
+							<div className="finder-result">
+								<span>Recommended</span>
+								<strong>{recommendedProduct.name}</strong>
+								<p>{recommendedProduct.bestFor}</p>
+							</div>
+						</div>
+
 						<div className="store-assurance" aria-label="Store purchase confidence">
 							<div className="assurance-item">
 								<i className="fas fa-lock" aria-hidden="true"></i>
@@ -348,6 +333,21 @@ function Store() {
 									<span>Ask support before buying if hardware fit is unclear.</span>
 								</div>
 							</div>
+						</div>
+
+						<div className="store-proof" aria-label="Benchmark evidence">
+							<div>
+								<span className="section-kicker">Benchmark context</span>
+								<h2>See the limits of the preliminary CS2 comparison.</h2>
+								<p>
+									One PC measured {benchmarkResults.averageFps.stock} and {benchmarkResults.averageFps.optimized} average FPS across two configurations. Windows edition,
+									memory settings, and GPU driver changed. <BenchmarkEvidenceLink />
+								</p>
+							</div>
+							<Link to="/performance" className="proof-link">
+								Read the benchmark details
+								<i className="fas fa-arrow-right" aria-hidden="true"></i>
+							</Link>
 						</div>
 
 						<div className="store-note">

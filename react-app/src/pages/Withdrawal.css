@@ -63,7 +63,7 @@
 .withdrawal-status {
 	padding: 0.8rem;
 	border-radius: var(--radius-sm);
-	border: 1px solid rgba(66, 232, 196, 0.34);
+	border: 1px solid var(--accent-line-strong);
 	background: var(--accent-wash);
 }
 

@@ -45,8 +45,10 @@ describe('Performance', () => {
 			</MemoryRouter>
 		);
 
-		expect(screen.getByRole('heading', { name: /frame-time distribution/i })).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: /the gap widens in the slowest frames/i })).toBeInTheDocument();
 		expect(screen.getByRole('img', { name: /frame-time percentile curves/i })).toBeInTheDocument();
+		// The stated gap must agree with the rounded values in the table: 1.27 - 0.99 and 5.02 - 3.86.
+		expect(screen.getByText(/grows from 0\.28 ms at the median frame to 1\.16 ms at the 99\.9th percentile/i)).toBeInTheDocument();
 		const table = screen.getByRole('table', { name: /median of each profile/i });
 		const p1Row = within(table).getByRole('row', { name: /99th percentile \(P1 FPS\)/i });
 		// The 1% point reproduces the published P1 FPS medians.

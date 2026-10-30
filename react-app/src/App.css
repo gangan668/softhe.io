@@ -6,12 +6,8 @@
 
 :root {
 	--primary-color: #42e8c4;
-	--primary-dark: #16b89c;
 	--brand-cyan: #4fd8e8;
 	--brand-blue: #72a7ff;
-	--brand-surface: rgba(67, 220, 211, 0.09);
-	--brand-surface-strong: rgba(67, 220, 211, 0.14);
-	--brand-border: rgba(82, 218, 222, 0.32);
 	--secondary-color: #ffb020;
 	--background-color: #080a0f;
 	--surface-color: #111821;
@@ -19,9 +15,9 @@
 	--card-bg: #111821;
 	--bg-color: var(--background-color);
 	--accent-color: var(--primary-color);
-	--text-primary: #f7fbff;
+	--text-primary: #f2f6fb;
 	--text-secondary: #a9b7c6;
-	--text-muted: #8696a6; /* At least 4.9:1 on every card surface (WCAG AA). */
+	--text-muted: #92a2b1; /* At least 5.9:1 on every card surface (WCAG AA). */
 	--border-color: rgba(174, 197, 218, 0.16);
 	--success-color: #35d28f;
 	--error-color: #ff5c75;
@@ -30,9 +26,8 @@
 	--text-error: #ff9cab;
 	--text-success: #78e8b4;
 	--text-on-accent: #03100d;
-	/* Teal text for navigation and account controls; softer than --primary-color on dark glass. */
+	/* Teal for text links and navigation; lighter than --primary-color for small type. */
 	--text-accent: #80e9e2;
-	--text-accent-hover: #8af3e5;
 	/* The "before" benchmark figure: readable but deliberately quieter than the result. */
 	--text-figure-muted: #aeb8c6;
 	/* Card surfaces and white washes layered on them. */
@@ -47,20 +42,31 @@
 	--accent-tint-strong: rgba(66, 232, 196, 0.12);
 	--accent-line: rgba(66, 232, 196, 0.2);
 	--accent-line-strong: rgba(66, 232, 196, 0.38);
+	--accent-focus: rgba(66, 232, 196, 0.72);
 	--gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--brand-cyan) 48%, var(--brand-blue) 100%);
 	--gradient-warm: linear-gradient(135deg, #ffb020 0%, #ff6b6b 100%);
 	--shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
 	--shadow-soft: 0 14px 40px rgba(2, 8, 23, 0.26);
 	--transition: all 0.22s ease;
 	--navbar-height: 70px;
-	--glass-bg: rgba(8, 10, 15, 0.72);
-	--glass-overlay: rgba(8, 10, 15, 0.72);
-	--glass-border: rgba(255, 255, 255, 0.1);
-	--glass-blur: 12px;
+	/* Type scale: use these rather than one-off sizes. */
+	--font-xs: 0.75rem;
+	--font-sm: 0.8125rem;
+	--font-md: 0.875rem;
+	--font-base: 1rem;
+	--font-lg: 1.125rem;
+	--font-xl: 1.25rem;
+	--font-2xl: 1.5rem;
+	--font-3xl: 1.75rem;
+	--font-4xl: 2rem;
+	--font-5xl: 2.5rem;
+	--glow-primary: 0 0 0 1px rgba(82, 218, 222, 0.22), 0 16px 36px rgba(66, 196, 216, 0.16);
+	--font-page-title: clamp(2.25rem, 4.5vw, 3.5rem);
+	--glass-bg: rgba(8, 10, 15, 0.78);
+	--glass-filter: blur(20px) saturate(140%);
 	--radius-lg: 14px;
 	--radius-md: 10px;
 	--radius-sm: 8px;
-	--glow-primary: 0 0 0 1px rgba(82, 218, 222, 0.22), 0 16px 36px rgba(66, 196, 216, 0.16);
 	/* Chart series: darker steps of the brand amber and teal, inside the dark-mode lightness band
 	   (OKLCH L 0.48-0.67) and validated for CVD separation and 3:1 contrast on --surface-color. */
 	--chart-stock: #c48225;
@@ -69,7 +75,7 @@
 
 
 body {
-	font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	font-family: "Inter Variable", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 	background:
 		radial-gradient(circle at 15% 0%, var(--accent-tint-strong), transparent 32rem),
 		radial-gradient(circle at 85% 12%, rgba(114, 167, 255, 0.12), transparent 28rem),
@@ -79,6 +85,26 @@ body {
 	overflow-x: clip;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Form controls do not inherit the page font by default. */
+button,
+input,
+select,
+textarea {
+	font-family: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	text-wrap: balance;
+}
+
+p,
+li {
+	text-wrap: pretty;
 }
 
 #root {
@@ -94,7 +120,7 @@ body {
 	border-radius: var(--radius-sm);
 	background: var(--text-primary);
 	color: var(--background-color);
-	font-weight: 800;
+	font-weight: 600;
 	transform: translateY(-160%);
 }
 
@@ -120,7 +146,7 @@ body {
 
 .btn {
 	padding: 12px 20px;
-	border-radius: 8px;
+	border-radius: var(--radius-sm);
 	text-decoration: none;
 	font-weight: 600;
 	transition: var(--transition);
@@ -161,7 +187,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-	outline: 2px solid rgba(66, 232, 196, 0.72);
+	outline: 2px solid var(--accent-focus);
 	outline-offset: 3px;
 }
 
@@ -171,7 +197,7 @@ textarea:focus-visible {
 	align-items: center;
 	gap: 0.55rem;
 	color: var(--primary-color);
-	font-size: 0.78rem;
+	font-size: var(--font-sm);
 	font-weight: 700;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
@@ -206,22 +232,22 @@ textarea:focus-visible {
 }
 
 .page-header {
-	padding: 130px 0 70px;
-	text-align: center;
+	padding: 130px 0 48px;
 	background:
 		linear-gradient(180deg, rgba(17, 24, 33, 0.74), rgba(8, 10, 15, 0)),
-		radial-gradient(ellipse at center, var(--accent-tint-strong) 0%, transparent 66%);
+		radial-gradient(ellipse at 20% 0%, var(--accent-tint-strong) 0%, transparent 66%);
 }
 
 .page-header h1 {
-	font-size: clamp(2.4rem, 5vw, 4rem);
+	font-size: var(--font-page-title);
 	font-weight: 700;
 	margin-bottom: 1rem;
 	line-height: 1.05;
 }
 
 .page-header p {
-	font-size: 1.2rem;
+	max-width: 680px;
+	font-size: var(--font-lg);
 	color: var(--text-secondary);
 }
 
@@ -230,27 +256,17 @@ textarea:focus-visible {
 	place-items: center;
 	min-height: 45vh;
 	color: var(--primary-color);
-	font-size: 1.5rem;
-}
-
-@media (max-width: 768px) {
-	.page-header h1 {
-		font-size: 2.5rem;
-	}
+	font-size: var(--font-2xl);
 }
 
 @media (max-width: 480px) {
-	.page-header h1 {
-		font-size: 2rem;
-	}
-
 	.section-title {
-		font-size: 2rem;
+		font-size: var(--font-4xl);
 	}
 
 	.btn {
 		padding: 10px 20px;
-		font-size: 0.9rem;
+		font-size: var(--font-md);
 	}
 }
 

@@ -81,11 +81,14 @@ export default function FrameTimeChart() {
 
 	return (
 		<figure className="frametime-chart">
-			<ul className="frametime-legend" aria-label="Legend">
-				{profiles.map(({ id, label }) => (
-					<li key={id}><span className={`frametime-key frametime-key--${id}`} aria-hidden="true"></span>{label}<span className="frametime-legend-note">{runs.filter((run) => run.profile === id).length} runs</span></li>
-				))}
-			</ul>
+			{/* Wide plots label each curve directly; narrow ones shorten those labels, so the full names live here. */}
+			{compact && (
+				<ul className="frametime-legend" aria-label="Legend">
+					{profiles.map(({ id, label }) => (
+						<li key={id}><span className={`frametime-key frametime-key--${id}`} aria-hidden="true"></span>{label}</li>
+					))}
+				</ul>
+			)}
 			<div
 				ref={wrapperRef}
 				className="frametime-plot"
@@ -110,12 +113,12 @@ export default function FrameTimeChart() {
 					{xTicks.map((share) => (
 						<text key={share} className="frametime-tick" x={x(share)} y={margin.top + plotHeight + 18} textAnchor="middle">{formatShare(share)}</text>
 					))}
-					<text className="frametime-axis-title" x={margin.left + plotWidth / 2} y={height - 8} textAnchor="middle">Share of frames slower than this (log scale)</text>
+					<text className="frametime-axis-title" x={margin.left + plotWidth / 2} y={height - 8} textAnchor="middle">Share of frames that took longer (log scale)</text>
 					<line className="frametime-reference" x1={x(0.01)} x2={x(0.01)} y1={margin.top} y2={margin.top + plotHeight} />
 					<text className="frametime-reference-label" x={x(0.01) - 6} y={margin.top + 12} textAnchor="end">P1 FPS</text>
 					{runs.map((run) => <path key={run.id} className={`frametime-line frametime-line--${run.profile}`} d={path(run.frameTimeMs)} />)}
 					{profiles.map(({ id, label }, index) => (
-						<text key={id} className="frametime-end-label" x={margin.left + plotWidth + 10} y={endLabelY[index]} dominantBaseline="middle">{compact ? label.split(' ')[0] : label}</text>
+						<text key={id} className={`frametime-end-label frametime-end-label--${id}`} x={margin.left + plotWidth + 10} y={endLabelY[index]} dominantBaseline="middle">{compact ? label.split(' ')[0] : label}</text>
 					))}
 					{active !== null && (
 						<g aria-hidden="true">

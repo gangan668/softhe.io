@@ -120,7 +120,7 @@ function Home() {
 						</div>
 						<div>
 							<strong>{idleOverhead.processes.optimized}</strong>
-							<span>Idle processes in the optimized sample</span>
+							<span>Idle processes in the SoftheOS sample</span>
 						</div>
 						<div>
 							<strong>14 days</strong>
@@ -146,11 +146,11 @@ function Home() {
 						</div>
 						<div className="comparison-card">
 							<div className="comparison-row">
-								<span>Stock Windows</span>
-								<strong className="negative">{averageFps.stock} FPS</strong>
+								<span>Default Windows</span>
+								<strong className="baseline">{averageFps.stock} FPS</strong>
 							</div>
 							<div className="comparison-row featured">
-								<span>Softhe.io Optimized</span>
+								<span>SoftheOS + BIOS</span>
 								<strong>{averageFps.optimized} FPS</strong>
 							</div>
 							<div className="comparison-footnote">
