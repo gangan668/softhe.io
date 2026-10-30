@@ -46,6 +46,17 @@ it('sends the session token on table queries once signed in', async () => {
 	expect(headers.get('apikey')).toBe('publishable-test');
 });
 
+it('sends the refreshed token on table queries after the stored session expires', async () => {
+	localStorage.setItem(storageKey, JSON.stringify({ ...session('expired-token'), expires_at: Math.floor(Date.now() / 1000) - 60 }));
+	fetchMock.mockImplementationOnce(async () => new Response(JSON.stringify(session('refreshed-token')), { status: 200, headers: { 'Content-Type': 'application/json' } }));
+	const { getSupabase } = await import('./supabase');
+	await (await getSupabase()).from('profiles').select('id');
+	expect(String(fetchMock.mock.calls[0][0])).toBe('https://project.supabase.co/auth/v1/token?grant_type=refresh_token');
+	const { url, headers } = lastRequest();
+	expect(url).toBe('https://project.supabase.co/rest/v1/profiles?select=id');
+	expect(headers.get('Authorization')).toBe('Bearer refreshed-token');
+});
+
 it('falls back to the publishable key on table queries when signed out', async () => {
 	const { getSupabase } = await import('./supabase');
 	await (await getSupabase()).from('profiles').select('id');
