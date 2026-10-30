@@ -15,24 +15,22 @@
 }
 
 .store-intro h1 {
-	font-size: clamp(2rem, 4vw, 3.4rem);
+	font-size: var(--font-page-title);
 	line-height: 1.04;
 	margin-bottom: 0.9rem;
 }
 
 .store-intro p {
 	color: var(--text-secondary);
-	font-size: 1.05rem;
+	font-size: var(--font-base);
 	line-height: 1.75;
 	max-width: 680px;
 }
 
 .store-trust {
 	display: grid;
-	gap: 0.75rem;
 }
 
-.store-trust div,
 .store-note,
 .store-assurance,
 .store-proof,
@@ -50,12 +48,12 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 1.5rem;
-	margin-bottom: 1rem;
+	margin-top: 1rem;
 	padding: 1.1rem 1.2rem;
 }
 
 .store-proof h2 {
-	font-size: 1.35rem;
+	font-size: var(--font-xl);
 	line-height: 1.2;
 	margin: 0.25rem 0 0.4rem;
 }
@@ -72,11 +70,12 @@
 	gap: 0.5rem;
 	flex-shrink: 0;
 	color: var(--primary-color);
-	font-weight: 800;
+	font-weight: 600;
 	text-decoration: none;
 }
 
 .product-finder {
+	margin-top: 1rem;
 	display: grid;
 	grid-template-columns: minmax(0, 0.85fr) minmax(260px, 0.8fr) minmax(240px, 0.55fr);
 	gap: 1rem;
@@ -86,7 +85,7 @@
 }
 
 .product-finder h2 {
-	font-size: 1.35rem;
+	font-size: var(--font-xl);
 	margin-bottom: 0.4rem;
 }
 
@@ -103,11 +102,11 @@
 .finder-controls button {
 	padding: 0.7rem 0.85rem;
 	border: 1px solid var(--border-color);
-	border-radius: 8px;
+	border-radius: var(--radius-sm);
 	background: var(--surface-tint);
 	color: var(--text-secondary);
 	font: inherit;
-	font-size: 0.9rem;
+	font-size: var(--font-md);
 	text-align: left;
 	cursor: pointer;
 	transition: var(--transition);
@@ -121,40 +120,39 @@
 }
 
 .finder-result {
-	border: 1px solid rgba(66, 232, 196, 0.24);
-	background: rgba(66, 232, 196, 0.07);
+	border: 1px solid var(--accent-line);
+	background: var(--accent-wash);
 	border-radius: var(--radius-md);
 	padding: 1rem;
 }
 
 .finder-result span {
 	color: var(--primary-color);
-	font-size: 0.72rem;
-	font-weight: 800;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
+	font-size: var(--font-md);
+	font-weight: 600;
 }
 
 .finder-result strong {
 	display: block;
 	margin: 0.25rem 0;
-	font-size: 1.05rem;
+	font-size: var(--font-base);
 }
 
 .store-trust div {
-	padding: 0.9rem 1rem;
+	padding: 0.75rem 0;
+	border-top: 1px solid var(--border-color);
 	display: grid;
 	gap: 0.1rem;
 }
 
 .store-trust strong {
-	color: var(--primary-color);
-	font-size: 1.05rem;
+	color: var(--text-primary);
+	font-size: var(--font-base);
 }
 
 .store-trust span {
 	color: var(--text-secondary);
-	font-size: 0.9rem;
+	font-size: var(--font-md);
 }
 
 .products-grid {
@@ -189,22 +187,21 @@
 	color: var(--text-on-accent);
 	padding: 5px 12px;
 	border-radius: 999px;
-	font-size: 0.78rem;
-	font-weight: 800;
+	font-size: var(--font-sm);
+	font-weight: 600;
 	z-index: 1;
 }
 
 .product-image {
 	height: 96px;
-	background:
-		linear-gradient(135deg, var(--accent-tint-strong), rgba(114, 167, 255, 0.08)),
+	background: linear-gradient(135deg, var(--accent-tint-strong), rgba(114, 167, 255, 0.08)),
 		rgba(255, 255, 255, 0.02);
 	display: flex;
 	align-items: center;
 	/* Left-aligned so the right-hand badge never covers the icon on narrow cards. */
 	justify-content: flex-start;
 	padding: 0 1.25rem;
-	font-size: 2.35rem;
+	font-size: var(--font-5xl);
 	color: var(--primary-color);
 	border-bottom: 1px solid var(--border-color);
 }
@@ -226,8 +223,8 @@
 }
 
 .product-info h2 {
-	font-size: 1.22rem;
-	font-weight: 750;
+	font-size: var(--font-xl);
+	font-weight: 700;
 	line-height: 1.18;
 }
 
@@ -245,33 +242,33 @@
 }
 
 .price {
-	font-size: 1.45rem;
-	font-weight: 800;
+	font-size: var(--font-2xl);
+	font-weight: 700;
 	color: var(--primary-color);
 	line-height: 1;
 }
 
 .best-for {
-	border: 1px solid var(--accent-line);
-	background: rgba(66, 232, 196, 0.06);
-	border-radius: var(--radius-md);
-	padding: 0.85rem;
+	align-content: start;
 	margin-bottom: 1rem;
 	display: grid;
 	gap: 0.25rem;
+	border: 1px solid var(--accent-line);
+	background: var(--accent-wash);
+	border-radius: var(--radius-md);
+	padding: 0.85rem;
 }
 
 .best-for span {
 	color: var(--primary-color);
-	font-size: 0.72rem;
-	font-weight: 800;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
+	font-size: var(--font-md);
+	font-weight: 600;
 }
 
 .best-for strong {
 	color: var(--text-primary);
-	font-size: 0.92rem;
+	font-weight: 600;
+	font-size: var(--font-md);
 	line-height: 1.45;
 }
 
@@ -284,7 +281,7 @@
 
 .product-features li {
 	color: var(--text-secondary);
-	font-size: 0.93rem;
+	font-size: var(--font-md);
 	padding-left: 1.25rem;
 	position: relative;
 }
@@ -311,7 +308,7 @@
 .product-actions .btn {
 	min-height: 44px;
 	padding: 0.75rem 0.8rem;
-	font-size: 0.9rem;
+	font-size: var(--font-md);
 }
 
 .product-actions .btn-success {
@@ -345,10 +342,7 @@
 	grid-template-columns: auto minmax(0, 1fr);
 	gap: 0.75rem;
 	align-items: start;
-	padding: 0.85rem;
-	border: 1px solid var(--border-color);
-	border-radius: var(--radius-md);
-	background: rgba(255, 255, 255, 0.03);
+	padding: 0.25rem;
 }
 
 .assurance-item i {
@@ -357,7 +351,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	border-radius: 8px;
+	border-radius: var(--radius-sm);
 	color: var(--primary-color);
 	background: var(--accent-tint);
 	border: 1px solid var(--accent-line);
@@ -365,13 +359,13 @@
 
 .assurance-item strong {
 	display: block;
-	font-size: 0.95rem;
+	font-size: var(--font-base);
 	margin-bottom: 0.2rem;
 }
 
 .assurance-item span {
 	color: var(--text-secondary);
-	font-size: 0.88rem;
+	font-size: var(--font-md);
 	line-height: 1.45;
 }
 
@@ -391,13 +385,16 @@
 	color: var(--text-secondary);
 }
 
-.store-note i,
+.store-note i {
+	color: var(--primary-color);
+}
+
 .store-note a {
 	color: var(--primary-color);
 }
 
 .store-note a {
-	font-weight: 750;
+	font-weight: 600;
 	text-decoration: none;
 	white-space: nowrap;
 }
@@ -412,7 +409,7 @@
 	}
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
 	.store-intro,
 	.store-assurance {
 		grid-template-columns: 1fr;
@@ -425,7 +422,7 @@
 	}
 }
 
-@media (max-width: 720px) {
+@media (max-width: 768px) {
 	.products-grid {
 		grid-template-columns: 1fr;
 	}
@@ -455,7 +452,7 @@
 .status-contact-link {
 	margin-left: auto;
 	color: currentColor;
-	font-weight: 800;
+	font-weight: 600;
 	white-space: nowrap;
 }
 
@@ -469,7 +466,7 @@
 	color: var(--text-error);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
 	.checkout-result .container {
 		align-items: flex-start;
 		flex-direction: column;

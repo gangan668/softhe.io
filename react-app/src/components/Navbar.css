@@ -2,10 +2,10 @@
 	position: fixed;
 	top: 0;
 	width: 100%;
-	background: linear-gradient(90deg, rgba(8, 10, 15, 0.94), rgba(9, 14, 20, 0.9), rgba(8, 10, 15, 0.94));
+	background: var(--glass-bg);
 	border-bottom: 1px solid var(--border-color);
-	backdrop-filter: blur(18px);
-	-webkit-backdrop-filter: blur(18px);
+	backdrop-filter: var(--glass-filter);
+	-webkit-backdrop-filter: var(--glass-filter);
 	z-index: 1000;
 	transition: var(--transition);
 }
@@ -22,15 +22,14 @@
 }
 
 .nav-account-link {
-	color: var(--text-accent);
+	/* Pairs with the cart at the far right; the auto margin takes up the space after the menu. */
+	margin-left: auto;
+	color: var(--text-secondary);
 	text-decoration: none;
-	font-weight: 750;
-	padding: 9px 14px;
-	border: 1px solid var(--brand-border);
+	font-weight: 500;
+	padding: 8px 12px;
 	border-radius: 999px;
 	white-space: nowrap;
-	background: var(--brand-surface);
-	box-shadow: inset 0 0 18px rgba(79, 216, 232, 0.025);
 	transition: var(--transition);
 }
 
@@ -81,6 +80,7 @@
 }
 
 .nav-menu {
+	margin-left: 1.5rem;
 	display: flex;
 	list-style: none;
 	gap: 0.35rem;
@@ -100,10 +100,10 @@
 }
 
 .cart-icon-btn {
-	background: var(--brand-surface);
-	border: 1px solid var(--brand-border);
+	background: var(--accent-wash);
+	border: 1px solid var(--accent-line-strong);
 	color: var(--text-accent);
-	font-size: 1.25rem;
+	font-size: var(--font-xl);
 	cursor: pointer;
 	position: relative;
 	width: 42px;
@@ -127,11 +127,11 @@
 }
 
 .cart-icon-btn:hover {
-	color: var(--text-accent-hover);
-	border-color: rgba(91, 205, 232, 0.52);
-	background: var(--brand-surface-strong);
-	box-shadow: 0 10px 28px rgba(58, 190, 202, 0.12);
+	color: var(--text-accent);
+	border-color: var(--accent-focus);
+	background: var(--accent-tint-strong);
 	transform: translateY(-1px);
+	box-shadow: 0 10px 28px rgba(58, 190, 202, 0.12);
 }
 
 .cart-badge {
@@ -146,7 +146,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 0.7rem;
+	font-size: var(--font-xs);
 	font-weight: 700;
 	border: 2px solid var(--background-color);
 }
@@ -154,15 +154,14 @@
 
 .nav-link:hover {
 	color: var(--text-accent);
-	background: var(--brand-surface);
+	background: var(--accent-wash);
 }
 
 .nav-link.active {
-	border: 1px solid transparent;
-	background:
-		linear-gradient(rgba(13, 33, 35, 0.96), rgba(10, 25, 31, 0.96)) padding-box,
+	background: linear-gradient(rgba(13, 33, 35, 0.96), rgba(10, 25, 31, 0.96)) padding-box,
 		var(--gradient) border-box;
 	color: var(--text-accent);
+	border: 1px solid transparent;
 	box-shadow: 0 10px 30px rgba(62, 193, 205, 0.12), inset 0 0 20px rgba(72, 218, 216, 0.045);
 }
 
@@ -215,11 +214,8 @@
 
 .nav-account-link:hover,
 .nav-account-link:focus-visible {
-	color: var(--text-accent-hover);
-	border-color: rgba(91, 205, 232, 0.52);
-	background: var(--brand-surface-strong);
-	box-shadow: 0 10px 28px rgba(58, 190, 202, 0.11);
-	transform: translateY(-1px);
+	color: var(--text-accent);
+	background: var(--accent-wash);
 }
 
 @media (max-width: 768px) {
@@ -228,6 +224,7 @@
 	}
 
 	.nav-menu {
+		margin-left: 0;
 		position: fixed;
 		left: -100%;
 		top: 70px;
@@ -266,12 +263,12 @@
 
 	.cart-icon-btn {
 		margin-left: 0.5rem;
-		font-size: 1.1rem;
+		font-size: var(--font-lg);
 	}
 
 	.cart-badge {
 		width: 16px;
 		height: 16px;
-		font-size: 0.65rem;
+		font-size: var(--font-xs);
 	}
 }

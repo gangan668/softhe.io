@@ -3,10 +3,17 @@ import { expect, test } from '@playwright/test';
 const privateRoutes = ['/login', '/register', '/forgot-password', '/resend-confirmation', '/reset-password', '/account', '/admin', '/checkout'];
 const publicRoutes = ['/', '/services', '/store', '/performance', '/contact', '/faq', '/privacy-policy', '/cookie-policy', '/terms', '/legal-notice', '/withdrawal'];
 
+// Protected routes show a loading state before redirecting, so metadata is only final once it clears.
+const settled = async (page) => {
+	await expect(page.locator('h1, .portal-state, .portal-error').first()).toBeVisible();
+	await expect(page.locator('.portal-state[role="status"]').filter({ hasText: /^Loading your account…$/ })).toHaveCount(0);
+	await expect(page.locator('h1, .portal-error, .portal-state').first()).toBeVisible();
+};
+
 test('direct hydrated routes keep canonical and indexing policy', async ({ page }) => {
 	for (const route of [...publicRoutes, ...privateRoutes]) {
 		await page.goto(route);
-		await expect(page.locator('h1, .portal-state, .portal-error').first()).toBeVisible();
+		await settled(page);
 		const actualPath = new URL(page.url()).pathname;
 		await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://softhe.io${actualPath}`);
 		await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', privateRoutes.includes(route) ? 'noindex, nofollow' : 'index, follow');
@@ -40,7 +47,7 @@ test('static HTML and hydrated pages declare the same copy', async ({ page, requ
 		const served = await head(await (await request.get(file)).text());
 		expect(served.title, route).not.toBe('Softhe.io');
 		await page.goto(route);
-		await expect(page.locator('h1, .portal-state, .portal-error').first()).toBeVisible();
+		await settled(page);
 		// Redirects (for example checkout or account) hydrate as a different route and are compared there.
 		if (new URL(page.url()).pathname !== route) continue;
 		expect(await head(), route).toEqual(served);

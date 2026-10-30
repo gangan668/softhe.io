@@ -16,7 +16,7 @@
   text-align: center;
   background: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 48px 32px;
   box-shadow: var(--shadow);
 }
@@ -40,7 +40,7 @@
 }
 
 .error-title {
-  font-size: 2rem;
+  font-size: var(--font-4xl);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 16px;
@@ -51,7 +51,7 @@
 }
 
 .error-message {
-  font-size: 1.1rem;
+  font-size: var(--font-lg);
   color: var(--text-secondary);
   margin-bottom: 32px;
   line-height: 1.6;
@@ -70,13 +70,13 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   font-weight: 600;
   text-decoration: none;
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.22s ease;
-  font-size: 1rem;
+  font-size: var(--font-base);
   font-family: inherit;
 }
 
@@ -108,7 +108,7 @@
   text-align: left;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 16px;
 }
 
@@ -130,7 +130,7 @@
 
 .error-stack h3 {
   color: var(--text-primary);
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   margin-top: 16px;
   margin-bottom: 8px;
 }
@@ -141,7 +141,7 @@
   padding: 12px;
   border-radius: 4px;
   overflow-x: auto;
-  font-size: 0.85rem;
+  font-size: var(--font-md);
   line-height: 1.5;
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -156,7 +156,7 @@
 .error-support p {
   color: var(--text-secondary);
   margin-bottom: 12px;
-  font-size: 0.95rem;
+  font-size: var(--font-base);
 }
 
 .support-link {
@@ -170,7 +170,7 @@
 }
 
 .support-link:hover {
-  color: var(--brand-blue);
+  color: var(--text-accent);
   transform: translateX(4px);
 }
 
@@ -181,11 +181,11 @@
   }
 
   .error-title {
-    font-size: 1.5rem;
+    font-size: var(--font-2xl);
   }
 
   .error-message {
-    font-size: 1rem;
+    font-size: var(--font-base);
   }
 
   .error-icon {
@@ -202,7 +202,7 @@
   }
 
   .error-stack pre {
-    font-size: 0.75rem;
+    font-size: var(--font-xs);
   }
 }
 
@@ -212,6 +212,6 @@
   }
 
   .error-title {
-    font-size: 1.25rem;
+    font-size: var(--font-xl);
   }
 }

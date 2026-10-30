@@ -1,12 +1,17 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
 import FrameTimeChart from '../components/FrameTimeChart';
-import { framesPerRun } from '../data/benchmarkFrametimes';
+import { framesPerRun, percentileRows } from '../data/benchmarkFrametimes';
 import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import "./Performance.css";
 
 const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
 const { processes, memoryGb } = idleOverhead;
 const { runCount, captureSeconds } = benchmarkMethodology;
+const frameTimeGap = (share) => {
+	const { stock, optimized } = percentileRows.find((row) => row.share === share).values;
+	// Subtract the rounded values so the figure matches the table beneath the chart.
+	return `${(Number(stock.toFixed(2)) - Number(optimized.toFixed(2))).toFixed(2)} ms`;
+};
 
 function Performance() {
 	return (
@@ -16,28 +21,26 @@ function Performance() {
 					<div className="container">
 						<span className="section-kicker">Benchmarks</span>
 						<h1>Measured results from the current test PC</h1>
-						<p>
-							This preliminary comparison uses one PC. Windows edition, memory settings, and
-							GPU driver changed. The result cannot isolate the effect of a Softhe.io product.
-						</p>
-						<p className="methodology-warning" role="note">
-							Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
-							 Runs per configuration: {runCount}. <BenchmarkEvidenceLink />
-						</p>
 						<div className="performance-stats">
 							<div>
-								<strong>{averageFps.stock} to {averageFps.optimized}</strong>
-								<span>Average FPS in CS2 sample</span>
+								<strong>{formatPercentChange(averageFps.change)}</strong>
+								<span>Average FPS in CS2: {averageFps.stock} to {averageFps.optimized}</span>
 							</div>
 							<div>
-								<strong>{onePercentLowFps.stock} to {onePercentLowFps.optimized}</strong>
-								<span>P1 FPS in CS2 sample</span>
+								<strong>{formatPercentChange(onePercentLowFps.change)}</strong>
+								<span>P1 FPS in CS2: {onePercentLowFps.stock} to {onePercentLowFps.optimized}</span>
 							</div>
 							<div>
-								<strong>Version 74</strong>
-								<span>Build used in the published sample</span>
+								<strong>{formatPercentChange(processes.change)}</strong>
+								<span>Idle processes: {processes.stock} to {processes.optimized}</span>
 							</div>
 						</div>
+						<p className="methodology-warning" role="note">
+							This preliminary comparison uses one PC. Windows edition, memory settings, and
+							GPU driver changed, so the result cannot isolate the effect of a Softhe.io product.
+							Captured {benchmarkMethodology.captureDate} on SoftheOS version 74, {runCount} runs per configuration.{' '}
+							<a href="#benchmark-methodology">Full test setup</a>. <BenchmarkEvidenceLink />
+						</p>
 					</div>
 				</section>
 
@@ -46,7 +49,7 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">Preliminary in-game sample</span>
 							<h2 className="section-title">Counter-Strike 2 FPS comparison</h2>
-							<p>The CPU, GPU, and motherboard are the same. Memory settings, Windows edition, and GPU driver changed. This whole-system comparison does not measure the effect of any single product.</p>
+							<p>The CPU, GPU, and motherboard are the same. This is a whole-system comparison of the two configurations below.</p>
 						</div>
 
 						<div className="native-benchmark-card">
@@ -79,9 +82,10 @@ function Performance() {
 				<section className="fps-comparison frametime-section" aria-labelledby="frametime-title">
 					<div className="container">
 						<div className="performance-section-heading">
-							<span className="section-kicker">Every recorded frame</span>
-							<h2 id="frametime-title" className="section-title">Frame-time distribution</h2>
+							<span className="section-kicker">Frame-time distribution</span>
+							<h2 id="frametime-title" className="section-title">The gap widens in the slowest frames</h2>
 							<p>
+								In this sample, the difference grows from {frameTimeGap(0.5)} at the median frame to {frameTimeGap(0.001)} at the 99.9th percentile.
 								Each line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
 								drawn from the published raw captures. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
 								Averages hide this tail, and it is where stutter shows up.
@@ -98,24 +102,24 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">System overhead</span>
 							<h2 className="section-title">Idle process and memory use</h2>
-							<p>Idle Windows overhead from the documented stock and optimized configurations.</p>
+							<p>Idle Windows overhead from the two documented configurations.</p>
 						</div>
 
 						<div className="overhead-showcase">
 							<div className="overhead-heading" aria-hidden="true">
-								<div><span>Default Windows</span><strong>Stock sample</strong></div>
-								<div><span>SoftheOS</span><strong>Optimized sample</strong></div>
+								<div><span>Default Windows</span></div>
+								<div><span>SoftheOS</span></div>
 							</div>
 							{/* Each value names its profile because the column headings disappear once the metrics stack on mobile. */}
 							<div className="overhead-metric">
 								<div><small className="overhead-profile">Default Windows</small><span>Background processes</span><strong>{processes.stock}</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(processes.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><small className="overhead-profile">SoftheOS</small><strong>{processes.optimized}</strong><span>Observed in sample</span></div>
+								<div><small className="overhead-profile">SoftheOS</small><strong>{processes.optimized}</strong></div>
 							</div>
 							<div className="overhead-metric">
 								<div><small className="overhead-profile">Default Windows</small><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(memoryGb.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><small className="overhead-profile">SoftheOS</small><strong>{memoryGb.optimized} GB</strong><span>Observed idle use</span></div>
+								<div><small className="overhead-profile">SoftheOS</small><strong>{memoryGb.optimized} GB</strong></div>
 							</div>
 							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
 						</div>
@@ -143,106 +147,14 @@ function Performance() {
 
 				<section className="detailed-comparison">
 					<div className="container">
-						<div className="performance-section-heading">
-							<span className="section-kicker">Summary</span>
-							<h2 className="section-title">Results at a glance</h2>
-							<p>Values from the preliminary CS2 comparison and separate idle snapshots.</p>
-						</div>
-
-						<div className="comparison-table">
-							<div className="table-header">
-								<div className="table-cell">Feature</div>
-								<div className="table-cell">Stock Windows</div>
-								<div className="table-cell">
-									Softhe.io Optimized
-								</div>
-								<div className="table-cell">Improvement</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-chart-line" aria-hidden="true"></i>
-									Frame Rate (CS2)
-								</div>
-								<div className="table-cell stock-value">
-									{averageFps.stock} avg FPS
-								</div>
-								<div className="table-cell optimized-value">
-									{averageFps.optimized} avg FPS
-								</div>
-								<div className="table-cell improvement">
-									{formatPercentChange(averageFps.change)}
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-chart-line" aria-hidden="true"></i>
-									P1 FPS (CS2)
-								</div>
-								<div className="table-cell stock-value">
-									{onePercentLowFps.stock} FPS
-								</div>
-								<div className="table-cell optimized-value">
-									{onePercentLowFps.optimized} FPS
-								</div>
-								<div className="table-cell improvement">
-									{formatPercentChange(onePercentLowFps.change)}
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-stopwatch" aria-hidden="true"></i>
-									Average Frame Time
-								</div>
-								<div className="table-cell stock-value">{frameTimeMs.stock}ms</div>
-								<div className="table-cell optimized-value">
-									{frameTimeMs.optimized}ms
-								</div>
-								<div className="table-cell improvement">
-									{formatPercentChange(frameTimeMs.change)}
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-list" aria-hidden="true"></i>
-									Idle Processes
-								</div>
-								<div className="table-cell stock-value">{processes.stock}</div>
-								<div className="table-cell optimized-value">
-									{processes.optimized}
-								</div>
-								<div className="table-cell improvement">
-									{formatPercentChange(processes.change)}
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-memory" aria-hidden="true"></i>
-									Idle Memory
-								</div>
-								<div className="table-cell stock-value">
-									{memoryGb.stock} GB
-								</div>
-								<div className="table-cell optimized-value">
-									{memoryGb.optimized} GB
-								</div>
-								<div className="table-cell improvement">
-									{formatPercentChange(memoryGb.change)}
-								</div>
-							</div>
-						</div>
-
-						<section className="benchmark-methodology" aria-labelledby="benchmark-methodology-title">
+						<section id="benchmark-methodology" className="benchmark-methodology" aria-labelledby="benchmark-methodology-title">
 							<div className="methodology-heading">
 								<span className="section-kicker">Evidence</span>
 								<h2 id="benchmark-methodology-title">Benchmark methodology</h2>
 								<p>
 									These results describe the documented test configuration only. They are not a
-									guarantee of results on other hardware or workloads.
+									guarantee of results on other hardware or workloads. Results and stability depend on
+									hardware, BIOS, drivers, Windows version, game settings, and workload.
 								</p>
 							</div>
 							<dl className="methodology-grid">
@@ -268,21 +180,13 @@ function Performance() {
 									P1 FPS is the 99th percentile frame time converted to FPS, not the average of the slowest 1% of frames.
 								</p>
 							)}
-						</section>
-
-						<div className="method-note">
-							<i className="fas fa-circle-info" aria-hidden="true"></i>
-							<p>
-								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
-								workload. The archive contains {benchmarkPublication.captureCountText} original JSON captures, with
+							<p className="methodology-archive">
+								The archive contains {benchmarkPublication.captureCountText} original JSON captures, with
 								median average FPS and P1 FPS from at least two repeated stock and optimized runs.{' '}
 								<BenchmarkEvidenceLink />
 							</p>
-						</div>
-						<p className="version-stability-note">
-							SoftheOS version 74 was used for this sample. Stability still depends on the hardware,
-							drivers, BIOS settings, and workload of each PC.
-						</p>
+						</section>
+
 					</div>
 				</section>
 			</div>

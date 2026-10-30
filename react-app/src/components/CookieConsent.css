@@ -20,8 +20,7 @@
 }
 
 .cookie-consent {
-	background: rgba(13, 19, 27, 0.98);
-  backdrop-filter: blur(16px);
+	background: var(--surface-color);
   border-top: 1px solid var(--primary-color);
 	box-shadow: 0 -22px 70px rgba(0, 0, 0, 0.52);
 	pointer-events: auto;
@@ -51,14 +50,14 @@
 .cookie-header i {
   width: 0.8rem;
   height: 0.8rem;
-  font-size: 0.7rem;
+  font-size: var(--font-xs);
   color: var(--secondary-color);
   filter: drop-shadow(0 0 12px rgba(255, 176, 32, 0.35));
 }
 
 .cookie-header h3 {
-  font-size: 1.35rem;
-  font-weight: 800;
+  font-size: var(--font-base);
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
   letter-spacing: 0;
@@ -73,7 +72,7 @@
   color: var(--text-secondary);
   line-height: 1.6;
 	margin: 0;
-  font-size: 0.95rem;
+  font-size: var(--font-base);
 }
 
 .toggle-details-btn {
@@ -82,7 +81,7 @@
   color: var(--primary-color);
   cursor: pointer;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -91,12 +90,12 @@
 }
 
 .toggle-details-btn:hover {
-  color: var(--brand-blue);
+  color: var(--text-accent);
   transform: translateX(4px);
 }
 
 .toggle-details-btn i {
-  font-size: 0.8rem;
+  font-size: var(--font-sm);
 }
 
 .cookie-details {
@@ -137,7 +136,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 1.05rem;
+  font-size: var(--font-base);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.75rem;
@@ -145,13 +144,13 @@
 
 .cookie-detail-section h4 i {
   color: var(--primary-color);
-  font-size: 1rem;
+  font-size: var(--font-base);
 }
 
 .cookie-detail-section p {
   color: var(--text-secondary);
   line-height: 1.6;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   margin-bottom: 0.75rem;
 }
 
@@ -159,8 +158,8 @@
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 800;
+  font-size: var(--font-xs);
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -189,18 +188,18 @@
   gap: 0.5rem;
   color: var(--primary-color);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   font-weight: 700;
   transition: var(--transition);
 }
 
 .cookie-info-links a:hover {
-  color: var(--brand-blue);
+  color: var(--text-accent);
   transform: translateX(2px);
 }
 
 .cookie-info-links a i {
-  font-size: 0.85rem;
+  font-size: var(--font-md);
 }
 
 .cookie-actions {
@@ -218,8 +217,8 @@
 	padding: 0.7rem 1rem;
   border: none;
   border-radius: var(--radius-sm);
-  font-weight: 800;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: var(--font-base);
   cursor: pointer;
   transition: var(--transition);
   font-family: inherit;
@@ -228,9 +227,9 @@
 /* Consent choices share one style so declining is as easy and as prominent as accepting. */
 .cookie-actions .btn-accept,
 .cookie-actions .btn-decline {
-	background: var(--brand-surface-strong);
+	background: var(--accent-tint-strong);
 	color: var(--text-primary);
-	border: 1px solid var(--brand-border);
+	border: 1px solid var(--accent-line-strong);
 	min-width: 116px;
 }
 
@@ -245,21 +244,22 @@
   align-items: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  font-size: 0.8rem;
+  font-size: var(--font-md);
   color: var(--text-muted);
   font-style: italic;
 }
 
 .cookie-note i {
   color: var(--primary-color);
-  font-size: 0.85rem;
+  font-size: var(--font-md);
 }
 
 @media (max-width: 768px) {
   .cookie-consent-container {
-		padding: 1rem 1.25rem;
+		padding: 0.75rem 1.25rem;
 		grid-template-columns: 1fr;
 		grid-template-areas: "header" "content" "actions" "details";
+		gap: 0.35rem;
   }
 
   .cookie-header {
@@ -267,12 +267,8 @@
     gap: 0.75rem;
   }
 
-  .cookie-header h3 {
-    font-size: 1.2rem;
-  }
-
   .cookie-description {
-    font-size: 0.9rem;
+    font-size: var(--font-md);
   }
 
   .cookie-details {
@@ -280,11 +276,11 @@
   }
 
   .cookie-detail-section h4 {
-    font-size: 1rem;
+    font-size: var(--font-base);
   }
 
   .cookie-detail-section p {
-    font-size: 0.85rem;
+    font-size: var(--font-md);
   }
 
   .cookie-info-links {
@@ -301,21 +297,17 @@
   }
 
   .cookie-note {
-    font-size: 0.75rem;
+    font-size: var(--font-md);
   }
 }
 
 @media (max-width: 480px) {
   .cookie-consent-container {
-    padding: 1rem;
-  }
-
-  .cookie-header h3 {
-    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
   }
 
   .cookie-description {
-    font-size: 0.85rem;
+    font-size: var(--font-md);
   }
 
   .cookie-details {
@@ -323,8 +315,8 @@
   }
 
 	.cookie-actions .btn {
-		padding: 0.7rem 1.25rem;
-		font-size: 0.9rem;
+		padding: 0.6rem 1rem;
+		font-size: var(--font-md);
 	}
 }
 
