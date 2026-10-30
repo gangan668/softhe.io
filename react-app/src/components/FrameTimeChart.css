@@ -244,6 +244,7 @@
 
 @media (forced-colors: active) {
 	.frametime-end-label { fill: CanvasText; }
+	.frametime-end-label--optimized { fill: Highlight; }
 	.frametime-line { stroke: CanvasText; }
 	.frametime-line--optimized { stroke: Highlight; }
 	.frametime-key--stock { background: CanvasText; }
