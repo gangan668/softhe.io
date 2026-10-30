@@ -5,8 +5,8 @@ import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
 export const budgets = { js: 120 * 1024, css: 24 * 1024 };
-// The portal adds the measured 56 KiB SDK and up to 5 KiB of route code to
-// the 80 KiB shared entry. Its explicit limit does not change the public limit.
+// The portal adds the measured 32 KiB auth and database clients and route code
+// to the 85 KiB shared entry. Its explicit limit does not change the public limit.
 export const portalBudgets = { js: 140 * 1024, css: 24 * 1024 };
 export const sdkBudgets = { js: 60 * 1024, css: 24 * 1024 };
 
@@ -50,10 +50,10 @@ function run() {
 	const manifest = JSON.parse(readFileSync(join(directory, '.vite/manifest.json'), 'utf8'));
 	const entries = Object.keys(manifest).filter((key) => manifest[key].isEntry);
 	if (!entries.length) throw new Error('Build manifest has no entry point.');
-	const sdk = Object.keys(manifest).filter((key) => /supabase-js.*index\.mjs$/.test(key));
+	const sdk = Object.keys(manifest).filter((key) => /@supabase\/(auth|postgrest)-js\/.*index\.m?js$/.test(key));
 	const analytics = 'src/components/VercelAnalyticsClient.jsx';
 	if (!manifest[analytics]) throw new Error('Missing consented analytics manifest entry.');
-	if (sdk.length !== 1) throw new Error('Expected one authentication SDK manifest entry.');
+	if (sdk.length !== 2) throw new Error('Expected the auth and database client manifest entries.');
 	const publicChunks = Object.keys(manifest).filter((key) => key.startsWith('src/pages/') && !/\/(Home|AuthPage|ResetPassword|Account|Admin|Checkout)\.jsx$/.test(key));
 	// Matches the fixed public route allowlist in publicAnalyticsPath. Unknown
 	// paths and direct private-route startup do not load the analytics client.

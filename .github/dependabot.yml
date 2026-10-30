@@ -15,6 +15,10 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
     groups:
+      # auth-js and postgrest-js are released together and should stay on one version.
+      supabase:
+        patterns:
+          - '@supabase/*'
       development-patch-updates:
         dependency-type: development
         update-types:
