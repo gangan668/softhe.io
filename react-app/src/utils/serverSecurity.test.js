@@ -327,9 +327,13 @@ describe('public error messages', () => {
 		expect(userError.statusCode).toBe(403);
 		expect(userError.message).not.toContain('row-level security');
 		expect(userError.detail).toContain('row-level security');
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const response = createResponse();
 		sendPublicError(response, userError);
 		expect(response.payload).toEqual({ error: 'Request could not be completed' });
+		// The upstream rejection stays diagnosable in private server logs.
+		expect(warn).toHaveBeenCalledWith('portal_request_rejected', expect.objectContaining({ status: 403, detail: expect.stringContaining('row-level security') }));
+		warn.mockRestore();
 
 		const adminError = await adminRequest('tickets').catch((error) => error);
 		expect(adminError.message).toBe('Customer data request failed (403)');

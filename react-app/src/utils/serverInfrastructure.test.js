@@ -353,6 +353,17 @@ describe('production health API', () => {
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 	});
 
+	it('shares one in-flight probe across concurrent public requests on a cold cache', async () => {
+		configureReadyEnvironment();
+		const fetchMock = healthyProviders();
+		vi.stubGlobal('fetch', fetchMock);
+		const responses = Array.from({ length: 5 }, () => createResponse());
+		await Promise.all(responses.map((response) => health({ method: 'GET', headers: {} }, response)));
+		// One Supabase probe and one Redis PING for five simultaneous public hits.
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+		expect(new Set(responses.map((response) => response.statusCode)).size).toBe(1);
+	});
+
 	it('keeps the reconcile-processing action independent of the health token', async () => {
 		process.env.MONITORING_RECONCILIATION_SECRET = 'r'.repeat(32);
 		const response = createResponse();

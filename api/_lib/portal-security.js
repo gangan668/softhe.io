@@ -75,6 +75,8 @@ const GENERIC_CLIENT_ERRORS = {
 const sendPublicError = (res, error, fallback = 'Request could not be completed') => {
 	const status = Number(error?.statusCode) || 500;
 	if (status >= 500) console.error('portal_request_failed', { status, message: error?.message, detail: error?.detail });
+	// Upstream rejections (e.g. PostgREST 4xx) keep their detail in private logs only.
+	else if (error?.detail) console.warn('portal_request_rejected', { status, message: error?.message, detail: error.detail });
 	const message = status < 500
 		? error?.publicMessage || GENERIC_CLIENT_ERRORS[status] || 'Request could not be completed'
 		: error?.publicMessage || fallback;

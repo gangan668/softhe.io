@@ -82,13 +82,22 @@ const probeCache = new Map();
 
 const resetProbeCache = () => probeCache.clear();
 
-const cachedProbe = async (name, probe, { fresh = false, now = Date.now() } = {}) => {
+// Concurrent public requests share one in-flight probe, so a burst on a cold or
+// expired cache triggers a single upstream query instead of one per request.
+const cachedProbe = (name, probe, { fresh = false, now = Date.now() } = {}) => {
 	const cached = probeCache.get(name);
-	if (!fresh && cached && cached.expiresAt > now) return cached.value;
-	let value;
-	try { value = await probe(); } catch { value = false; }
-	probeCache.set(name, { value, expiresAt: now + PROBE_TTL_MS });
-	return value;
+	if (!fresh && cached && (cached.pending || cached.expiresAt > now)) return cached.promise;
+	const entry = { pending: true, expiresAt: 0 };
+	entry.promise = Promise.resolve()
+		.then(probe)
+		.catch(() => false)
+		.then((value) => {
+			entry.pending = false;
+			entry.expiresAt = now + PROBE_TTL_MS;
+			return value;
+		});
+	probeCache.set(name, entry);
+	return entry.promise;
 };
 
 const probePortalAccess = (options) => cachedProbe('portal', async () => {
