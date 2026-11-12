@@ -1,0 +1,434 @@
+{
+  "origin": "https://softhe-e4rn8keki-suportsofthe-9420s-projects.vercel.app",
+  "source": "7ca108b5ce2a4abde28907cab912a9d520357ba8",
+  "checkedAt": "2026-10-25T02:01:56.796Z",
+  "rows": [
+    {
+      "route": "/",
+      "status": 200,
+      "path": "/",
+      "title": "Softhe.io | Windows and BIOS tuning for gaming PCs",
+      "canonical": "https://softhe.io/",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/services",
+      "status": 200,
+      "path": "/services",
+      "title": "PC optimization services | Softhe.io",
+      "canonical": "https://softhe.io/services",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/store",
+      "status": 200,
+      "path": "/store",
+      "title": "Windows builds and BIOS tuning | Softhe.io store",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "overflow": false,
+      "commerceDisabled": true,
+      "width": 1440
+    },
+    {
+      "route": "/performance",
+      "status": 200,
+      "path": "/performance",
+      "title": "PC performance benchmark results | Softhe.io",
+      "canonical": "https://softhe.io/performance",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/contact",
+      "status": 200,
+      "path": "/contact",
+      "title": "Contact Softhe.io | Product and setup support",
+      "canonical": "https://softhe.io/contact",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/faq",
+      "status": 200,
+      "path": "/faq",
+      "title": "Windows and BIOS tuning FAQ | Softhe.io",
+      "canonical": "https://softhe.io/faq",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "path": "/terms",
+      "title": "Terms of Service | Softhe.io",
+      "canonical": "https://softhe.io/terms",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/privacy-policy",
+      "status": 200,
+      "path": "/privacy-policy",
+      "title": "Privacy Policy | Softhe.io",
+      "canonical": "https://softhe.io/privacy-policy",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/cookie-policy",
+      "status": 200,
+      "path": "/cookie-policy",
+      "title": "Cookie Policy | Softhe.io",
+      "canonical": "https://softhe.io/cookie-policy",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/legal-notice",
+      "status": 200,
+      "path": "/legal-notice",
+      "title": "Legal Notice | Softhe.io",
+      "canonical": "https://softhe.io/legal-notice",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/withdrawal",
+      "status": 200,
+      "path": "/withdrawal",
+      "title": "Withdraw from an Order | Softhe.io",
+      "canonical": "https://softhe.io/withdrawal",
+      "robots": "index, follow",
+      "overflow": false,
+      "width": 1440
+    },
+    {
+      "route": "/checkout",
+      "status": 200,
+      "path": "/store",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "overflow": false,
+      "challengePresent": false,
+      "challengeSolved": false,
+      "consoleErrors": [],
+      "width": 1440
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "path": "/login",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": true,
+      "challengeSolved": false,
+      "consoleErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "source": "https://challenges.cloudflare.com"
+        }
+      ],
+      "width": 1440
+    },
+    {
+      "route": "/register",
+      "status": 200,
+      "path": "/register",
+      "canonical": "https://softhe.io/register",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": true,
+      "challengeSolved": false,
+      "consoleErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "source": "https://challenges.cloudflare.com"
+        }
+      ],
+      "width": 1440
+    },
+    {
+      "route": "/forgot-password",
+      "status": 200,
+      "path": "/forgot-password",
+      "canonical": "https://softhe.io/forgot-password",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": true,
+      "challengeSolved": false,
+      "consoleErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "source": "https://challenges.cloudflare.com"
+        }
+      ],
+      "width": 1440
+    },
+    {
+      "route": "/resend-confirmation",
+      "status": 200,
+      "path": "/resend-confirmation",
+      "canonical": "https://softhe.io/resend-confirmation",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": true,
+      "challengeSolved": false,
+      "consoleErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "source": "https://challenges.cloudflare.com"
+        }
+      ],
+      "width": 1440
+    },
+    {
+      "route": "/reset-password",
+      "status": 200,
+      "path": "/reset-password",
+      "canonical": "https://softhe.io/reset-password",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": false,
+      "challengeSolved": false,
+      "consoleErrors": [],
+      "width": 1440
+    },
+    {
+      "route": "/account",
+      "status": 200,
+      "path": "/login",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": false,
+      "challengeSolved": false,
+      "consoleErrors": [],
+      "width": 1440
+    },
+    {
+      "route": "/admin",
+      "status": 200,
+      "path": "/login",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": false,
+      "challengeSolved": false,
+      "consoleErrors": [],
+      "width": 1440
+    },
+    {
+      "route": "/audit-unknown-route",
+      "status": 404,
+      "path": "/audit-unknown-route",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "challengePresent": false,
+      "challengeSolved": false,
+      "consoleErrors": [
+        {
+          "text": "Failed to load resource: the server responded with a status of 400 ()",
+          "source": "https://challenges.cloudflare.com"
+        },
+        {
+          "text": "Failed to load resource: the server responded with a status of 404 ()",
+          "source": "https://softhe-e4rn8keki-suportsofthe-9420s-projects.vercel.app"
+        }
+      ],
+      "width": 1440
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "status": 200,
+      "path": "/",
+      "canonical": "https://softhe.io/",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/services",
+      "status": 200,
+      "path": "/services",
+      "canonical": "https://softhe.io/services",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/store",
+      "status": 200,
+      "path": "/store",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/performance",
+      "status": 200,
+      "path": "/performance",
+      "canonical": "https://softhe.io/performance",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/faq",
+      "status": 200,
+      "path": "/faq",
+      "canonical": "https://softhe.io/faq",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/contact",
+      "status": 200,
+      "path": "/contact",
+      "canonical": "https://softhe.io/contact",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/terms",
+      "status": 200,
+      "path": "/terms",
+      "canonical": "https://softhe.io/terms",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/privacy-policy",
+      "status": 200,
+      "path": "/privacy-policy",
+      "canonical": "https://softhe.io/privacy-policy",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/cookie-policy",
+      "status": 200,
+      "path": "/cookie-policy",
+      "canonical": "https://softhe.io/cookie-policy",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/legal-notice",
+      "status": 200,
+      "path": "/legal-notice",
+      "canonical": "https://softhe.io/legal-notice",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/withdrawal",
+      "status": 200,
+      "path": "/withdrawal",
+      "canonical": "https://softhe.io/withdrawal",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/checkout",
+      "status": 200,
+      "path": "/store",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/login",
+      "status": 200,
+      "path": "/login",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/register",
+      "status": 200,
+      "path": "/register",
+      "canonical": "https://softhe.io/register",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/forgot-password",
+      "status": 200,
+      "path": "/forgot-password",
+      "canonical": "https://softhe.io/forgot-password",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/resend-confirmation",
+      "status": 200,
+      "path": "/resend-confirmation",
+      "canonical": "https://softhe.io/resend-confirmation",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/reset-password",
+      "status": 200,
+      "path": "/reset-password",
+      "canonical": "https://softhe.io/reset-password",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/account",
+      "status": 200,
+      "path": "/login",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/admin",
+      "status": 200,
+      "path": "/login",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    },
+    {
+      "width": 390,
+      "route": "/audit-unknown-route",
+      "status": 404,
+      "path": "/audit-unknown-route",
+      "robots": "noindex, nofollow",
+      "overflow": false
+    }
+  ],
+  "pageErrors": []
+}

@@ -1,0 +1,229 @@
+{
+  "origin": "https://softhe-e4rn8keki-suportsofthe-9420s-projects.vercel.app",
+  "checkedAt": "2026-10-25T02:05:49.696Z",
+  "release": {
+    "sourceCommit": "7ca108b5ce2a4abde28907cab912a9d520357ba8",
+    "fingerprint": "softhe-7ca108b-stage1"
+  },
+  "observations": [
+    {
+      "route": "/",
+      "width": 390,
+      "status": 200,
+      "path": "/",
+      "title": "Softhe.io | Windows and BIOS tuning for gaming PCs",
+      "canonical": "https://softhe.io/",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/services",
+      "width": 390,
+      "status": 200,
+      "path": "/services",
+      "title": "PC optimization services | Softhe.io",
+      "canonical": "https://softhe.io/services",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/store",
+      "width": 390,
+      "status": 200,
+      "path": "/store",
+      "title": "Windows builds and BIOS tuning | Softhe.io store",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/performance",
+      "width": 390,
+      "status": 200,
+      "path": "/performance",
+      "title": "PC performance benchmark results | Softhe.io",
+      "canonical": "https://softhe.io/performance",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/faq",
+      "width": 390,
+      "status": 200,
+      "path": "/faq",
+      "title": "Windows and BIOS tuning FAQ | Softhe.io",
+      "canonical": "https://softhe.io/faq",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/contact",
+      "width": 390,
+      "status": 200,
+      "path": "/contact",
+      "title": "Contact Softhe.io | Product and setup support",
+      "canonical": "https://softhe.io/contact",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/terms",
+      "width": 390,
+      "status": 200,
+      "path": "/terms",
+      "title": "Terms of Service | Softhe.io",
+      "canonical": "https://softhe.io/terms",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/privacy-policy",
+      "width": 390,
+      "status": 200,
+      "path": "/privacy-policy",
+      "title": "Privacy Policy | Softhe.io",
+      "canonical": "https://softhe.io/privacy-policy",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/cookie-policy",
+      "width": 390,
+      "status": 200,
+      "path": "/cookie-policy",
+      "title": "Cookie Policy | Softhe.io",
+      "canonical": "https://softhe.io/cookie-policy",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/legal-notice",
+      "width": 390,
+      "status": 200,
+      "path": "/legal-notice",
+      "title": "Legal Notice | Softhe.io",
+      "canonical": "https://softhe.io/legal-notice",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/withdrawal",
+      "width": 390,
+      "status": 200,
+      "path": "/withdrawal",
+      "title": "Withdraw from an Order | Softhe.io",
+      "canonical": "https://softhe.io/withdrawal",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/checkout",
+      "width": 390,
+      "status": 200,
+      "path": "/store",
+      "title": "Windows builds and BIOS tuning | Softhe.io store",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/login",
+      "width": 390,
+      "status": 200,
+      "path": "/login",
+      "title": "Welcome back | Softhe.io",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/register",
+      "width": 390,
+      "status": 200,
+      "path": "/register",
+      "title": "Create your account | Softhe.io",
+      "canonical": "https://softhe.io/register",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/forgot-password",
+      "width": 390,
+      "status": 200,
+      "path": "/forgot-password",
+      "title": "Reset your password | Softhe.io",
+      "canonical": "https://softhe.io/forgot-password",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/resend-confirmation",
+      "width": 390,
+      "status": 200,
+      "path": "/resend-confirmation",
+      "title": "Resend confirmation | Softhe.io",
+      "canonical": "https://softhe.io/resend-confirmation",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/reset-password",
+      "width": 390,
+      "status": 200,
+      "path": "/reset-password",
+      "title": "Choose a New Password | Softhe.io",
+      "canonical": "https://softhe.io/reset-password",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/account",
+      "width": 390,
+      "status": 200,
+      "path": "/login",
+      "title": "Welcome back | Softhe.io",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/admin",
+      "width": 390,
+      "status": 200,
+      "path": "/login",
+      "title": "Welcome back | Softhe.io",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    },
+    {
+      "route": "/production-browser-route-that-must-not-exist",
+      "width": 390,
+      "status": 404,
+      "path": "/production-browser-route-that-must-not-exist",
+      "title": "Page Not Found | Softhe.io",
+      "robots": "noindex, nofollow",
+      "overflow": false,
+      "brokenImages": 0
+    }
+  ]
+}

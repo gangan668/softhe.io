@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { notifyTicketReply, writeTicket } from './portal';
+import { notifyTicketReply, revokeOtherSessions, writeTicket } from './portal';
 
 describe('notifyTicketReply', () => {
 	it('does nothing without an authenticated session', async () => {
@@ -32,5 +32,26 @@ describe('writeTicket', () => {
 			method: 'POST',
 			headers: expect.objectContaining({ Authorization: 'Bearer token', 'Idempotency-Key': expect.stringMatching(/^[0-9a-f-]{36}$/i) }),
 		}));
+	});
+});
+
+describe('revokeOtherSessions', () => {
+	it('authenticates revocation and reports the outcome', async () => {
+		const fetchImpl = vi.fn().mockResolvedValue({ ok: true });
+		await expect(revokeOtherSessions({ access_token: 'token' }, fetchImpl)).resolves.toBe(true);
+		expect(fetchImpl).toHaveBeenCalledWith('/api/session-revoke-others', expect.objectContaining({ method: 'POST', headers: expect.objectContaining({ Authorization: 'Bearer token' }) }));
+		await expect(revokeOtherSessions(null, fetchImpl)).resolves.toBe(false);
+		expect(fetchImpl).toHaveBeenCalledOnce();
+	});
+});
+
+describe('writeTicket errors', () => {
+	it('caps server error messages and ignores non-string errors', async () => {
+		const huge = vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: 'y'.repeat(5000) }) });
+		const error = await writeTicket({ access_token: 'token' }, {}, huge).catch((caught) => caught);
+		expect(error.safeMessage).toBe(true);
+		expect(error.message.length).toBeLessThanOrEqual(200);
+		const nonString = vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: ['internal'] }) });
+		await expect(writeTicket({ access_token: 'token' }, {}, nonString)).rejects.toThrow('Ticket could not be saved');
 	});
 });

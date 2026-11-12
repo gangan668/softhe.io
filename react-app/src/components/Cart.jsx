@@ -1,12 +1,14 @@
 import { useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import { trackEvent } from '../utils/analytics';
+import { getBundleDiscountRate } from '../utils/cart';
 import './Cart.css';
 
 function Cart({ isOpen, onClose }) {
 	const { cart, removeFromCart, updateQuantity, getCartTotal, getCartCount } = useCart();
+	const navigate = useNavigate();
 	const dialogRef = useRef(null);
 	const closeButtonRef = useRef(null);
 	useDialogFocus({
@@ -26,7 +28,8 @@ function Cart({ isOpen, onClose }) {
 			currency: 'EUR',
 		});
 
-		window.location.href = '/checkout';
+		onClose();
+		navigate('/checkout');
 	};
 
 	return (
@@ -122,10 +125,10 @@ function Cart({ isOpen, onClose }) {
 									<span className="total-amount">€{getCartTotal()}</span>
 								</div>
 
-								{cart.length > 1 && (
+								{getBundleDiscountRate(cart.length) > 0 && (
 									<div className="bundle-discount-notice">
 										<i className="fas fa-tag" aria-hidden="true"></i>
-										<span>Multiple items selected!</span>
+										<span>{Math.round(getBundleDiscountRate(cart.length) * 100)}% bundle discount applied at checkout</span>
 									</div>
 								)}
 

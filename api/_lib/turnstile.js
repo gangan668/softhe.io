@@ -9,12 +9,13 @@ const MAX_TOKEN_LENGTH = 2048;
 const turnstileRequired = (environment = process.env) => Boolean(environment.TURNSTILE_SECRET_KEY?.trim());
 
 // Returns { ok: true } when the request may proceed, otherwise { ok: false, status, error }.
-// Verification is enforced only when TURNSTILE_SECRET_KEY is configured.
-const verifyTurnstile = async (req, fetchImpl = fetch) => {
+// Verification is enforced only when TURNSTILE_SECRET_KEY is configured. The token is
+// read from the already-parsed JSON body (field captchaToken).
+const verifyTurnstile = async (req, { body = req.body, fetchImpl = fetch } = {}) => {
 	const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
 	if (!secret) return { ok: true, skipped: true };
 
-	const token = typeof req.body?.captchaToken === 'string' ? req.body.captchaToken.trim() : '';
+	const token = typeof body?.captchaToken === 'string' ? body.captchaToken.trim() : '';
 	if (!token || token.length > MAX_TOKEN_LENGTH) {
 		return { ok: false, status: 400, error: CAPTCHA_FAILED_MESSAGE };
 	}

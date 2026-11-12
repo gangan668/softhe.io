@@ -1,9 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { trackEvent } from '../utils/analytics';
+vi.mock('../utils/analytics', () => ({ trackEvent: vi.fn() }));
 import FAQ from './FAQ';
 
 describe('FAQ Component', () => {
+	it('records only query length and category instead of free-text search contents', () => {
+		renderFAQ();
+		fireEvent.change(screen.getByRole('textbox', { name: /search questions/i }), { target: { value: 'private-customer@example.test' } });
+		expect(trackEvent).toHaveBeenLastCalledWith('faq_search', { query_length: 29, category: 'all' });
+		expect(JSON.stringify(vi.mocked(trackEvent).mock.calls)).not.toContain('private-customer');
+	});
 	const renderFAQ = () => {
 		return render(
 			<BrowserRouter>

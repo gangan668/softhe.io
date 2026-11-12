@@ -13,6 +13,8 @@ const ticketWrite = require('../../../api/ticket-write.js');
 const { runIdempotent } = ticketWrite;
 const portalBootstrap = require('../../../api/portal-bootstrap.js');
 const staffApi = require('../../../api/_lib/staff-handler.js');
+const { jsonOnly } = require('../../../api/_lib/portal-security.js');
+const orderFulfillment = require('../../../api/_lib/order-fulfillment.js');
 
 const vercelConfig = require('../../../vercel.json');
 
@@ -22,11 +24,12 @@ describe('deployment security headers', () => {
 	const csp = globalHeaders['Content-Security-Policy'] || '';
 	const directive = (policy, name) => policy.split(';').map((part) => part.trim()).find((part) => part.split(/\s+/)[0] === name);
 
-	it('allows only the production Supabase origin, without a wildcard', () => {
+	it('allows both production and isolated Preview Supabase origins without a wildcard', () => {
 		expect(csp).toContain('https://mbwsmyqofkxmxkelqviy.supabase.co');
 		expect(csp).toContain('wss://mbwsmyqofkxmxkelqviy.supabase.co');
-		// The disposable 2026-08-27 security-assessment project is no longer allowed.
-		expect(csp).not.toContain('zbchdxptibehtizomwiq');
+		// Branch-scoped Previews build against the isolated project; validate-server-config requires it here.
+		expect(csp).toContain('https://zbchdxptibehtizomwiq.supabase.co');
+		expect(csp).toContain('wss://zbchdxptibehtizomwiq.supabase.co');
 		expect(csp).not.toContain('*.supabase.co');
 	});
 
@@ -35,11 +38,11 @@ describe('deployment security headers', () => {
 		expect(directive(csp, 'style-src')).toBe("style-src 'self'");
 		expect(directive(csp, 'object-src')).toBe("object-src 'none'");
 		expect(directive(csp, 'frame-ancestors')).toBe("frame-ancestors 'none'");
-		expect(csp).toContain('upgrade-insecure-requests');
-		for (const host of ['buy.stripe.com', 'js.stripe.com', 'cdn.jsdelivr.net', 'api.emailjs.com']) {
+		expect(directive(csp, 'upgrade-insecure-requests')).toBe('upgrade-insecure-requests');
+		for (const host of ['stripe.com', 'cdn.jsdelivr.net', 'api.emailjs.com', 'googletagmanager.com', 'google-analytics.com']) {
 			expect(csp).not.toContain(host);
 		}
-		expect(csp).not.toMatch(/(^|\s)https?:(\s|;|$)/);
+		expect(csp).not.toMatch(/(^|\s)(https?|wss?):(\s|;|$)/);
 	});
 
 	it('reports CSP violations to the same-origin collector', () => {
@@ -50,7 +53,7 @@ describe('deployment security headers', () => {
 	});
 
 	it('sends transport, isolation, and feature-policy headers', () => {
-		expect(globalHeaders['Strict-Transport-Security']).toMatch(/^max-age=63072000; includeSubDomains/);
+		expect(globalHeaders['Strict-Transport-Security']).toBe('max-age=63072000; includeSubDomains');
 		expect(globalHeaders['Cross-Origin-Opener-Policy']).toBe('same-origin');
 		expect(globalHeaders['Cross-Origin-Resource-Policy']).toBe('same-origin');
 		// COEP would break the third-party Turnstile iframe.
@@ -63,29 +66,34 @@ describe('deployment security headers', () => {
 		for (const feature of ['camera', 'microphone', 'geolocation', 'usb', 'payment', 'magnetometer', 'accelerometer', 'gyroscope']) {
 			expect(permissions).toContain(`${feature}=()`);
 		}
-		expect(globalHeaders['Permissions-Policy']).not.toContain('interest-cohort');
 		expect(globalHeaders).not.toHaveProperty('X-XSS-Protection');
 	});
 
-	it('serves the production headers from vite preview, minus localhost-incompatible ones', async () => {
-		const { previewHeaders, devHeaders } = await import('../../securityHeaders.js');
-		const preview = previewHeaders(globalHeaders);
+	it('serves the production headers from vite preview, minus HSTS and upgrade-insecure-requests', async () => {
+		const { previewHeaders } = await import('../../securityHeaders.js');
 		const { 'Strict-Transport-Security': _hsts, ...productionWithoutHsts } = globalHeaders;
-		expect(preview).toEqual({
+		expect(previewHeaders(globalHeaders)).toEqual({
 			...productionWithoutHsts,
 			'Content-Security-Policy': csp.replace(/;\s*upgrade-insecure-requests/, ''),
 		});
 
+		const fixture = previewHeaders(globalHeaders, { connectSrc: ['https://portal-fixture.supabase.co'] })['Content-Security-Policy'];
+		expect(directive(fixture, 'connect-src')).toBe(`${directive(csp, 'connect-src')} https://portal-fixture.supabase.co`);
+	});
+
+	it('derives the dev headers from production with only the HMR relaxations', async () => {
+		const { devHeaders } = await import('../../securityHeaders.js');
 		const dev = devHeaders(globalHeaders);
 		const devCsp = dev['Content-Security-Policy'];
-		expect(directive(devCsp, 'script-src')).toContain("'unsafe-eval'");
-		expect(directive(devCsp, 'style-src')).toContain("'unsafe-inline'");
-		expect(directive(devCsp, 'connect-src')).toContain('ws:');
-		expect(directive(devCsp, 'connect-src')).toContain('https://mbwsmyqofkxmxkelqviy.supabase.co');
-		expect(devCsp).not.toContain('upgrade-insecure-requests');
-		expect(devCsp).not.toContain('buy.stripe.com');
-		expect(dev).not.toHaveProperty('X-XSS-Protection');
+		expect(directive(devCsp, 'script-src')).toBe(`${directive(csp, 'script-src')} 'unsafe-inline' 'unsafe-eval'`);
+		expect(directive(devCsp, 'style-src')).toBe("style-src 'self' 'unsafe-inline'");
+		expect(directive(devCsp, 'connect-src')).toBe(`${directive(csp, 'connect-src')} ws: wss:`);
+		expect(directive(devCsp, 'frame-ancestors')).toBe("frame-ancestors 'none'");
+		for (const name of ['upgrade-insecure-requests', 'report-uri', 'report-to']) expect(directive(devCsp, name)).toBeUndefined();
+		expect(dev).not.toHaveProperty('Reporting-Endpoints');
 		expect(dev).not.toHaveProperty('Strict-Transport-Security');
+		const { 'Strict-Transport-Security': _hsts, 'Reporting-Endpoints': _reporting, 'Content-Security-Policy': _csp, ...rest } = globalHeaders;
+		expect(dev).toEqual(expect.objectContaining(rest));
 	});
 });
 const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
@@ -108,6 +116,16 @@ const createResponse = () => {
 	response.end = vi.fn(() => response);
 	return response;
 };
+
+describe('public API malformed input', () => {
+	it.each([['contact', contact], ['withdrawal', withdrawal], ['browser errors', browserErrors]])('rejects a JSON null body for %s without an unhandled exception', async (_name, handler) => {
+		const response = createResponse();
+		const outbound = vi.fn(); vi.stubGlobal('fetch', outbound);
+		await handler({ method: 'POST', headers: { 'content-type': 'application/json' }, body: null }, response);
+		expect(response.statusCode).toBe(400);
+		expect(outbound).not.toHaveBeenCalled();
+	});
+});
 
 describe('durable Redis helpers', () => {
 	beforeEach(() => {
@@ -140,14 +158,27 @@ describe('production health API', () => {
 	const detailedRequest = () => ({ method: 'GET', headers: { authorization: 'Bearer health-token' } });
 	beforeEach(() => {
 		process.env.HEALTH_CHECK_TOKEN = 'health-token';
-		health.resetPortalProbeCache();
+		health.resetProbeCache();
 	});
 
+	it('fails readiness without exposing errors when configured Redis cannot be reached', async () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		Object.assign(process.env, { PUBLIC_SITE_URL: 'https://softhe.io', VAT_STATUS: 'not-registered', BUSINESS_REGISTRATION_ID: '000000-0000', SUPPORT_EMAIL: 'support@example.com' });
+		const outbound = vi.fn(async (url, options) => { if (url === process.env.UPSTASH_REDIS_REST_URL) { expect(JSON.parse(options.body)).toEqual(['PING']); throw new Error('ENOTFOUND secret-provider-host'); } return jsonResponse([]); });
+		vi.stubGlobal('fetch', outbound); const response = createResponse(); await health(detailedRequest(),response);
+		expect(response.statusCode).toBe(503); expect(response.payload.checks).toMatchObject({ storage: false, portal: false, checkout: false, tickets: false, contact: false, withdrawal: false, fulfillment: false }); expect(JSON.stringify(response.payload)).not.toMatch(/ENOTFOUND|secret-provider-host|UPSTASH_REDIS/);
+	});
+	it('skips the Redis probe when its required configuration is missing', async () => {
+		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example'; delete process.env.UPSTASH_REDIS_REST_TOKEN;
+		delete process.env.SUPABASE_URL; delete process.env.SUPABASE_PUBLISHABLE_KEY;
+		const outbound = vi.fn().mockResolvedValue(jsonResponse([])); vi.stubGlobal('fetch', outbound);
+		const response = createResponse(); await health(detailedRequest(),response); expect(response.statusCode).toBe(503); expect(response.payload.checks.storage).toBe(false); expect(outbound).not.toHaveBeenCalled();
+	});
 	it('reports missing server configuration without exposing values', async () => {
 		process.env.RELEASE_SOURCE_COMMIT = '0123456789abcdef';
 		process.env.RELEASE_FINGERPRINT = 'release-test-fingerprint';
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.status).toBe('configuration-required');
@@ -166,7 +197,7 @@ describe('production health API', () => {
 		process.env.RELEASE_FINGERPRINT = 'stale-fingerprint';
 		process.env.COMMERCE_ENABLED = 'false';
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 
 		expect(response.payload.release).toEqual({
 			sourceCommit: 'abcdef0123456789',
@@ -174,18 +205,20 @@ describe('production health API', () => {
 		});
 	});
 
-	it('reports ready when every required variable exists', async () => {
+	it('reports ready when required configuration, Supabase and Redis are healthy', async () => {
 		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
 		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
 		process.env.VAT_STATUS = 'not-registered';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		vi.stubGlobal('fetch', vi.fn(async (url) => jsonResponse(url === process.env.UPSTASH_REDIS_REST_URL ? { result: 'PONG' } : [])));
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 
 		expect(response.statusCode).toBe(200);
 		expect(response.payload).toEqual(expect.objectContaining({ status: 'ready' }));
+		expect(response.payload.checks).toMatchObject({ storage: true, portal: true });
+		expect(fetch.mock.calls.some(([url, options]) => url === process.env.UPSTASH_REDIS_REST_URL && options.body === '["PING"]')).toBe(true);
 	});
 
 	it('fails readiness when privileged portal access is rejected', async () => {
@@ -196,7 +229,7 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ message: 'Invalid API key' }, false, 401)));
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.portal).toBe(false);
@@ -210,7 +243,7 @@ describe('production health API', () => {
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.tickets).toBe(false);
@@ -225,7 +258,7 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		process.env.EMAILJS_PRIVATE_KEY = 'Encrypted';
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.tickets).toBe(false);
@@ -242,15 +275,15 @@ describe('production health API', () => {
 		process.env.VAT_STATUS = 'not-registered';
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		vi.stubGlobal('fetch', vi.fn(async (url) => jsonResponse(url === process.env.UPSTASH_REDIS_REST_URL ? { result: 'PONG' } : [])));
 		const response = createResponse();
-		await health(detailedRequest(), response);
+		await health(detailedRequest(),response);
 		expect(response.statusCode).toBe(200);
 		expect(response.payload.checks.fulfillment).toBe(true);
 
 		delete process.env.RESEND_API_KEY;
 		const missingSender = createResponse();
-		await health(detailedRequest(), missingSender);
+		await health(detailedRequest(),missingSender);
 		expect(missingSender.statusCode).toBe(503);
 		expect(missingSender.payload.checks.fulfillment).toBe(false);
 	});
@@ -268,14 +301,16 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		process.env.RELEASE_SOURCE_COMMIT = '0123456789abcdef';
 	};
+	const healthyProviders = () => vi.fn(async (url) => jsonResponse(url === process.env.UPSTASH_REDIS_REST_URL ? { result: 'PONG' } : []));
 
 	it('returns only the overall status to unauthenticated callers', async () => {
 		configureReadyEnvironment();
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		vi.stubGlobal('fetch', healthyProviders());
 		const ready = createResponse();
 		await health({ method: 'GET', headers: {} }, ready);
 		expect(ready.statusCode).toBe(200);
 		expect(ready.payload).toEqual({ status: 'ready' });
+		expect(ready.headers.Vary).toBe('Authorization');
 
 		delete process.env.STRIPE_SECRET_KEY;
 		const notReady = createResponse();
@@ -286,7 +321,7 @@ describe('production health API', () => {
 
 	it('never returns details for a wrong token or when no token is configured', async () => {
 		configureReadyEnvironment();
-		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		vi.stubGlobal('fetch', healthyProviders());
 		const wrong = createResponse();
 		await health({ method: 'GET', headers: { authorization: 'Bearer wrong-token' } }, wrong);
 		expect(wrong.statusCode).toBe(401);
@@ -294,25 +329,36 @@ describe('production health API', () => {
 
 		delete process.env.HEALTH_CHECK_TOKEN;
 		const unconfigured = createResponse();
-		await health({ method: 'GET', headers: { authorization: 'Bearer ' } }, unconfigured);
+		await health({ method: 'GET', headers: { authorization: 'Bearer health-token' } }, unconfigured);
+		expect(unconfigured.statusCode).toBe(401);
 		expect(unconfigured.payload).not.toHaveProperty('release');
 		expect(unconfigured.payload).not.toHaveProperty('checks');
 	});
 
-	it('caches the privileged portal probe for public traffic but probes fresh for authenticated checks', async () => {
+	it('caches the privileged portal and Redis probes for public traffic but probes fresh for authenticated checks', async () => {
 		configureReadyEnvironment();
-		const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
+		const fetchMock = healthyProviders();
 		vi.stubGlobal('fetch', fetchMock);
 		for (let index = 0; index < 3; index += 1) await health({ method: 'GET', headers: {} }, createResponse());
-		expect(fetchMock).toHaveBeenCalledTimes(1);
-
-		await health(detailedRequest(), createResponse());
+		// One Supabase probe and one Redis PING for three public hits.
 		expect(fetchMock).toHaveBeenCalledTimes(2);
 
-		const now = Date.now();
+		await health(detailedRequest(), createResponse());
+		expect(fetchMock).toHaveBeenCalledTimes(4);
+
 		fetchMock.mockClear();
-		await health.probePortalAccess({ now: now + health.PORTAL_PROBE_TTL_MS + 1000 });
-		expect(fetchMock).toHaveBeenCalledTimes(1);
+		const later = Date.now() + health.PROBE_TTL_MS + 1000;
+		await health.probePortalAccess({ now: later });
+		await health.probeStorageAccess({ now: later });
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+	});
+
+	it('keeps the reconcile-processing action independent of the health token', async () => {
+		process.env.MONITORING_RECONCILIATION_SECRET = 'r'.repeat(32);
+		const response = createResponse();
+		await health({ method: 'GET', query: { action: 'reconcile-processing' }, headers: { authorization: 'Bearer health-token' } }, response);
+		expect(response.statusCode).toBe(401);
+		delete process.env.MONITORING_RECONCILIATION_SECRET;
 	});
 });
 
@@ -325,12 +371,14 @@ describe('ticket notification API', () => {
 		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
 		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
 		vi.stubGlobal('fetch', vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ id: 'staff', email: 'staff@example.com' }))
+			.mockResolvedValueOnce(jsonResponse({ id: 'customer', email: 'customer@example.com' }))
 			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: 'Reply' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
-			.mockResolvedValueOnce(jsonResponse([{ role: 'staff' }]))
 			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }])));
+		process.env.SUPPORT_EMAIL = 'support@softhe.io';
+		delete process.env.EMAILJS_TICKET_TEMPLATE_ID;
+		delete process.env.RESEND_API_KEY;
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const response = createResponse();
 		await ticketNotification({
@@ -363,7 +411,6 @@ describe('ticket notification API', () => {
 			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'message', ticket_id: 'ticket', body: '<test>' }]))
 			.mockResolvedValueOnce(jsonResponse([{ id: 'ticket', user_id: 'customer', subject: 'Help', status: 'open' }]))
-			.mockResolvedValueOnce(jsonResponse([]))
 			.mockResolvedValueOnce(jsonResponse([{ email: 'customer@example.com', full_name: 'Customer' }]))
 			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
 			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
@@ -418,6 +465,32 @@ describe('ticket write API', () => {
 });
 
 describe('staff authorization boundary', () => {
+	it('returns a nonempty ticket queue with the correct owner profiles', async () => {
+		Object.assign(process.env, {
+			STAFF_PORTAL_ENABLED: 'true', SUPABASE_URL: 'https://project.supabase.co',
+			SUPABASE_PUBLISHABLE_KEY: 'public-key', SUPABASE_SERVICE_ROLE_KEY: 'service-key',
+			PORTAL_RATE_LIMIT_SECRET: 'rate-secret', UPSTASH_REDIS_REST_URL: 'https://redis.example',
+			UPSTASH_REDIS_REST_TOKEN: 'redis-token',
+		});
+		const actorId = '11111111-1111-4111-8111-111111111111';
+		const ownerId = '22222222-2222-4222-8222-222222222222';
+		const claims = Buffer.from(JSON.stringify({ sub: actorId, aal: 'aal2', session_id: actorId })).toString('base64url');
+		const outbound = vi.fn(async (url) => {
+			if (url === 'https://redis.example') return jsonResponse({ result: 1 });
+			if (url.endsWith('/auth/v1/user')) return jsonResponse({ id: actorId, email: 'staff@example.com', email_confirmed_at: '2026-01-01' });
+			if (url.includes('select=account_status')) return jsonResponse([{ account_status: 'active' }]);
+			if (url.endsWith('/rpc/verify_staff_access')) return jsonResponse([{ role: 'staff' }]);
+			if (url.includes('/tickets?')) return jsonResponse([{ id: actorId, user_id: ownerId, subject: 'Support request' }]);
+			if (url.includes('/profiles?id=in.')) return jsonResponse([{ id: ownerId, email: 'customer@example.com', full_name: 'Customer' }]);
+			if (url.endsWith('/staff_audit_events')) return jsonResponse(null);
+			throw new Error(`Unexpected request: ${url}`);
+		});
+		vi.stubGlobal('fetch', outbound);
+		const response = createResponse();
+		await staffApi({ method: 'GET', headers: { authorization: `Bearer header.${claims}.signature` }, query: { action: 'queue' } }, response);
+		expect(response.statusCode).toBe(200);
+		expect(response.payload.tickets[0].owner).toEqual({ email: 'customer@example.com', fullName: 'Customer' });
+	});
 	it('keeps every staff endpoint unavailable unless explicitly enabled', async () => {
 		delete process.env.STAFF_PORTAL_ENABLED;
 		const response = createResponse();
@@ -426,29 +499,41 @@ describe('staff authorization boundary', () => {
 		expect(response.payload).toEqual({ error: 'Not found' });
 	});
 
-	it('never grants or renews a role during customer bootstrap', async () => {
+	it('no longer claims orders by email during customer bootstrap', async () => {
 		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
 		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
-		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
-		process.env.PORTAL_RATE_LIMIT_SECRET = 'rate-secret';
-		process.env.UPSTASH_REDIS_REST_URL = 'https://redis.example';
-		process.env.UPSTASH_REDIS_REST_TOKEN = 'redis-token';
-		const fetchMock = vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ id: '11111111-1111-4111-8111-111111111111', email: 'test@example.com', email_confirmed_at: '2026-08-13T00:00:00Z' }))
-			.mockResolvedValueOnce(jsonResponse([{ account_status: 'active' }]))
-			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
-			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
-			.mockResolvedValueOnce(jsonResponse([]));
+		const fetchMock = vi.fn();
 		vi.stubGlobal('fetch', fetchMock);
 		const response = createResponse();
 		await portalBootstrap({ method: 'POST', headers: { authorization: 'Bearer token', 'content-type': 'application/json', origin: 'https://softhe.io', host: 'softhe.io' }, body: {}, query: {} }, response);
-		expect(response.statusCode).toBe(200);
-		expect(fetchMock.mock.calls.some(([url]) => String(url).includes('user_roles'))).toBe(false);
-		expect(response.payload).not.toHaveProperty('staff');
+		expect(response.statusCode).toBe(404);
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });
 
 describe('server configuration guards', () => {
+	it('rejects oversized headers before Vercel lazily parses the body', () => {
+		const req = { headers: { 'content-type': 'application/json', 'content-length': '100000' } };
+		const parseBody = vi.fn(() => { throw new Error('Body parsing must not run'); });
+		Object.defineProperty(req, 'body', { get: parseBody });
+		expect(() => jsonOnly(req, 16384)).toThrow('Request too large');
+		expect(parseBody).not.toHaveBeenCalled();
+	});
+	it('limits actual JSON bytes even when Content-Length is missing or understates the body', () => {
+		for (const headers of [{}, { 'content-length': '1' }]) {
+			expect(() => jsonOnly({ headers: { 'content-type': 'application/json', ...headers }, body: { message: 'é'.repeat(30) } }, 50)).toThrow('Request too large');
+		}
+		expect(() => jsonOnly({ headers: { 'content-type': 'application/json-invalid' }, body: {} })).toThrow('JSON content type required');
+		expect(() => jsonOnly({ headers: { 'content-type': 'application/json; charset=utf-8' }, body: { message: 'ok' } })).not.toThrow();
+	});
+
+	it('rejects oversized buffered fulfillment requests before authentication or storage', async () => {
+		const outbound = vi.fn(); vi.stubGlobal('fetch', outbound);
+		const response = createResponse();
+		await orderFulfillment({ method: 'POST', headers: {}, body: Buffer.alloc(65537) }, response);
+		expect(response.statusCode).toBe(413);
+		expect(outbound).not.toHaveBeenCalled();
+	});
 	it('requires a complete operator identity', () => {
 		expect(() => assertOperatorIdentity({})).toThrow(/operator identity/i);
 		expect(() => assertOperatorIdentity({
@@ -516,7 +601,7 @@ describe('contact API', () => {
 
 	it('validates submissions before external calls', async () => {
 		const response = createResponse();
-		await contact({ method: 'POST', body: {}, headers: {} }, response);
+		await contact({ method: 'POST', body: {}, headers: { 'content-type': 'application/json' } }, response);
 		expect(response.statusCode).toBe(400);
 		expect(response.payload.error).toMatch(/valid name/i);
 	});
@@ -526,7 +611,7 @@ describe('contact API', () => {
 		const response = createResponse();
 		await contact({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.10' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.10' },
 			body: { name: 'Jane Doe', email: 'jane@example.com', subject: 'general', message: 'A valid message.' },
 		}, response);
 		expect(response.statusCode).toBe(429);
@@ -541,7 +626,7 @@ describe('contact API', () => {
 		const response = createResponse();
 		await contact({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.20' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.20' },
 			body: {
 				name: ' Jane\u0000 Doe ',
 				email: 'JANE@EXAMPLE.COM',
@@ -566,7 +651,7 @@ describe('contact API', () => {
 		const response = createResponse();
 		await contact({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.21' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.21' },
 			body: {
 				name: 'Jane Doe',
 				email: 'jane@example.com',
@@ -635,7 +720,7 @@ describe('withdrawal API validation', () => {
 		const response = createResponse();
 		await withdrawal({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.30' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.30' },
 			body: { orderReference, email, requestedItems: ['entire-order'] },
 		}, response);
 		return response;
@@ -663,7 +748,9 @@ describe('withdrawal API validation', () => {
 		expect(emails.map((email) => email.template_id)).toEqual(['withdrawal-customer', 'withdrawal-operator']);
 		expect(emails[0].template_params.to_email).toBe('customer@example.com');
 		expect(emails[1].template_params).toEqual(expect.objectContaining({ order_verified: 'yes', to_email: 'support@example.com', customer_email: 'customer@example.com' }));
-		expect(storedRecords(fetchMock).every((record) => record.orderVerified === true)).toBe(true);
+		const records = storedRecords(fetchMock);
+		expect(records.length).toBeGreaterThan(0);
+		expect(records.every((record) => record.orderVerified === true)).toBe(true);
 	});
 
 	it('only notifies the operator for an order that does not match, with an identical response', async () => {
@@ -688,6 +775,7 @@ describe('withdrawal API validation', () => {
 		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
 		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
 		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
 		const stripe = vi.fn();
 		const fetchMock = routeWithdrawalFetch({ stripe, supabase: () => jsonResponse([{ customer_email: 'customer@example.com' }]) });
 		vi.stubGlobal('fetch', fetchMock);
@@ -699,6 +787,20 @@ describe('withdrawal API validation', () => {
 		expect(sentEmails(fetchMock)).toHaveLength(2);
 	});
 
+	it('falls back to the Stripe session when the portal database has no matching order', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		const stripe = vi.fn(() => jsonResponse({ id: 'cs_test_12345678', customer_details: { email: 'customer@example.com' } }));
+		const fetchMock = routeWithdrawalFetch({ stripe, supabase: () => jsonResponse([]) });
+		vi.stubGlobal('fetch', fetchMock);
+		await submitWithdrawal();
+
+		expect(stripe).toHaveBeenCalledTimes(1);
+		expect(sentEmails(fetchMock).map((email) => email.template_id)).toEqual(['withdrawal-customer', 'withdrawal-operator']);
+	});
+
 	it('records and notifies the operator when the order lookup is unavailable', async () => {
 		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
 		const fetchMock = routeWithdrawalFetch({ stripe: () => jsonResponse({ error: { message: 'down' } }, false, 500) });
@@ -708,9 +810,10 @@ describe('withdrawal API validation', () => {
 		consoleError.mockRestore();
 
 		expect(response.statusCode).toBe(202);
-		const emails = sentEmails(fetchMock);
-		expect(emails.map((email) => email.template_id)).toEqual(['withdrawal-operator']);
-		expect(storedRecords(fetchMock).length).toBeGreaterThan(0);
+		expect(sentEmails(fetchMock).map((email) => email.template_id)).toEqual(['withdrawal-operator']);
+		const records = storedRecords(fetchMock);
+		expect(records.length).toBeGreaterThan(0);
+		expect(records.every((record) => record.orderVerified === false)).toBe(true);
 	});
 
 	it('does not acknowledge an unverifiable reference when no order source is configured', async () => {
@@ -718,6 +821,7 @@ describe('withdrawal API validation', () => {
 		vi.stubGlobal('fetch', fetchMock);
 		const response = await submitWithdrawal('customer@example.com', 'CS_TEST_12345678');
 		expect(response.statusCode).toBe(202);
+		expect(response.payload.requestId).toMatch(/^wd_/);
 		expect(sentEmails(fetchMock).map((email) => email.template_id)).toEqual(['withdrawal-operator']);
 	});
 
@@ -735,7 +839,7 @@ describe('withdrawal API validation', () => {
 		const response = createResponse();
 		await withdrawal({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.30' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.30' },
 			body: {
 				orderReference: 'CS_TEST_12345678',
 				email: 'customer@example.com',
@@ -1121,7 +1225,7 @@ afterEach(() => {
 		'STAFF_PORTAL_ENABLED',
 		'HEALTH_CHECK_TOKEN', 'TURNSTILE_SECRET_KEY', 'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY',
 	]) delete process.env[key];
-	health.resetPortalProbeCache();
+	health.resetProbeCache();
 });
 
 describe('browser error reporting API', () => {
@@ -1137,7 +1241,7 @@ describe('browser error reporting API', () => {
 		const response = createResponse();
 		await browserErrors({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.20', origin: 'https://softhe.io', host: 'softhe.io', 'content-type': 'application/json' },
+			headers: { 'content-type': 'application/json', 'x-forwarded-for': '203.0.113.20', origin: 'https://softhe.io', host: 'softhe.io' },
 			body: { message: 'Failure\u0000message', stack: 'stack', url: 'https://softhe.io/store' },
 		}, response);
 
@@ -1173,3 +1277,4 @@ describe('monitoring test API', () => {
 		consoleError.mockRestore();
 	});
 });
+

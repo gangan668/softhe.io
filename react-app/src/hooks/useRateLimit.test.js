@@ -79,9 +79,7 @@ describe("useRateLimit", () => {
 		expect(result.current.attemptsLeft).toBe(0);
 	});
 
-	it.skip("should reset after the time window expires", async () => {
-		// Skipped: Timer-based async state updates are difficult to test reliably with fake timers
-		// The actual functionality works in the application
+	it("should reset after the time window expires", async () => {
 		const { result } = renderHook(() => useRateLimit(3, 60000));
 		const mockAction = vi.fn().mockResolvedValue("success");
 
@@ -100,6 +98,9 @@ describe("useRateLimit", () => {
 		});
 
 		expect(result.current.isBlocked).toBe(true);
+		act(() => vi.advanceTimersByTime(60000));
+		expect(result.current.isBlocked).toBe(false);
+		expect(result.current.attemptsLeft).toBe(3);
 	});
 
 	it("should provide correct block message", async () => {
@@ -156,9 +157,7 @@ describe("useRateLimit", () => {
 		expect(result.current.attemptsLeft).toBe(2);
 	});
 
-	it.skip("should work with custom limit and window", async () => {
-		// Skipped: Timer-based async state updates are difficult to test reliably with fake timers
-		// The actual functionality works in the application
+	it("should work with custom limit and window", async () => {
 		const { result } = renderHook(() => useRateLimit(2, 30000));
 		const mockAction = vi.fn().mockResolvedValue("success");
 
@@ -180,9 +179,7 @@ describe("useRateLimit", () => {
 		expect(result.current.isBlocked).toBe(true);
 	});
 
-	it.skip("should update blockTimeLeft countdown", async () => {
-		// Skipped: Timer-based async state updates are difficult to test reliably with fake timers
-		// The actual functionality works in the application
+	it("should update blockTimeLeft countdown", async () => {
 		const { result } = renderHook(() => useRateLimit(2, 60000));
 		const mockAction = vi.fn().mockResolvedValue("success");
 
@@ -194,7 +191,9 @@ describe("useRateLimit", () => {
 		});
 
 		expect(result.current.isBlocked).toBe(true);
-		expect(result.current.blockTimeLeft).toBeGreaterThan(0);
+		expect(result.current.blockTimeLeft).toBe(60);
+		act(() => vi.advanceTimersByTime(1000));
+		expect(result.current.blockTimeLeft).toBe(59);
 
 		// Verify the block message contains time information
 		const blockMessage = result.current.getBlockMessage();
@@ -243,4 +242,24 @@ describe("useRateLimit", () => {
 			result.current.attempt(mockAction);
 		});
 	});
-});
+	it('unblocks at the window boundary and permits another action', async () => {
+		const { result } = renderHook(() => useRateLimit(2, 30000));
+		const action = vi.fn().mockResolvedValue();
+		await act(async () => { await result.current.attempt(action); await result.current.attempt(action); await result.current.attempt(action); });
+		expect(result.current.blockTimeLeft).toBe(30);
+		act(() => vi.advanceTimersByTime(1000));
+		expect(result.current.blockTimeLeft).toBe(29);
+		act(() => vi.advanceTimersByTime(29000));
+		expect(result.current.isBlocked).toBe(false);
+		expect(result.current.attemptsLeft).toBe(2);
+		expect(result.current.blockTimeLeft).toBe(0);
+		await act(async () => { expect(await result.current.attempt(action)).toBe(true); });
+		expect(action).toHaveBeenCalledTimes(3);
+	});
+	it('clears block and countdown timers on unmount', async () => {
+		const { result, unmount } = renderHook(() => useRateLimit(1, 60000));
+		await act(async () => { await result.current.attempt(async () => {}); await result.current.attempt(async () => {}); });
+		expect(vi.getTimerCount()).toBe(2);
+		unmount();
+		expect(vi.getTimerCount()).toBe(0);
+	});});

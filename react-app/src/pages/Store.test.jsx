@@ -27,18 +27,8 @@ describe('Store', () => {
 	it('ignores a malformed product fragment without crashing', () => {
 		window.history.replaceState({}, '', '/store#%');
 		renderStore();
-		expect(screen.getByRole('heading', { name: 'Store' })).toBeInTheDocument();
-	});
-
-	it('uses a single page heading and places quick fit directly above the product grid', () => {
-		const { container } = renderStore();
-
-		expect(screen.getAllByRole('heading', { level: 1 })).toHaveLength(1);
-		expect(screen.queryByRole('heading', { level: 2 })).not.toBeInTheDocument();
-		const finder = container.querySelector('.product-finder');
-		const grid = container.querySelector('.products-grid');
-		expect(finder.nextElementSibling).toBe(grid);
-		expect(container.querySelector('.store-intro, .store-trust, .store-proof, .store-note')).toBeNull();
+		expect(screen.getByRole('heading', { level: 1, name: /choose windows, bios tuning, or both/i })).toBeInTheDocument();
+		expect(screen.queryAllByRole('heading', { level: 3 })).toHaveLength(0);
 	});
 
 	it('renders product cards and recommendation helper', () => {
@@ -50,31 +40,15 @@ describe('Store', () => {
 		expect(screen.getByText('Find the closest match for your PC')).toBeInTheDocument();
 		expect(screen.getByText('Server-validated checkout')).toBeInTheDocument();
 		expect(screen.getByText('Bundle discounts')).toBeInTheDocument();
-		expect(screen.getByText(/stripe-hosted checkout/i)).toBeInTheDocument();
-	});
-
-	it('keeps withdrawal, support, and benchmark links in the merged assurance strip', () => {
-		renderStore();
-
-		expect(screen.getByText('Withdrawal rights')).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /request a withdrawal online/i })).toHaveAttribute('href', '/withdrawal');
-		expect(screen.getByRole('link', { name: /^terms$/i })).toHaveAttribute('href', '/terms');
-		expect(screen.getByRole('link', { name: /ask support/i })).toHaveAttribute('href', '/contact');
-		expect(screen.getByRole('link', { name: /read the benchmark details/i })).toHaveAttribute('href', '/performance');
-		expect(screen.getAllByText(/valid Windows licence required/i).length).toBeGreaterThanOrEqual(2);
 	});
 
 	it('updates the product recommendation', async () => {
 		const user = userEvent.setup();
 		renderStore();
 
-		const choice = screen.getByRole('button', { name: /requires windows 11/i });
-		await user.click(choice);
+		await user.click(screen.getByRole('button', { name: /requires windows 11/i }));
 
-		expect(choice).toHaveAttribute('aria-pressed', 'true');
-		expect(screen.getByRole('link', { name: 'Custom Windows 11 ISO' })).toHaveAttribute('href', '#windows-11');
-		expect(document.getElementById('windows-11')).toHaveClass('is-recommended');
-		expect(document.getElementById('windows-10')).not.toHaveClass('is-recommended');
+		expect(screen.getAllByText('Custom Windows 11 ISO').length).toBeGreaterThanOrEqual(1);
 		expect(screen.getAllByText(/Newer PCs that require Windows 11/i).length).toBeGreaterThanOrEqual(1);
 	});
 

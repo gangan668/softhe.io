@@ -1,4 +1,16 @@
+import { Buffer } from 'node:buffer';
 import { expect, test } from '@playwright/test';
+
+const customer = { id: '11111111-1111-4111-8111-111111111111', aud: 'authenticated', role: 'authenticated', email: 'customer@example.test', email_confirmed_at: '2026-10-01T12:00:00Z', app_metadata: { provider: 'email', providers: ['email'] }, user_metadata: {}, created_at: '2026-10-01T12:00:00Z' };
+const encode = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+const customerToken = () => `${encode({ alg: 'HS256', typ: 'JWT' })}.${encode({ sub: customer.id, role: 'authenticated', aal: 'aal1', exp: Math.floor(Date.now() / 1000) + 3600, session_id: '22222222-2222-4222-8222-222222222222' })}.fixture-signature`;
+
+// Seeds a stored Supabase session and answers the intercepted fixture project.
+async function signInCustomer(page) {
+	const session = { access_token: customerToken(), refresh_token: 'fixture-refresh-token', expires_in: 3600, expires_at: Math.floor(Date.now() / 1000) + 3600, token_type: 'bearer', user: customer };
+	await page.addInitScript((stored) => localStorage.setItem('sb-portal-fixture-auth-token', JSON.stringify(stored)), session);
+	await page.route('https://portal-fixture.supabase.co/**', (route) => route.fulfill({ status: 200, json: new URL(route.request().url()).pathname === '/auth/v1/user' ? customer : [] }));
+}
 
 const routes = ['/', '/services', '/store', '/performance', '/faq', '/contact', '/terms', '/privacy-policy', '/legal-notice', '/withdrawal'];
 
@@ -116,7 +128,19 @@ test.describe('public website smoke tests', () => {
 		await expect(page.locator('#main-content')).toBeFocused();
 	});
 
+	test('signed-out shoppers are asked to sign in before checkout and keep their cart', async ({ page }) => {
+		let checkoutRequests = 0;
+		await page.route('**/api/create-checkout-session', (route) => { checkoutRequests += 1; return route.fulfill({ status: 500, json: {} }); });
+		await page.goto('/store');
+		await page.getByRole('button', { name: /buy now/i }).first().click();
+		await expect(page).toHaveURL(/\/login$/);
+		await expect(page.getByRole('status')).toContainText('Sign in or create an account to complete your purchase. Your cart is saved.');
+		await expect(page.getByRole('button', { name: /pay securely with stripe/i })).toHaveCount(0);
+		expect(checkoutRequests).toBe(0);
+	});
+
 	test('checkout requires terms consent and exposes server failures safely', async ({ page }) => {
+		await signInCustomer(page);
 		await page.route('**/api/create-checkout-session', (route) => route.fulfill({
 			status: 503,
 			contentType: 'application/json',
@@ -164,17 +188,109 @@ test.describe('public website smoke tests', () => {
 	test('mobile navigation is opaque, traps focus, and closes with Escape', async ({ page }) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 		await page.goto('/');
-		const menuButton = page.getByRole('button', { name: /open navigation menu/i });
+		const menuButton = page.locator('button[aria-controls="primary-navigation"]');
 		await menuButton.click();
 		const menu = page.locator('#primary-navigation');
 		await expect(menu).toBeVisible();
 		await expect(menu).toHaveCSS('background-color', 'rgb(8, 10, 15)');
 		await expect(menu.getByRole('link', { name: 'Home', exact: true })).toBeFocused();
 		await page.keyboard.press('Shift+Tab');
+		await expect(menuButton).toBeFocused();
+		await page.keyboard.press('Shift+Tab');
 		await expect(menu.getByRole('link', { name: 'FAQ', exact: true })).toBeFocused();
+		await page.keyboard.press('Tab');
+		await expect(menuButton).toBeFocused();
+		await page.keyboard.press('Tab');
+		await expect(menu.getByRole('link', { name: 'Home', exact: true })).toBeFocused();
 		await page.keyboard.press('Escape');
 		await expect(menuButton).toBeFocused();
 	});
+
+	test('opening the cart from mobile navigation preserves cart focus and restores scrolling', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/');
+		const menuButton = page.locator('button[aria-controls="primary-navigation"]');
+		const cartButton = page.getByRole('button', { name: /shopping cart with/i });
+		await menuButton.click();
+		await cartButton.click();
+		await expect(menuButton).toHaveAttribute('aria-expanded', 'false');
+		const cart = page.getByRole('dialog', { name: /shopping cart/i });
+		const closeButton = cart.getByRole('button', { name: 'Close cart' });
+		await expect(closeButton).toBeFocused();
+		await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+		await page.keyboard.press('Tab');
+		await expect(cart.getByRole('link', { name: 'Browse Products' })).toBeFocused();
+		await page.keyboard.press('Tab');
+		await expect(closeButton).toBeFocused();
+		await page.keyboard.press('Escape');
+		await expect(cart).toBeHidden();
+		await expect(cartButton).toBeFocused();
+		await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+	});
+
+	test('closed mobile navigation links are out of the tab order', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/');
+		await page.getByRole('link', { name: 'Softhe.io home' }).focus();
+		await page.keyboard.press('Tab');
+		// The off-screen menu used to receive focus here before the account link.
+		await expect(page.locator('.nav-account-link')).toBeFocused();
+		await expect(page.locator('#primary-navigation')).toHaveCSS('visibility', 'hidden');
+	});
+
+	test('cart drawer header is not covered by the fixed navbar', async ({ page }) => {
+		await page.goto('/');
+		await page.getByRole('button', { name: /shopping cart with/i }).click();
+		const closeButton = page.getByRole('dialog', { name: /shopping cart/i }).getByRole('button', { name: 'Close cart' });
+		await expect(closeButton).toBeInViewport();
+		// The open dialog makes the navbar inert, so hit-testing passes through it even while it is
+		// painted over the drawer header. Compare the stacking order of the two fixed layers instead.
+		const layers = await page.evaluate(() => ['.cart-sidebar', '.navbar'].map((selector) => Number(getComputedStyle(document.querySelector(selector)).zIndex)));
+		expect(layers[0]).toBeGreaterThan(layers[1]);
+	});
+
+	test('not found page primary action keeps dark text on the gradient', async ({ page }) => {
+		await page.goto('/this-route-does-not-exist');
+		await expect(page.locator('.not-found-actions .btn-primary')).toHaveCSS('color', 'rgb(3, 16, 13)');
+	});
+
+	test('stacked idle overhead values name their profile on mobile', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.goto('/performance');
+		// Side-by-side column headings would sit above stacked values and mislabel them.
+		await expect(page.locator('.overhead-heading')).toBeHidden();
+		const firstMetric = page.locator('.overhead-metric').first();
+		await expect(firstMetric.locator('.overhead-profile').first()).toHaveText('Default Windows');
+		await expect(firstMetric.locator('.overhead-profile').first()).toBeVisible();
+		await expect(firstMetric.locator('.overhead-profile').last()).toHaveText('SoftheOS');
+		await expect(firstMetric.locator('.overhead-profile').last()).toBeVisible();
+	});
+
+	for (const width of [320, 360, 390]) {
+		test(`frame-time readout never moves the table at ${width}px`, async ({ page }) => {
+			await page.setViewportSize({ width, height: 800 });
+			await page.goto('/performance');
+			const plot = page.getByRole('group', { name: /frame-time chart/i });
+			const table = page.getByRole('table', { name: /median of each profile/i });
+			await plot.scrollIntoViewIfNeeded();
+			// Measured relative to the plot so page scrolling cannot mask a shift.
+			const offset = () => page.evaluate(() => {
+				const plotBox = document.querySelector('.frametime-plot').getBoundingClientRect();
+				return Math.round(document.querySelector('.frametime-table').getBoundingClientRect().top - plotBox.top);
+			});
+			const idle = await offset();
+			await expect(table).toBeVisible();
+			await plot.focus();
+			await page.keyboard.press('Home');
+			// Step through every percentile, the longest and shortest readouts included.
+			for (let step = 0; step < 51; step += 1) {
+				expect(await offset(), `point ${step}`).toBe(idle);
+				await page.keyboard.press('ArrowRight');
+			}
+			const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+			expect(scrollWidth).toBeLessThanOrEqual(width);
+		});
+	}
 
 	for (const width of [320, 390, 768, 1280, 1440]) {
 		test(`store has no horizontal overflow at ${width}px`, async ({ page }) => {
@@ -212,6 +328,16 @@ test.describe('cookie consent controls', () => {
 		const initialScroll = await page.evaluate(() => window.scrollY);
 		await page.mouse.wheel(0, 700);
 		await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(initialScroll);
+	});
+
+	test('decline and accept are presented with equal prominence', async ({ page }) => {
+		await page.goto('/');
+		const dialog = page.getByRole('dialog', { name: /we value your privacy/i });
+		const style = (name) => dialog.getByRole('button', { name }).evaluate((button) => {
+			const computed = getComputedStyle(button);
+			return [computed.backgroundColor, computed.color, computed.borderColor, computed.fontWeight, computed.fontSize];
+		});
+		expect(await style(/decline cookies/i)).toEqual(await style(/accept cookies/i));
 	});
 
 	test('details, accept, persistence, and settings reopening work', async ({ page }) => {

@@ -2,10 +2,10 @@
 	position: fixed;
 	top: 0;
 	width: 100%;
-	background: linear-gradient(90deg, rgba(8, 10, 15, 0.94), rgba(9, 14, 20, 0.9), rgba(8, 10, 15, 0.94));
+	background: var(--glass-bg);
 	border-bottom: 1px solid var(--border-color);
-	backdrop-filter: blur(18px);
-	-webkit-backdrop-filter: blur(18px);
+	backdrop-filter: var(--glass-filter);
+	-webkit-backdrop-filter: var(--glass-filter);
 	z-index: 1000;
 	transition: var(--transition);
 }
@@ -22,15 +22,14 @@
 }
 
 .nav-account-link {
-	color: #73eadf;
+	/* Pairs with the cart at the far right; the auto margin takes up the space after the menu. */
+	margin-left: auto;
+	color: var(--text-secondary);
 	text-decoration: none;
-	font-weight: 750;
-	padding: 9px 14px;
-	border: 1px solid var(--brand-border);
+	font-weight: 500;
+	padding: 8px 12px;
 	border-radius: 999px;
 	white-space: nowrap;
-	background: var(--brand-surface);
-	box-shadow: inset 0 0 18px rgba(79, 216, 232, 0.025);
 	transition: var(--transition);
 }
 
@@ -53,7 +52,8 @@
 	-webkit-mask: url("/images/softhe-icon-v2-192.png") center / contain no-repeat;
 	mask: url("/images/softhe-icon-v2-192.png") center / contain no-repeat;
 	filter: drop-shadow(0 0 8px rgba(79, 216, 232, 0.18));
-	transition: transform var(--transition), filter var(--transition);
+	/* --transition is a full "all …" shorthand, so it cannot be reused per property here. */
+	transition: transform 0.22s ease, filter 0.22s ease;
 }
 
 .nav-logo a::after {
@@ -79,19 +79,8 @@
 	transform: scale(1.12);
 }
 
-.visually-hidden {
-	position: absolute !important;
-	width: 1px !important;
-	height: 1px !important;
-	padding: 0 !important;
-	margin: -1px !important;
-	overflow: hidden !important;
-	clip: rect(0, 0, 0, 0) !important;
-	white-space: nowrap !important;
-	border: 0 !important;
-}
-
 .nav-menu {
+	margin-left: 1.5rem;
 	display: flex;
 	list-style: none;
 	gap: 0.35rem;
@@ -102,7 +91,8 @@
 	color: var(--text-secondary);
 	text-decoration: none;
 	font-weight: 500;
-	transition: var(--transition);
+	/* Not "all": the links would animate the menu's inherited visibility and refuse focus while opening. */
+	transition: color 0.22s ease, background 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 	position: relative;
 	padding: 8px 12px;
 	border: 1px solid transparent;
@@ -110,10 +100,10 @@
 }
 
 .cart-icon-btn {
-	background: var(--brand-surface);
-	border: 1px solid var(--brand-border);
-	color: #76dfeb;
-	font-size: 1.25rem;
+	background: var(--accent-wash);
+	border: 1px solid var(--accent-line-strong);
+	color: var(--text-accent);
+	font-size: var(--font-xl);
 	cursor: pointer;
 	position: relative;
 	width: 42px;
@@ -137,11 +127,11 @@
 }
 
 .cart-icon-btn:hover {
-	color: #8af3e5;
-	border-color: rgba(91, 205, 232, 0.52);
-	background: var(--brand-surface-strong);
-	box-shadow: 0 10px 28px rgba(58, 190, 202, 0.12);
+	color: var(--text-accent);
+	border-color: var(--accent-focus);
+	background: var(--accent-tint-strong);
 	transform: translateY(-1px);
+	box-shadow: 0 10px 28px rgba(58, 190, 202, 0.12);
 }
 
 .cart-badge {
@@ -149,30 +139,29 @@
 	top: -6px;
 	right: -6px;
 	background: var(--gradient);
-	color: #03100d;
+	color: var(--text-on-accent);
 	border-radius: 50%;
 	width: 18px;
 	height: 18px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 0.75rem;
+	font-size: var(--font-xs);
 	font-weight: 700;
 	border: 2px solid var(--background-color);
 }
 
 
 .nav-link:hover {
-	color: #80e9e2;
-	background: var(--brand-surface);
+	color: var(--text-accent);
+	background: var(--accent-wash);
 }
 
 .nav-link.active {
-	border: 1px solid transparent;
-	background:
-		linear-gradient(rgba(13, 33, 35, 0.96), rgba(10, 25, 31, 0.96)) padding-box,
+	background: linear-gradient(rgba(13, 33, 35, 0.96), rgba(10, 25, 31, 0.96)) padding-box,
 		var(--gradient) border-box;
-	color: #87f0e4;
+	color: var(--text-accent);
+	border: 1px solid transparent;
 	box-shadow: 0 10px 30px rgba(62, 193, 205, 0.12), inset 0 0 20px rgba(72, 218, 216, 0.045);
 }
 
@@ -219,13 +208,14 @@
 	border-radius: 999px;
 }
 
+.nav-account-link.pending {
+	visibility: hidden;
+}
+
 .nav-account-link:hover,
 .nav-account-link:focus-visible {
-	color: #8af3e5;
-	border-color: rgba(91, 205, 232, 0.52);
-	background: var(--brand-surface-strong);
-	box-shadow: 0 10px 28px rgba(58, 190, 202, 0.11);
-	transform: translateY(-1px);
+	color: var(--text-accent);
+	background: var(--accent-wash);
 }
 
 @media (max-width: 768px) {
@@ -234,17 +224,20 @@
 	}
 
 	.nav-menu {
+		margin-left: 0;
 		position: fixed;
 		left: -100%;
 		top: 70px;
 		bottom: 0;
 		flex-direction: column;
-		background-color: #080a0f;
+		background-color: var(--background-color);
 		width: 100%;
 		min-height: calc(100dvh - 70px);
 		overflow-y: auto;
 		text-align: center;
-		transition: var(--transition);
+		/* Hidden once the slide-out finishes so off-screen links leave the tab order and accessibility tree. */
+		visibility: hidden;
+		transition: left 0.22s ease, visibility 0s linear 0.22s;
 		box-shadow: var(--shadow);
 		border-top: 1px solid var(--border-color);
 		padding: 1rem 0 1.25rem;
@@ -253,6 +246,8 @@
 
 	.nav-menu.active {
 		left: 0;
+		visibility: visible;
+		transition: left 0.22s ease;
 	}
 
 	.nav-menu li {
@@ -268,12 +263,12 @@
 
 	.cart-icon-btn {
 		margin-left: 0.5rem;
-		font-size: 1.1rem;
+		font-size: var(--font-lg);
 	}
 
 	.cart-badge {
-		width: 18px;
-		height: 18px;
-		font-size: 0.75rem;
+		width: 16px;
+		height: 16px;
+		font-size: var(--font-xs);
 	}
 }

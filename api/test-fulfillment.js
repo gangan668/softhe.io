@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { redisCommand } = require('./_lib/redis');
 
@@ -109,7 +110,7 @@ async function testFulfillment(req, res) {
 	}
 }
 
-module.exports = testFulfillment;
+module.exports = withHttp(testFulfillment, { raw: true });
 module.exports.config = { api: { bodyParser: false } };
 module.exports.getRetentionSeconds = getRetentionSeconds;
 module.exports.isEnabled = isEnabled;

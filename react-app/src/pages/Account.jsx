@@ -1,57 +1,50 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import SEO from '../components/SEO';
-import ActivityPanel from '../components/portal/ActivityPanel';
-import OrdersPanel from '../components/portal/OrdersPanel';
-import ProfileForm from '../components/portal/ProfileForm';
-import SecurityPanel from '../components/portal/SecurityPanel';
-import TicketsPanel from '../components/portal/TicketsPanel';
 import { useAuth } from '../context/useAuth';
-import { notifyTicketReply, writeTicket } from '../utils/portal';
+import { notifyTicketReply, revokeOtherSessions, writeTicket } from '../utils/portal';
+import { hasVerifiedFactor } from '../utils/mfa';
 import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
 import { runPortalQueriesWithSessionRecovery } from '../utils/portalSession';
-import { SESSION_EXPIRED_MESSAGE, capServerMessage, getUserErrorMessage } from '../utils/userErrors';
+import { SESSION_EXPIRED_MESSAGE, getUserErrorMessage } from '../utils/userErrors';
 import './Portal.css';
 
 const tabs = ['overview', 'orders', 'tickets', 'history', 'security'];
-const emptyData = { profile: null, orders: [], tickets: [], activity: [] };
-const emptyTicket = { subject: '', category: 'general', message: '' };
-const idlePasswordFlow = { step: 'idle', sending: false, saving: false };
-const VERIFICATION_CODE = /^[0-9]{6,10}$/;
-
-const revokeOtherSessions = async (session) => {
-	try {
-		const response = await fetch('/api/session-revoke-others', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-			body: '{}',
-		});
-		return response.ok;
-	} catch {
-		return false;
-	}
-};
+const formatDate = (value) => new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 
 export default function Account() {
+	const { user } = useAuth();
+	return <AccountSession key={user.id} />;
+}
+
+function AccountSession() {
 	const { user, session, staff, supabase } = useAuth();
 	const navigate = useNavigate();
 	const [tab, setTab] = useState('overview');
-	const [data, setData] = useState(emptyData);
-	const [selectedTicket, setSelectedTicket] = useState(null);
+	const [accountData, setData] = useState({ userId: user.id, profile: null, orders: [], tickets: [], activity: [] });
+	const data = accountData.userId === user.id ? accountData : { profile: null, orders: [], tickets: [], activity: [] };
+	const [storedTicket, setSelectedTicket] = useState(null);
+	const selectedTicket = storedTicket?.ownerId === user.id ? storedTicket : null;
 	const [showTicketComposer, setShowTicketComposer] = useState(false);
 	const [messages, setMessages] = useState([]);
 	const [status, setStatus] = useState({ loading: true, error: '', message: '' });
-	const [newTicket, setNewTicket] = useState(emptyTicket);
+	const [newTicket, setNewTicket] = useState({ subject: '', category: 'general', message: '' });
 	const [reply, setReply] = useState('');
 	const [replySending, setReplySending] = useState(false);
 	const replyInFlight = useRef(false);
+	const ticketInFlight = useRef(false);
+	const [ticketSending, setTicketSending] = useState(false);
+	const requestScope = useRef(0);
+	const ticketRead = useRef(0);
+	const loadRead = useRef(0);
+	// Token refresh keeps the same account. Identity changes and unmounts invalidate its requests.
+	useEffect(() => { requestScope.current += 1; return () => { requestScope.current += 1; ticketRead.current += 1; }; }, [user.id, supabase]);
 	const [mfa, setMfa] = useState({ factorId: '', qr: '', code: '', message: '', error: '' });
-	const [passwordFlow, setPasswordFlow] = useState(idlePasswordFlow);
-
-	const showError = (error, fallback) => setStatus((s) => ({ ...s, error: getUserErrorMessage(error, fallback), message: '' }));
+	const [passwordCodeSent, setPasswordCodeSent] = useState(false);
 
 	const load = useCallback(async () => {
+		const scope = requestScope.current; const request = ++loadRead.current;
 		setStatus((s) => ({ ...s, loading: true, error: '' }));
+		try {
 		const runQueries = () => Promise.all([
 			supabase.from('profiles').select('*').eq('id', user.id).single(),
 			supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false }),
@@ -59,242 +52,147 @@ export default function Account() {
 			supabase.from('activity_events').select('*').order('created_at', { ascending: false }).limit(100),
 		]);
 		const recovered = await runPortalQueriesWithSessionRecovery(supabase, runQueries);
+		if (scope !== requestScope.current || request !== loadRead.current) return;
 		const [profile, orders, tickets, activity] = recovered.results;
 		const error = recovered.error;
 		if (recovered.sessionInvalid) {
-			setData(emptyData);
+			setData({ profile: null, orders: [], tickets: [], activity: [] });
 			setMessages([]);
 			setSelectedTicket(null);
 			await supabase.auth.signOut({ scope: 'local' });
-			// The session-recovery helper builds this message locally; cap it anyway.
-			navigate('/login', { replace: true, state: { authError: capServerMessage(error?.message, SESSION_EXPIRED_MESSAGE) } });
+			if (scope === requestScope.current) navigate('/login', { replace: true, state: { authError: getUserErrorMessage(error, SESSION_EXPIRED_MESSAGE) } });
 			return;
 		}
-		setData({ profile: profile.data, orders: orders.data || [], tickets: tickets.data || [], activity: activity.data || [] });
-		setStatus({
-			loading: false,
-			error: error ? getUserErrorMessage(error, 'Some account details could not be loaded. Please try again.') : '',
-			message: '',
-		});
+		setData({ userId: user.id, profile: profile.data, orders: orders.data || [], tickets: tickets.data || [], activity: activity.data || [] });
+		setStatus({ loading: false, error: error ? getUserErrorMessage(error, 'Some account details could not be loaded. Please try again.') : '', message: '' });
+		} catch { if (scope === requestScope.current) setStatus({ loading: false, error: 'Account could not be loaded. Please try again.', message: '' }); }
 	}, [navigate, supabase, user.id]);
-
 	useEffect(() => {
-		const timer = window.setTimeout(() => {
-			void load();
-		}, 0);
+		const timer = window.setTimeout(() => { void load(); }, 0);
 		return () => window.clearTimeout(timer);
 	}, [load]);
 
 	const openTicket = async (ticket) => {
-		setSelectedTicket(ticket);
-		const result = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticket.id).order('created_at');
-		setMessages(result.data || []);
+		const request = ++ticketRead.current;
+		const scope = requestScope.current;
+		setSelectedTicket({ ...ticket, ownerId: user.id }); setMessages([]); setReply('');
+		try {
+			const result = await supabase.from('ticket_messages').select('*').eq('ticket_id', ticket.id).order('created_at');
+			if (request !== ticketRead.current || scope !== requestScope.current) return;
+			if (result.error) throw result.error;
+			setMessages(result.data || []);
+		} catch { if (request === ticketRead.current && scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Conversation could not be loaded. Please try again.' })); }
 	};
-
 	const saveProfile = async (event) => {
-		event.preventDefault();
-		const form = new FormData(event.currentTarget);
-		const billing_address = {
-			line1: form.get('line1'),
-			line2: form.get('line2'),
-			city: form.get('city'),
-			postal_code: form.get('postal_code'),
-			country: form.get('country'),
-		};
-		const { error } = await supabase
-			.from('profiles')
-			.update({ full_name: form.get('full_name'), phone: form.get('phone'), locale: form.get('locale'), billing_address })
-			.eq('id', user.id);
-		setStatus((s) => ({
-			...s,
-			error: error ? getUserErrorMessage(error, 'Your profile could not be saved. Please try again.') : '',
-			message: error ? '' : 'Profile saved.',
-		}));
-		if (!error) load();
+		event.preventDefault(); const scope = requestScope.current; const form = new FormData(event.currentTarget);
+		const billing_address = { line1: form.get('line1'), line2: form.get('line2'), city: form.get('city'), postal_code: form.get('postal_code'), country: form.get('country') };
+		try { const { error } = await supabase.from('profiles').update({ full_name: form.get('full_name'), phone: form.get('phone'), locale: form.get('locale'), billing_address }).eq('id', user.id);
+		if (scope !== requestScope.current) return; setStatus((s) => ({ ...s, error: error ? getUserErrorMessage(error, 'Profile could not be saved. Please try again.') : '', message: error ? '' : 'Profile saved.' })); if (!error) void load(); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Profile could not be saved. Please try again.', message: '' })); }
 	};
-
 	const createTicket = async (event) => {
-		event.preventDefault();
-		let id;
+		event.preventDefault(); if (ticketInFlight.current) return;
+		const scope = requestScope.current; ticketInFlight.current = true; setTicketSending(true);
 		try {
-			({ id } = await writeTicket(session, {
-				action: 'create',
-				subject: newTicket.subject,
-				category: newTicket.category,
-				message: newTicket.message,
-			}));
-		} catch (error) {
-			return setStatus((s) => ({ ...s, error: getUserErrorMessage(error) }));
-		}
-		setNewTicket(emptyTicket);
-		setShowTicketComposer(false);
-		const notified = await notifyTicketReply(session, { ticketId: id });
-		await load();
-		setTab('tickets');
-		setStatus((s) => ({
-			...s,
-			error: notified ? '' : 'Ticket saved, but the email notification could not be sent.',
-			message: `Ticket ${String(id).slice(0, 8)} created.`,
-		}));
+			const { id } = await writeTicket(session, { action: 'create', subject: newTicket.subject, category: newTicket.category, message: newTicket.message });
+			if (scope !== requestScope.current) return;
+			setNewTicket({ subject: '', category: 'general', message: '' }); setShowTicketComposer(false);
+			const notified = await notifyTicketReply(session, { ticketId: id }).catch(() => false);
+			if (scope !== requestScope.current) return;
+			await load(); if (scope !== requestScope.current) return;
+			setTab('tickets'); setStatus((value) => ({ ...value, error: notified ? '' : 'Ticket saved, but the email notification could not be sent.', message: 'Ticket ' + String(id).slice(0, 8) + ' created.' }));
+		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: getUserErrorMessage(error, 'Ticket could not be saved. Please try again.') })); }
+		finally { ticketInFlight.current = false; if (scope === requestScope.current) setTicketSending(false); }
 	};
-
 	const sendReply = async (event) => {
-		event.preventDefault();
-		if (!selectedTicket || !reply.trim() || replyInFlight.current) return;
-		replyInFlight.current = true;
-		setReplySending(true);
+		event.preventDefault(); if (!selectedTicket || !reply.trim() || replyInFlight.current) return;
+		const scope = requestScope.current; const read = ticketRead.current; const ticket = selectedTicket;
+		replyInFlight.current = true; setReplySending(true);
 		try {
-			const message = await writeTicket(session, { action: 'message', ticketId: selectedTicket.id, message: reply.trim() });
-			setReply('');
-			const notified = await notifyTicketReply(session, { messageId: message.id });
-			await openTicket(selectedTicket);
-			await load();
-			setStatus((s) => ({ ...s, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
-		} catch (error) {
-			setStatus((s) => ({ ...s, error: getUserErrorMessage(error) }));
-		} finally {
-			replyInFlight.current = false;
-			setReplySending(false);
-		}
+			const message = await writeTicket(session, { action: 'message', ticketId: ticket.id, message: reply.trim() });
+			if (scope !== requestScope.current) return;
+			if (read === ticketRead.current) setReply('');
+			const notified = await notifyTicketReply(session, { messageId: message.id }).catch(() => false);
+			if (scope !== requestScope.current) return;
+			if (read === ticketRead.current) await openTicket(ticket);
+			await load(); if (scope !== requestScope.current) return;
+			setStatus((value) => ({ ...value, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
+		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: getUserErrorMessage(error, 'Reply could not be sent. Please try again.') })); }
+		finally { replyInFlight.current = false; if (scope === requestScope.current) setReplySending(false); }
 	};
-
-	const signOut = async () => {
-		setData(emptyData);
-		setMessages([]);
-		setSelectedTicket(null);
-		await supabase.auth.signOut();
-		navigate('/login', { replace: true });
+	const signOut = async () => { const scope = requestScope.current; setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); try { const result = await supabase.auth.signOut(); if (result?.error) throw result.error; if (scope === requestScope.current) navigate('/login', { replace: true }); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Sign-out could not be completed. Please try again.', message: '' })); } };
+	// Supabase emails a one-time nonce. With "Secure password change" enabled it is
+	// required only for sessions older than 24 hours; "Require current password"
+	// closes that window. Both checks are enforced by Supabase, not this page.
+	const sendPasswordCode = async () => {
+		const scope = requestScope.current;
+		try {
+			const { error } = await supabase.auth.reauthenticate();
+			if (scope !== requestScope.current) return;
+			if (error) throw error;
+			setPasswordCodeSent(true);
+			setStatus((s) => ({ ...s, error: '', message: `We emailed a verification code to ${user.email}.` }));
+		} catch { if (scope === requestScope.current) setStatus((s) => ({ ...s, error: 'The verification code could not be sent. Please wait a minute and try again.', message: '' })); }
 	};
-
-	// Secure password change, step 1: Supabase emails a one-time code (nonce).
-	const requestPasswordCode = async () => {
-		setPasswordFlow((flow) => ({ ...flow, sending: true }));
-		const { error } = await supabase.auth.reauthenticate();
-		if (error) {
-			setPasswordFlow((flow) => ({ ...flow, sending: false }));
-			return showError(error, 'The verification code could not be sent. Please try again.');
-		}
-		setPasswordFlow({ step: 'code-sent', sending: false, saving: false });
-		setStatus((s) => ({ ...s, error: '', message: 'We emailed you a verification code. Enter it below with your new password.' }));
-	};
-
-	// Step 2: the Supabase Auth server verifies the nonce before accepting the new password.
 	const updatePassword = async (event) => {
 		event.preventDefault();
-		const formElement = event.currentTarget;
-		const form = new FormData(formElement);
-		const code = String(form.get('code') || '').trim();
-		const password = form.get('password');
-		if (!VERIFICATION_CODE.test(code)) {
-			return setStatus((s) => ({ ...s, error: 'Enter the verification code from your email.', message: '' }));
-		}
+		const passwordForm = event.currentTarget; const scope = requestScope.current;
+		const fields = new FormData(passwordForm);
+		const password = fields.get('password'); const nonce = String(fields.get('nonce') || '').trim(); const currentPassword = String(fields.get('current_password') || '');
 		if (!validateStrongPassword(password)) return setStatus((s) => ({ ...s, error: passwordRequirements, message: '' }));
-		setPasswordFlow((flow) => ({ ...flow, saving: true }));
-		const { error } = await supabase.auth.updateUser({ password, nonce: code });
-		if (error) {
-			setPasswordFlow((flow) => ({ ...flow, saving: false }));
-			return showError(error, 'Password could not be updated. Request a new code and try again.');
-		}
-		formElement.reset();
-		setPasswordFlow(idlePasswordFlow);
+		let passwordChanged = false;
+		try { const { error } = await supabase.auth.updateUser({ password, nonce, current_password: currentPassword });
+		if (scope !== requestScope.current) return;
+		if (error) return setStatus((s) => ({ ...s, error: 'Password could not be updated. Check your current password and the verification code, or request a new code.', message: '' }));
+		passwordChanged = true; passwordForm.reset(); setPasswordCodeSent(false);
 		const revoked = await revokeOtherSessions(session);
-		if (!revoked) {
-			return setStatus((s) => ({ ...s, error: 'Password changed, but other sessions could not be revoked. Please sign out of all devices.', message: '' }));
-		}
-		setStatus((s) => ({ ...s, error: '', message: 'Password updated and other sessions revoked.' }));
+		if (scope !== requestScope.current) return;
+		setStatus((s) => revoked ? { ...s, error: '', message: 'Password updated and other sessions revoked.' } : { ...s, error: 'Password changed, but other sessions could not be revoked. Use "Sign out other devices" below.', message: '' });
+		} catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: passwordChanged ? 'Password changed, but other sessions could not be revoked. Use "Sign out other devices" below.' : 'Password could not be updated. Sign in again and retry.', message: '' })); }
 	};
-
+	const signOutOtherDevices = async () => {
+		const scope = requestScope.current;
+		const revoked = await revokeOtherSessions(session).catch(() => false);
+		if (scope === requestScope.current) setStatus((s) => revoked ? { ...s, error: '', message: 'All other devices have been signed out.' } : { ...s, error: 'Other devices could not be signed out. Please try again.', message: '' });
+	};
 	const beginMfa = async () => {
+		const scope = requestScope.current;
+		try {
 		const factors = await supabase.auth.mfa.listFactors();
+		if (scope !== requestScope.current) return;
+		if (factors.error) throw factors.error;
 		const verified = factors.data?.totp?.find((factor) => factor.status === 'verified');
-		if (verified) {
-			return setMfa((value) => ({ ...value, factorId: verified.id, qr: '', message: 'Enter a current authenticator code to elevate this session.', error: '' }));
-		}
-		const { data: enrollment, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Softhe.io staff access' });
-		setMfa((value) => (error
-			? { ...value, error: 'MFA enrollment could not be started.' }
-			: { ...value, factorId: enrollment.id, qr: enrollment.totp.qr_code, message: 'Scan this QR code, then enter the six-digit code.', error: '' }));
+		if (verified) return setMfa((value) => ({ ...value, factorId: verified.id, qr: '', message: 'Enter the current code from your authenticator app.', error: '' }));
+		const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Softhe.io' });
+		if (scope !== requestScope.current) return;
+		setMfa((value) => error ? { ...value, error: 'Authenticator setup could not be started. Please try again.' } : { ...value, factorId: data.id, qr: data.totp.qr_code, message: 'Scan this QR code, then enter the six-digit code.', error: '' });
+		} catch { if (scope === requestScope.current) setMfa((value) => ({ ...value, error: 'Authenticator setup could not be started. Please try again.', message: '' })); }
 	};
-
 	const verifyMfa = async (event) => {
-		event.preventDefault();
+		event.preventDefault(); const scope = requestScope.current;
+		try {
 		const challenge = await supabase.auth.mfa.challenge({ factorId: mfa.factorId });
-		if (challenge.error) return setMfa((value) => ({ ...value, error: 'MFA challenge could not be created.' }));
+		if (scope !== requestScope.current) return;
+		if (challenge.error) return setMfa((value) => ({ ...value, error: 'Authenticator verification could not be started. Please try again.' }));
 		const verified = await supabase.auth.mfa.verify({ factorId: mfa.factorId, challengeId: challenge.data.id, code: mfa.code });
+		if (scope !== requestScope.current) return;
 		if (verified.error) return setMfa((value) => ({ ...value, error: 'That authenticator code was not accepted.' }));
-		await supabase.auth.refreshSession();
-		setMfa((value) => ({ ...value, code: '', qr: '', message: 'MFA verified. This session now has AAL2 assurance.', error: '' }));
+		const refreshed = await supabase.auth.refreshSession();
+		if (scope !== requestScope.current) return;
+		if (refreshed.error || !refreshed.data?.session) return setMfa((value) => ({ ...value, error: 'Your authenticator app was verified, but this session could not be refreshed. Sign out and sign in again to finish.', message: '' }));
+		setMfa((value) => ({ ...value, factorId: '', verified: true, code: '', qr: '', message: 'Authenticator app verified. You will be asked for a code each time you sign in.', error: '' }));
+		} catch { if (scope === requestScope.current) setMfa((value) => ({ ...value, error: 'That code could not be verified. Please try again.', message: '' })); }
 	};
 
-	const profile = data.profile || {};
-
-	return (
-		<div className="portal-page">
-			<SEO title="Customer account | Softhe.io" description="Manage your Softhe.io profile, orders, support tickets, and account history." />
-			<header className="portal-heading">
-				<div>
-					<span className="eyebrow">Customer portal</span>
-					<h1>Hello, {profile.full_name || user.email}</h1>
-					<p>{user.email}</p>
-				</div>
-				<div className="portal-actions">
-					{staff && <Link className="btn btn-secondary" to="/admin">Staff portal</Link>}
-					<button className="btn btn-secondary" onClick={signOut}>Sign out</button>
-				</div>
-			</header>
-			<nav className="portal-tabs" aria-label="Account sections">
-				{tabs.map((name) => (
-					<button key={name} className={tab === name ? 'active' : ''} onClick={() => setTab(name)}>{name}</button>
-				))}
-			</nav>
-			{status.loading && <div className="portal-state" role="status">Loading account…</div>}
-			{status.error && <div className="portal-error" role="alert">{status.error}</div>}
-			{status.message && <div className="portal-success" role="status">{status.message}</div>}
-
-			{!status.loading && tab === 'overview' && (
-				<div className="portal-grid">
-					<ProfileForm profile={profile} onSubmit={saveProfile} />
-					<section className="portal-card metric-card">
-						<h2>At a glance</h2>
-						<strong>{data.orders.length}</strong>
-						<span>orders</span>
-						<strong>{data.tickets.filter((t) => t.status !== 'closed').length}</strong>
-						<span>open tickets</span>
-						<button className="btn btn-secondary" onClick={() => setTab('tickets')}>Get support</button>
-					</section>
-				</div>
-			)}
-			{tab === 'orders' && <OrdersPanel orders={data.orders} />}
-			{tab === 'tickets' && (
-				<TicketsPanel
-					tickets={data.tickets}
-					selectedTicket={selectedTicket}
-					messages={messages}
-					userId={user.id}
-					showComposer={showTicketComposer}
-					onToggleComposer={() => setShowTicketComposer((visible) => !visible)}
-					newTicket={newTicket}
-					onNewTicketChange={setNewTicket}
-					onCreateTicket={createTicket}
-					onOpenTicket={openTicket}
-					reply={reply}
-					onReplyChange={setReply}
-					replySending={replySending}
-					onSendReply={sendReply}
-				/>
-			)}
-			{tab === 'history' && <ActivityPanel activity={data.activity} />}
-			{tab === 'security' && (
-				<SecurityPanel
-					passwordFlow={passwordFlow}
-					onRequestPasswordCode={requestPasswordCode}
-					onUpdatePassword={updatePassword}
-					mfa={mfa}
-					onBeginMfa={beginMfa}
-					onVerifyMfa={verifyMfa}
-					onMfaCodeChange={(code) => setMfa((value) => ({ ...value, code }))}
-				/>
-			)}
-		</div>
-	);
+	const profile = data.profile || {}; const address = profile.billing_address || {};
+	const authenticatorOn = hasVerifiedFactor(user) || mfa.verified;
+	return <div className="portal-page">
+		<header className="portal-heading"><div><span className="eyebrow">Customer portal</span><h1>{profile.full_name ? `Hello, ${profile.full_name}` : 'Welcome back'}</h1><p>{user.email}</p></div><div className="portal-actions">{staff && <Link className="btn btn-secondary" to="/admin">Staff portal</Link>}<button className="btn btn-secondary" onClick={signOut}>Sign out</button></div></header>
+		<nav className="portal-tabs" aria-label="Account sections">{tabs.map((name) => <button key={name} className={tab === name ? 'active' : ''} onClick={() => setTab(name)}>{name}</button>)}</nav>
+		{status.loading && <div className="portal-state" role="status">Loading account…</div>}{status.error && <div className="portal-error" role="alert">{status.error}</div>}{status.message && <div className="portal-success" role="status">{status.message}</div>}
+		{!status.loading && tab === 'overview' && <div className="portal-grid"><section className="portal-card"><h2>Profile</h2><form className="portal-form" onSubmit={saveProfile}><label>Full name<input name="full_name" defaultValue={profile.full_name} required /></label><label>Phone<input name="phone" defaultValue={profile.phone} autoComplete="tel" /></label><div className="form-row"><label>Address<input name="line1" defaultValue={address.line1} /></label><label>Address line 2<input name="line2" defaultValue={address.line2} /></label></div><div className="form-row"><label>City<input name="city" defaultValue={address.city} /></label><label>Postal code<input name="postal_code" defaultValue={address.postal_code} /></label></div><div className="form-row"><label>Country<input name="country" defaultValue={address.country} maxLength="2" placeholder="SE" /></label><label>Locale<select name="locale" defaultValue={profile.locale || 'en'}><option value="en">English</option><option value="sv">Svenska</option></select></label></div><button className="btn btn-primary">Save profile</button></form></section><section className="portal-card metric-card"><h2>At a glance</h2><strong>{data.orders.length}</strong><span>orders</span><strong>{data.tickets.filter((t) => t.status !== 'closed').length}</strong><span>open tickets</span><button className="btn btn-secondary" onClick={() => setTab('tickets')}>Get support</button></section></div>}
+		{tab === 'orders' && <section className="portal-card"><h2>Orders</h2>{!data.orders.length ? <p>No orders yet. Purchases made while signed in appear here after payment is confirmed.</p> : <div className="portal-list">{data.orders.map((order) => <article key={order.id}><div><strong>Order {order.stripe_session_id.slice(-10)}</strong><p>{formatDate(order.created_at)} · {order.status}</p><small>{order.order_items?.map((item) => `${item.product_name} × ${item.quantity}`).join(', ')}</small></div><strong>{new Intl.NumberFormat(undefined, { style: 'currency', currency: order.currency.toUpperCase() }).format(order.amount_total / 100)}</strong></article>)}</div>}</section>}
+		{tab === 'tickets' && <section className="portal-card tickets-card"><div className="tickets-heading"><div><h2>Support history</h2><p>Review your tickets and continue existing conversations.</p></div><button className={showTicketComposer ? 'btn btn-secondary' : 'btn btn-primary'} onClick={() => setShowTicketComposer((visible) => !visible)}>{showTicketComposer ? 'Cancel' : 'New ticket'}</button></div>{showTicketComposer ? <form className="portal-form ticket-composer" onSubmit={createTicket}><label>Subject<input value={newTicket.subject} onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })} minLength="3" maxLength="120" required /></label><label>Category<select value={newTicket.category} onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}><option value="general">General</option><option value="technical">Technical</option><option value="sales">Sales</option><option value="billing">Billing</option></select></label><label>Message<textarea value={newTicket.message} onChange={(e) => setNewTicket({ ...newTicket, message: e.target.value })} maxLength="4000" required /></label><button className="btn btn-primary" disabled={ticketSending}>{ticketSending ? 'Creating…' : 'Create ticket'}</button></form> : <div className="ticket-workspace"><div className="ticket-list" aria-label="Your tickets">{data.tickets.length ? data.tickets.map((ticket) => <button key={ticket.id} onClick={() => openTicket(ticket)} className={selectedTicket?.id === ticket.id ? 'active' : ''}><strong>{ticket.subject}</strong><span>{ticket.status.replaceAll('_', ' ')}</span></button>) : <p className="ticket-empty">You have not created any support tickets yet.</p>}</div><div className="conversation-panel">{selectedTicket ? <div className="conversation"><h3>{selectedTicket.subject}</h3><div className="conversation-messages">{messages.map((message) => <div className={message.author_id === user.id ? 'message own' : 'message'} key={message.id}><p>{message.body}</p><small>{formatDate(message.created_at)}</small></div>)}</div>{selectedTicket.status !== 'closed' && <form onSubmit={sendReply}><textarea value={reply} onChange={(e) => setReply(e.target.value)} maxLength="4000" aria-label="Reply" disabled={replySending} required /><button className="btn btn-primary" disabled={replySending}>{replySending ? 'Sending…' : 'Send reply'}</button></form>}</div> : <div className="ticket-empty ticket-empty-detail"><strong>Select a ticket</strong><p>Choose a conversation from the history to view its messages.</p></div>}</div></div>}</section>}
+		{tab === 'history' && <section className="portal-card"><h2>Activity history</h2><div className="timeline">{data.activity.map((event) => <article key={event.id}><span></span><div><strong>{event.event_type.replaceAll('.', ' ')}</strong><p>{formatDate(event.created_at)}</p></div></article>)}</div></section>}
+		{tab === 'security' && <section className="portal-card narrow-card"><h2>Security</h2><p>Your password is managed securely by Supabase and is never stored by Softhe.io.</p><h3>Change password</h3>{!passwordCodeSent ? <><p>For your protection we first email a verification code to {user.email}.</p><button className="btn btn-secondary" onClick={sendPasswordCode}>Email me a verification code</button></> : <form className="portal-form" onSubmit={updatePassword}><label>Verification code<input name="nonce" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,10}" maxLength="10" required /></label><label>Current password<input name="current_password" type="password" autoComplete="current-password" required /></label><label>New password<input name="password" type="password" minLength="12" autoComplete="new-password" required /><small>{passwordRequirements}</small></label><button className="btn btn-primary">Change password</button><button type="button" className="btn btn-secondary" onClick={sendPasswordCode}>Send a new code</button></form>}<hr /><h3>Devices</h3><p>Sign out every other browser or device that is using this account.</p><button className="btn btn-secondary" onClick={signOutOtherDevices}>Sign out other devices</button><hr /><h3>Authenticator app</h3><p>{authenticatorOn ? 'Your authenticator app is on. You will enter a code from it each time you sign in.' : 'Add an authenticator app, such as Google Authenticator or 1Password, so signing in also needs a six-digit code from your phone.'}</p>{mfa.error && <div className="portal-error" role="alert">{mfa.error}</div>}{mfa.message && <div className="portal-success" role="status">{mfa.message}</div>}{mfa.qr && <img src={mfa.qr} alt="Authenticator enrollment QR code" width="220" height="220" />}{!mfa.factorId ? !authenticatorOn && <button className="btn btn-secondary" onClick={beginMfa}>Set up authenticator app</button> : <form className="portal-form" onSubmit={verifyMfa}><label>Six-digit code<input value={mfa.code} onChange={(event) => setMfa((value) => ({ ...value, code: event.target.value.replace(/\D/g, '').slice(0, 6) }))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" required /></label><button className="btn btn-primary">Verify code</button></form>}</section>}
+	</div>;
 }

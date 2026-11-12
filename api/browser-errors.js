@@ -1,24 +1,26 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { incrementWithExpiry } = require('./_lib/redis');
-const { jsonOnly } = require('./_lib/portal-security');
+const { readJsonBody, readJsonValue } = require('./_lib/json-body');
+const { sendPublicError } = require('./_lib/portal-security');
 
 const MAX_REPORT_BYTES = 16 * 1024;
-const CSP_CONTENT_TYPES = new Set(['application/csp-report', 'application/reports+json', 'application/json']);
+const CSP_MEDIA_TYPES = ['application/csp-report', 'application/reports+json', 'application/json'];
 
 const cleanText = (value, maxLength) => typeof value === 'string'
 	? value.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, maxLength)
 	: '';
 
 const normalizeError = (body = {}) => ({
-	message: cleanText(body.message, 500),
-	name: cleanText(body.name, 100),
-	stack: cleanText(body.stack, 4000),
-	url: cleanText(body.url, 500),
-	environment: cleanText(body.environment, 50),
-	context: body.context && typeof body.context === 'object'
+	message: cleanText(body?.message, 500),
+	name: cleanText(body?.name, 100),
+	stack: cleanText(body?.stack, 4000),
+	url: cleanText(body?.url, 500),
+	environment: cleanText(body?.environment, 50),
+	context: body?.context && typeof body.context === 'object'
 		? JSON.stringify(body.context).slice(0, 2000)
 		: '',
-	timestamp: cleanText(body.timestamp, 50),
+	timestamp: cleanText(body?.timestamp, 50),
 });
 
 const getClientKey = (req) => {
@@ -50,65 +52,55 @@ const isSameOrigin = (req) => {
 	return Boolean(requestHost) && origin === `https://${String(requestHost).split(',')[0].trim()}`;
 };
 
-const mediaType = (req) => String(req.headers?.['content-type'] || '').split(';')[0].trim().toLowerCase();
-
-const bodySize = (body) => {
-	if (body === undefined || body === null) return 0;
-	if (typeof body === 'string') return Buffer.byteLength(body);
-	if (Buffer.isBuffer(body)) return body.length;
-	try { return Buffer.byteLength(JSON.stringify(body)); } catch { return Infinity; }
-};
-
-const parseBody = (body) => {
-	if (Buffer.isBuffer(body)) body = body.toString('utf8');
-	if (typeof body === 'string') {
-		try { return JSON.parse(body); } catch { return null; }
-	}
-	return body && typeof body === 'object' ? body : null;
-};
-
 // Accepts both the legacy report-uri format ({ "csp-report": {...} }) and the
-// Reporting API format ([{ type: "csp-violation", body: {...} }]).
+// Reporting API format ([{ type: "csp-violation", body: {...} }]). String bodies
+// (unparsed by an upstream adapter) are parsed here.
 const normalizeCspReports = (rawBody) => {
-	const parsed = parseBody(rawBody);
-	if (!parsed) return [];
+	let parsed = rawBody;
+	if (Buffer.isBuffer(parsed)) parsed = parsed.toString('utf8');
+	if (typeof parsed === 'string') {
+		try { parsed = JSON.parse(parsed); } catch { return []; }
+	}
+	if (!parsed || typeof parsed !== 'object') return [];
 	const entries = Array.isArray(parsed) ? parsed : [parsed];
 	return entries.slice(0, 10).flatMap((entry) => {
 		if (!entry || typeof entry !== 'object') return [];
-		const report = entry['csp-report'] || (entry.type === 'csp-violation' ? entry.body : null) || entry.body || entry;
+		const report = entry['csp-report'] || entry.body || entry;
 		if (!report || typeof report !== 'object') return [];
+		const lineNumber = report.lineNumber ?? report['line-number'];
 		const record = {
 			documentURL: cleanText(report.documentURL || report['document-uri'], 300),
 			effectiveDirective: cleanText(report.effectiveDirective || report['effective-directive'] || report['violated-directive'], 100),
 			blockedURL: cleanText(report.blockedURL || report['blocked-uri'], 300),
 			disposition: cleanText(report.disposition, 20),
 			sourceFile: cleanText(report.sourceFile || report['source-file'], 300),
-			lineNumber: Number.isInteger(report.lineNumber ?? report['line-number']) ? report.lineNumber ?? report['line-number'] : null,
+			lineNumber: Number.isInteger(lineNumber) ? lineNumber : null,
 		};
 		return record.effectiveDirective || record.blockedURL ? [record] : [];
 	});
 };
 
-const enforceReportRateLimit = async (req, res, bucket, limit) => {
+const enforceReportRateLimit = async (req, res, bucket, limit, message) => {
 	const attempts = await incrementWithExpiry(`browser:${bucket}:${getClientKey(req)}`, 60);
 	if (attempts > limit) {
 		res.setHeader('Retry-After', '60');
-		res.status(429).json({ error: 'Too many reports' });
+		res.status(429).json({ error: message });
 		return false;
 	}
 	return true;
 };
 
 async function cspReport(req, res) {
-	// Browsers do not reliably send Origin on violation reports, so no origin check here.
-	if (!CSP_CONTENT_TYPES.has(mediaType(req))) return res.status(415).json({ error: 'Unsupported content type' });
-	const declaredLength = Number(req.headers?.['content-length'] || 0);
-	if (!Number.isFinite(declaredLength) || declaredLength > MAX_REPORT_BYTES || bodySize(req.body) > MAX_REPORT_BYTES) {
-		return res.status(413).json({ error: 'Request too large' });
+	// Browsers do not reliably send Origin on violation reports, so there is no origin check.
+	let body;
+	try {
+		body = await readJsonValue(req, { maxBytes: MAX_REPORT_BYTES, mediaTypes: CSP_MEDIA_TYPES });
+	} catch (error) {
+		return sendPublicError(res, error);
 	}
 	try {
-		if (!(await enforceReportRateLimit(req, res, 'csp', 30))) return undefined;
-		for (const record of normalizeCspReports(req.body)) console.warn('csp_violation', record);
+		if (!(await enforceReportRateLimit(req, res, 'csp', 30, 'Too many reports'))) return undefined;
+		for (const record of normalizeCspReports(body)) console.warn('csp_violation', record);
 		return res.status(204).end();
 	} catch (reportingError) {
 		console.error('csp_report_ingestion_failed', { message: reportingError.message });
@@ -123,19 +115,16 @@ async function browserErrors(req, res) {
 	}
 	if (req.query?.kind === 'csp') return cspReport(req, res);
 
+	// Bounded (16 KB) JSON only; the body is read before the origin check so
+	// oversized or malformed input is rejected without further work.
+	let body;
+	try { body = await readJsonBody(req, MAX_REPORT_BYTES); } catch (error) { return sendPublicError(res, error); }
 	if (!isSameOrigin(req)) return res.status(403).json({ error: 'Forbidden' });
-	try {
-		jsonOnly(req, MAX_REPORT_BYTES);
-	} catch (error) {
-		return res.status(error.statusCode).json({ error: error.publicMessage });
-	}
-	if (bodySize(req.body) > MAX_REPORT_BYTES) return res.status(413).json({ error: 'Request too large' });
-
-	const error = normalizeError(parseBody(req.body) || {});
+	const error = normalizeError(body);
 	if (!error.message) return res.status(400).json({ error: 'Error message is required' });
 
 	try {
-		if (!(await enforceReportRateLimit(req, res, 'error', 20))) return undefined;
+		if (!(await enforceReportRateLimit(req, res, 'error', 20, 'Too many error reports'))) return undefined;
 		console.error('browser_error', error);
 		return res.status(202).json({ accepted: true });
 	} catch (reportingError) {
@@ -144,7 +133,9 @@ async function browserErrors(req, res) {
 	}
 }
 
-module.exports = browserErrors;
+// raw: CSP reports use non-JSON media types, so the handler reads the bounded body itself.
+module.exports = withHttp(browserErrors, { raw: true });
+module.exports.config = { api: { bodyParser: false } };
 module.exports.MAX_REPORT_BYTES = MAX_REPORT_BYTES;
 module.exports.getClientKey = getClientKey;
 module.exports.isSameOrigin = isSameOrigin;

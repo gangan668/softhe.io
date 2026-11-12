@@ -12,6 +12,7 @@ function DialogProbe({
 	withButtons = true,
 	backgroundSelector,
 	modal = true,
+	autoFocus,
 }) {
 	const dialogRef = useRef(null);
 	const initialFocusRef = useRef(null);
@@ -22,6 +23,7 @@ function DialogProbe({
 		initialFocusRef: withInitialFocus ? initialFocusRef : undefined,
 		backgroundSelector,
 		modal,
+		autoFocus,
 	});
 
 	if (!withDialog) return null;
@@ -173,5 +175,39 @@ describe('useDialogFocus', () => {
 		trigger.remove();
 
 		expect(() => unmount()).not.toThrow();
+	});
+
+	it('leaves focus in place without autoFocus and restores it after the user enters the dialog', async () => {
+		const user = userEvent.setup();
+		const onDismiss = vi.fn();
+		const trigger = document.createElement('button');
+		trigger.textContent = 'Page control';
+		document.body.appendChild(trigger);
+		trigger.focus();
+		const { unmount } = render(<DialogProbe modal={false} autoFocus={false} onDismiss={onDismiss} />);
+		expect(trigger).toHaveFocus();
+
+		await user.keyboard('{Escape}');
+		expect(onDismiss).not.toHaveBeenCalled();
+
+		screen.getByRole('button', { name: 'First' }).focus();
+		await user.keyboard('{Escape}');
+		expect(onDismiss).toHaveBeenCalledOnce();
+		unmount();
+		expect(trigger).toHaveFocus();
+		trigger.remove();
+	});
+
+	it('does not move focus on close when the user never entered a non-autofocused dialog', () => {
+		const first = document.createElement('button');
+		const second = document.createElement('button');
+		document.body.append(first, second);
+		first.focus();
+		const { unmount } = render(<DialogProbe modal={false} autoFocus={false} />);
+		second.focus();
+		unmount();
+		expect(second).toHaveFocus();
+		first.remove();
+		second.remove();
 	});
 });

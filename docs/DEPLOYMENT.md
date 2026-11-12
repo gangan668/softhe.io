@@ -4,6 +4,8 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 
 ## Vercel
 
+As verified on 2026-10-07, `softhe.io` is already attached to Vercel project `softhe-io` (`prj_ivs19EGdAuvKZJ6nPd34WRtJ3Kki`). The setup steps below apply to a fresh environment; they are not instructions to repeat DNS cutover on the current site. Set `VITE_PUBLIC_ORIGIN=https://softhe.io` for public production metadata and callbacks. Use an explicitly isolated origin for provider-backed Preview verification.
+
 1. Import `gangan668/softhe.io` into Vercel.
 2. Keep the repository root as the project root. The checked-in `vercel.json` builds `react-app` and exposes `/api/*` functions.
 3. Attach the production domain and set `PUBLIC_SITE_URL` to its HTTPS origin.
@@ -45,8 +47,8 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `RELEASE_FINGERPRINT` | Public, unique release identifier reported by `/api/health` for release binding |
 | `ORDER_FULFILLMENT_WEBHOOK_URL` | HTTPS endpoint that provisions or records paid orders |
 | `ORDER_FULFILLMENT_WEBHOOK_SECRET` | HMAC key shared with the fulfillment endpoint |
-| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile server secret. When set, `/api/contact` and `/api/withdrawal` reject requests without a valid `captchaToken` (HTTP 400); verification is skipped when unset. Required by the build when `VITE_CAPTCHA_ENABLED=true` |
-| `HEALTH_CHECK_TOKEN` | Long random bearer token. `GET /api/health` without it returns only `{ status }`; with `Authorization: Bearer <token>` it returns release identity and per-integration checks. Also store it as the GitHub Actions secret `HEALTH_CHECK_TOKEN` for the release gate, production smoke, and monitoring workflows |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile server secret. When set, `/api/contact` and `/api/withdrawal` reject requests without a valid `captchaToken` (HTTP 400, or 503 if Cloudflare cannot be reached); verification is skipped when unset. Required by the build when `VITE_CAPTCHA_ENABLED=true` |
+| `HEALTH_CHECK_TOKEN` | Long random bearer token. `GET /api/health` without it returns only `{ status }` (probes cached for 60 seconds); with `Authorization: Bearer <token>` it returns release identity and per-integration checks from fresh probes, and a wrong token returns 401. Also store it as the GitHub Actions secret `HEALTH_CHECK_TOKEN` for the release gate, production smoke, browser smoke, and monitoring workflows |
 
 ## Required Client Variables
 
@@ -88,6 +90,19 @@ npm run budget
 npm run e2e:all
 ```
 
+After the HTTP smoke, run `npm run smoke:browser` against the deployed origin with
+`PRODUCTION_BASE_URL`, `EXPECTED_RELEASE_SOURCE_COMMIT`, and
+`EXPECTED_RELEASE_FINGERPRINT` set for the exact candidate. This reads 20 routes at
+390px and 1440px, checks metadata before and after hydration, protects anonymous
+account/staff routes, and rejects static-404 CSP style violations, broken images,
+page exceptions, and horizontal overflow. It does not submit forms or test provider
+delivery. `EXPECTED_PUBLIC_ORIGIN` defaults to `https://softhe.io`; use the intended
+isolated canonical origin when qualifying an isolated Preview. Protected candidates
+can receive a short-lived connector share URL through `SMOKE_VERCEL_SHARE_URL` in the
+environment. Never print or save that URL in evidence. `SMOKE_BROWSER_EVIDENCE_FILE`
+optionally saves sanitized route observations. The scheduled Production Smoke
+workflow now runs this browser gate after its HTTP checks.
+
 Then verify all of the following in a deployed preview environment before moving the domain:
 
 - route-specific title, description, canonical, Open Graph image, sitemap, and a true HTTP 404 for an unknown path;
@@ -122,7 +137,7 @@ The GitHub Pages workflow is manual-only and retained as a static, commerce-disa
 
 ## Monitoring release gate
 
-- Run the scheduled production smoke against `/api/health`; alert on any non-200 response or failed readiness check. Configure the GitHub Actions secret `HEALTH_CHECK_TOKEN` (same value as the Vercel variable): without it the smoke, monitoring, and release-gate jobs only verify the public `status` and log that release commit, fingerprint, and per-integration checks were skipped.
+- Run the scheduled production smoke against `/api/health`; alert on any non-200 response or failed readiness check. Configure the GitHub Actions secret `HEALTH_CHECK_TOKEN` (same value as the Vercel variable): without it the smoke, monitoring, and release-gate jobs only verify the public `status` and log a warning that release commit, fingerprint, and per-integration checks were skipped.
 - Set the GitHub Actions variables `REQUIRE_APP_MARKER=true`, `REQUIRE_SECURITY_HEADERS=true`, and `REQUIRE_SERVERLESS_API=true` when the smoke target is a Vercel Preview or after the production cutover. Their temporary `false` defaults only keep the legacy GitHub Pages smoke useful before migration.
 - Set `EXPECTED_RELEASE_SOURCE_COMMIT` and `EXPECTED_RELEASE_FINGERPRINT` to the values
   reported by the approved deployment. The scheduled smoke then detects a project or production

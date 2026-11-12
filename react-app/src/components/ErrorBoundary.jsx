@@ -54,7 +54,7 @@ class ErrorBoundary extends React.Component {
 				<div className="error-boundary">
 					<div className="error-boundary-container">
 						<div className="error-icon">
-							<i className="fas fa-exclamation-triangle"></i>
+							<i className="fas fa-exclamation-triangle" aria-hidden="true"></i>
 						</div>
 
 						<h1 className="error-title">Oops! Something went wrong</h1>
@@ -68,21 +68,21 @@ class ErrorBoundary extends React.Component {
 								className="btn btn-primary"
 								onClick={this.handleReset}
 							>
-								<i className="fas fa-redo"></i> Try Again
+								<i className="fas fa-redo" aria-hidden="true"></i> Try Again
 							</button>
 
 							<button
 								className="btn btn-secondary"
 								onClick={this.handleReload}
 							>
-								<i className="fas fa-sync"></i> Reload Page
+								<i className="fas fa-sync" aria-hidden="true"></i> Reload Page
 							</button>
 
 							<a
 								href="/"
 								className="btn btn-secondary"
 							>
-								<i className="fas fa-home"></i> Go Home
+								<i className="fas fa-home" aria-hidden="true"></i> Go Home
 							</a>
 						</div>
 
@@ -107,7 +107,7 @@ class ErrorBoundary extends React.Component {
 						<div className="error-support">
 							<p>If the problem persists, please contact our support team:</p>
 							<a href={`mailto:${siteConfig.supportEmail}`} className="support-link">
-								<i className="fas fa-envelope"></i> {siteConfig.supportEmail}
+								<i className="fas fa-envelope" aria-hidden="true"></i> {siteConfig.supportEmail}
 							</a>
 						</div>
 					</div>

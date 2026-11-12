@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import crypto from 'node:crypto';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PRODUCTS as clientProducts } from '../data/products';
 
 const require = createRequire(import.meta.url);
@@ -9,6 +9,13 @@ const { PRODUCTS: serverProducts, createStripeForm, getDiscountRate, getIdempote
 const { verifyStripeSignature } = require('../../../api/stripe-webhook.js');
 
 describe('server checkout validation', () => {
+	it('rejects malformed Stripe signature headers without throwing', () => {
+		const payload = Buffer.from('{}');
+		const timestamp = Math.floor(Date.now() / 1000);
+		for (const header of [[], {}, `t=${timestamp},v1=${'é'.repeat(64)}`, `t=${timestamp},v1=`]) {
+			expect(verifyStripeSignature(payload, header, 'secret')).toBe(false);
+		}
+	});
 	it('fails closed at the API boundary when commerce is disabled', async () => {
 		const previous = process.env.COMMERCE_ENABLED;
 		process.env.COMMERCE_ENABLED = 'false';
@@ -36,6 +43,9 @@ describe('server checkout validation', () => {
 
 	it('rejects unknown products and invalid quantities', () => {
 		expect(() => normalizeItems([{ id: 'made-up', quantity: 1 }])).toThrow('Unknown product');
+		for (const id of ['__proto__', 'constructor', 'toString', ['windows-10']]) {
+			expect(() => normalizeItems([{ id, quantity: 1 }])).toThrow('Unknown product');
+		}
 		expect(() => normalizeItems([{ id: 'windows-10', quantity: 0 }])).toThrow('Invalid quantity');
 	});
 
@@ -53,7 +63,7 @@ describe('server checkout validation', () => {
 			{ id: 'windows-10', quantity: 1 },
 			{ id: 'bios-optimization', quantity: 1 },
 		]);
-		const { form, discountRate } = createStripeForm(items, 'https://softhe.io');
+		const { form, discountRate } = createStripeForm(items, 'https://softhe.io', undefined, undefined, { id: 'customer-id', email: 'customer@example.test' });
 
 		expect(getDiscountRate(2)).toBe(0.05);
 		expect(discountRate).toBe(0.05);
@@ -64,12 +74,13 @@ describe('server checkout validation', () => {
 	});
 
 	it('offers promotion codes only when no bundle discount applies', () => {
-		const single = createStripeForm(normalizeItems([{ id: 'windows-10', quantity: 2 }]), 'https://softhe.io');
+		const customer = { id: 'customer-id', email: 'customer@example.test' };
+		const single = createStripeForm(normalizeItems([{ id: 'windows-10', quantity: 2 }]), 'https://softhe.io', undefined, undefined, customer);
 		expect(single.discountRate).toBe(0);
 		expect(single.form.get('allow_promotion_codes')).toBe('true');
 
 		for (const ids of [['windows-10', 'bios-optimization'], ['windows-10', 'windows-11', 'bios-optimization']]) {
-			const bundle = createStripeForm(normalizeItems(ids.map((id) => ({ id, quantity: 1 }))), 'https://softhe.io');
+			const bundle = createStripeForm(normalizeItems(ids.map((id) => ({ id, quantity: 1 }))), 'https://softhe.io', undefined, undefined, customer);
 			expect(bundle.discountRate).toBeGreaterThan(0);
 			expect(bundle.form.has('allow_promotion_codes')).toBe(false);
 		}
@@ -117,5 +128,47 @@ describe('Stripe webhook verification', () => {
 		expect(verifyStripeSignature(payload, `t=${timestamp},v1=${signature}`, secret)).toBe(true);
 		expect(verifyStripeSignature(payload, `t=${timestamp},v1=${'0'.repeat(64)}`, secret)).toBe(false);
 		expect(verifyStripeSignature(payload, `t=not-a-number,v1=${signature}`, secret)).toBe(false);
+	});
+});
+
+describe('account-only checkout', () => {
+	const env = {
+		COMMERCE_ENABLED: 'true', STRIPE_SECRET_KEY: 'sk_test_fixture', LEGAL_NAME: 'Fixture Operator', LEGAL_ADDRESS: 'Testgatan 1, Stockholm',
+		BUSINESS_REGISTRATION_ID: '000000-0000', SUPPORT_EMAIL: 'support@softhe.io', VAT_STATUS: 'not-registered', PUBLIC_SITE_URL: 'https://softhe.io',
+		SUPABASE_URL: 'https://project.supabase.co', SUPABASE_PUBLISHABLE_KEY: 'public-key',
+	};
+	const request = (headers = {}) => ({
+		method: 'POST',
+		headers: { 'content-type': 'application/json', 'idempotency-key': '12345678901234567890', ...headers },
+		body: { items: [{ id: 'windows-10', quantity: 1 }], legalAcceptance: { termsAccepted: true, earlyPerformanceRequested: true, withdrawalAcknowledged: true } },
+	});
+	const response = () => ({ statusCode: null, payload: null, setHeader() {}, status(code) { this.statusCode = code; return this; }, json(payload) { this.payload = payload; return this; } });
+	afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
+
+	it('refuses anonymous checkout before contacting Stripe', async () => {
+		for (const [name, value] of Object.entries(env)) vi.stubEnv(name, value);
+		const outbound = vi.fn(); vi.stubGlobal('fetch', outbound);
+		const res = response();
+		await checkoutApi(request(), res);
+		expect(res.statusCode).toBe(401);
+		expect(outbound).not.toHaveBeenCalled();
+	});
+	it('refuses accounts whose email is not confirmed', async () => {
+		for (const [name, value] of Object.entries(env)) vi.stubEnv(name, value);
+		const outbound = vi.fn(async (url) => url.endsWith('/auth/v1/user')
+			? { ok: true, status: 200, json: async () => ({ id: 'customer-id', email: 'customer@example.test', email_confirmed_at: null }) }
+			: { ok: true, status: 200, json: async () => [{ account_status: 'active' }] });
+		vi.stubGlobal('fetch', outbound);
+		const res = response();
+		await checkoutApi(request({ authorization: 'Bearer token' }), res);
+		expect(res.statusCode).toBe(403);
+		expect(res.payload).toEqual({ error: 'Verify your email before placing an order' });
+		expect(outbound.mock.calls.some(([url]) => new URL(String(url)).hostname === 'api.stripe.com')).toBe(false);
+	});
+	it('always binds the Stripe session to the signed-in customer', () => {
+		const { form } = createStripeForm([{ id: 'windows-10', quantity: 1 }], 'https://softhe.io', undefined, undefined, { id: 'customer-id', email: 'customer@example.test' });
+		expect(form.get('metadata[portal_user_id]')).toBe('customer-id');
+		expect(form.get('customer_email')).toBe('customer@example.test');
+		expect(() => createStripeForm([{ id: 'windows-10', quantity: 1 }], 'https://softhe.io')).toThrow('Checkout requires a signed-in customer');
 	});
 });

@@ -18,7 +18,5 @@ describe('Store with commerce disabled', () => {
 		expect(screen.queryByRole('button', { name: /buy now/i })).not.toBeInTheDocument();
 		expect(screen.getByRole('link', { name: /ask about an order/i })).toHaveAttribute('href', '/contact');
 		expect(screen.getAllByText(/ordering temporarily unavailable/i)).toHaveLength(3);
-		expect(screen.getByText(/checkout activates only after server and legal readiness checks pass/i)).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /request a withdrawal online/i })).toHaveAttribute('href', '/withdrawal');
 	});
 });

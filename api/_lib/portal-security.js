@@ -2,11 +2,16 @@ const crypto = require('crypto');
 const { incrementWithExpiry, claimKey, deleteKey } = require('./redis');
 
 const jsonOnly = (req, maxBytes = 16384) => {
-	if (!String(req.headers?.['content-type'] || '').toLowerCase().startsWith('application/json')) {
+	if (String(req.headers?.['content-type'] || '').split(';')[0].trim().toLowerCase() !== 'application/json') {
 		throw Object.assign(new Error('JSON content type required'), { statusCode: 415, publicMessage: 'JSON content type required' });
 	}
 	const length = Number(req.headers?.['content-length'] || 0);
-	if (!Number.isFinite(length) || length > maxBytes) {
+	if (!Number.isInteger(length) || length < 0 || length > maxBytes) {
+		throw Object.assign(new Error('Request too large'), { statusCode: 413, publicMessage: 'Request too large' });
+	}
+	const serializedBody = req.body === undefined ? '' : (Buffer.isBuffer(req.body) || typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+	const actualLength = Buffer.byteLength(serializedBody, 'utf8');
+	if (actualLength > maxBytes) {
 		throw Object.assign(new Error('Request too large'), { statusCode: 413, publicMessage: 'Request too large' });
 	}
 };

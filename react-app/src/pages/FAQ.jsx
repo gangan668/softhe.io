@@ -1,6 +1,7 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
-import SEO from "../components/SEO";
-import { absoluteUrl, siteConfig } from "../config/site";
+import { siteConfig } from "../config/site";
+import { benchmarkPublication, benchmarkResults } from "../data/benchmark";
 import { trackEvent } from "../utils/analytics";
 import "./FAQ.css";
 
@@ -159,10 +160,10 @@ function FAQ() {
 						<p>Results depend on the hardware, drivers, game settings, and starting configuration. The current preliminary sample compares two configurations of one PC:</p>
 						<ul>
 							<li>
-								<strong>CS2 average FPS:</strong> 658 to 826 in the two-run medians
+								<strong>CS2 average FPS:</strong> {benchmarkResults.averageFps.stock} to {benchmarkResults.averageFps.optimized} in the two-run medians
 							</li>
 							<li>
-								<strong>CS2 1% low:</strong> 225 to 285 FPS in the two-run medians
+								<strong>CS2 P1 FPS:</strong> {benchmarkResults.onePercentLowFps.stock} to {benchmarkResults.onePercentLowFps.optimized} FPS in the two-run medians
 							</li>
 							<li>
 								<strong>Idle processes:</strong> 111 to 31 in the Task Manager sample
@@ -172,7 +173,7 @@ function FAQ() {
 							</li>
 						</ul>
 						<p>
-							Windows edition, memory settings, and GPU driver changed. Raw run captures are not yet published. The comparison cannot isolate the effect of one product or predict your result.
+							Windows edition, memory settings, and GPU driver changed. All {benchmarkPublication.captureCountText} raw CapFrameX captures are published on the <Link to="/performance">benchmark page</Link>. The comparison cannot isolate the effect of one product or predict your result.
 						</p>
 					</div>
 				),
@@ -184,7 +185,7 @@ function FAQ() {
 						<p>Compatibility depends on your motherboard, CPU, GPU, firmware, drivers, and Windows licence. Send your hardware list and current Windows edition before ordering. Support can check the fit of the selected product.</p>
 						<p>
 							If you have specific concerns about compatibility,{" "}
-							<a href="/contact">contact us</a> before purchasing and we'll
+							<Link to="/contact">contact us</Link> before purchasing and we'll
 							verify compatibility with your system.
 						</p>
 					</div>
@@ -212,7 +213,7 @@ function FAQ() {
 					<div>
 						<p>The Windows 10 build is for an existing setup that still needs Windows 10. The Windows 11 build is for newer hardware or software that needs Windows 11. Check your device requirements and valid Windows licence before choosing.</p>
 						<p>
-							Not sure which to choose? <a href="/contact">Contact us</a> and
+							Not sure which to choose? <Link to="/contact">Contact us</Link> and
 							we'll recommend based on your hardware and games.
 						</p>
 					</div>
@@ -269,7 +270,7 @@ function FAQ() {
 						</ul>
 						<p>
 							For LAN centers, PC cafes, or business use, please{" "}
-							<a href="/contact">contact us</a> for commercial licensing options.
+							<Link to="/contact">contact us</Link> for commercial licensing options.
 						</p>
 					</div>
 				),
@@ -301,7 +302,7 @@ function FAQ() {
 							<li>Read the Terms of Service and withdrawal notice before checkout</li>
 						</ul>
 						<p>
-							To make a withdrawal request, use the <a href="/withdrawal">online form</a> or email{" "}
+							To make a withdrawal request, use the <Link to="/withdrawal">online form</Link> or email{" "}
 							<a href={`mailto:${siteConfig.supportEmail}`}>{siteConfig.supportEmail}</a> with your
 							order number. Support will confirm whether the request qualifies and what happens next.
 						</p>
@@ -340,10 +341,10 @@ function FAQ() {
 						<p>The checkout applies the current bundle discounts:</p>
 						<ul>
 							<li>
-								<strong>Two products:</strong> 5% off the bundle
+								<strong>Two different products:</strong> 5% off the bundle
 							</li>
 							<li>
-								<strong>Three products:</strong> 10% off the bundle
+								<strong>All three products:</strong> 10% off the bundle
 							</li>
 							<li>
 								<strong>Other offers:</strong> Only discounts shown in the store or checkout apply
@@ -438,7 +439,7 @@ function FAQ() {
 					<div>
 						<p>Contact us with your hardware and the change you need. We will confirm whether the work is available and provide its scope and price before you order.</p>
 						<p>
-							<a href="/contact">Contact us</a> to discuss your requirements and
+							<Link to="/contact">Contact us</Link> to discuss your requirements and
 							get a custom quote.
 						</p>
 					</div>
@@ -490,7 +491,7 @@ function FAQ() {
 	const handleSearch = (value) => {
 		setSearchTerm(value.toLowerCase());
 		if (value.trim().length >= 3) {
-			trackEvent("faq_search", { search_term: value.trim().slice(0, 80) });
+			trackEvent("faq_search", { query_length: Math.min(value.trim().length, 200), category: activeCategory });
 		}
 		if (value) {
 			// Auto-expand all matching items
@@ -543,12 +544,6 @@ function FAQ() {
 
 	return (
 		<div className="faq-page">
-			<SEO
-				title="Windows and BIOS tuning FAQ | Softhe.io"
-				description="Answers about Softhe.io Windows builds, BIOS tuning, compatibility, benchmark limits, orders, and support."
-				keywords="PC optimization FAQ, Windows ISO questions, BIOS tuning help, gaming optimization FAQ"
-				canonicalUrl={absoluteUrl('/faq')}
-			/>
 
 			<section className="page-header">
 				<div className="container">
@@ -573,7 +568,7 @@ function FAQ() {
 									setActiveItems([]);
 								}}
 							>
-								<i className={category.icon}></i> {category.label}
+								<i className={category.icon} aria-hidden="true"></i> {category.label}
 							</button>
 						))}
 					</div>
@@ -606,6 +601,7 @@ function FAQ() {
 											categories.find((c) => c.id === category)?.icon ||
 											"fas fa-question-circle"
 										}
+										aria-hidden="true"
 									></i>{" "}
 									{category.charAt(0).toUpperCase() + category.slice(1)}{" "}
 									Questions
@@ -629,7 +625,7 @@ function FAQ() {
 												onClick={() => toggleItem(category, originalIndex)}
 											>
 												<span>{item.question}</span>
-												<i className="fas fa-chevron-down"></i>
+												<i className="fas fa-chevron-down" aria-hidden="true"></i>
 											</button>
 											<div id={`faq-answer-${itemId}`} className="faq-answer" hidden={!isActive}>
 												{typeof item.answer === "string" ? (
@@ -651,11 +647,11 @@ function FAQ() {
 							(category) => filterItems(category, faqData[category]).length === 0
 						) && (
 							<div className="no-results">
-								<i className="fas fa-search"></i>
+								<i className="fas fa-search" aria-hidden="true"></i>
 								<h3>No results found</h3>
 								<p>
 									Try different keywords or{" "}
-									<a href="/contact">contact our support team</a>
+									<Link to="/contact">contact our support team</Link>
 								</p>
 							</div>
 						)}
@@ -666,16 +662,16 @@ function FAQ() {
 								<h2>Need a specific answer?</h2>
 								<p>Send your hardware details and question to support.</p>
 							<div className="faq-cta-buttons">
-								<a href="/contact" className="btn btn-primary">
-									<i className="fas fa-envelope"></i> Contact Support
-								</a>
+								<Link to="/contact" className="btn btn-primary">
+									<i className="fas fa-envelope" aria-hidden="true"></i> Contact Support
+								</Link>
 								<a
 									href="https://discord.com/users/softhecs"
 									target="_blank"
 									rel="noopener noreferrer"
 									className="btn btn-secondary"
 								>
-									<i className="fab fa-discord"></i> Message on Discord
+									<i className="fab fa-discord" aria-hidden="true"></i> Message on Discord
 								</a>
 							</div>
 						</div>

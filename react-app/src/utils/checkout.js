@@ -5,7 +5,6 @@ const RETRY_KEY_TTL_MS = 23 * 60 * 60 * 1000;
 const MAX_PENDING_CHECKOUTS = 100;
 
 const checkoutScope = async (accessToken) => {
-	if (!accessToken) return 'anonymous';
 	const bytes = new TextEncoder().encode(accessToken);
 	const digest = await crypto.subtle.digest('SHA-256', bytes);
 	return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
@@ -27,6 +26,7 @@ export const isStripeCheckoutUrl = (value) => {
 };
 
 export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = fetch, accessToken = null) => {
+	if (!accessToken) throw new Error('Sign in to your account before checking out.');
 	const items = cart.map(({ id, quantity }) => ({ id, quantity })).sort((left, right) => left.id.localeCompare(right.id));
 	const requestKey = JSON.stringify({ items, legalAcceptance, scope: await checkoutScope(accessToken) });
 	const now = Date.now();
@@ -41,7 +41,7 @@ export const createCheckoutSession = async (cart, legalAcceptance, fetchImpl = f
 	pendingCheckoutKeys.set(requestKey, entry);
 	const response = await apiFetch('/api/create-checkout-session', {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json', 'Idempotency-Key': entry.idempotencyKey, ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}) },
+		headers: { 'Content-Type': 'application/json', 'Idempotency-Key': entry.idempotencyKey, Authorization: `Bearer ${accessToken}` },
 		body: JSON.stringify({
 			items,
 			legalAcceptance,

@@ -1,8 +1,7 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Captcha from '../components/Captcha';
-import SEO from '../components/SEO';
 import useCaptcha from '../components/useCaptcha';
-import { absoluteUrl, siteConfig } from '../config/site';
+import { siteConfig } from '../config/site';
 import { CAPTCHA_REQUIRED_MESSAGE } from '../utils/captcha';
 import { getUserErrorMessage } from '../utils/userErrors';
 import { submitWithdrawal } from '../utils/withdrawal';
@@ -26,8 +25,7 @@ function Withdrawal() {
 	});
 	const [status, setStatus] = useState(null);
 	const [submitting, setSubmitting] = useState(false);
-	const captchaRef = useRef(null);
-	const captcha = useCaptcha(captchaRef);
+	const captcha = useCaptcha();
 
 	const toggleItem = (itemId) => {
 		setForm((current) => {
@@ -54,7 +52,7 @@ function Withdrawal() {
 				type: 'success',
 				// The server answers identically whether or not the order matched,
 				// so never claim that an email was definitely sent.
-				message: `If the order reference and email match our records, you'll receive a confirmation email.${result.requestId ? ` Your request ID is ${result.requestId}.` : ''}`,
+				message: `If the order reference and email match our records, you'll receive a confirmation email.${result?.requestId ? ` Your request ID is ${result.requestId}.` : ''}`,
 			});
 			setForm((current) => ({ ...current, comments: '', website: '' }));
 		} catch (error) {
@@ -67,11 +65,6 @@ function Withdrawal() {
 
 	return (
 		<>
-			<SEO
-				title="Withdraw from an Order | Softhe.io"
-				description="Submit and receive confirmation of a withdrawal request for an eligible Softhe.io distance contract."
-				canonicalUrl={absoluteUrl('/withdrawal')}
-			/>
 			<div className="legal-page withdrawal-page">
 				<section className="page-header">
 					<div className="container">
@@ -142,7 +135,7 @@ function Withdrawal() {
 								onChange={(event) => setForm({ ...form, comments: event.target.value })}
 								maxLength="2000"
 							/>
-							<Captcha ref={captchaRef} config={captcha.config} onToken={captcha.onToken} />
+							<Captcha captcha={captcha} />
 							<button
 								className="btn btn-primary"
 								type="submit"

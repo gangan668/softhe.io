@@ -1,0 +1,363 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\react-app\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "e2e/portal.spec.js",
+      "--grep",
+      "layouts preserve",
+      "--reporter=json"
+    ],
+    "configFile": "C:\\Users\\Administrator\\.codex\\worktrees\\9aee\\softhe.io-main\\react-app\\playwright.config.js",
+    "rootDir": "C:/Users/Administrator/.codex/worktrees/9aee/softhe.io-main/react-app/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 4
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/Administrator/.codex/worktrees/9aee/softhe.io-main/react-app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "desktop-chromium",
+        "name": "desktop-chromium",
+        "testDir": "C:/Users/Administrator/.codex/worktrees/9aee/softhe.io-main/react-app/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      },
+      {
+        "outputDir": "C:/Users/Administrator/.codex/worktrees/9aee/softhe.io-main/react-app/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 4
+        },
+        "id": "mobile-chromium",
+        "name": "mobile-chromium",
+        "testDir": "C:/Users/Administrator/.codex/worktrees/9aee/softhe.io-main/react-app/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 12,
+    "webServer": {
+      "command": "npm run preview -- --host 127.0.0.1 --port 57600",
+      "url": "http://127.0.0.1:57600",
+      "reuseExistingServer": false,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "portal.spec.js",
+      "file": "portal.spec.js",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "authenticated account layouts preserve profile and ticket controls at all audit widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4309,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T20:46:50.607Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "account-320.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-account-320.png"
+                    },
+                    {
+                      "name": "account-390.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-account-390.png"
+                    },
+                    {
+                      "name": "account-768.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-account-768.png"
+                    },
+                    {
+                      "name": "account-1280.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-account-1280.png"
+                    },
+                    {
+                      "name": "account-1440.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-account-1440.png"
+                    },
+                    {
+                      "name": "authenticated-account-layouts.json",
+                      "contentType": "application/json",
+                      "path": "portal-responsive/desktop-chromium-authenticated-account-layouts.json"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a59c075e2277509753eb-f611e1fb1a12fcc499e7",
+          "file": "portal.spec.js",
+          "line": 110,
+          "column": 1
+        },
+        {
+          "title": "verified staff layouts preserve queue, orders, status and reply controls at all audit widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop-chromium",
+              "projectName": "desktop-chromium",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 1,
+                  "status": "passed",
+                  "duration": 4613,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T20:46:50.623Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "admin-320.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-admin-320.png"
+                    },
+                    {
+                      "name": "admin-390.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-admin-390.png"
+                    },
+                    {
+                      "name": "admin-768.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-admin-768.png"
+                    },
+                    {
+                      "name": "admin-1280.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-admin-1280.png"
+                    },
+                    {
+                      "name": "admin-1440.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/desktop-chromium-admin-1440.png"
+                    },
+                    {
+                      "name": "authenticated-admin-layouts.json",
+                      "contentType": "application/json",
+                      "path": "portal-responsive/desktop-chromium-authenticated-admin-layouts.json"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a59c075e2277509753eb-9e26d342bfbace1a9b62",
+          "file": "portal.spec.js",
+          "line": 130,
+          "column": 1
+        },
+        {
+          "title": "authenticated account layouts preserve profile and ticket controls at all audit widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 2,
+                  "status": "passed",
+                  "duration": 7639,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T20:46:50.631Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "account-320.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-account-320.png"
+                    },
+                    {
+                      "name": "account-390.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-account-390.png"
+                    },
+                    {
+                      "name": "account-768.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-account-768.png"
+                    },
+                    {
+                      "name": "account-1280.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-account-1280.png"
+                    },
+                    {
+                      "name": "account-1440.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-account-1440.png"
+                    },
+                    {
+                      "name": "authenticated-account-layouts.json",
+                      "contentType": "application/json",
+                      "path": "portal-responsive/mobile-chromium-authenticated-account-layouts.json"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a59c075e2277509753eb-104a0d33e56d5c752e08",
+          "file": "portal.spec.js",
+          "line": 110,
+          "column": 1
+        },
+        {
+          "title": "verified staff layouts preserve queue, orders, status and reply controls at all audit widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "mobile-chromium",
+              "projectName": "mobile-chromium",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 3,
+                  "status": "passed",
+                  "duration": 8093,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-07T20:46:50.617Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "admin-320.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-admin-320.png"
+                    },
+                    {
+                      "name": "admin-390.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-admin-390.png"
+                    },
+                    {
+                      "name": "admin-768.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-admin-768.png"
+                    },
+                    {
+                      "name": "admin-1280.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-admin-1280.png"
+                    },
+                    {
+                      "name": "admin-1440.png",
+                      "contentType": "image/png",
+                      "path": "portal-responsive/mobile-chromium-admin-1440.png"
+                    },
+                    {
+                      "name": "authenticated-admin-layouts.json",
+                      "contentType": "application/json",
+                      "path": "portal-responsive/mobile-chromium-authenticated-admin-layouts.json"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "a59c075e2277509753eb-8bfbd0696404c1940b07",
+          "file": "portal.spec.js",
+          "line": 130,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-07T20:46:49.994Z",
+    "duration": 9517.117,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

@@ -1,19 +1,22 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import Cart from './components/Cart';
 import CookieConsent from './components/CookieConsent';
 import ErrorBoundary from './components/ErrorBoundary';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
+import RouteMetadata from './components/RouteMetadata';
+import WebAnalytics from './components/WebAnalytics';
 import { CartProvider } from './context/CartProvider';
 import { AuthProvider } from './context/AuthProvider';
 import ProtectedRoute from './components/ProtectedRoute';
 import { trackPageView } from './utils/analytics';
 import { initMonitoring } from './utils/monitoring';
 import { getAuthCallbackError } from './utils/authCallback';
+import './icons.css';
 import './App.css';
 
-import Home from './pages/Home';
+const Home = lazy(() => import('./pages/Home'));
 const Services = lazy(() => import('./pages/Services'));
 const Store = lazy(() => import('./pages/Store'));
 const Performance = lazy(() => import('./pages/Performance'));
@@ -70,6 +73,8 @@ function PageLoader() {
 
 function App() {
 	const [isCartOpen, setIsCartOpen] = useState(false);
+	// Stable so the cart's focus-management effect does not re-run on unrelated renders.
+	const closeCart = useCallback(() => setIsCartOpen(false), []);
 	useEffect(() => initMonitoring(), []);
 
 	return (
@@ -79,6 +84,8 @@ function App() {
 				<CartProvider>
 					<AuthCallbackErrorRedirect />
 					<RouteTracker />
+					<RouteMetadata />
+					<WebAnalytics />
 					<div className="App">
 						<a className="skip-link" href="#main-content">Skip to main content</a>
 						<Navbar onCartClick={() => setIsCartOpen((open) => !open)} />
@@ -92,7 +99,7 @@ function App() {
 									<Route path="/performance" element={<Performance />} />
 									<Route path="/contact" element={<Contact />} />
 									<Route path="/faq" element={<FAQ />} />
-									<Route path="/checkout" element={<Checkout />} />
+									<Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
 									<Route path="/privacy-policy" element={<PrivacyPolicy />} />
 									<Route path="/cookie-policy" element={<CookiePolicy />} />
 									<Route path="/terms" element={<Terms />} />
@@ -111,7 +118,7 @@ function App() {
 							</ErrorBoundary>
 						</main>
 						<Footer />
-						<Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+						<Cart isOpen={isCartOpen} onClose={closeCart} />
 					</div>
 					<CookieConsent />
 				</CartProvider>

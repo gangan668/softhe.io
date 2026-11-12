@@ -1,56 +1,57 @@
-const PENDING = {
-	hardware: 'Hardware details pending publication',
-	software: 'BIOS, driver, and Windows versions pending publication',
-	scenario: 'Game settings and test procedure pending publication',
-	captureDate: 'Capture date pending publication',
-	summaryMethod: 'Method pending publication',
+import evidence from '../../../docs/benchmark-evidence.json' with { type: 'json' };
+
+export { benchmarkPublication } from './benchmarkPublication.js';
+
+export const benchmarkMethodology = {
+  hardware: evidence.hardware,
+  operatingSystem: evidence.operatingSystem,
+  bios: evidence.bios,
+  drivers: evidence.drivers,
+  scenario: `${evidence.scenario} ${evidence.warmupProcedure}`,
+  graphicsSettings: evidence.graphicsSettings,
+  captureDate: evidence.captureDate,
+  // validate-benchmark-evidence requires equal run counts for both profiles.
+  runCount: evidence.stock.runs.length,
+  captureSeconds: evidence.captureSeconds,
+  summaryMethod: evidence.summaryMethod,
+  gameVersion: evidence.gameVersion,
 };
 
-const parseRunCount = (value) => {
-	const runCount = Number.parseInt(value || '', 10);
-	return Number.isFinite(runCount) ? runCount : null;
+const { stock, optimized } = evidence.reportedMedians;
+// Round half away from zero so equal-sized gains and reductions display symmetrically.
+export const percentChange = (from, to) => {
+  const change = ((to - from) / from) * 100;
+  return Math.sign(change) * Math.round(Math.abs(change));
+};
+const frameTimeMs = (averageFps) => 1000 / averageFps;
+
+export const formatPercentChange = (change) => `${change > 0 ? '+' : ''}${change}%`;
+
+// Display values derived from the published medians so page copy cannot drift from the evidence.
+export const benchmarkResults = {
+  averageFps: {
+    stock: Math.round(stock.averageFps),
+    optimized: Math.round(optimized.averageFps),
+    change: percentChange(stock.averageFps, optimized.averageFps),
+  },
+  onePercentLowFps: {
+    stock: Math.round(stock.onePercentLowFps),
+    optimized: Math.round(optimized.onePercentLowFps),
+    change: percentChange(stock.onePercentLowFps, optimized.onePercentLowFps),
+  },
+  frameTimeMs: {
+    stock: frameTimeMs(stock.averageFps).toFixed(2),
+    optimized: frameTimeMs(optimized.averageFps).toFixed(2),
+    change: percentChange(frameTimeMs(stock.averageFps), frameTimeMs(optimized.averageFps)),
+  },
 };
 
-/**
- * Builds the benchmark methodology from VITE_BENCHMARK_* values and reports
- * which pieces of evidence are still unpublished. Never invents values: any
- * unset field keeps a "pending publication" placeholder and is listed in `missing`.
- */
-export function buildBenchmarkEvidence(env = {}) {
-	const runCount = parseRunCount(env.VITE_BENCHMARK_RUN_COUNT);
-	const summaryMethod = env.VITE_BENCHMARK_SUMMARY_METHOD || '';
+// Idle snapshots are separate from the CapFrameX captures and are not in the evidence manifest.
+const idle = { processes: { stock: 111, optimized: 31 }, memoryGb: { stock: 2.5, optimized: 0.8 } };
+export const idleOverhead = Object.fromEntries(Object.entries(idle).map(([metric, values]) => [
+  metric,
+  { ...values, change: percentChange(values.stock, values.optimized) },
+]));
 
-	const methodology = {
-		hardware: env.VITE_BENCHMARK_HARDWARE || PENDING.hardware,
-		software: env.VITE_BENCHMARK_SOFTWARE || PENDING.software,
-		scenario: env.VITE_BENCHMARK_SCENARIO || PENDING.scenario,
-		captureDate: env.VITE_BENCHMARK_CAPTURE_DATE || PENDING.captureDate,
-		runCount,
-		summaryMethod: summaryMethod || PENDING.summaryMethod,
-	};
-
-	const checks = [
-		{ key: 'hardware', label: 'Test hardware (CPU, GPU, motherboard, memory)', published: Boolean(env.VITE_BENCHMARK_HARDWARE) },
-		{ key: 'software', label: 'BIOS, driver, and Windows versions', published: Boolean(env.VITE_BENCHMARK_SOFTWARE) },
-		{ key: 'scenario', label: 'Game settings and test procedure', published: Boolean(env.VITE_BENCHMARK_SCENARIO) },
-		{ key: 'captureDate', label: 'Capture date', published: Boolean(env.VITE_BENCHMARK_CAPTURE_DATE) },
-		{ key: 'runCount', label: 'Number of repeated runs (at least two per configuration)', published: runCount !== null && runCount >= 2 },
-		{ key: 'summaryMethod', label: 'Summary method (median of repeated runs)', published: summaryMethod.toLowerCase() === 'median' },
-	];
-
-	const missing = checks.filter((check) => !check.published).map(({ key, label }) => ({ key, label }));
-
-	return {
-		methodology,
-		complete: missing.length === 0,
-		missing,
-		published: checks.filter((check) => check.published).map(({ key }) => key),
-	};
-}
-
-const evidence = buildBenchmarkEvidence(import.meta.env);
-
-export const benchmarkMethodology = evidence.methodology;
-export const benchmarkEvidenceComplete = evidence.complete;
-export const missingBenchmarkEvidence = evidence.missing;
-export const publishedBenchmarkFields = evidence.published;
+// Publication does not establish full reproducibility or isolate one product.
+export const benchmarkEvidenceComplete = false;

@@ -1,6 +1,9 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { OPERATOR_IDENTITY_KEYS } = require('./_lib/config');
 const { adminRequest } = require('./_lib/supabase');
+const { reconcileProcessing } = require('./_lib/processing-attempts');
+const { redisCommand } = require('./_lib/redis');
 
 const safeEqual = (left, right) => {
 	const leftBuffer = Buffer.from(String(left || ''));
@@ -71,20 +74,29 @@ const getConfigurationStatus = (environment = process.env) => {
 	return { ready: missing.length === 0 && uniqueInvalid.length === 0, missing, invalid: uniqueInvalid };
 };
 
-// The portal probe uses the service-role key, so unauthenticated traffic must not be
-// able to trigger it on every request. Results are cached per warm instance.
-const PORTAL_PROBE_TTL_MS = 60 * 1000;
-let portalProbeCache = null;
+// The portal probe uses the service-role key and the storage probe hits Redis, so
+// unauthenticated traffic must not be able to trigger them on every request. Results
+// are cached per warm instance; authenticated release checks always probe fresh.
+const PROBE_TTL_MS = 60 * 1000;
+const probeCache = new Map();
 
-const resetPortalProbeCache = () => { portalProbeCache = null; };
+const resetProbeCache = () => probeCache.clear();
 
-const probePortalAccess = async ({ fresh = false, now = Date.now() } = {}) => {
-	if (!fresh && portalProbeCache && portalProbeCache.expiresAt > now) return portalProbeCache.value;
-	let value = true;
-	try { await adminRequest('profiles?select=id&limit=1'); } catch { value = false; }
-	portalProbeCache = { value, expiresAt: now + PORTAL_PROBE_TTL_MS };
+const cachedProbe = async (name, probe, { fresh = false, now = Date.now() } = {}) => {
+	const cached = probeCache.get(name);
+	if (!fresh && cached && cached.expiresAt > now) return cached.value;
+	let value;
+	try { value = await probe(); } catch { value = false; }
+	probeCache.set(name, { value, expiresAt: now + PROBE_TTL_MS });
 	return value;
 };
+
+const probePortalAccess = (options) => cachedProbe('portal', async () => {
+	await adminRequest('profiles?select=id&limit=1');
+	return true;
+}, options);
+
+const probeStorageAccess = (options) => cachedProbe('storage', async () => await redisCommand(['PING']) === 'PONG', options);
 
 // true for a valid HEALTH_CHECK_TOKEN bearer, false when no credential was sent,
 // null when a credential was sent but does not match (or no token is configured).
@@ -99,7 +111,6 @@ const detailedAccess = (req) => {
 
 async function health(req, res) {
 	res.setHeader('Cache-Control', 'no-store');
-	res.setHeader('Vary', 'Authorization');
 	if (req.method === 'POST') {
 		if (process.env.VERCEL_ENV !== 'preview') return res.status(404).json({ error: 'Not found' });
 		const configuredSecret = process.env.MONITORING_TEST_SECRET;
@@ -108,8 +119,13 @@ async function health(req, res) {
 			return res.status(401).json({ error: 'Unauthorized' });
 		}
 		const kind = req.body?.kind;
+		if (kind === 'verify-isolated-portal') {
+			return require('./_lib/provider-verification').handleProviderVerification(req, res);
+		}
 		if (kind === 'browser') console.error('browser_error', { monitorTest: true });
 		else if (kind === 'delivery') console.error('contact_delivery_failed', { monitorTest: true });
+		else if (kind === 'stripe') console.error('stripe_webhook_failed', { monitorTest: true });
+		else if (kind === 'fulfillment') console.error('fulfillment_delivery_failed', { monitorTest: true });
 		else return res.status(400).json({ error: 'Unsupported monitoring test' });
 		return res.status(202).json({ accepted: true, kind });
 	}
@@ -117,7 +133,21 @@ async function health(req, res) {
 		res.setHeader('Allow', 'GET, POST');
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
+	if (req.query?.action === 'reconcile-processing') {
+		const secret = process.env.MONITORING_RECONCILIATION_SECRET;
+		const supplied = String(req.headers?.authorization || '').replace(/^Bearer\s+/i, '');
+		if (!secret || secret.length < 32) return res.status(503).json({ error: 'Processing monitoring is not configured' });
+		if (!safeEqual(secret, supplied)) return res.status(401).json({ error: 'Unauthorized' });
+		try {
+			const result = await reconcileProcessing();
+			const attentionRequired = result.pending.stripe > 0 || result.pending.fulfillment > 0 || result.truncated;
+			return res.status(200).json({ ...result, status: attentionRequired ? 'attention-required' : 'ready' });
+		} catch {
+			return res.status(503).json({ error: 'Processing monitoring is temporarily unavailable' });
+		}
+	}
 
+	res.setHeader('Vary', 'Authorization');
 	const detailed = detailedAccess(req);
 	if (detailed === null) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -128,9 +158,12 @@ async function health(req, res) {
 		? ['RESEND_API_KEY', 'EMAIL_FROM']
 		: ['EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID'];
 	let portalAccess = readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY']);
-	// Authenticated release checks always probe fresh; public hits share the cached result.
 	if (portalAccess) portalAccess = await probePortalAccess({ fresh: detailed });
-	const ready = configuration.ready && portalAccess;
+	let storageAccess = readyFor(storageKeys);
+	if (storageAccess) storageAccess = await probeStorageAccess({ fresh: detailed });
+	const ready = configuration.ready && portalAccess && storageAccess;
+	// Public callers learn only the overall status; release identity and per-integration
+	// checks require the HEALTH_CHECK_TOKEN bearer.
 	if (!detailed) return res.status(ready ? 200 : 503).json({ status: ready ? 'ready' : 'configuration-required' });
 	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
 	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
@@ -144,21 +177,22 @@ async function health(req, res) {
 			fingerprint,
 		},
 		checks: {
-			portal: portalAccess && readyFor([...storageKeys,'PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
-			checkout: readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
-			contact: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
-			tickets: readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
-			withdrawal: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
-			storage: readyFor(storageKeys),
-			fulfillment: readyFor([...OPERATOR_IDENTITY_KEYS, ...storageKeys, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
+			portal: portalAccess && storageAccess && readyFor(['PORTAL_RATE_LIMIT_SECRET','CHECKOUT_RECEIPT_SECRET']),
+			checkout: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'PUBLIC_SITE_URL', 'VAT_STATUS', ...(process.env.VAT_STATUS === 'registered' ? ['VAT_ID'] : []), 'STRIPE_SECRET_KEY', 'STRIPE_WEBHOOK_SECRET']),
+			contact: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_TEMPLATE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'CONTACT_RATE_LIMIT_SECRET']),
+			tickets: portalAccess && storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_TICKET_TEMPLATE_ID']),
+			withdrawal: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_WITHDRAWAL_TEMPLATE_ID', 'EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID', 'CONTACT_RATE_LIMIT_SECRET']),
+			storage: storageAccess,
+			fulfillment: storageAccess && readyFor([...OPERATOR_IDENTITY_KEYS, 'ORDER_FULFILLMENT_WEBHOOK_URL', 'ORDER_FULFILLMENT_WEBHOOK_SECRET', ...orderEmailKeys]) && !configuration.invalid.includes('ORDER_CONFIRMATION_PROVIDER'),
 		},
 	});
 }
 
-module.exports = health;
+module.exports = withHttp(health);
 module.exports.REQUIRED_CONFIGURATION = REQUIRED_CONFIGURATION;
 module.exports.getConfigurationStatus = getConfigurationStatus;
 module.exports.safeEqual = safeEqual;
-module.exports.PORTAL_PROBE_TTL_MS = PORTAL_PROBE_TTL_MS;
+module.exports.PROBE_TTL_MS = PROBE_TTL_MS;
 module.exports.probePortalAccess = probePortalAccess;
-module.exports.resetPortalProbeCache = resetPortalProbeCache;
+module.exports.probeStorageAccess = probeStorageAccess;
+module.exports.resetProbeCache = resetProbeCache;

@@ -1,3 +1,4 @@
+const { withHttp } = require('./_lib/http');
 const { normalizeItems } = require('./create-checkout-session');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { verifyActiveUser } = require('./_lib/supabase');
@@ -60,6 +61,6 @@ async function checkoutSession(req, res) {
 	}
 }
 
-module.exports = checkoutSession;
+module.exports = withHttp(checkoutSession);
 module.exports.CHECKOUT_SESSION_ID = CHECKOUT_SESSION_ID;
 module.exports.getVerifiedOrderItems = getVerifiedOrderItems;

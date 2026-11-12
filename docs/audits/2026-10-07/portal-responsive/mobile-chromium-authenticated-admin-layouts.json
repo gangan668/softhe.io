@@ -1,0 +1,92 @@
+[
+  {
+    "width": 320,
+    "state": "admin-queue-and-orders",
+    "viewport": 320,
+    "pageWidth": 320,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 320,
+    "state": "admin-conversation-and-actions",
+    "viewport": 320,
+    "pageWidth": 320,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 390,
+    "state": "admin-queue-and-orders",
+    "viewport": 390,
+    "pageWidth": 390,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 390,
+    "state": "admin-conversation-and-actions",
+    "viewport": 390,
+    "pageWidth": 390,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 768,
+    "state": "admin-queue-and-orders",
+    "viewport": 768,
+    "pageWidth": 768,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 768,
+    "state": "admin-conversation-and-actions",
+    "viewport": 768,
+    "pageWidth": 768,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1280,
+    "state": "admin-queue-and-orders",
+    "viewport": 1280,
+    "pageWidth": 1280,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1280,
+    "state": "admin-conversation-and-actions",
+    "viewport": 1280,
+    "pageWidth": 1280,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1440,
+    "state": "admin-queue-and-orders",
+    "viewport": 1440,
+    "pageWidth": 1440,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1440,
+    "state": "admin-conversation-and-actions",
+    "viewport": 1440,
+    "pageWidth": 1440,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  }
+]

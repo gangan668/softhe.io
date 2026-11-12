@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { setAnalyticsConsent, hasConsentDecision, initGA } from '../utils/analytics';
+import { setAnalyticsConsent, hasConsentDecision } from '../utils/analytics';
 import { useDialogFocus } from '../hooks/useDialogFocus';
 import './CookieConsent.css';
 
@@ -8,6 +8,8 @@ const COOKIE_SETTINGS_EVENT = 'softhe:open-cookie-settings';
 function CookieConsent() {
 	const [showBanner, setShowBanner] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
+	// Only move focus into the banner when the visitor opened it from Cookie Settings.
+	const [openedByUser, setOpenedByUser] = useState(false);
 	const dialogRef = useRef(null);
 	const declineButtonRef = useRef(null);
 	const dismissBanner = useCallback(() => setShowBanner(false), []);
@@ -18,10 +20,12 @@ function CookieConsent() {
 		initialFocusRef: declineButtonRef,
 		backgroundSelector: '.App',
 		modal: false,
+		autoFocus: openedByUser,
 	});
 
 	useEffect(() => {
 		const openSettings = () => {
+			setOpenedByUser(true);
 			setShowDetails(true);
 			setShowBanner(true);
 		};
@@ -39,9 +43,6 @@ function CookieConsent() {
 				clearTimeout(timer);
 				window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
 			};
-		} else {
-			// User has already consented, initialize analytics
-			initGA();
 		}
 
 		return () => window.removeEventListener(COOKIE_SETTINGS_EVENT, openSettings);
@@ -51,7 +52,6 @@ function CookieConsent() {
 		try {
 			await setAnalyticsConsent(true);
 			setShowBanner(false);
-			initGA();
 		} catch (error) {
 			console.error('Error setting analytics consent:', error);
 			// Still hide banner even if analytics fails
@@ -121,9 +121,9 @@ function CookieConsent() {
 										Performance Cookies
 									</h4>
 									<p>
-										These cookies help us understand how visitors interact with our website
-										by collecting and reporting information anonymously. We use Google
-										Analytics with IP anonymization enabled to protect your privacy.
+										Optional analytics help us understand visits to our public pages
+										after consent. We use cookie-free Vercel Web Analytics. Its events exclude
+										private routes, query strings, and URL fragments. Google Analytics is not used.
 									</p>
 									<span className="cookie-status optional">Optional</span>
 								</div>

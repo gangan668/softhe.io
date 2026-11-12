@@ -1,5 +1,13 @@
 # Staged production runbook
 
+## Remediation checkpoint (2026-10-07)
+
+The current public release is main `77aead61515245e553efdda15fdaf4973b7e462a`, deployment `dpl_GqvggywWh9SNs1a9hjqYZDCU9weM`, fingerprint `softhe-77aead6-stage1`. See `ROLLBACK.md` for the verified Vercel baseline. The candidate record below is dated history, not the current remediation candidate.
+
+Work is proceeding on `codex/website-audit-remediation`. Bind a new immutable deployment, full source commit, and fingerprint after the integrated checks pass. Keep commerce and staff disabled for stage one. Historical launch evidence must not be relabeled as fresh verification of this branch.
+
+The existing monitoring Preview is `dpl_FS9FAVwQ5gX7EqgVfmiUozKMePUs` on `customer-portal-test`. Following the owner's authorized restoration of isolated Supabase project `zbchdxptibehtizomwiq` on 2026-10-07, that same Preview returned HTTP 200 ready with every check true. Its source remains the historical portal candidate. Live ownership policy checks passed inside a rolled-back transaction with no synthetic rows retained. Previous synthetic customers were deleted after their September tests. Real Auth API and email delivery checks still require usable isolated test sign-in access.
+
 ## Current release candidate
 
 - Source commit: `980d65f0491d1f711541dfcde5aa3cc568684954`

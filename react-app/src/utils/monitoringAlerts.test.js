@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 const script = join(process.cwd(), 'scripts', 'check-monitoring-alerts.js');
 
-const runMonitor = (reviewEvents) => {
+const runMonitor = (reviewEvents, options = {}) => {
 	const directory = mkdtempSync(join(tmpdir(), 'softhe-monitor-'));
 	try {
 		const emptyLog = join(directory, 'empty.jsonl');
@@ -21,6 +21,9 @@ const runMonitor = (reviewEvents) => {
 			BROWSER_LOG_FILE: emptyLog,
 			DELIVERY_LOG_FILE: emptyLog,
 			CONFIRMATION_REVIEW_LOG_FILE: reviewLog,
+            STRIPE_LOG_FILE: options.stripe ? reviewLog : emptyLog,
+            FULFILLMENT_LOG_FILE: options.fulfillment ? reviewLog : emptyLog,
+            ...options.env,
 		},
 		});
 	} finally {
@@ -29,6 +32,32 @@ const runMonitor = (reviewEvents) => {
 };
 
 describe('monitoring alert checker', () => {
+	it.each(['stripe', 'fulfillment'])('detects %s operational failures', (kind) => {
+		const marker = kind === 'stripe' ? 'stripe_webhook_failed' : 'fulfillment_processing_failed';
+		const result = runMonitor([{ message: marker }], { [kind]: true });
+		expect(result.status).not.toBe(0);
+		expect(result.stderr).toContain(kind === 'stripe' ? '1 Stripe webhook failure' : '1 fulfillment failure');
+	});
+	it.each(['stripe', 'fulfillment'])('requires synthetic %s detection', (kind) => {
+		const result = runMonitor([], { env: { TEST_ALERT: kind } });
+		expect(result.status).not.toBe(0);
+		expect(result.stderr).toContain('was not detected');
+	});
+	it('fails closed when a configured log file is missing', () => {
+		const result = runMonitor([], { env: { STRIPE_LOG_FILE: join(tmpdir(), 'missing-softhe-monitor-log.jsonl') } });
+		expect(result.status).not.toBe(0);
+		expect(result.stderr).toContain('ENOENT');
+	});
+	it('fails closed when a log line is malformed', () => {
+		const directory = mkdtempSync(join(tmpdir(), 'softhe-invalid-monitor-'));
+		try {
+			const path = join(directory, 'invalid.jsonl');
+			writeFileSync(path, '{not-json');
+			const result = runMonitor([], { env: { STRIPE_LOG_FILE: path } });
+			expect(result.status).not.toBe(0);
+			expect(result.stderr).toContain('malformed JSON');
+		} finally { rmSync(directory, { recursive: true, force: true }); }
+	});
 	it('passes when no monitored errors are present', () => {
 		const result = runMonitor([]);
 		expect(result.status).toBe(0);
@@ -59,10 +88,16 @@ describe('monitoring alert checker', () => {
 		for (const name of ['monitoring-alerts.yml', 'release-gate.yml', 'production-smoke.yml']) {
 			expect(read(name)).toContain('HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}');
 		}
+		// Every smoke step in the scheduled smoke (HTTP and browser) receives the token.
+		expect(read('production-smoke.yml').match(/HEALTH_CHECK_TOKEN: \$\{\{ secrets\.HEALTH_CHECK_TOKEN \}\}/g)).toHaveLength(2);
+		expect(read('release-gate.yml').match(/HEALTH_CHECK_TOKEN: \$\{\{ secrets\.HEALTH_CHECK_TOKEN \}\}/g)).toHaveLength(3);
 		expect(read('monitoring-alerts.yml')).toContain('health_auth=(--header "Authorization: Bearer $HEALTH_CHECK_TOKEN")');
+		expect(read('monitoring-alerts.yml')).toContain('"${health_auth[@]}" https://softhe.io/api/health');
 		expect(read('release-gate.yml')).toContain('--max-time 30 "${health_auth[@]}" > candidate-health.json');
-		const smoke = readFileSync(join(process.cwd(), 'scripts', 'production-smoke.js'), 'utf8');
-		expect(smoke).toContain('Authorization: `Bearer ${healthCheckToken}`');
+		const script = (name) => readFileSync(join(process.cwd(), 'scripts', name), 'utf8');
+		expect(script('production-smoke.js')).toContain('Authorization: `Bearer ${healthCheckToken}`');
+		expect(script('deployed-browser-checks.mjs')).toContain('Authorization: `Bearer ${healthToken}`');
+		expect(script('vercel-smoke-request.js')).toContain("['--header', `${key}: ${value}`]");
 	});
 
 	it('requires explicit aligned Preview configuration for controlled runtime tests', () => {

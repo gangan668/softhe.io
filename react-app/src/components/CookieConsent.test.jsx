@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import CookieConsent from "./CookieConsent";
@@ -62,12 +62,12 @@ describe("CookieConsent Component", () => {
 			expect(screen.queryByText(/We value your privacy/i)).not.toBeInTheDocument();
 		});
 
-		it("should initialize analytics if consent already given", () => {
+		it("does not start legacy Google Analytics for existing consent", () => {
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
 
 			render(<CookieConsent />);
 
-			expect(analytics.initGA).toHaveBeenCalled();
+			expect(analytics.initGA).not.toHaveBeenCalled();
 		});
 	});
 
@@ -135,7 +135,7 @@ describe("CookieConsent Component", () => {
 			});
 		});
 
-		it("should initialize Google Analytics when Accept is clicked", async () => {
+		it("does not start legacy Google Analytics when Accept is clicked", async () => {
 			const user = userEvent.setup();
 			vi.mocked(analytics.hasConsentDecision).mockReturnValue(false);
 
@@ -144,7 +144,7 @@ describe("CookieConsent Component", () => {
 			const acceptButton = await screen.findByRole("button", { name: /Accept/i }, { timeout: 3000 });
 			await user.click(acceptButton);
 
-			expect(analytics.initGA).toHaveBeenCalled();
+			expect(analytics.initGA).not.toHaveBeenCalled();
 		});
 
 		it("should not initialize Google Analytics when Decline is clicked", async () => {
@@ -253,7 +253,7 @@ describe("CookieConsent Component", () => {
 				const banner = screen.getByRole("dialog", { name: /we value your privacy/i });
 				expect(banner).toHaveAttribute("aria-modal", "false");
 				expect(banner).toHaveAttribute("aria-describedby", "cookie-consent-description");
-				expect(screen.getByRole("button", { name: /decline cookies/i })).toHaveFocus();
+				expect(screen.getByRole("button", { name: /decline cookies/i })).not.toHaveFocus();
 				expect(document.body.style.overflow).not.toBe("hidden");
 			}, { timeout: 3000 });
 		});
@@ -268,10 +268,26 @@ describe("CookieConsent Component", () => {
 			render(<CookieConsent />);
 
 			await screen.findByRole("dialog", { name: /we value your privacy/i }, { timeout: 3000 });
+			expect(trigger).toHaveFocus();
+			await user.keyboard("{Escape}");
+			expect(screen.getByRole("dialog", { name: /we value your privacy/i })).toBeInTheDocument();
+
+			await user.tab();
+			expect(screen.getByRole("button", { name: /show cookie details/i })).toHaveFocus();
 			await user.keyboard("{Escape}");
 			expect(screen.queryByRole("dialog", { name: /we value your privacy/i })).not.toBeInTheDocument();
 			expect(trigger).toHaveFocus();
 			trigger.remove();
+		});
+
+		it("moves focus into the banner when opened from Cookie Settings", async () => {
+			vi.mocked(analytics.hasConsentDecision).mockReturnValue(true);
+			render(<CookieConsent />);
+			act(() => window.dispatchEvent(new Event("softhe:open-cookie-settings")));
+
+			await waitFor(() => {
+				expect(screen.getByRole("button", { name: /decline cookies/i })).toHaveFocus();
+			});
 		});
 	});
 

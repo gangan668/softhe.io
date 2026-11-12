@@ -1,4 +1,6 @@
 import { createRequire } from 'node:module';
+import { createServer, request } from 'node:http';
+import { once } from 'node:events';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
@@ -7,7 +9,9 @@ const withdrawal = require('../../../api/withdrawal.js');
 const browserErrors = require('../../../api/browser-errors.js');
 const { verifyTurnstile, SITEVERIFY_URL, CAPTCHA_FAILED_MESSAGE } = require('../../../api/_lib/turnstile.js');
 const { sendPublicError } = require('../../../api/_lib/portal-security.js');
-const { adminRequest, userRequest } = require('../../../api/_lib/supabase.js');
+const { adminRequest, userRequest, verifyUser } = require('../../../api/_lib/supabase.js');
+
+const JSON_HEADERS = { 'content-type': 'application/json' };
 
 const jsonResponse = (result, ok = true, status = 200) => ({ ok, status, json: async () => result });
 
@@ -18,6 +22,29 @@ const createResponse = () => {
 	response.json = vi.fn((payload) => { response.payload = payload; return response; });
 	response.end = vi.fn(() => response);
 	return response;
+};
+
+const exchange = async (handler, { method = 'POST', path = '/', headers = {}, chunks = [] } = {}) => {
+	const server = createServer(handler);
+	server.listen(0, '127.0.0.1');
+	await once(server, 'listening');
+	try {
+		return await new Promise((resolve, reject) => {
+			const outgoing = request({ host: '127.0.0.1', port: server.address().port, method, path, headers }, (incoming) => {
+				let body = '';
+				incoming.setEncoding('utf8');
+				incoming.on('data', (chunk) => { body += chunk; });
+				incoming.on('end', () => resolve({ status: incoming.statusCode, headers: incoming.headers, body }));
+				incoming.on('error', reject);
+			});
+			outgoing.on('error', reject);
+			for (const chunk of chunks) outgoing.write(chunk);
+			outgoing.end();
+		});
+	} finally {
+		server.closeAllConnections();
+		await new Promise((resolve) => server.close(resolve));
+	}
 };
 
 const ENV_KEYS = [
@@ -55,17 +82,17 @@ const validWithdrawal = { orderReference: 'cs_test_12345678', email: 'jane@examp
 
 describe('Turnstile verification', () => {
 	it('is skipped when no secret is configured', async () => {
-		const fetchMock = vi.fn();
-		await expect(verifyTurnstile({ headers: {}, body: {} }, fetchMock)).resolves.toEqual(expect.objectContaining({ ok: true }));
-		expect(fetchMock).not.toHaveBeenCalled();
+		const fetchImpl = vi.fn();
+		await expect(verifyTurnstile({ headers: {}, body: {} }, { fetchImpl })).resolves.toEqual(expect.objectContaining({ ok: true }));
+		expect(fetchImpl).not.toHaveBeenCalled();
 	});
 
 	it('posts secret, response, and client IP to siteverify', async () => {
 		process.env.TURNSTILE_SECRET_KEY = 'turnstile-secret';
-		const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ success: true }));
-		const result = await verifyTurnstile({ headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' }, body: { captchaToken: 'token-1' } }, fetchMock);
+		const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({ success: true }));
+		const result = await verifyTurnstile({ headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' } }, { body: { captchaToken: 'token-1' }, fetchImpl });
 		expect(result.ok).toBe(true);
-		const [url, options] = fetchMock.mock.calls[0];
+		const [url, options] = fetchImpl.mock.calls[0];
 		expect(url).toBe(SITEVERIFY_URL);
 		expect(options.method).toBe('POST');
 		const form = new URLSearchParams(options.body);
@@ -76,16 +103,19 @@ describe('Turnstile verification', () => {
 
 	it('rejects a missing or invalid token and reports an unreachable provider as 503', async () => {
 		process.env.TURNSTILE_SECRET_KEY = 'turnstile-secret';
-		const missing = await verifyTurnstile({ headers: {}, body: {} }, vi.fn());
+		const missing = await verifyTurnstile({ headers: {}, body: {} }, { fetchImpl: vi.fn() });
 		expect(missing).toEqual({ ok: false, status: 400, error: 'Security verification failed. Please try again.' });
 
-		const invalid = await verifyTurnstile({ headers: {}, body: { captchaToken: 'bad' } }, vi.fn().mockResolvedValue(jsonResponse({ success: false })));
-		expect(invalid.status).toBe(400);
+		const invalid = await verifyTurnstile({ headers: {}, body: { captchaToken: 'bad' } }, { fetchImpl: vi.fn().mockResolvedValue(jsonResponse({ success: false })) });
+		expect(invalid).toEqual({ ok: false, status: 400, error: CAPTCHA_FAILED_MESSAGE });
 
 		vi.spyOn(console, 'error').mockImplementation(() => {});
-		const down = await verifyTurnstile({ headers: {}, body: { captchaToken: 'x' } }, vi.fn().mockRejectedValue(new Error('network')));
+		const down = await verifyTurnstile({ headers: {}, body: { captchaToken: 'x' } }, { fetchImpl: vi.fn().mockRejectedValue(new Error('network')) });
 		expect(down.status).toBe(503);
 		expect(down.error).not.toMatch(/network/);
+
+		const httpError = await verifyTurnstile({ headers: {}, body: { captchaToken: 'x' } }, { fetchImpl: vi.fn().mockResolvedValue(jsonResponse({}, false, 500)) });
+		expect(httpError.status).toBe(503);
 	});
 
 	it('blocks contact submissions without a valid token before rate limiting or email', async () => {
@@ -93,19 +123,23 @@ describe('Turnstile verification', () => {
 		const fetchMock = vi.fn();
 		vi.stubGlobal('fetch', fetchMock);
 		const response = createResponse();
-		await contact({ method: 'POST', headers: {}, body: validContact }, response);
+		await contact({ method: 'POST', headers: JSON_HEADERS, body: validContact }, response);
 		expect(response.statusCode).toBe(400);
 		expect(response.payload).toEqual({ error: CAPTCHA_FAILED_MESSAGE });
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
-	it('still validates fields before calling siteverify', async () => {
+	it('runs the honeypot and field validation before calling siteverify', async () => {
 		process.env.TURNSTILE_SECRET_KEY = 'turnstile-secret';
 		const fetchMock = vi.fn();
 		vi.stubGlobal('fetch', fetchMock);
-		const response = createResponse();
-		await contact({ method: 'POST', headers: {}, body: { ...validContact, name: '' } }, response);
-		expect(response.payload.error).toMatch(/valid name/i);
+		const invalid = createResponse();
+		await contact({ method: 'POST', headers: JSON_HEADERS, body: { ...validContact, name: '' } }, invalid);
+		expect(invalid.payload.error).toMatch(/valid name/i);
+
+		const bot = createResponse();
+		await contact({ method: 'POST', headers: JSON_HEADERS, body: { ...validContact, website: 'spam' } }, bot);
+		expect(bot.statusCode).toBe(200);
 		expect(fetchMock).not.toHaveBeenCalled();
 	});
 
@@ -118,7 +152,7 @@ describe('Turnstile verification', () => {
 		});
 		vi.stubGlobal('fetch', fetchMock);
 		const response = createResponse();
-		await contact({ method: 'POST', headers: {}, body: { ...validContact, captchaToken: 'ok' } }, response);
+		await contact({ method: 'POST', headers: JSON_HEADERS, body: { ...validContact, captchaToken: 'ok' } }, response);
 		expect(response.statusCode).toBe(200);
 		expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([SITEVERIFY_URL, 'https://redis.example', 'https://api.emailjs.com/api/v1.0/email/send']);
 	});
@@ -130,12 +164,13 @@ describe('Turnstile verification', () => {
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 
 		const missing = createResponse();
-		await withdrawal({ method: 'POST', headers: {}, body: validWithdrawal }, missing);
+		await withdrawal({ method: 'POST', headers: JSON_HEADERS, body: validWithdrawal }, missing);
 		expect(missing.statusCode).toBe(400);
+		expect(missing.payload).toEqual({ error: CAPTCHA_FAILED_MESSAGE });
 		expect(fetchMock).not.toHaveBeenCalled();
 
 		const down = createResponse();
-		await withdrawal({ method: 'POST', headers: {}, body: { ...validWithdrawal, captchaToken: 'tok' } }, down);
+		await withdrawal({ method: 'POST', headers: JSON_HEADERS, body: { ...validWithdrawal, captchaToken: 'tok' } }, down);
 		expect(down.statusCode).toBe(503);
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		expect(fetchMock.mock.calls[0][0]).toBe(SITEVERIFY_URL);
@@ -170,17 +205,25 @@ describe('browser error ingestion boundary', () => {
 		expect(actualTooLarge.statusCode).toBe(413);
 	});
 
-	it('accepts the configured public origin', async () => {
+	it('accepts the configured public origin even when served from another host', async () => {
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: 1 })));
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		const response = createResponse();
 		await browserErrors({ method: 'POST', headers: { ...sameOrigin, host: 'internal.vercel.app' }, body: { message: 'boom' } }, response);
 		expect(response.statusCode).toBe(202);
 	});
+
+	it('keeps rate limiting error reports', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: 21 })));
+		const response = createResponse();
+		await browserErrors({ method: 'POST', headers: sameOrigin, body: { message: 'boom' } }, response);
+		expect(response.statusCode).toBe(429);
+		expect(response.headers['Retry-After']).toBe('60');
+	});
 });
 
 describe('CSP violation reports', () => {
-	it('accepts legacy report-uri bodies without an Origin header', async () => {
+	it('accepts legacy report-uri string bodies without an Origin header', async () => {
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: 1 })));
 		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 		const response = createResponse();
@@ -232,6 +275,18 @@ describe('CSP violation reports', () => {
 		await browserErrors({ method: 'POST', query: { kind: 'csp' }, headers: { 'content-type': 'application/json' }, body: {} }, limited);
 		expect(limited.statusCode).toBe(429);
 	});
+
+	it('streams application/csp-report bodies through the native HTTP adapter', async () => {
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ result: 1 })));
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const report = JSON.stringify({ 'csp-report': { 'document-uri': 'https://softhe.io/', 'violated-directive': 'style-src', 'blocked-uri': 'inline' } });
+		const response = await exchange(browserErrors, { path: '/api/browser-errors?kind=csp', headers: { 'content-type': 'application/csp-report' }, chunks: [report] });
+		expect(response.status).toBe(204);
+		expect(warn).toHaveBeenCalledWith('csp_violation', expect.objectContaining({ effectiveDirective: 'style-src' }));
+
+		const oversized = await exchange(browserErrors, { path: '/api/browser-errors?kind=csp', headers: { 'content-type': 'application/csp-report', 'transfer-encoding': 'chunked' }, chunks: ['{"x":"', 'x'.repeat(17000)] });
+		expect(oversized.status).toBe(413);
+	});
 });
 
 describe('public error messages', () => {
@@ -274,7 +329,7 @@ describe('public error messages', () => {
 		expect(userError.detail).toContain('row-level security');
 		const response = createResponse();
 		sendPublicError(response, userError);
-		expect(response.payload).toEqual({ error: 'Forbidden' });
+		expect(response.payload).toEqual({ error: 'Request could not be completed' });
 
 		const adminError = await adminRequest('tickets').catch((error) => error);
 		expect(adminError.message).toBe('Customer data request failed (403)');
@@ -284,8 +339,24 @@ describe('public error messages', () => {
 
 	it('keeps the intended authentication messages user-facing', async () => {
 		const response = createResponse();
-		const { verifyUser } = require('../../../api/_lib/supabase.js');
 		sendPublicError(response, await verifyUser({ headers: {} }).catch((error) => error));
 		expect(response.payload).toEqual({ error: 'Authentication required' });
+	});
+
+	it('keeps checkout configuration details out of the public 503', async () => {
+		const checkout = require('../../../api/create-checkout-session.js');
+		const previous = { COMMERCE_ENABLED: process.env.COMMERCE_ENABLED };
+		process.env.COMMERCE_ENABLED = 'true';
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+		try {
+			const response = createResponse();
+			await checkout({ method: 'POST', headers: { ...JSON_HEADERS, 'idempotency-key': 'a'.repeat(32) }, body: { items: [] } }, response);
+			expect(response.statusCode).toBe(503);
+			expect(response.payload).toEqual({ error: 'Checkout is temporarily unavailable' });
+		} finally {
+			if (previous.COMMERCE_ENABLED === undefined) delete process.env.COMMERCE_ENABLED;
+			else process.env.COMMERCE_ENABLED = previous.COMMERCE_ENABLED;
+		}
 	});
 });

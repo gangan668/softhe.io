@@ -1,0 +1,429 @@
+{
+  "checkedAt": "2026-10-07T18:53:50.714Z",
+  "origin": "https://softhe.io",
+  "pages": [
+    {
+      "path": "/",
+      "status": 200,
+      "title": "Windows and BIOS tuning for gaming PCs | Softhe.io",
+      "canonical": "https://softhe.io/",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/services",
+      "status": 200,
+      "title": "Windows and BIOS services | Softhe.io",
+      "canonical": "https://softhe.io/services",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/store",
+      "status": 200,
+      "title": "Store | Softhe.io",
+      "canonical": "https://softhe.io/store",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/performance",
+      "status": 200,
+      "title": "Preliminary CS2 results | Softhe.io",
+      "canonical": "https://softhe.io/performance",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/contact",
+      "status": 200,
+      "title": "Contact PC Optimization Support | Softhe.io",
+      "canonical": "https://softhe.io/contact",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/checkout",
+      "status": 200,
+      "title": "Checkout | Softhe.io",
+      "canonical": "https://softhe.io/checkout",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/faq",
+      "status": 200,
+      "title": "PC Optimization FAQ | Softhe.io",
+      "canonical": "https://softhe.io/faq",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/privacy-policy",
+      "status": 200,
+      "title": "Privacy Policy | Softhe.io",
+      "canonical": "https://softhe.io/privacy-policy",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/cookie-policy",
+      "status": 200,
+      "title": "Cookie Policy | Softhe.io",
+      "canonical": "https://softhe.io/cookie-policy",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "title": "Terms of Service | Softhe.io",
+      "canonical": "https://softhe.io/terms",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/legal-notice",
+      "status": 200,
+      "title": "Legal Notice | Softhe.io",
+      "canonical": "https://softhe.io/legal-notice",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/withdrawal",
+      "status": 200,
+      "title": "Online Withdrawal Request | Softhe.io",
+      "canonical": "https://softhe.io/withdrawal",
+      "robots": "index, follow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/login",
+      "status": 200,
+      "title": "Customer Login | Softhe.io",
+      "canonical": "https://softhe.io/login",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/register",
+      "status": 200,
+      "title": "Create Customer Account | Softhe.io",
+      "canonical": "https://softhe.io/register",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/forgot-password",
+      "status": 200,
+      "title": "Reset Password | Softhe.io",
+      "canonical": "https://softhe.io/forgot-password",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/resend-confirmation",
+      "status": 200,
+      "title": "Resend Account Confirmation | Softhe.io",
+      "canonical": "https://softhe.io/resend-confirmation",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/reset-password",
+      "status": 200,
+      "title": "Choose a New Password | Softhe.io",
+      "canonical": "https://softhe.io/reset-password",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/account",
+      "status": 200,
+      "title": "Customer Account | Softhe.io",
+      "canonical": "https://softhe.io/account",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/admin",
+      "status": 200,
+      "title": "Staff Portal | Softhe.io",
+      "canonical": "https://softhe.io/admin",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/robots.txt",
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/sitemap.xml",
+      "status": 200,
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    },
+    {
+      "path": "/production-smoke-route-that-must-not-exist",
+      "status": 404,
+      "title": "Page Not Found | Softhe.io",
+      "robots": "noindex, nofollow",
+      "headers": {
+        "content-security-policy": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+        "x-frame-options": "DENY",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "strict-origin-when-cross-origin",
+        "strict-transport-security": "max-age=63072000"
+      }
+    }
+  ],
+  "assets": [
+    {
+      "path": "/images/softhe-icon-v2-32.png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "path": "/assets/index-GcIZhq4D.js",
+      "status": 200,
+      "contentType": "application/javascript; charset=utf-8"
+    },
+    {
+      "path": "/assets/index-DbF82arn.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/images/softhe-icon-v2-192.png",
+      "status": 200,
+      "contentType": "image/png"
+    },
+    {
+      "path": "/assets/Services-DEAf_waB.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Store-BV7duJYj.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Performance-l7YCShJh.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Contact-Bdw-TO12.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/FAQ-lL1kJ464.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Checkout-DpkcqGyX.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Legal-BBr0xFXW.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Withdrawal-gkOLvR1_.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/assets/Portal-BEsqSGQj.css",
+      "status": 200,
+      "contentType": "text/css; charset=utf-8"
+    },
+    {
+      "path": "/images/softhe-icon-v2-180.png",
+      "status": 200,
+      "contentType": "image/png"
+    }
+  ],
+  "api": [
+    {
+      "path": "/api/health",
+      "status": 200,
+      "body": {
+        "status": "ready",
+        "release": {
+          "sourceCommit": "77aead61515245e553efdda15fdaf4973b7e462a",
+          "fingerprint": "softhe-77aead6-stage1"
+        },
+        "checks": {
+          "portal": true,
+          "checkout": true,
+          "contact": true,
+          "tickets": true,
+          "withdrawal": true,
+          "storage": true,
+          "fulfillment": true
+        }
+      }
+    },
+    {
+      "path": "/api/staff?action=status",
+      "status": 404,
+      "body": {
+        "error": "Not found"
+      }
+    },
+    {
+      "path": "/api/portal-bootstrap",
+      "status": 405,
+      "body": {
+        "error": "Method not allowed"
+      }
+    },
+    {
+      "path": "/api/checkout-session",
+      "status": 400,
+      "body": {
+        "error": "Invalid checkout session"
+      }
+    },
+    {
+      "path": "/api/test-fulfillment",
+      "status": 404,
+      "body": {
+        "error": "Not found"
+      }
+    }
+  ]
+}

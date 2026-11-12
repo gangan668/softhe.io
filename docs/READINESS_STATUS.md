@@ -1,5 +1,43 @@
 # Production readiness status
 
+## Audit follow-up checkpoint (2026-10-25)
+
+The current main source is `7ca108b5ce2a4abde28907cab912a9d520357ba8`. Vercel staged Production
+deployment `dpl_FBrzme7GnyDjLmpKByrcv6cMcPzn` reports this exact source and fingerprint
+`softhe-7ca108b-stage1`, with HTTP 200 ready and all seven checks true. An authenticated
+browser pass verified correct initial and hydrated metadata, private-route indexing,
+anonymous route protection, layout, and static-404 CSP behavior across 40 checks at
+390px and 1440px. Public `softhe.io` and `www.softhe.io` still point to
+`dpl_GqvggywWh9SNs1a9hjqYZDCU9weM`, which reports `77aead6`. They were not promoted.
+
+Local follow-up work repairs the dependency audit, adds a deployed-browser smoke gate,
+and gives CAPTCHA failure, expiry, timeout, and unsupported-browser states a visible
+retry path. These local changes are not part of the staged `7ca108b` deployment.
+Recovered historical provider evidence is documented in
+[`HISTORICAL_PROVIDER_EVIDENCE.md`](audits/2026-10-25/HISTORICAL_PROVIDER_EVIDENCE.md).
+The four technical evidence entries now retain their original verification dates and
+explicit historical scope. Legal and accounting sign-offs remain pending. The launch
+candidate record is still historical and has not been rebound to this work.
+
+Production Auth still reports the previously accepted leaked-password protection
+warning. This is covered by the scoped September 1 risk acceptance, not a new waived
+gate. The isolated project's advisor requests report hibernation, and a bounded
+read-only SQL check timed out. Current isolated Auth state and real CAPTCHA/login,
+confirmation, recovery, and MFA success are therefore unverified. No provider
+settings, account credentials, production routing, or commerce flags were changed.
+
+## Security remediation checkpoint (2026-10-16)
+
+The source audit and follow-up changes are documented in [the remediation report](audits/2026-10-16/REMEDIATION.md). Both hosted databases have the compatible column restrictions and additive service ticket functions, verified with rolled-back synthetic tests. Final browser-write revocation must follow confirmation of the deployed service-mediated API. The public domain still served `77aead6` at this checkpoint and passed strict smoke after the compatible database changes. Source push, API deployment, final database enforcement, and commercial evidence qualification remain separate steps.
+
+## Remediation execution checkpoint (2026-10-07)
+
+The current public release is Vercel Production deployment `dpl_GqvggywWh9SNs1a9hjqYZDCU9weM`, main source `77aead61515245e553efdda15fdaf4973b7e462a`, fingerprint `softhe-77aead6-stage1`. The full website audit and remediation are tracked in `audits/2026-10-07/REPORT.md`, `COMPLETION_PLAN.md`, and `EXECUTION_STATUS.md`.
+
+Source repairs and expanded regressions are being integrated on `codex/website-audit-remediation`; they are not deployed production fixes. Production commerce and contact submission remain disabled. The owner-approved restoration of isolated Supabase project `zbchdxptibehtizomwiq` completed successfully. Existing monitoring Preview `dpl_FS9FAVwQ5gX7EqgVfmiUozKMePUs` now returns HTTP 200 `ready` with every configuration check true, retaining its historical source/fingerprint.
+
+Live database grants/RLS checks passed using two credential-free synthetic identities inside a rolled-back transaction, including cross-customer and suspended-user denial. Cleanup confirmed zero synthetic users, tickets, and orders. This does not prove Auth API, CAPTCHA/MFA, transactional delivery, payments, or the new remediation candidate. Six commercial evidence entries remain pending. The checkpoints below remain dated history.
+
 Last verification checkpoint: 2026-10-04 (Europe/Berlin). The observations below distinguish controlled alert detection, notification receipt, and candidate readiness.
 
 ## Verification checkpoint (2026-10-04)

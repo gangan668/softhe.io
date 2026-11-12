@@ -1,68 +1,46 @@
-import SEO from '../components/SEO';
-import {
-	benchmarkEvidenceComplete,
-	benchmarkMethodology,
-	missingBenchmarkEvidence,
-	publishedBenchmarkFields,
-} from '../data/benchmark';
+import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
+import FrameTimeChart from '../components/FrameTimeChart';
+import { framesPerRun, percentileRows } from '../data/benchmarkFrametimes';
+import { benchmarkEvidenceComplete, benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
 import "./Performance.css";
 
-const METHODOLOGY_FIELDS = [
-	{ key: 'hardware', label: 'Hardware', value: () => benchmarkMethodology.hardware },
-	{ key: 'software', label: 'Software', value: () => benchmarkMethodology.software },
-	{ key: 'scenario', label: 'Scenario', value: () => benchmarkMethodology.scenario },
-	{ key: 'captureDate', label: 'Captured', value: () => benchmarkMethodology.captureDate },
-	{ key: 'runCount', label: 'Repeated runs', value: () => benchmarkMethodology.runCount },
-	{ key: 'summaryMethod', label: 'Summary', value: () => benchmarkMethodology.summaryMethod },
-];
+const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
+const { processes, memoryGb } = idleOverhead;
+const { runCount, captureSeconds } = benchmarkMethodology;
+const frameTimeGap = (share) => {
+	const { stock, optimized } = percentileRows.find((row) => row.share === share).values;
+	// Subtract the rounded values so the figure matches the table beneath the chart.
+	return `${(Number(stock.toFixed(2)) - Number(optimized.toFixed(2))).toFixed(2)} ms`;
+};
 
 function Performance() {
-	const publishedFields = METHODOLOGY_FIELDS.filter((field) => publishedBenchmarkFields.includes(field.key));
-
 	return (
 		<>
-			<SEO
-				title="PC performance benchmark results | Softhe.io"
-				description="Review a preliminary whole-system CS2 comparison, its changed variables, and the evidence still needed to reproduce it."
-				keywords="fps benchmarks, gaming performance, cs2 fps, counter-strike performance, windows optimization results, gaming benchmarks, fps comparison, frame time optimization"
-				ogTitle="CS2 benchmark comparison | Softhe.io"
-				ogDescription="One PC measured 658 and 826 average FPS across two configurations. Raw runs remain unpublished and several variables changed."
-			/>
 			<div className="performance-page">
 				<section className="performance-hero page-header">
 					<div className="container">
-						<span className="section-kicker">{benchmarkEvidenceComplete ? 'Benchmarks' : 'Preliminary benchmark sample'}</span>
-						<h1>{benchmarkEvidenceComplete ? 'Measured results from the current test PC' : 'Early results from one test PC'}</h1>
-						<p>
-							This preliminary comparison uses one PC. Windows edition, memory settings, and
-							GPU driver changed. The result cannot isolate the effect of a Softhe.io product.
-						</p>
-						{benchmarkEvidenceComplete ? (
-							<p className="methodology-warning" role="note">
-								Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
-								 Runs per configuration: {benchmarkMethodology.runCount}.
-								 Raw run captures: not yet published.
-							</p>
-						) : (
-							<p className="methodology-warning" role="note">
-								The full test methodology and raw run captures are not yet published.{' '}
-								<a href="#benchmark-methodology-title">See what is missing</a>.
-							</p>
-						)}
+						<span className="section-kicker">Benchmarks</span>
+						<h1>Measured results from the current test PC</h1>
 						<div className="performance-stats">
 							<div>
-								<strong>658 to 826</strong>
-								<span>Average FPS in CS2 sample</span>
+								<strong>{formatPercentChange(averageFps.change)}</strong>
+								<span>Average FPS in CS2: {averageFps.stock} to {averageFps.optimized}</span>
 							</div>
 							<div>
-								<strong>225 to 285</strong>
-								<span>1% low FPS in CS2 sample</span>
+								<strong>{formatPercentChange(onePercentLowFps.change)}</strong>
+								<span>P1 FPS in CS2: {onePercentLowFps.stock} to {onePercentLowFps.optimized}</span>
 							</div>
 							<div>
-								<strong>Version 74</strong>
-								<span>Build used in the published sample</span>
+								<strong>{formatPercentChange(processes.change)}</strong>
+								<span>Idle processes: {processes.stock} to {processes.optimized}</span>
 							</div>
 						</div>
+						<p className="methodology-warning" role="note">
+							This preliminary comparison uses one PC. Windows edition, memory settings, and
+							GPU driver changed, so the result cannot isolate the effect of a Softhe.io product.
+							Captured {benchmarkMethodology.captureDate} on SoftheOS version 74, {runCount} runs per configuration.{' '}
+							<a href="#benchmark-methodology">Full test setup</a>. <BenchmarkEvidenceLink />
+						</p>
 					</div>
 				</section>
 
@@ -71,32 +49,50 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">Preliminary in-game sample</span>
 							<h2 className="section-title">Counter-Strike 2 FPS comparison</h2>
-							<p>The CPU, GPU, and motherboard are the same. Memory settings, Windows edition, and GPU driver changed. This whole-system comparison does not measure the effect of any single product.</p>
+							<p>The CPU, GPU, and motherboard are the same. This is a whole-system comparison of the two configurations below.</p>
 						</div>
 
 						<div className="native-benchmark-card">
 							<div className="native-card-topline">
 								<div><span>Preliminary result</span><strong>CS2 · Dust 2 benchmark</strong></div>
-								<b>2-run median</b>
+								<b>{runCount}-run median</b>
 							</div>
 							<div className="native-result-stage">
 								<div className="native-result before">
 									<span>Before · Default Windows</span>
-									<strong>658</strong>
+									<strong>{averageFps.stock}</strong>
 									<small>average FPS</small>
 								</div>
-								<div className="native-gain"><i className="fas fa-arrow-right" aria-hidden="true"></i><strong>+25%</strong><span>average FPS</span></div>
+								<div className="native-gain"><i className="fas fa-arrow-right" aria-hidden="true"></i><strong>{formatPercentChange(averageFps.change)}</strong><span>average FPS</span></div>
 								<div className="native-result after">
 									<span>After · SoftheOS + BIOS</span>
-									<strong>826</strong>
+									<strong>{averageFps.optimized}</strong>
 									<small>average FPS</small>
 								</div>
 							</div>
 							<div className="native-supporting-metrics">
-								<div><span>1% low</span><strong>225 <i className="fas fa-arrow-right" aria-hidden="true"></i> 285 FPS</strong><b>+27%</b></div>
-								<div><span>Average frame time</span><strong>1.52 <i className="fas fa-arrow-right" aria-hidden="true"></i> 1.21 ms</strong><b>-20%</b></div>
-								<div><span>Recorded sample</span><strong>2 × 109 seconds</strong><b>Median</b></div>
+								<div><span>P1 FPS</span><strong>{onePercentLowFps.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {onePercentLowFps.optimized} FPS</strong><b>{formatPercentChange(onePercentLowFps.change)}</b></div>
+								<div><span>Average frame time</span><strong>{frameTimeMs.stock}<span className="visually-hidden"> to </span> <i className="fas fa-arrow-right" aria-hidden="true"></i> {frameTimeMs.optimized} ms</strong><b>{formatPercentChange(frameTimeMs.change)}</b></div>
+								<div><span>Recorded sample</span><strong>{runCount} × {captureSeconds} seconds</strong><b>Median</b></div>
 							</div>
+						</div>
+					</div>
+				</section>
+
+				<section className="fps-comparison frametime-section" aria-labelledby="frametime-title">
+					<div className="container">
+						<div className="performance-section-heading">
+							<span className="section-kicker">Frame-time distribution</span>
+							<h2 id="frametime-title" className="section-title">The gap widens in the slowest frames</h2>
+							<p>
+								In this sample, the difference grows from {frameTimeGap(0.5)} at the median frame to {frameTimeGap(0.001)} at the 99.9th percentile.
+								Each line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
+								drawn from the published raw captures. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
+								Averages hide this tail, and it is where stutter shows up.
+							</p>
+						</div>
+						<div className="native-benchmark-card frametime-card">
+							<FrameTimeChart />
 						</div>
 					</div>
 				</section>
@@ -106,23 +102,24 @@ function Performance() {
 						<div className="performance-section-heading">
 							<span className="section-kicker">System overhead</span>
 							<h2 className="section-title">Idle process and memory use</h2>
-							<p>Idle Windows overhead from the documented stock and optimized configurations.</p>
+							<p>Idle Windows overhead from the two documented configurations.</p>
 						</div>
 
 						<div className="overhead-showcase">
-							<div className="overhead-heading">
-								<div><span>Default Windows</span><strong>Stock sample</strong></div>
-								<div><span>SoftheOS</span><strong>Optimized sample</strong></div>
+							<div className="overhead-heading" aria-hidden="true">
+								<div><span>Default Windows</span></div>
+								<div><span>SoftheOS</span></div>
+							</div>
+							{/* Each value names its profile because the column headings disappear once the metrics stack on mobile. */}
+							<div className="overhead-metric">
+								<div><small className="overhead-profile">Default Windows</small><span>Background processes</span><strong>{processes.stock}</strong></div>
+								<div className="overhead-change"><b>{formatPercentChange(processes.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
+								<div><small className="overhead-profile">SoftheOS</small><strong>{processes.optimized}</strong></div>
 							</div>
 							<div className="overhead-metric">
-								<div><span>Background processes</span><strong>111</strong></div>
-								<div className="overhead-change"><b>-72%</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><strong>31</strong><span>Target shown in sample</span></div>
-							</div>
-							<div className="overhead-metric">
-								<div><span>Idle memory</span><strong>2.5 GB</strong></div>
-								<div className="overhead-change"><b>-68%</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
-								<div><strong>0.8 GB</strong><span>Observed idle use</span></div>
+								<div><small className="overhead-profile">Default Windows</small><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
+								<div className="overhead-change"><b>{formatPercentChange(memoryGb.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
+								<div><small className="overhead-profile">SoftheOS</small><strong>{memoryGb.optimized} GB</strong></div>
 							</div>
 							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
 						</div>
@@ -150,134 +147,46 @@ function Performance() {
 
 				<section className="detailed-comparison">
 					<div className="container">
-						<div className="performance-section-heading">
-							<span className="section-kicker">Summary</span>
-							<h2 className="section-title">Results at a glance</h2>
-							<p>Values from the preliminary CS2 comparison and separate idle snapshots. Raw runs are not yet published.</p>
-						</div>
-
-						<div className="comparison-table">
-							<div className="table-header">
-								<div className="table-cell">Feature</div>
-								<div className="table-cell">Stock Windows</div>
-								<div className="table-cell">
-									Softhe.io Optimized
-								</div>
-								<div className="table-cell">Improvement</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-chart-line"></i>
-									Frame Rate (CS2)
-								</div>
-								<div className="table-cell stock-value">
-									658 avg FPS
-								</div>
-								<div className="table-cell optimized-value">
-									826 avg FPS
-								</div>
-								<div className="table-cell improvement">
-									+25% avg
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-stopwatch"></i>
-									Frame Time
-								</div>
-								<div className="table-cell stock-value">1.52ms</div>
-								<div className="table-cell optimized-value">
-									1.21ms
-								</div>
-								<div className="table-cell improvement">
-									-20% reduction
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-list"></i>
-									Idle Processes
-								</div>
-								<div className="table-cell stock-value">111</div>
-								<div className="table-cell optimized-value">
-									31
-								</div>
-								<div className="table-cell improvement">
-									-72%
-								</div>
-							</div>
-
-							<div className="table-row">
-								<div className="table-cell feature-name">
-									<i className="fas fa-memory"></i>
-									Idle Memory
-								</div>
-								<div className="table-cell stock-value">
-									2.5 GB
-								</div>
-								<div className="table-cell optimized-value">
-									0.8 GB
-								</div>
-								<div className="table-cell improvement">
-									-68%
-								</div>
-							</div>
-						</div>
-
-						<section className="benchmark-methodology" aria-labelledby="benchmark-methodology-title">
+						<section id="benchmark-methodology" className="benchmark-methodology" aria-labelledby="benchmark-methodology-title">
 							<div className="methodology-heading">
 								<span className="section-kicker">Evidence</span>
 								<h2 id="benchmark-methodology-title">Benchmark methodology</h2>
 								<p>
 									These results describe the documented test configuration only. They are not a
-									guarantee of results on other hardware or workloads.
+									guarantee of results on other hardware or workloads. Results and stability depend on
+									hardware, BIOS, drivers, Windows version, game settings, and workload.
 								</p>
 							</div>
-							{benchmarkEvidenceComplete ? (
-								<dl className="methodology-grid">
-									{METHODOLOGY_FIELDS.map((field) => (
-										<div key={field.key}><dt>{field.label}</dt><dd>{field.value()}</dd></div>
-									))}
-								</dl>
-							) : (
-								<div className="methodology-pending" role="note" aria-labelledby="methodology-pending-title">
-									<h3 id="methodology-pending-title">Evidence not yet published</h3>
-									<p>
-										Full reproducibility details and raw run evidence have not yet been published.
-										These figures cannot establish the effect of a single product.
-									</p>
-									<ul>
-										{missingBenchmarkEvidence.map((item) => (
-											<li key={item.key}>{item.label}</li>
-										))}
-										<li>Raw run captures for each configuration</li>
-									</ul>
-									{publishedFields.length > 0 && (
-										<dl className="methodology-grid methodology-grid-partial">
-											{publishedFields.map((field) => (
-												<div key={field.key}><dt>{field.label}</dt><dd>{field.value()}</dd></div>
-											))}
-										</dl>
-									)}
+							<dl className="methodology-grid">
+								<div><dt>Hardware</dt><dd>{benchmarkMethodology.hardware}</dd></div>
+								<div><dt>Operating system</dt><dd>{benchmarkMethodology.operatingSystem}</dd></div>
+								<div><dt>BIOS</dt><dd>{benchmarkMethodology.bios}</dd></div>
+								<div><dt>Drivers</dt><dd>{benchmarkMethodology.drivers}</dd></div>
+								<div><dt>Game version</dt><dd>{benchmarkMethodology.gameVersion}</dd></div>
+								<div>
+									<dt>Sample</dt>
+									<dd>
+										Captured {benchmarkMethodology.captureDate}.{' '}
+										{runCount} runs of {captureSeconds} seconds per configuration, summarized by {benchmarkMethodology.summaryMethod}.
+									</dd>
 								</div>
+								<div><dt>Scenario</dt><dd>{benchmarkMethodology.scenario}</dd></div>
+								<div><dt>Graphics settings</dt><dd>{benchmarkMethodology.graphicsSettings}</dd></div>
+							</dl>
+							{!benchmarkEvidenceComplete && (
+								<p className="methodology-warning" role="note">
+									The exact CS2 build and chipset-driver versions were not recorded.
+									These figures cannot establish the effect of a single product.
+									P1 FPS is the 99th percentile frame time converted to FPS, not the average of the slowest 1% of frames.
+								</p>
 							)}
+							<p className="methodology-archive">
+								The archive contains {benchmarkPublication.captureCountText} original JSON captures, with
+								median average FPS and P1 FPS from at least two repeated stock and optimized runs.{' '}
+								<BenchmarkEvidenceLink />
+							</p>
 						</section>
 
-						<div className="method-note">
-							<i className="fas fa-circle-info" aria-hidden="true"></i>
-							<p>
-								Results depend on hardware, BIOS, drivers, Windows version, game settings, and
-								workload. Raw screenshots should accompany each published run set, including
-								median FPS and 1% lows from at least two repeated stock and optimized runs.
-							</p>
-						</div>
-						<p className="version-stability-note">
-							SoftheOS version 74 was used for this sample. Stability still depends on the hardware,
-							drivers, BIOS settings, and workload of each PC.
-						</p>
 					</div>
 				</section>
 			</div>

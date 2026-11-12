@@ -7,10 +7,9 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath, URL } from "node:url";
 
 // Resolved lazily: under vitest's jsdom environment import.meta.url is not a
-// file: URL, so callers there pass the parsed headers in explicitly.
+// file: URL, so tests pass the parsed production headers in explicitly.
 const vercelConfigPath = () => fileURLToPath(new URL("../vercel.json", import.meta.url));
 const CSP = "Content-Security-Policy";
-const HSTS = "Strict-Transport-Security";
 
 export const parseCsp = (policy) => new Map(
 	policy.split(";")
@@ -33,17 +32,10 @@ export const readProductionHeaders = (configPath = vercelConfigPath()) => {
 	return Object.fromEntries(entry.headers.map(({ key, value }) => [key, value]));
 };
 
-// Production headers, minus what cannot work over plain http://localhost:
-// - `upgrade-insecure-requests` would rewrite same-origin subresource requests
-//   to https://localhost, which the preview server does not serve.
-// - HSTS is ignored over http, and if ever honoured would pin localhost to https.
-export const previewHeaders = (production = readProductionHeaders()) => {
-	const headers = { ...production };
-	delete headers[HSTS];
+const withCsp = (headers, edit) => {
 	const csp = parseCsp(headers[CSP]);
-	csp.delete("upgrade-insecure-requests");
-	headers[CSP] = serializeCsp(csp);
-	return headers;
+	edit(csp);
+	return { ...headers, [CSP]: serializeCsp(csp) };
 };
 
 const addSources = (csp, name, sources) => {
@@ -51,19 +43,30 @@ const addSources = (csp, name, sources) => {
 	csp.set(name, [...current, ...sources.filter((source) => !current.includes(source))]);
 };
 
+// Production headers, minus what cannot work over plain http://localhost:
+// - `upgrade-insecure-requests` would rewrite same-origin subresource requests
+//   to https://localhost, which the preview server does not serve.
+// - HSTS is ignored over http, and if ever honoured would pin localhost to https.
+// `connectSrc` lets an isolated browser suite reach its intercepted fixture provider.
+export const previewHeaders = (production = readProductionHeaders(), { connectSrc = [] } = {}) => {
+	const { "Strict-Transport-Security": _hsts, ...headers } = production;
+	return withCsp(headers, (csp) => {
+		csp.delete("upgrade-insecure-requests");
+		if (connectSrc.length) addSources(csp, "connect-src", connectSrc);
+	});
+};
+
 // `vite dev` needs inline/eval scripts (react-refresh preamble, HMR client),
 // inline styles (CSS injected via <style>), and a WebSocket for HMR. Everything
 // else stays as strict as production. There are no /api functions under
 // `vite dev`, so CSP reporting is dropped rather than POSTing into a 404.
 export const devHeaders = (production = readProductionHeaders()) => {
-	const headers = previewHeaders(production);
-	const csp = parseCsp(headers[CSP]);
-	addSources(csp, "script-src", ["'unsafe-inline'", "'unsafe-eval'"]);
-	addSources(csp, "style-src", ["'unsafe-inline'"]);
-	addSources(csp, "connect-src", ["ws:"]);
-	csp.delete("report-uri");
-	csp.delete("report-to");
-	headers[CSP] = serializeCsp(csp);
-	delete headers["Reporting-Endpoints"];
-	return headers;
+	const { "Reporting-Endpoints": _reporting, ...headers } = previewHeaders(production);
+	return withCsp(headers, (csp) => {
+		addSources(csp, "script-src", ["'unsafe-inline'", "'unsafe-eval'"]);
+		addSources(csp, "style-src", ["'unsafe-inline'"]);
+		addSources(csp, "connect-src", ["ws:", "wss:"]);
+		csp.delete("report-uri");
+		csp.delete("report-to");
+	});
 };

@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { BrowserRouter, MemoryRouter } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { CartProvider } from "../context/CartProvider";
 import Navbar from "./Navbar";
 
@@ -358,7 +359,11 @@ describe("Navbar Component", () => {
 			expect(document.body.style.overflow).toBe("hidden");
 			expect(screen.getByRole("link", { name: "Home" })).toHaveFocus();
 			await user.keyboard("{Shift>}{Tab}{/Shift}");
+			expect(hamburger).toHaveFocus();
+			await user.keyboard("{Shift>}{Tab}{/Shift}");
 			expect(screen.getByRole("link", { name: "FAQ" })).toHaveFocus();
+			await user.keyboard("{Tab}");
+			expect(hamburger).toHaveFocus();
 			await user.keyboard("{Tab}");
 			expect(screen.getByRole("link", { name: "Home" })).toHaveFocus();
 			await user.keyboard("a");
@@ -540,6 +545,30 @@ describe("Navbar Component", () => {
 				// Menu should be closed
 				expect(menu).not.toHaveClass("active");
 			}
+		});
+	});
+
+	describe("Account link", () => {
+		const renderWithAuth = (auth) => render(
+			<MemoryRouter>
+				<AuthContext.Provider value={auth}>
+					<CartProvider>
+						<Navbar onCartClick={vi.fn()} />
+					</CartProvider>
+				</AuthContext.Provider>
+			</MemoryRouter>,
+		);
+
+		it("hides the Login label while a stored session is being checked", () => {
+			renderWithAuth({ user: null, loading: true });
+			expect(document.querySelector(".nav-account-link")).toHaveClass("pending");
+		});
+
+		it("shows Account once the session resolves to a signed-in user", () => {
+			renderWithAuth({ user: { id: "user-1" }, loading: false });
+			const link = screen.getByRole("link", { name: "Account" });
+			expect(link).not.toHaveClass("pending");
+			expect(link).toHaveAttribute("href", "/account");
 		});
 	});
 });

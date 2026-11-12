@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 /**
  * Custom hook for rate limiting form submissions
@@ -14,6 +14,7 @@ const useRateLimit = (limit = 3, windowMs = 60000) => {
   const attemptsRef = useRef([]);
   const blockTimerRef = useRef(null);
   const countdownRef = useRef(null);
+  useEffect(() => () => { clearTimeout(blockTimerRef.current); clearTimeout(countdownRef.current); }, []);
 
   /**
    * Clean up old attempts outside the time window
@@ -29,6 +30,7 @@ const useRateLimit = (limit = 3, windowMs = 60000) => {
    * Start the block countdown timer
    */
   const startBlockCountdown = useCallback((duration) => {
+    clearTimeout(countdownRef.current);
     const endTime = Date.now() + duration;
 
     const updateCountdown = () => {
@@ -55,7 +57,7 @@ const useRateLimit = (limit = 3, windowMs = 60000) => {
       const now = Date.now();
       const oldestAttempt = attemptsRef.current[0];
 
-      if (oldestAttempt && now - oldestAttempt >= windowMs) {
+      if (!oldestAttempt || now - oldestAttempt >= windowMs) {
         // Block time expired, reset
         attemptsRef.current = [];
         setIsBlocked(false);
@@ -85,6 +87,7 @@ const useRateLimit = (limit = 3, windowMs = 60000) => {
       setIsBlocked(true);
       startBlockCountdown(timeUntilUnblock);
 
+      clearTimeout(blockTimerRef.current);
       // Set timer to automatically unblock
       blockTimerRef.current = setTimeout(() => {
         attemptsRef.current = [];

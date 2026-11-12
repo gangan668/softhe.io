@@ -1,0 +1,197 @@
+[
+  {
+    "width": 320,
+    "state": "account-profile",
+    "viewport": 320,
+    "pageWidth": 320,
+    "outsideViewport": [
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 343.53125,
+        "width": 75.484375
+      },
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 431.6875,
+        "width": 82.15625
+      }
+    ],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 320,
+    "state": "account-conversation",
+    "viewport": 320,
+    "pageWidth": 320,
+    "outsideViewport": [
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 343.53125,
+        "width": 75.484375
+      },
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 431.6875,
+        "width": 82.15625
+      }
+    ],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 320,
+    "state": "account-ticket-composer",
+    "viewport": 320,
+    "pageWidth": 320,
+    "outsideViewport": [
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 343.53125,
+        "width": 75.484375
+      },
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 431.6875,
+        "width": 82.15625
+      }
+    ],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 390,
+    "state": "account-profile",
+    "viewport": 390,
+    "pageWidth": 390,
+    "outsideViewport": [
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 431.6875,
+        "width": 82.15625
+      }
+    ],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 390,
+    "state": "account-conversation",
+    "viewport": 390,
+    "pageWidth": 390,
+    "outsideViewport": [
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 431.6875,
+        "width": 82.15625
+      }
+    ],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 390,
+    "state": "account-ticket-composer",
+    "viewport": 390,
+    "pageWidth": 390,
+    "outsideViewport": [
+      {
+        "tag": "BUTTON",
+        "class": "",
+        "right": 431.6875,
+        "width": 82.15625
+      }
+    ],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 768,
+    "state": "account-profile",
+    "viewport": 768,
+    "pageWidth": 768,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 768,
+    "state": "account-conversation",
+    "viewport": 768,
+    "pageWidth": 768,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 768,
+    "state": "account-ticket-composer",
+    "viewport": 768,
+    "pageWidth": 768,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1280,
+    "state": "account-profile",
+    "viewport": 1280,
+    "pageWidth": 1280,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1280,
+    "state": "account-conversation",
+    "viewport": 1280,
+    "pageWidth": 1280,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1280,
+    "state": "account-ticket-composer",
+    "viewport": 1280,
+    "pageWidth": 1280,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1440,
+    "state": "account-profile",
+    "viewport": 1440,
+    "pageWidth": 1440,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1440,
+    "state": "account-conversation",
+    "viewport": 1440,
+    "pageWidth": 1440,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  },
+  {
+    "width": 1440,
+    "state": "account-ticket-composer",
+    "viewport": 1440,
+    "pageWidth": 1440,
+    "outsideViewport": [],
+    "mainCount": 1,
+    "headingCount": 1
+  }
+]

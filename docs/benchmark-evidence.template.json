@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "captureDate": "YYYY-MM-DD",
   "summaryMethod": "median",
+  "captureSeconds": 0,
   "hardware": "CPU; GPU; motherboard; memory; storage; cooling",
   "bios": "Motherboard BIOS version and relevant settings",
   "drivers": "GPU and chipset driver versions",

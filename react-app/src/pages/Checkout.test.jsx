@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { CartProvider } from '../context/CartProvider';
 import Checkout from './Checkout';
+import { AuthContext } from '../context/AuthContext';
 import { createCheckoutSession } from '../utils/checkout';
+import { peekPostAuthDestination, rememberPostAuthDestination } from '../utils/postAuthRedirect';
 
 vi.mock('../utils/checkout', () => ({ createCheckoutSession: vi.fn() }));
 vi.mock('../utils/analytics', () => ({ trackEvent: vi.fn() }));
@@ -13,12 +15,14 @@ const renderCheckout = (cart, initialEntry = '/checkout') => {
 	localStorage.setItem('softhe_cart', JSON.stringify(cart));
 	return render(
 		<MemoryRouter initialEntries={[initialEntry]}>
+			<AuthContext.Provider value={{ configured: true, session: { access_token: 'checkout-token' }, user: { id: 'customer' } }}>
 			<CartProvider>
 				<Routes>
 					<Route path="/checkout" element={<Checkout />} />
 					<Route path="/store" element={<div>Store Redirect</div>} />
 				</Routes>
 			</CartProvider>
+			</AuthContext.Provider>
 		</MemoryRouter>
 	);
 };
@@ -87,6 +91,8 @@ describe('Checkout', () => {
 				earlyPerformanceRequested: true,
 				withdrawalAcknowledged: true,
 			}),
+			expect.any(Function),
+			'checkout-token',
 		);
 	});
 
@@ -106,6 +112,11 @@ describe('Checkout', () => {
 
 		expect(screen.getByRole('status')).toHaveTextContent(/nothing was charged, and your cart has been kept/i);
 		expect(JSON.parse(localStorage.getItem('softhe_cart'))).toEqual([{ id: 'windows-10', quantity: 1 }]);
+	});
+	it('fulfils a pending sign-up return when checkout opens', () => {
+		rememberPostAuthDestination('/checkout');
+		renderCheckout([{ id: 'windows-10', name: 'Custom Windows 10 ISO', price: 65, quantity: 1, icon: 'fas fa-windows' }]);
+		expect(peekPostAuthDestination()).toBeNull();
 	});
 });
 

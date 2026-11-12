@@ -64,7 +64,7 @@ if (requireServerlessApi) {
 			assert(health.release?.fingerprint === expectedReleaseFingerprint, '/api/health reports an unexpected release fingerprint');
 		}
 	} else {
-		console.log('HEALTH_CHECK_TOKEN is not set: only the public /api/health status was verified; release commit, fingerprint, and per-integration checks were skipped.');
+		console.warn('Warning: HEALTH_CHECK_TOKEN is not set; only the public /api/health status was verified. Release commit, fingerprint, and per-integration checks were skipped.');
 	}
 }
 

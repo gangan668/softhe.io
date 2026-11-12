@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-07",
+  "passed": true,
+  "engine": "Redis 7.4 Lua",
+  "image": "redis:7.4-alpine",
+  "imageDigest": "sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499",
+  "host": "code1",
+  "isolation": "Disposable Docker container with network disabled and no host port or persistent volume",
+  "containerRemoved": true,
+  "cases": [
+    "Start one hour old remains discoverable independently of log windows",
+    "Both retained index keys have expiry exceeding the 15-minute stuck threshold",
+    "An older attempt cannot remove a newer retry token",
+    "Retries preserve the oldest unresolved start score",
+    "Completed Stripe stage removes an orphaned pending index",
+    "Fresh processing attempt does not alert",
+    "Successful matching-token completion clears the index",
+    "Completed receiver order removes its orphaned pending index",
+    "Scan caps at 100 records and reports truncation for 101 pending attempts"
+  ],
+  "command": "PROCESSING_REDIS_TEST_CONTAINER=softhe-processing-test-20261007 node scripts/test-processing-index.js",
+  "limits": "This proves disposable Redis Lua behavior and source tests. No production fault, provider request, live notification or deployed monitor was exercised."
+}

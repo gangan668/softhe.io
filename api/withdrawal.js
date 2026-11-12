@@ -1,7 +1,10 @@
+const { withHttp } = require('./_lib/http');
 const crypto = require('node:crypto');
 const { claimKey, deleteKey, incrementWithExpiry, setKey } = require('./_lib/redis');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertOperatorIdentity } = require('./_lib/config');
+const { readJsonBody } = require('./_lib/json-body');
+const { sendPublicError } = require('./_lib/portal-security');
 const { fetchWithTimeout } = require('./_lib/fetch');
 const { adminRequest, portalServerConfigured } = require('./_lib/supabase');
 const { verifyTurnstile } = require('./_lib/turnstile');
@@ -16,13 +19,13 @@ const cleanText = (value, maxLength) => typeof value === 'string'
 	: '';
 
 const normalizeWithdrawal = (body = {}) => ({
-	orderReference: cleanText(body.orderReference, 100),
-	email: cleanText(body.email, 100).toLowerCase(),
-	requestedItems: Array.isArray(body.requestedItems)
+	orderReference: cleanText(body?.orderReference, 100),
+	email: cleanText(body?.email, 100).toLowerCase(),
+	requestedItems: Array.isArray(body?.requestedItems)
 		? [...new Set(body.requestedItems.map((item) => cleanText(item, 40)).filter(Boolean))]
 		: [],
-	comments: cleanText(body.comments, 2000),
-	website: cleanText(body.website, 200),
+	comments: cleanText(body?.comments, 2000),
+	website: cleanText(body?.website, 200),
 });
 
 const validateWithdrawal = (submission) => {
@@ -63,6 +66,7 @@ const getIdempotencyKey = (submission) => {
 	return crypto.createHmac('sha256', secret).update(canonical).digest('hex');
 };
 
+// Compares normalized addresses in constant time (fixed-length digests).
 const emailsMatch = (left, right) => {
 	if (typeof left !== 'string' || typeof right !== 'string' || !left.trim() || !right.trim()) return false;
 	const digest = (value) => crypto.createHash('sha256').update(value.trim().toLowerCase()).digest();
@@ -70,7 +74,8 @@ const emailsMatch = (left, right) => {
 };
 
 // Resolves the e-mail address of the order behind a reference (a Stripe Checkout
-// Session ID). Returns null when the order cannot be found. Provider errors are thrown.
+// Session ID): the portal database first, then the Stripe session itself. Returns
+// null when the order cannot be found. Provider errors are thrown.
 const lookupOrderEmail = async (orderReference) => {
 	if (portalServerConfigured()) {
 		const rows = await adminRequest(`orders?stripe_session_id=eq.${encodeURIComponent(orderReference)}&select=customer_email&limit=1`);
@@ -84,7 +89,7 @@ const lookupOrderEmail = async (orderReference) => {
 		if (response.status === 404) return null;
 		if (!response.ok) throw new Error(`Order lookup failed (${response.status})`);
 		const session = await response.json();
-		return session?.customer_details?.email || session?.customer_email || null;
+		return session?.customer_details?.email || null;
 	}
 	return null;
 };
@@ -133,14 +138,16 @@ async function withdrawal(req, res) {
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
-	const submission = normalizeWithdrawal(req.body);
+	let body;
+	try { body = await readJsonBody(req); } catch (error) { return sendPublicError(res, error); }
+	const submission = normalizeWithdrawal(body);
 	if (submission.website) {
 		return res.status(202).json({ received: true });
 	}
 	const validationError = validateWithdrawal(submission);
 	if (validationError) return res.status(400).json({ error: validationError });
 
-	const captcha = await verifyTurnstile(req);
+	const captcha = await verifyTurnstile(req, { body });
 	if (!captcha.ok) return res.status(captcha.status).json({ error: captcha.error });
 
 	let idempotencyKey;
@@ -192,7 +199,8 @@ async function withdrawal(req, res) {
 	}
 }
 
-module.exports = withdrawal;
+module.exports = withHttp(withdrawal);
+module.exports.config = { api: { bodyParser: false } };
 module.exports.ALLOWED_ITEMS = ALLOWED_ITEMS;
 module.exports.getIdempotencyKey = getIdempotencyKey;
 module.exports.getRetentionSeconds = getRetentionSeconds;

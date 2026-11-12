@@ -2,6 +2,8 @@
 
 This checklist is intentionally fail-closed. Check an item only when evidence exists in the named system. Live commerce remains disabled until every **Launch blocker** is complete.
 
+The checked items below describe historical candidate evidence. For the 2026-10-07 remediation release, rebind and reverify the exact new candidate before treating them as current launch qualification. Current progress is in `audits/2026-10-07/EXECUTION_STATUS.md`; the human review package is `audits/2026-10-07/LEGAL_REVIEW_PACKAGE.md`.
+
 Record the evidence for every item in [`launch-evidence.json`](launch-evidence.json). The file
 deliberately starts with pending entries and the manual **Commercial Release Gate** workflow
 rejects missing, placeholder, stale-candidate, or unapproved evidence before it runs the strict
@@ -29,7 +31,7 @@ rather than the later commit that records its evidence. The strict smoke confirm
 ## Evidence quality
 
 - [ ] Benchmark page names the exact hardware, BIOS, drivers, Windows/game versions, settings, and capture date.
-- [x] Stock and optimized results use at least two repeated runs and report medians, FPS, and 1% lows.
+- [x] Stock and optimized results use at least two repeated runs and report medians, average FPS, and P1 FPS.
 - [ ] Raw screenshots are published and claims are limited to the documented test configuration.
 - [ ] Layouts are approved at 320, 390, 768, 1280, and 1440 pixels.
 
