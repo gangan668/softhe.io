@@ -1,7 +1,13 @@
 const requestError = (statusCode, message) => Object.assign(new Error(message), { statusCode, publicMessage: message });
 
-const readJsonBody = async (req, maxBytes = 16384) => {
-	if (String(req.headers?.['content-type'] || '').split(';')[0].trim().toLowerCase() !== 'application/json') {
+const JSON_MEDIA_TYPES = ['application/json'];
+
+const mediaType = (req) => String(req.headers?.['content-type'] || '').split(';')[0].trim().toLowerCase();
+
+// Bounded read of any JSON value. mediaTypes lists the accepted Content-Type values
+// (e.g. CSP reports arrive as application/csp-report or application/reports+json).
+const readJsonValue = async (req, { maxBytes = 16384, mediaTypes = JSON_MEDIA_TYPES } = {}) => {
+	if (!mediaTypes.includes(mediaType(req))) {
 		throw requestError(415, 'JSON content type required');
 	}
 	const length = Number(req.headers?.['content-length'] || 0);
@@ -13,7 +19,6 @@ const readJsonBody = async (req, maxBytes = 16384) => {
 	let raw;
 	if (supplied !== undefined && !Buffer.isBuffer(supplied) && typeof supplied !== 'string') {
 		if (Buffer.byteLength(JSON.stringify(supplied), 'utf8') > maxBytes) throw requestError(413, 'Request too large');
-		if (!supplied || typeof supplied !== 'object' || Array.isArray(supplied)) throw requestError(400, 'JSON object required');
 		return supplied;
 	}
 	if (Buffer.isBuffer(supplied) || typeof supplied === 'string') {
@@ -35,10 +40,13 @@ const readJsonBody = async (req, maxBytes = 16384) => {
 		}
 		raw = Buffer.concat(chunks, bytes);
 	}
-	let body;
-	try { body = JSON.parse(raw.toString('utf8')); } catch { throw requestError(400, 'Invalid JSON'); }
+	try { return JSON.parse(raw.toString('utf8')); } catch { throw requestError(400, 'Invalid JSON'); }
+};
+
+const readJsonBody = async (req, maxBytes = 16384) => {
+	const body = await readJsonValue(req, { maxBytes });
 	if (!body || typeof body !== 'object' || Array.isArray(body)) throw requestError(400, 'JSON object required');
 	return body;
 };
 
-module.exports = { readJsonBody };
+module.exports = { readJsonBody, readJsonValue };

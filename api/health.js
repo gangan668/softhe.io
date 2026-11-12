@@ -74,6 +74,41 @@ const getConfigurationStatus = (environment = process.env) => {
 	return { ready: missing.length === 0 && uniqueInvalid.length === 0, missing, invalid: uniqueInvalid };
 };
 
+// The portal probe uses the service-role key and the storage probe hits Redis, so
+// unauthenticated traffic must not be able to trigger them on every request. Results
+// are cached per warm instance; authenticated release checks always probe fresh.
+const PROBE_TTL_MS = 60 * 1000;
+const probeCache = new Map();
+
+const resetProbeCache = () => probeCache.clear();
+
+const cachedProbe = async (name, probe, { fresh = false, now = Date.now() } = {}) => {
+	const cached = probeCache.get(name);
+	if (!fresh && cached && cached.expiresAt > now) return cached.value;
+	let value;
+	try { value = await probe(); } catch { value = false; }
+	probeCache.set(name, { value, expiresAt: now + PROBE_TTL_MS });
+	return value;
+};
+
+const probePortalAccess = (options) => cachedProbe('portal', async () => {
+	await adminRequest('profiles?select=id&limit=1');
+	return true;
+}, options);
+
+const probeStorageAccess = (options) => cachedProbe('storage', async () => await redisCommand(['PING']) === 'PONG', options);
+
+// true for a valid HEALTH_CHECK_TOKEN bearer, false when no credential was sent,
+// null when a credential was sent but does not match (or no token is configured).
+const detailedAccess = (req) => {
+	const header = String(req.headers?.authorization || '').trim();
+	if (!header) return false;
+	const supplied = header.replace(/^Bearer\s+/i, '');
+	const configured = process.env.HEALTH_CHECK_TOKEN?.trim();
+	if (!configured || !supplied || !safeEqual(configured, supplied)) return null;
+	return true;
+};
+
 async function health(req, res) {
 	res.setHeader('Cache-Control', 'no-store');
 	if (req.method === 'POST') {
@@ -112,6 +147,10 @@ async function health(req, res) {
 		}
 	}
 
+	res.setHeader('Vary', 'Authorization');
+	const detailed = detailedAccess(req);
+	if (detailed === null) return res.status(401).json({ error: 'Unauthorized' });
+
 	const configuration = getConfigurationStatus();
 	const readyFor = (keys) => !keys.some((key) => configuration.missing.includes(key) || configuration.invalid.includes(key));
 	const storageKeys = ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
@@ -119,14 +158,13 @@ async function health(req, res) {
 		? ['RESEND_API_KEY', 'EMAIL_FROM']
 		: ['EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID'];
 	let portalAccess = readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY']);
-	if (portalAccess) {
-		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
-	}
+	if (portalAccess) portalAccess = await probePortalAccess({ fresh: detailed });
 	let storageAccess = readyFor(storageKeys);
-	if (storageAccess) {
-		try { storageAccess = await redisCommand(['PING']) === 'PONG'; } catch { storageAccess = false; }
-	}
+	if (storageAccess) storageAccess = await probeStorageAccess({ fresh: detailed });
 	const ready = configuration.ready && portalAccess && storageAccess;
+	// Public callers learn only the overall status; release identity and per-integration
+	// checks require the HEALTH_CHECK_TOKEN bearer.
+	if (!detailed) return res.status(ready ? 200 : 503).json({ status: ready ? 'ready' : 'configuration-required' });
 	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
 	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
 	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
@@ -154,3 +192,7 @@ module.exports = withHttp(health);
 module.exports.REQUIRED_CONFIGURATION = REQUIRED_CONFIGURATION;
 module.exports.getConfigurationStatus = getConfigurationStatus;
 module.exports.safeEqual = safeEqual;
+module.exports.PROBE_TTL_MS = PROBE_TTL_MS;
+module.exports.probePortalAccess = probePortalAccess;
+module.exports.probeStorageAccess = probeStorageAccess;
+module.exports.resetProbeCache = resetProbeCache;

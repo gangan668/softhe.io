@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
 import { staffRequest } from '../utils/staff';
+import { getUserErrorMessage } from '../utils/userErrors';
 import './Portal.css';
+
+const STAFF_ERROR_MESSAGE = 'The staff request could not be completed. Please try again.';
 
 export default function Admin() {
 	const { user } = useAuth();
@@ -35,19 +38,19 @@ function AdminSession() {
 			const nextCustomers = status.role === 'admin' ? (await staffRequest(session, 'customers')).customers || [] : [];
 			if (!current()) return;
 			setDataOwner(user.id + ':' + session?.access_token); setTickets(queue.tickets || []); setAccess(status); setOrders(nextOrders); setCustomers(nextCustomers); setError('');
-		} catch (loadError) { if (current()) { setTickets([]); setOrders([]); setCustomers([]); setAccess(null); setSelected(null); setMessages([]); setError(loadError.message); } }
+		} catch (loadError) { if (current()) { setTickets([]); setOrders([]); setCustomers([]); setAccess(null); setSelected(null); setMessages([]); setError(getUserErrorMessage(loadError, STAFF_ERROR_MESSAGE)); } }
 	}, [session, user.id]);
 	useEffect(() => { const timer = window.setTimeout(() => void load(), 0); return () => window.clearTimeout(timer); }, [load]);
 	const open = async (ticket) => {
 		const generation = scope.current; const request = ++ticketRead.current;
 		setSelected(null); setMessages([]); setReply('');
 		try { const data = await staffRequest(session, 'ticket', { query: { id: ticket.id } }); if (generation !== scope.current || request !== ticketRead.current) return; setSelected(data.ticket); setMessages(data.messages || []); setError(''); }
-		catch (openError) { if (generation === scope.current && request === ticketRead.current) setError(openError.message); }
+		catch (openError) { if (generation === scope.current && request === ticketRead.current) setError(getUserErrorMessage(openError, STAFF_ERROR_MESSAGE)); }
 	};
 	const updateStatus = async (status) => {
 		const generation = scope.current; const ticket = selected; const read = ticketRead.current;
 		try { await staffRequest(session, 'status', { method: 'POST', body: { ticketId: ticket.id, status } }); if (generation !== scope.current) return; if (read === ticketRead.current) setSelected({ ...ticket, status }); await load(); }
-		catch (statusError) { if (generation === scope.current) setError(statusError.message); }
+		catch (statusError) { if (generation === scope.current) setError(getUserErrorMessage(statusError, STAFF_ERROR_MESSAGE)); }
 	};
 	const send = async (event) => {
 		event.preventDefault(); if (replyInFlight.current || !reply.trim() || !selected) return;
@@ -58,7 +61,7 @@ function AdminSession() {
 			// The reply is stored either way; tell staff when the customer was not emailed.
 			if (saved?.notified === false && generation === scope.current) setError('Reply saved, but the customer could not be emailed. Contact them another way if it is urgent.');
 		}
-		catch (sendError) { if (generation === scope.current) setError(sendError.message); }
+		catch (sendError) { if (generation === scope.current) setError(getUserErrorMessage(sendError, STAFF_ERROR_MESSAGE)); }
 		finally { replyInFlight.current = false; if (generation === scope.current) setReplySending(false); }
 	};
 	return <div className="portal-page"><header className="portal-heading"><div><span className="eyebrow">Staff only · MFA protected</span><h1>Customer operations</h1><p>Server-mediated support access. Every privileged view and action is audited.</p></div><Link className="btn btn-secondary" to="/account">Customer account</Link></header>{error && <div className="portal-error" role="alert">{error}</div>}

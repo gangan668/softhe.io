@@ -5,6 +5,7 @@ import { notifyTicketReply, revokeOtherSessions, writeTicket } from '../utils/po
 import { hasVerifiedFactor } from '../utils/mfa';
 import { passwordRequirements, validateStrongPassword } from '../utils/passwordPolicy';
 import { runPortalQueriesWithSessionRecovery } from '../utils/portalSession';
+import { SESSION_EXPIRED_MESSAGE, getUserErrorMessage } from '../utils/userErrors';
 import './Portal.css';
 
 const tabs = ['overview', 'orders', 'tickets', 'history', 'security'];
@@ -59,11 +60,11 @@ function AccountSession() {
 			setMessages([]);
 			setSelectedTicket(null);
 			await supabase.auth.signOut({ scope: 'local' });
-			if (scope === requestScope.current) navigate('/login', { replace: true, state: { authError: error.message } });
+			if (scope === requestScope.current) navigate('/login', { replace: true, state: { authError: getUserErrorMessage(error, SESSION_EXPIRED_MESSAGE) } });
 			return;
 		}
 		setData({ userId: user.id, profile: profile.data, orders: orders.data || [], tickets: tickets.data || [], activity: activity.data || [] });
-		setStatus({ loading: false, error: error?.message || '', message: '' });
+		setStatus({ loading: false, error: error ? getUserErrorMessage(error, 'Some account details could not be loaded. Please try again.') : '', message: '' });
 		} catch { if (scope === requestScope.current) setStatus({ loading: false, error: 'Account could not be loaded. Please try again.', message: '' }); }
 	}, [navigate, supabase, user.id]);
 	useEffect(() => {
@@ -86,7 +87,7 @@ function AccountSession() {
 		event.preventDefault(); const scope = requestScope.current; const form = new FormData(event.currentTarget);
 		const billing_address = { line1: form.get('line1'), line2: form.get('line2'), city: form.get('city'), postal_code: form.get('postal_code'), country: form.get('country') };
 		try { const { error } = await supabase.from('profiles').update({ full_name: form.get('full_name'), phone: form.get('phone'), locale: form.get('locale'), billing_address }).eq('id', user.id);
-		if (scope !== requestScope.current) return; setStatus((s) => ({ ...s, error: error?.message || '', message: error ? '' : 'Profile saved.' })); if (!error) void load(); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Profile could not be saved. Please try again.', message: '' })); }
+		if (scope !== requestScope.current) return; setStatus((s) => ({ ...s, error: error ? getUserErrorMessage(error, 'Profile could not be saved. Please try again.') : '', message: error ? '' : 'Profile saved.' })); if (!error) void load(); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Profile could not be saved. Please try again.', message: '' })); }
 	};
 	const createTicket = async (event) => {
 		event.preventDefault(); if (ticketInFlight.current) return;
@@ -99,7 +100,7 @@ function AccountSession() {
 			if (scope !== requestScope.current) return;
 			await load(); if (scope !== requestScope.current) return;
 			setTab('tickets'); setStatus((value) => ({ ...value, error: notified ? '' : 'Ticket saved, but the email notification could not be sent.', message: 'Ticket ' + String(id).slice(0, 8) + ' created.' }));
-		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: error.message })); }
+		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: getUserErrorMessage(error, 'Ticket could not be saved. Please try again.') })); }
 		finally { ticketInFlight.current = false; if (scope === requestScope.current) setTicketSending(false); }
 	};
 	const sendReply = async (event) => {
@@ -115,7 +116,7 @@ function AccountSession() {
 			if (read === ticketRead.current) await openTicket(ticket);
 			await load(); if (scope !== requestScope.current) return;
 			setStatus((value) => ({ ...value, error: notified ? '' : 'Reply saved, but the email notification could not be sent.' }));
-		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: error.message })); }
+		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: getUserErrorMessage(error, 'Reply could not be sent. Please try again.') })); }
 		finally { replyInFlight.current = false; if (scope === requestScope.current) setReplySending(false); }
 	};
 	const signOut = async () => { const scope = requestScope.current; setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); try { const result = await supabase.auth.signOut(); if (result?.error) throw result.error; if (scope === requestScope.current) navigate('/login', { replace: true }); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Sign-out could not be completed. Please try again.', message: '' })); } };

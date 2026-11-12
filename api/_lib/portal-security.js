@@ -59,10 +59,26 @@ const verifyReceiptToken = (sessionId, supplied) => {
 	return left.length === right.length && crypto.timingSafeEqual(left, right);
 };
 
-const sendPublicError = (res, error, fallback = 'Request could not be completed') => {
-	const status = Number(error?.statusCode) || 500;
-	if (status >= 500) console.error('portal_request_failed', { status, message: error?.message });
-	return res.status(status).json({ error: error?.publicMessage || (status < 500 ? error?.message : fallback) });
+const GENERIC_CLIENT_ERRORS = {
+	400: 'Invalid request',
+	401: 'Authentication required',
+	403: 'Forbidden',
+	404: 'Not found',
+	409: 'Conflict',
+	413: 'Request too large',
+	415: 'Unsupported content type',
+	429: 'Too many requests. Please try again later.',
 };
 
-module.exports = { acquireLock, clientIp, enforceRateLimit, enforceSameOrigin, jsonOnly, receiptToken, releaseLock, requestId, sendPublicError, verifyReceiptToken };
+// Only messages explicitly marked as public (error.publicMessage) reach the client.
+// Internal messages (including upstream provider text) stay in server logs.
+const sendPublicError = (res, error, fallback = 'Request could not be completed') => {
+	const status = Number(error?.statusCode) || 500;
+	if (status >= 500) console.error('portal_request_failed', { status, message: error?.message, detail: error?.detail });
+	const message = status < 500
+		? error?.publicMessage || GENERIC_CLIENT_ERRORS[status] || 'Request could not be completed'
+		: error?.publicMessage || fallback;
+	return res.status(status).json({ error: message });
+};
+
+module.exports = { GENERIC_CLIENT_ERRORS, acquireLock, clientIp, enforceRateLimit, enforceSameOrigin, jsonOnly, receiptToken, releaseLock, requestId, sendPublicError, verifyReceiptToken };

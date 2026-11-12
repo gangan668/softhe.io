@@ -26,6 +26,7 @@ jobs:
       - name: Check production
         run: node scripts/production-smoke.js
         env:
+          HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
           PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL || 'https://softhe.io' }}
           REQUIRE_APP_MARKER: ${{ vars.REQUIRE_APP_MARKER || 'false' }}
           REQUIRE_SECURITY_HEADERS: ${{ vars.REQUIRE_SECURITY_HEADERS || 'false' }}
@@ -41,6 +42,7 @@ jobs:
       - name: Check hydrated production metadata and rendering
         run: npm run smoke:browser
         env:
+          HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}
           PRODUCTION_BASE_URL: ${{ vars.PRODUCTION_BASE_URL || 'https://softhe.io' }}
           EXPECTED_PUBLIC_ORIGIN: https://softhe.io
           EXPECTED_RELEASE_SOURCE_COMMIT: ${{ vars.EXPECTED_RELEASE_SOURCE_COMMIT }}

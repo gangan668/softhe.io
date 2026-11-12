@@ -4,14 +4,19 @@ import { isPrivateRoute } from '../src/config/routePolicy.js';
 const routes = ['/', '/services', '/store', '/performance', '/faq', '/contact', '/terms', '/privacy-policy', '/cookie-policy', '/legal-notice', '/withdrawal', '/checkout', '/login', '/register', '/forgot-password', '/resend-confirmation', '/reset-password', '/account', '/admin'];
 
 // This probe reads deployed pages without submitting forms or creating accounts.
-export async function checkDeployedBrowser({ context, origin, publicOrigin = 'https://softhe.io', sourceCommit, fingerprint, widths = [390, 1440] }) {
-  const healthResponse = await context.request.get(`${origin}/api/health`);
+export async function checkDeployedBrowser({ context, origin, publicOrigin = 'https://softhe.io', sourceCommit, fingerprint, widths = [390, 1440], healthToken = process.env.HEALTH_CHECK_TOKEN?.trim() }) {
+  // Release identity and per-integration checks are only returned to the HEALTH_CHECK_TOKEN bearer.
+  const healthResponse = await context.request.get(`${origin}/api/health`, healthToken ? { headers: { Authorization: `Bearer ${healthToken}` } } : undefined);
   assert.equal(healthResponse.status(), 200, 'Deployed health must return HTTP 200');
   const health = await healthResponse.json();
   assert.equal(health.status, 'ready', 'Deployed health is not ready');
-  assert(Object.values(health.checks || {}).length >= 7 && Object.values(health.checks).every(Boolean), 'Deployed readiness checks are incomplete');
-  if (sourceCommit) assert.equal(health.release?.sourceCommit, sourceCommit, 'Deployed source commit differs from the candidate');
-  if (fingerprint) assert.equal(health.release?.fingerprint, fingerprint, 'Deployed release fingerprint differs from the candidate');
+  if (healthToken) {
+    assert(Object.values(health.checks || {}).length >= 7 && Object.values(health.checks).every(Boolean), 'Deployed readiness checks are incomplete');
+    if (sourceCommit) assert.equal(health.release?.sourceCommit, sourceCommit, 'Deployed source commit differs from the candidate');
+    if (fingerprint) assert.equal(health.release?.fingerprint, fingerprint, 'Deployed release fingerprint differs from the candidate');
+  } else {
+    console.warn('Warning: HEALTH_CHECK_TOKEN is not set; only the public /api/health status was verified. Release commit, fingerprint, and per-integration checks were skipped.');
+  }
   const observations = [];
   for (const width of widths) {
     for (const route of [...routes, '/production-browser-route-that-must-not-exist']) {

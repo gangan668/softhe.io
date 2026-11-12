@@ -101,7 +101,8 @@ const createStripeForm = (items, origin, acceptedAt = new Date().toISOString(), 
 	form.append('mode', 'payment');
 	form.append('success_url', `${origin}/store?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
 	form.append('cancel_url', `${origin}/checkout?checkout=cancelled`);
-	form.append('allow_promotion_codes', 'true');
+	// Promotion codes must not stack on top of the automatic bundle discount.
+	if (discountRate === 0) form.append('allow_promotion_codes', 'true');
 	form.append('billing_address_collection', 'auto');
 	form.append('invoice_creation[enabled]', 'true');
 	form.append('customer_creation', 'always');
@@ -157,7 +158,8 @@ async function createCheckoutSession(req, res) {
 	try {
 		assertCommerceConfiguration();
 	} catch (error) {
-		return res.status(503).json({ error: error.message });
+		console.error('checkout_configuration_incomplete', { message: error.message });
+		return res.status(503).json({ error: 'Checkout is temporarily unavailable' });
 	}
 
 	let items;

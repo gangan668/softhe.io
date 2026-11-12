@@ -44,3 +44,14 @@ describe('revokeOtherSessions', () => {
 		expect(fetchImpl).toHaveBeenCalledOnce();
 	});
 });
+
+describe('writeTicket errors', () => {
+	it('caps server error messages and ignores non-string errors', async () => {
+		const huge = vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: 'y'.repeat(5000) }) });
+		const error = await writeTicket({ access_token: 'token' }, {}, huge).catch((caught) => caught);
+		expect(error.safeMessage).toBe(true);
+		expect(error.message.length).toBeLessThanOrEqual(200);
+		const nonString = vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: ['internal'] }) });
+		await expect(writeTicket({ access_token: 'token' }, {}, nonString)).rejects.toThrow('Ticket could not be saved');
+	});
+});

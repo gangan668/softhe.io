@@ -1,5 +1,9 @@
 import { useState } from 'react';
+import Captcha from '../components/Captcha';
+import useCaptcha from '../components/useCaptcha';
 import { siteConfig } from '../config/site';
+import { CAPTCHA_REQUIRED_MESSAGE } from '../utils/captcha';
+import { getUserErrorMessage } from '../utils/userErrors';
 import { submitWithdrawal } from '../utils/withdrawal';
 import './Legal.css';
 import './Withdrawal.css';
@@ -21,6 +25,7 @@ function Withdrawal() {
 	});
 	const [status, setStatus] = useState(null);
 	const [submitting, setSubmitting] = useState(false);
+	const captcha = useCaptcha();
 
 	const toggleItem = (itemId) => {
 		setForm((current) => {
@@ -35,20 +40,25 @@ function Withdrawal() {
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
+		if (captcha.blocking) {
+			setStatus({ type: 'error', message: CAPTCHA_REQUIRED_MESSAGE });
+			return;
+		}
 		setSubmitting(true);
 		setStatus(null);
 		try {
-			const result = await submitWithdrawal(form);
+			const result = await submitWithdrawal({ ...form, captchaToken: captcha.token });
 			setStatus({
 				type: 'success',
-				message: result.duplicate
-					? 'This withdrawal request was already received. Check your email or contact support if you need help.'
-					: `Your request was received${result.requestId ? ` as ${result.requestId}` : ''}. A timestamped acknowledgement will be sent by email.`,
+				// The server answers identically whether or not the order matched,
+				// so never claim that an email was definitely sent.
+				message: `If the order reference and email match our records, you'll receive a confirmation email.${result?.requestId ? ` Your request ID is ${result.requestId}.` : ''}`,
 			});
 			setForm((current) => ({ ...current, comments: '', website: '' }));
 		} catch (error) {
-			setStatus({ type: 'error', message: error.message });
+			setStatus({ type: 'error', message: getUserErrorMessage(error, 'The withdrawal request could not be confirmed.') });
 		} finally {
+			if (captcha.enabled) captcha.reset();
 			setSubmitting(false);
 		}
 	};
@@ -125,7 +135,12 @@ function Withdrawal() {
 								onChange={(event) => setForm({ ...form, comments: event.target.value })}
 								maxLength="2000"
 							/>
-							<button className="btn btn-primary" type="submit" disabled={submitting || form.requestedItems.length === 0}>
+							<Captcha captcha={captcha} />
+							<button
+								className="btn btn-primary"
+								type="submit"
+								disabled={submitting || form.requestedItems.length === 0 || captcha.blocking}
+							>
 								{submitting ? 'Submitting…' : 'Confirm withdrawal request'}
 							</button>
 							{status && (

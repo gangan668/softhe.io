@@ -83,6 +83,23 @@ describe('monitoring alert checker', () => {
 		}
 	});
 
+	it('authenticates detailed health checks with the HEALTH_CHECK_TOKEN secret', () => {
+		const read = (name) => readFileSync(join(process.cwd(), '..', '.github', 'workflows', name), 'utf8');
+		for (const name of ['monitoring-alerts.yml', 'release-gate.yml', 'production-smoke.yml']) {
+			expect(read(name)).toContain('HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}');
+		}
+		// Every smoke step in the scheduled smoke (HTTP and browser) receives the token.
+		expect(read('production-smoke.yml').match(/HEALTH_CHECK_TOKEN: \$\{\{ secrets\.HEALTH_CHECK_TOKEN \}\}/g)).toHaveLength(2);
+		expect(read('release-gate.yml').match(/HEALTH_CHECK_TOKEN: \$\{\{ secrets\.HEALTH_CHECK_TOKEN \}\}/g)).toHaveLength(3);
+		expect(read('monitoring-alerts.yml')).toContain('health_auth=(--header "Authorization: Bearer $HEALTH_CHECK_TOKEN")');
+		expect(read('monitoring-alerts.yml')).toContain('"${health_auth[@]}" https://softhe.io/api/health');
+		expect(read('release-gate.yml')).toContain('--max-time 30 "${health_auth[@]}" > candidate-health.json');
+		const script = (name) => readFileSync(join(process.cwd(), 'scripts', name), 'utf8');
+		expect(script('production-smoke.js')).toContain('Authorization: `Bearer ${healthCheckToken}`');
+		expect(script('deployed-browser-checks.mjs')).toContain('Authorization: `Bearer ${healthToken}`');
+		expect(script('vercel-smoke-request.js')).toContain("['--header', `${key}: ${value}`]");
+	});
+
 	it('requires explicit aligned Preview configuration for controlled runtime tests', () => {
 		const workflow = readFileSync(join(process.cwd(), '..', '.github', 'workflows', 'monitoring-alerts.yml'), 'utf8');
 		expect(workflow).toContain('MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}');
