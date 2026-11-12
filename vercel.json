@@ -7,17 +7,23 @@
 		{ "source": "/api/order-fulfillment", "destination": "/api/stripe-webhook" },
 		{ "source": "/api/staff", "destination": "/api/portal-bootstrap?staff=1" },
 		{ "source": "/api/session-revoke-others", "destination": "/api/portal-bootstrap?action=revoke-others" },
-		{ "source": "/api/staff/revoke", "destination": "/api/portal-bootstrap?action=revoke-staff" }
-		,{ "source": "/api/tickets/write", "destination": "/api/ticket-write" }
-		,{ "source": "/api/staff/account-status", "destination": "/api/portal-bootstrap?action=account-status" }
+		{ "source": "/api/staff/revoke", "destination": "/api/portal-bootstrap?action=revoke-staff" },
+		{ "source": "/api/tickets/write", "destination": "/api/ticket-write" },
+		{ "source": "/api/staff/account-status", "destination": "/api/portal-bootstrap?action=account-status" },
+		{ "source": "/api/csp-report", "destination": "/api/browser-errors?kind=csp" }
 	],
 	"headers": [
 		{
 			"source": "/(.*)",
 			"headers": [
-				{ "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://zbchdxptibehtizomwiq.supabase.co wss://zbchdxptibehtizomwiq.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests" },
+				{ "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' https://www.googletagmanager.com https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data:; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com https://mbwsmyqofkxmxkelqviy.supabase.co wss://mbwsmyqofkxmxkelqviy.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests; report-uri /api/csp-report; report-to csp-endpoint" },
+				{ "key": "Reporting-Endpoints", "value": "csp-endpoint=\"/api/csp-report\"" },
+				{ "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
+				{ "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+				{ "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
+				{ "key": "X-Permitted-Cross-Domain-Policies", "value": "none" },
 				{ "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-				{ "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), usb=()" },
+				{ "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), usb=(), payment=(), magnetometer=(), accelerometer=(), gyroscope=()" },
 				{ "key": "X-Content-Type-Options", "value": "nosniff" },
 				{ "key": "X-Frame-Options", "value": "DENY" }
 			]

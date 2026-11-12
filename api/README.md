@@ -66,9 +66,11 @@ candidate origin and use the same `ORDER_FULFILLMENT_WEBHOOK_SECRET` for sender 
 
 ## health.js and browser-errors.js
 
-`GET /api/health` reports whether every required production integration is configured without exposing secret values. Use it as the cutover and uptime readiness check.
+`GET /api/health` reports whether every required production integration is configured without exposing secret values. Use it as the cutover and uptime readiness check. Public callers receive only `{ "status": "ready" | "configuration-required" }` (HTTP 200/503), and the service-role portal probe is cached for 60 seconds per warm instance. Sending `Authorization: Bearer <HEALTH_CHECK_TOKEN>` returns the detailed payload (`release.sourceCommit`, `release.fingerprint`, `checks`) with a fresh probe; a wrong token returns 401.
 
-`POST /api/browser-errors` accepts bounded, rate-limited client error reports and writes structured records to server logs. Configure `VITE_ERROR_REPORTING_ENDPOINT=/api/browser-errors` on the serverless deployment, then connect the host logs to the chosen alerting destination.
+`POST /api/browser-errors` accepts bounded (16 KB), same-origin, JSON, rate-limited client error reports and writes structured records to server logs. Configure `VITE_ERROR_REPORTING_ENDPOINT=/api/browser-errors` on the serverless deployment, then connect the host logs to the chosen alerting destination. `POST /api/csp-report` (rewritten to `/api/browser-errors?kind=csp`) accepts `application/csp-report`, `application/reports+json`, or `application/json` violation reports without an Origin requirement, logs a compact `csp_violation` warning, and returns 204.
+
+`POST /api/contact` and `POST /api/withdrawal` verify a Cloudflare Turnstile token (`captchaToken` in the JSON body) whenever `TURNSTILE_SECRET_KEY` is set. The withdrawal endpoint always notifies the operator (with `order_verified: yes|no`) but sends the customer acknowledgement only when the order reference (Stripe Checkout Session ID) belongs to the submitted email; the HTTP response is identical either way.
 
 `PUBLIC_SITE_URL` is the only source used for Stripe success and cancellation URLs. Request host headers are intentionally ignored.
 

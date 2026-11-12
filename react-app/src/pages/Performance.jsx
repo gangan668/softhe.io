@@ -1,8 +1,24 @@
 import SEO from '../components/SEO';
-import { benchmarkEvidenceComplete, benchmarkMethodology } from '../data/benchmark';
+import {
+	benchmarkEvidenceComplete,
+	benchmarkMethodology,
+	missingBenchmarkEvidence,
+	publishedBenchmarkFields,
+} from '../data/benchmark';
 import "./Performance.css";
 
+const METHODOLOGY_FIELDS = [
+	{ key: 'hardware', label: 'Hardware', value: () => benchmarkMethodology.hardware },
+	{ key: 'software', label: 'Software', value: () => benchmarkMethodology.software },
+	{ key: 'scenario', label: 'Scenario', value: () => benchmarkMethodology.scenario },
+	{ key: 'captureDate', label: 'Captured', value: () => benchmarkMethodology.captureDate },
+	{ key: 'runCount', label: 'Repeated runs', value: () => benchmarkMethodology.runCount },
+	{ key: 'summaryMethod', label: 'Summary', value: () => benchmarkMethodology.summaryMethod },
+];
+
 function Performance() {
+	const publishedFields = METHODOLOGY_FIELDS.filter((field) => publishedBenchmarkFields.includes(field.key));
+
 	return (
 		<>
 			<SEO
@@ -15,17 +31,24 @@ function Performance() {
 			<div className="performance-page">
 				<section className="performance-hero page-header">
 					<div className="container">
-						<span className="section-kicker">Benchmarks</span>
-						<h1>Measured results from the current test PC</h1>
+						<span className="section-kicker">{benchmarkEvidenceComplete ? 'Benchmarks' : 'Preliminary benchmark sample'}</span>
+						<h1>{benchmarkEvidenceComplete ? 'Measured results from the current test PC' : 'Early results from one test PC'}</h1>
 						<p>
 							This preliminary comparison uses one PC. Windows edition, memory settings, and
 							GPU driver changed. The result cannot isolate the effect of a Softhe.io product.
 						</p>
-						<p className="methodology-warning" role="note">
-							Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
-							 Runs per configuration: {benchmarkMethodology.runCount ?? 'not yet published'}.
-							 Raw run captures: not yet published.
-						</p>
+						{benchmarkEvidenceComplete ? (
+							<p className="methodology-warning" role="note">
+								Captured: {benchmarkMethodology.captureDate}. Hardware: {benchmarkMethodology.hardware}.
+								 Runs per configuration: {benchmarkMethodology.runCount}.
+								 Raw run captures: not yet published.
+							</p>
+						) : (
+							<p className="methodology-warning" role="note">
+								The full test methodology and raw run captures are not yet published.{' '}
+								<a href="#benchmark-methodology-title">See what is missing</a>.
+							</p>
+						)}
 						<div className="performance-stats">
 							<div>
 								<strong>658 to 826</strong>
@@ -213,19 +236,33 @@ function Performance() {
 									guarantee of results on other hardware or workloads.
 								</p>
 							</div>
-							<dl className="methodology-grid">
-								<div><dt>Hardware</dt><dd>{benchmarkMethodology.hardware}</dd></div>
-								<div><dt>Software</dt><dd>{benchmarkMethodology.software}</dd></div>
-								<div><dt>Scenario</dt><dd>{benchmarkMethodology.scenario}</dd></div>
-								<div><dt>Captured</dt><dd>{benchmarkMethodology.captureDate}</dd></div>
-								<div><dt>Repeated runs</dt><dd>{benchmarkMethodology.runCount ?? 'Pending publication'}</dd></div>
-								<div><dt>Summary</dt><dd>{benchmarkMethodology.summaryMethod}</dd></div>
-							</dl>
-							{!benchmarkEvidenceComplete && (
-								<p className="methodology-warning" role="note">
-									Full reproducibility details and raw run evidence have not yet been published.
-									These figures cannot establish the effect of a single product.
-								</p>
+							{benchmarkEvidenceComplete ? (
+								<dl className="methodology-grid">
+									{METHODOLOGY_FIELDS.map((field) => (
+										<div key={field.key}><dt>{field.label}</dt><dd>{field.value()}</dd></div>
+									))}
+								</dl>
+							) : (
+								<div className="methodology-pending" role="note" aria-labelledby="methodology-pending-title">
+									<h3 id="methodology-pending-title">Evidence not yet published</h3>
+									<p>
+										Full reproducibility details and raw run evidence have not yet been published.
+										These figures cannot establish the effect of a single product.
+									</p>
+									<ul>
+										{missingBenchmarkEvidence.map((item) => (
+											<li key={item.key}>{item.label}</li>
+										))}
+										<li>Raw run captures for each configuration</li>
+									</ul>
+									{publishedFields.length > 0 && (
+										<dl className="methodology-grid methodology-grid-partial">
+											{publishedFields.map((field) => (
+												<div key={field.key}><dt>{field.label}</dt><dd>{field.value()}</dd></div>
+											))}
+										</dl>
+									)}
+								</div>
 							)}
 						</section>
 

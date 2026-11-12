@@ -178,64 +178,22 @@ function Store() {
 						</div>
 					</div>
 				)}
-				<section className="page-header">
+				<section className="store" aria-labelledby="store-title">
 					<div className="container">
-						<h1>Store</h1>
-						<p>Compare each product by price, included work, and hardware fit.{!commerceEnabled && ' Online ordering is currently unavailable.'}</p>
-					</div>
-				</section>
-
-				<section className="store">
-					<div className="container">
-						<div className="store-intro">
-							<div>
-								<span className="section-kicker">Products</span>
-								<h2>Choose Windows, BIOS tuning, or both.</h2>
-								<p>
-									Choose a Windows build for operating-system changes or BIOS tuning for firmware
-								and memory settings. {commerceEnabled ? 'The server checks the order before Stripe opens.' : 'Online ordering is currently unavailable.'}
-								</p>
-							</div>
-							<div className="store-trust">
-								{commerceEnabled && <div>
-									<strong>Stripe</strong>
-									<span>Secure hosted checkout</span>
-								</div>}
-								<div>
-									<strong>Withdrawal</strong>
-									<span>Online request available</span>
-								</div>
-								<div>
-									<strong>Support</strong>
-									<span>Email and Discord</span>
-								</div>
-							</div>
-						</div>
-
-						<div className="store-proof" aria-label="Benchmark evidence">
-							<div>
-								<span className="section-kicker">Benchmark context</span>
-								<h3>See the limits of the preliminary CS2 comparison.</h3>
-								<p>
-									One PC measured 658 and 826 average FPS across two configurations. Windows edition,
-									memory settings, and GPU driver changed. Raw runs are not yet published.
-								</p>
-							</div>
-							<a href="/performance" className="proof-link">
-								Read the benchmark details
-								<i className="fas fa-arrow-right" aria-hidden="true"></i>
-							</a>
-						</div>
+						<header className="store-header">
+							<h1 id="store-title">Store</h1>
+							<p>Choose a Windows build, BIOS tuning, or both. Compare price, included work, and hardware fit.</p>
+						</header>
 
 						<div className="product-finder">
-							<div>
-								<span className="section-kicker">Quick fit</span>
-							<h3>Find the closest match for your PC</h3>
-							<p>Choose the statement that matches your requirement. Contact support if none of them fit.</p>
-							</div>
-							<div className="finder-controls" role="group" aria-label="Product recommendation options">
+							<p className="finder-label" id="finder-label">
+								<span>Quick fit</span>
+								Find the closest match for your PC
+							</p>
+							<div className="finder-controls" role="group" aria-labelledby="finder-label">
 								<button
 									type="button"
+									aria-pressed={quizChoice === 'windows-10'}
 									className={quizChoice === 'windows-10' ? 'active' : ''}
 									onClick={() => handleQuizChoice('windows-10', 'competitive_windows_baseline')}
 								>
@@ -243,6 +201,7 @@ function Store() {
 								</button>
 								<button
 									type="button"
+									aria-pressed={quizChoice === 'windows-11'}
 									className={quizChoice === 'windows-11' ? 'active' : ''}
 									onClick={() => handleQuizChoice('windows-11', 'newer_pc_windows_11')}
 								>
@@ -250,27 +209,32 @@ function Store() {
 								</button>
 								<button
 									type="button"
+									aria-pressed={quizChoice === 'bios-optimization'}
 									className={quizChoice === 'bios-optimization' ? 'active' : ''}
 									onClick={() => handleQuizChoice('bios-optimization', 'untuned_hardware')}
 								>
 									I need my BIOS and memory settings checked
 								</button>
 							</div>
-							<div className="finder-result">
-								<span>Recommended</span>
-								<strong>{recommendedProduct.name}</strong>
-								<p>{recommendedProduct.bestFor}</p>
-							</div>
+							<p className="finder-result" aria-live="polite">
+								<span className="finder-result-label">Recommended:</span>{' '}
+								<a href={`#${recommendedProduct.id}`}>{recommendedProduct.name}</a>
+								<span className="finder-reason"> — {recommendedProduct.bestFor}</span>
+							</p>
 						</div>
 
 						<div className="products-grid">
 							{products.map((product) => (
-								<div key={product.id} id={product.id} className="product-card">
+								<div
+									key={product.id}
+									id={product.id}
+									className={`product-card${product.id === recommendedProduct.id ? ' is-recommended' : ''}`}
+								>
 									{product.badge && (
 										<div className="product-badge">{product.badge}</div>
 									)}
 									<div className="product-image">
-										<i className={product.icon}></i>
+										<i className={product.icon} aria-hidden="true"></i>
 									</div>
 									<div className="product-info">
 										<div className="product-heading">
@@ -292,29 +256,31 @@ function Store() {
 										<div className="product-actions">
 											{commerceEnabled ? (
 												<>
-											<button
-												onClick={() => handleAddToCart(product)}
-												className={`btn ${addedToCart === product.id ? 'btn-success' : 'btn-secondary'}`}
-											>
-												{addedToCart === product.id ? (
-													<>
-														<i className="fas fa-check"></i>
-														Added to Cart
-													</>
-												) : (
-													<>
-														<i className="fas fa-cart-plus"></i>
-														Add to Cart
-													</>
-												)}
-											</button>
-											<button
-												onClick={() => handleBuyNow(product)}
-												className="btn btn-primary"
-											>
-												<i className="fas fa-bolt"></i>
-												Buy Now
-											</button>
+													<button
+														type="button"
+														onClick={() => handleAddToCart(product)}
+														className={`btn ${addedToCart === product.id ? 'btn-success' : 'btn-secondary'}`}
+													>
+														{addedToCart === product.id ? (
+															<>
+																<i className="fas fa-check" aria-hidden="true"></i>
+																Added to Cart
+															</>
+														) : (
+															<>
+																<i className="fas fa-cart-plus" aria-hidden="true"></i>
+																Add to Cart
+															</>
+														)}
+													</button>
+													<button
+														type="button"
+														onClick={() => handleBuyNow(product)}
+														className="btn btn-primary"
+													>
+														<i className="fas fa-bolt" aria-hidden="true"></i>
+														Buy Now
+													</button>
 												</>
 											) : (
 												<span className="product-unavailable" role="status">Ordering temporarily unavailable</span>
@@ -325,12 +291,21 @@ function Store() {
 							))}
 						</div>
 
-						<div className="store-assurance" aria-label="Store purchase confidence">
+						<p className="store-benchmark-link">
+							<i className="fas fa-chart-line" aria-hidden="true"></i>
+							<span>Preliminary CS2 sample from one PC; raw runs are not yet published.</span>
+							<Link to="/performance">
+								Read the benchmark details
+								<i className="fas fa-arrow-right" aria-hidden="true"></i>
+							</Link>
+						</p>
+
+						<div className="store-assurance" aria-label="Before you order">
 							<div className="assurance-item">
 								<i className="fas fa-lock" aria-hidden="true"></i>
 								<div>
 									<strong>Server-validated checkout</strong>
-									<span>{commerceEnabled ? 'Product prices and quantities are verified before Stripe opens.' : 'Checkout activates only after server and legal readiness checks pass.'}</span>
+									<span>{commerceEnabled ? 'Prices and quantities are verified on the server before secure Stripe-hosted checkout opens.' : 'Checkout activates only after server and legal readiness checks pass.'}</span>
 								</div>
 							</div>
 							<div className="assurance-item">
@@ -341,20 +316,19 @@ function Store() {
 								</div>
 							</div>
 							<div className="assurance-item">
-								<i className="fas fa-circle-question" aria-hidden="true"></i>
+								<i className="fas fa-rotate-left" aria-hidden="true"></i>
 								<div>
-									<strong>Ask before ordering</strong>
-									<span>Ask support before buying if hardware fit is unclear.</span>
+									<strong>Withdrawal rights</strong>
+									<span>Eligible consumers can <Link to="/withdrawal">request a withdrawal online</Link>. Read the <Link to="/terms">terms</Link> for exceptions.</span>
 								</div>
 							</div>
-						</div>
-
-						<div className="store-note">
-							<div>
-								<i className="fas fa-circle-info" aria-hidden="true"></i>
-								<span>Not sure which option fits your hardware?</span>
+							<div className="assurance-item">
+								<i className="fas fa-headset" aria-hidden="true"></i>
+								<div>
+									<strong>Ask before ordering</strong>
+									<span>Unsure about hardware fit? <Link to="/contact">Ask support</Link> by email or Discord before buying.</span>
+								</div>
 							</div>
-							<a href="/contact">Ask before buying</a>
 						</div>
 					</div>
 				</section>

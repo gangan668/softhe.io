@@ -8,7 +8,7 @@ const IDEMPOTENCY_KEY = /^[A-Za-z0-9_-]{20,100}$/;
 
 const runIdempotent = async (req, user, operation) => {
 	const supplied = String(req.headers?.['idempotency-key'] || '').trim();
-	if (!IDEMPOTENCY_KEY.test(supplied)) throw Object.assign(new Error('A valid idempotency key is required'), { statusCode: 400 });
+	if (!IDEMPOTENCY_KEY.test(supplied)) throw Object.assign(new Error('A valid idempotency key is required'), { statusCode: 400, publicMessage: 'A valid idempotency key is required' });
 	const key = `portal:ticket-write:${user.id}:${supplied}`;
 	const cached = await redisCommand(['GET', key]);
 	if (cached) return { ...JSON.parse(cached), duplicate: true };

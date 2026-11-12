@@ -156,7 +156,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: 0.7rem;
+	font-size: 0.75rem;
 	font-weight: 700;
 	border: 2px solid var(--background-color);
 }
@@ -272,8 +272,8 @@
 	}
 
 	.cart-badge {
-		width: 16px;
-		height: 16px;
-		font-size: 0.65rem;
+		width: 18px;
+		height: 18px;
+		font-size: 0.75rem;
 	}
 }

@@ -45,6 +45,8 @@ Softhe.io must be deployed to a Node serverless host. GitHub Pages is not a supp
 | `RELEASE_FINGERPRINT` | Public, unique release identifier reported by `/api/health` for release binding |
 | `ORDER_FULFILLMENT_WEBHOOK_URL` | HTTPS endpoint that provisions or records paid orders |
 | `ORDER_FULFILLMENT_WEBHOOK_SECRET` | HMAC key shared with the fulfillment endpoint |
+| `TURNSTILE_SECRET_KEY` | Cloudflare Turnstile server secret. When set, `/api/contact` and `/api/withdrawal` reject requests without a valid `captchaToken` (HTTP 400); verification is skipped when unset. Required by the build when `VITE_CAPTCHA_ENABLED=true` |
+| `HEALTH_CHECK_TOKEN` | Long random bearer token. `GET /api/health` without it returns only `{ status }`; with `Authorization: Bearer <token>` it returns release identity and per-integration checks. Also store it as the GitHub Actions secret `HEALTH_CHECK_TOKEN` for the release gate, production smoke, and monitoring workflows |
 
 ## Required Client Variables
 
@@ -96,7 +98,7 @@ Then verify all of the following in a deployed preview environment before moving
 - signed fulfillment with authoritative product IDs and quantities, duplicate webhook delivery, and a retry/failure path;
 - analytics consent and withdrawal, plus a deliberate test error arriving at the configured monitoring endpoint;
 - the final legal name, postal address, VAT details, payment methods, refund wording, and service terms.
-- `/api/health` returning HTTP 200 with every readiness check true and the production smoke workflow passing security-header and true-404 checks.
+- `/api/health` returning HTTP 200 with every readiness check true (request it with `Authorization: Bearer $HEALTH_CHECK_TOKEN` to see the checks) and the production smoke workflow passing security-header and true-404 checks.
 
 Record references, timestamps, and named verifiers in `docs/launch-evidence.json`. Once every
 entry is backed by evidence, run `npm run evidence:verify` and dispatch the manual
@@ -120,7 +122,7 @@ The GitHub Pages workflow is manual-only and retained as a static, commerce-disa
 
 ## Monitoring release gate
 
-- Run the scheduled production smoke against `/api/health`; alert on any non-200 response or failed readiness check.
+- Run the scheduled production smoke against `/api/health`; alert on any non-200 response or failed readiness check. Configure the GitHub Actions secret `HEALTH_CHECK_TOKEN` (same value as the Vercel variable): without it the smoke, monitoring, and release-gate jobs only verify the public `status` and log that release commit, fingerprint, and per-integration checks were skipped.
 - Set the GitHub Actions variables `REQUIRE_APP_MARKER=true`, `REQUIRE_SECURITY_HEADERS=true`, and `REQUIRE_SERVERLESS_API=true` when the smoke target is a Vercel Preview or after the production cutover. Their temporary `false` defaults only keep the legacy GitHub Pages smoke useful before migration.
 - Set `EXPECTED_RELEASE_SOURCE_COMMIT` and `EXPECTED_RELEASE_FINGERPRINT` to the values
   reported by the approved deployment. The scheduled smoke then detects a project or production

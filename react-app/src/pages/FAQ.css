@@ -148,6 +148,7 @@
 }
 
 .faq-answer {
+	will-change: max-height, opacity, transform;
 	max-height: 0;
 	opacity: 0;
 	transform: translateY(-4px);

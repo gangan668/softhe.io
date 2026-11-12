@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const { incrementWithExpiry } = require('./_lib/redis');
 const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertOperatorIdentity } = require('./_lib/config');
+const { verifyTurnstile } = require('./_lib/turnstile');
 
 const SUBJECTS = new Set(['general', 'technical', 'sales', 'custom', 'billing']);
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -86,6 +87,9 @@ async function contact(req, res) {
 	if (submission.website) return res.status(200).json({ delivered: true });
 	const validationError = validateSubmission(submission);
 	if (validationError) return res.status(400).json({ error: validationError });
+
+	const captcha = await verifyTurnstile(req);
+	if (!captcha.ok) return res.status(captcha.status).json({ error: captcha.error });
 
 	try {
 		assertOperatorIdentity();

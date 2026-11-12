@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import useRateLimit from "../hooks/useRateLimit";
+import Captcha from '../components/Captcha';
 import SEO from '../components/SEO';
+import useCaptcha from '../components/useCaptcha';
 import { siteConfig } from '../config/site';
 import { trackFormSubmission } from '../utils/analytics';
+import { CAPTCHA_REQUIRED_MESSAGE } from '../utils/captcha';
 import { submitContactForm } from '../utils/contact';
 import { contactFormEnabled } from '../utils/runtimeConfig';
+import { getUserErrorMessage } from '../utils/userErrors';
 import "./Contact.css";
 
 function Contact() {
@@ -23,6 +27,10 @@ function Contact() {
 
 	// Rate limiting: 3 attempts per minute
 	const rateLimit = useRateLimit(3, 60000);
+
+	// Optional Turnstile check (single-use token, reset after every submit attempt)
+	const captchaRef = useRef(null);
+	const captcha = useCaptcha(captchaRef);
 
 	/**
 	 * Sanitize input to prevent XSS
@@ -127,13 +135,21 @@ function Contact() {
 			return;
 		}
 
+		if (captcha.blocking) {
+			setSubmitStatus({
+				type: "error",
+				message: CAPTCHA_REQUIRED_MESSAGE,
+			});
+			return;
+		}
+
 		// Set submitting state immediately to disable button and show loading
 		setIsSubmitting(true);
 
 		// Attempt submission with rate limiting
 		try {
 			const success = await rateLimit.attempt(async () => {
-				await submitContactForm(formData, honeypot);
+				await submitContactForm({ ...formData, captchaToken: captcha.token }, honeypot);
 
 				setSubmitStatus({
 					type: "success",
@@ -161,9 +177,10 @@ function Contact() {
 			console.error("Form submission error:", error);
 			setSubmitStatus({
 				type: "error",
-				message: error.message || `An error occurred. Please contact ${siteConfig.supportEmail}`,
+				message: getUserErrorMessage(error, `An error occurred. Please contact ${siteConfig.supportEmail}`),
 			});
 		} finally {
+			if (captcha.enabled) captcha.reset();
 			setIsSubmitting(false);
 		}
 	};
@@ -493,6 +510,12 @@ function Contact() {
 											)}
 										</div>
 
+										<Captcha
+											ref={captchaRef}
+											config={captcha.config}
+											onToken={captcha.onToken}
+										/>
+
 										{/* Success Message */}
 										{submitStatus.type === "success" && (
 											<div
@@ -526,7 +549,7 @@ function Contact() {
 										<button
 											type="submit"
 											className="btn btn-primary form-submit"
-											disabled={isSubmitting || rateLimit.isBlocked}
+											disabled={isSubmitting || rateLimit.isBlocked || captcha.blocking}
 										>
 											{isSubmitting ? (
 												<>

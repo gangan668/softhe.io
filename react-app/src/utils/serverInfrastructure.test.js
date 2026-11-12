@@ -17,13 +17,75 @@ const staffApi = require('../../../api/_lib/staff-handler.js');
 const vercelConfig = require('../../../vercel.json');
 
 describe('deployment security headers', () => {
-	it('allows both production and isolated Preview Supabase origins without a wildcard', () => {
-		const csp = vercelConfig.headers[0].headers.find(({ key }) => key === 'Content-Security-Policy')?.value || '';
+	const globalEntry = vercelConfig.headers.find(({ source }) => source === '/(.*)');
+	const globalHeaders = Object.fromEntries(globalEntry.headers.map(({ key, value }) => [key, value]));
+	const csp = globalHeaders['Content-Security-Policy'] || '';
+	const directive = (policy, name) => policy.split(';').map((part) => part.trim()).find((part) => part.split(/\s+/)[0] === name);
+
+	it('allows only the production Supabase origin, without a wildcard', () => {
 		expect(csp).toContain('https://mbwsmyqofkxmxkelqviy.supabase.co');
 		expect(csp).toContain('wss://mbwsmyqofkxmxkelqviy.supabase.co');
-		expect(csp).toContain('https://zbchdxptibehtizomwiq.supabase.co');
-		expect(csp).toContain('wss://zbchdxptibehtizomwiq.supabase.co');
-		expect(csp).not.toContain('https://*.supabase.co');
+		// The disposable 2026-08-27 security-assessment project is no longer allowed.
+		expect(csp).not.toContain('zbchdxptibehtizomwiq');
+		expect(csp).not.toContain('*.supabase.co');
+	});
+
+	it('keeps the CSP strict and drops hosts the app no longer uses', () => {
+		expect(directive(csp, 'script-src')).not.toMatch(/unsafe-inline|unsafe-eval/);
+		expect(directive(csp, 'style-src')).toBe("style-src 'self'");
+		expect(directive(csp, 'object-src')).toBe("object-src 'none'");
+		expect(directive(csp, 'frame-ancestors')).toBe("frame-ancestors 'none'");
+		expect(csp).toContain('upgrade-insecure-requests');
+		for (const host of ['buy.stripe.com', 'js.stripe.com', 'cdn.jsdelivr.net', 'api.emailjs.com']) {
+			expect(csp).not.toContain(host);
+		}
+		expect(csp).not.toMatch(/(^|\s)https?:(\s|;|$)/);
+	});
+
+	it('reports CSP violations to the same-origin collector', () => {
+		expect(directive(csp, 'report-uri')).toBe('report-uri /api/csp-report');
+		expect(directive(csp, 'report-to')).toBe('report-to csp-endpoint');
+		expect(globalHeaders['Reporting-Endpoints']).toBe('csp-endpoint="/api/csp-report"');
+		expect(vercelConfig.rewrites).toContainEqual({ source: '/api/csp-report', destination: '/api/browser-errors?kind=csp' });
+	});
+
+	it('sends transport, isolation, and feature-policy headers', () => {
+		expect(globalHeaders['Strict-Transport-Security']).toMatch(/^max-age=63072000; includeSubDomains/);
+		expect(globalHeaders['Cross-Origin-Opener-Policy']).toBe('same-origin');
+		expect(globalHeaders['Cross-Origin-Resource-Policy']).toBe('same-origin');
+		// COEP would break the third-party Turnstile iframe.
+		expect(globalHeaders).not.toHaveProperty('Cross-Origin-Embedder-Policy');
+		expect(globalHeaders['X-Permitted-Cross-Domain-Policies']).toBe('none');
+		expect(globalHeaders['X-Content-Type-Options']).toBe('nosniff');
+		expect(globalHeaders['X-Frame-Options']).toBe('DENY');
+		expect(globalHeaders['Referrer-Policy']).toBe('strict-origin-when-cross-origin');
+		const permissions = globalHeaders['Permissions-Policy'].split(',').map((part) => part.trim());
+		for (const feature of ['camera', 'microphone', 'geolocation', 'usb', 'payment', 'magnetometer', 'accelerometer', 'gyroscope']) {
+			expect(permissions).toContain(`${feature}=()`);
+		}
+		expect(globalHeaders['Permissions-Policy']).not.toContain('interest-cohort');
+		expect(globalHeaders).not.toHaveProperty('X-XSS-Protection');
+	});
+
+	it('serves the production headers from vite preview, minus localhost-incompatible ones', async () => {
+		const { previewHeaders, devHeaders } = await import('../../securityHeaders.js');
+		const preview = previewHeaders(globalHeaders);
+		const { 'Strict-Transport-Security': _hsts, ...productionWithoutHsts } = globalHeaders;
+		expect(preview).toEqual({
+			...productionWithoutHsts,
+			'Content-Security-Policy': csp.replace(/;\s*upgrade-insecure-requests/, ''),
+		});
+
+		const dev = devHeaders(globalHeaders);
+		const devCsp = dev['Content-Security-Policy'];
+		expect(directive(devCsp, 'script-src')).toContain("'unsafe-eval'");
+		expect(directive(devCsp, 'style-src')).toContain("'unsafe-inline'");
+		expect(directive(devCsp, 'connect-src')).toContain('ws:');
+		expect(directive(devCsp, 'connect-src')).toContain('https://mbwsmyqofkxmxkelqviy.supabase.co');
+		expect(devCsp).not.toContain('upgrade-insecure-requests');
+		expect(devCsp).not.toContain('buy.stripe.com');
+		expect(dev).not.toHaveProperty('X-XSS-Protection');
+		expect(dev).not.toHaveProperty('Strict-Transport-Security');
 	});
 });
 const { TICKET_CATEGORIES } = require('../../../api/ticket-write.js');
@@ -75,11 +137,17 @@ describe('durable Redis helpers', () => {
 });
 
 describe('production health API', () => {
+	const detailedRequest = () => ({ method: 'GET', headers: { authorization: 'Bearer health-token' } });
+	beforeEach(() => {
+		process.env.HEALTH_CHECK_TOKEN = 'health-token';
+		health.resetPortalProbeCache();
+	});
+
 	it('reports missing server configuration without exposing values', async () => {
 		process.env.RELEASE_SOURCE_COMMIT = '0123456789abcdef';
 		process.env.RELEASE_FINGERPRINT = 'release-test-fingerprint';
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.status).toBe('configuration-required');
@@ -98,7 +166,7 @@ describe('production health API', () => {
 		process.env.RELEASE_FINGERPRINT = 'stale-fingerprint';
 		process.env.COMMERCE_ENABLED = 'false';
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 
 		expect(response.payload.release).toEqual({
 			sourceCommit: 'abcdef0123456789',
@@ -114,7 +182,7 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 
 		expect(response.statusCode).toBe(200);
 		expect(response.payload).toEqual(expect.objectContaining({ status: 'ready' }));
@@ -128,7 +196,7 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ message: 'Invalid API key' }, false, 401)));
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.portal).toBe(false);
@@ -142,7 +210,7 @@ describe('production health API', () => {
 		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.tickets).toBe(false);
@@ -157,7 +225,7 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		process.env.EMAILJS_PRIVATE_KEY = 'Encrypted';
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 
 		expect(response.statusCode).toBe(503);
 		expect(response.payload.checks.tickets).toBe(false);
@@ -176,13 +244,13 @@ describe('production health API', () => {
 		process.env.SUPPORT_EMAIL = 'support@example.com';
 		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
 		const response = createResponse();
-		await health({ method: 'GET' }, response);
+		await health(detailedRequest(), response);
 		expect(response.statusCode).toBe(200);
 		expect(response.payload.checks.fulfillment).toBe(true);
 
 		delete process.env.RESEND_API_KEY;
 		const missingSender = createResponse();
-		await health({ method: 'GET' }, missingSender);
+		await health(detailedRequest(), missingSender);
 		expect(missingSender.statusCode).toBe(503);
 		expect(missingSender.payload.checks.fulfillment).toBe(false);
 	});
@@ -190,6 +258,61 @@ describe('production health API', () => {
 	it('rejects an unknown order confirmation provider', () => {
 		process.env.ORDER_CONFIRMATION_PROVIDER = 'unknown';
 		expect(health.getConfigurationStatus().invalid).toContain('ORDER_CONFIRMATION_PROVIDER');
+	});
+
+	const configureReadyEnvironment = () => {
+		for (const key of health.REQUIRED_CONFIGURATION) process.env[key] = `${key}-configured`;
+		process.env.PUBLIC_SITE_URL = 'https://softhe.io';
+		process.env.VAT_STATUS = 'not-registered';
+		process.env.BUSINESS_REGISTRATION_ID = '000000-0000';
+		process.env.SUPPORT_EMAIL = 'support@example.com';
+		process.env.RELEASE_SOURCE_COMMIT = '0123456789abcdef';
+	};
+
+	it('returns only the overall status to unauthenticated callers', async () => {
+		configureReadyEnvironment();
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		const ready = createResponse();
+		await health({ method: 'GET', headers: {} }, ready);
+		expect(ready.statusCode).toBe(200);
+		expect(ready.payload).toEqual({ status: 'ready' });
+
+		delete process.env.STRIPE_SECRET_KEY;
+		const notReady = createResponse();
+		await health({ method: 'GET' }, notReady);
+		expect(notReady.statusCode).toBe(503);
+		expect(notReady.payload).toEqual({ status: 'configuration-required' });
+	});
+
+	it('never returns details for a wrong token or when no token is configured', async () => {
+		configureReadyEnvironment();
+		vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse([])));
+		const wrong = createResponse();
+		await health({ method: 'GET', headers: { authorization: 'Bearer wrong-token' } }, wrong);
+		expect(wrong.statusCode).toBe(401);
+		expect(wrong.payload).toEqual({ error: 'Unauthorized' });
+
+		delete process.env.HEALTH_CHECK_TOKEN;
+		const unconfigured = createResponse();
+		await health({ method: 'GET', headers: { authorization: 'Bearer ' } }, unconfigured);
+		expect(unconfigured.payload).not.toHaveProperty('release');
+		expect(unconfigured.payload).not.toHaveProperty('checks');
+	});
+
+	it('caches the privileged portal probe for public traffic but probes fresh for authenticated checks', async () => {
+		configureReadyEnvironment();
+		const fetchMock = vi.fn().mockResolvedValue(jsonResponse([]));
+		vi.stubGlobal('fetch', fetchMock);
+		for (let index = 0; index < 3; index += 1) await health({ method: 'GET', headers: {} }, createResponse());
+		expect(fetchMock).toHaveBeenCalledTimes(1);
+
+		await health(detailedRequest(), createResponse());
+		expect(fetchMock).toHaveBeenCalledTimes(2);
+
+		const now = Date.now();
+		fetchMock.mockClear();
+		await health.probePortalAccess({ now: now + health.PORTAL_PROBE_TTL_MS + 1000 });
+		expect(fetchMock).toHaveBeenCalledTimes(1);
 	});
 });
 
@@ -496,29 +619,112 @@ describe('withdrawal API validation', () => {
 		expect(withdrawal.validateWithdrawal(normalized)).toMatch(/either the entire order/i);
 	});
 
-	it('persists and acknowledges a timestamped withdrawal request', async () => {
-		const fetchMock = vi.fn()
-			.mockResolvedValueOnce(jsonResponse({ result: 1 }))
-			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
-			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }))
-			.mockResolvedValueOnce(jsonResponse({}, true, 200))
-			.mockResolvedValueOnce(jsonResponse({}, true, 200))
-			.mockResolvedValueOnce(jsonResponse({ result: 'OK' }));
-		vi.stubGlobal('fetch', fetchMock);
+	const EMAILJS_URL = 'https://api.emailjs.com/api/v1.0/email/send';
+	const routeWithdrawalFetch = ({ stripe, supabase } = {}) => vi.fn(async (url, options = {}) => {
+		const target = String(url);
+		if (target === 'https://redis.example') {
+			const command = JSON.parse(options.body);
+			return jsonResponse({ result: command[0] === 'EVAL' ? 1 : 'OK' });
+		}
+		if (target === EMAILJS_URL) return jsonResponse({}, true, 200);
+		if (target.startsWith('https://api.stripe.com/')) return stripe();
+		if (target.startsWith('https://project.supabase.co/')) return supabase();
+		throw new Error(`Unexpected fetch ${target}`);
+	});
+	const submitWithdrawal = async (email = 'customer@example.com', orderReference = 'cs_test_12345678') => {
 		const response = createResponse();
 		await withdrawal({
 			method: 'POST',
 			headers: { 'x-forwarded-for': '203.0.113.30' },
-			body: {
-				orderReference: 'CS_TEST_12345678',
-				email: 'customer@example.com',
-				requestedItems: ['entire-order'],
-			},
+			body: { orderReference, email, requestedItems: ['entire-order'] },
 		}, response);
+		return response;
+	};
+	const sentEmails = (fetchMock) => fetchMock.mock.calls
+		.filter(([url]) => url === EMAILJS_URL)
+		.map(([, options]) => JSON.parse(options.body));
+	const storedRecords = (fetchMock) => fetchMock.mock.calls
+		.filter(([url]) => url === 'https://redis.example')
+		.map(([, options]) => JSON.parse(options.body))
+		.filter((command) => command[0] === 'SET' && String(command[1]).startsWith('withdrawal:request:'))
+		.map((command) => JSON.parse(command[2]));
+
+	it('acknowledges the customer only when the Stripe order belongs to the submitted email', async () => {
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		const fetchMock = routeWithdrawalFetch({
+			stripe: () => jsonResponse({ id: 'cs_test_12345678', customer_details: { email: 'Customer@Example.com' } }),
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const response = await submitWithdrawal();
 
 		expect(response.statusCode).toBe(202);
-		expect(response.payload.requestId).toMatch(/^wd_/);
-		expect(fetchMock.mock.calls.filter(([url]) => url === 'https://api.emailjs.com/api/v1.0/email/send')).toHaveLength(2);
+		expect(response.payload).toEqual({ received: true, requestId: expect.stringMatching(/^wd_/), receivedAt: expect.any(String) });
+		const emails = sentEmails(fetchMock);
+		expect(emails.map((email) => email.template_id)).toEqual(['withdrawal-customer', 'withdrawal-operator']);
+		expect(emails[0].template_params.to_email).toBe('customer@example.com');
+		expect(emails[1].template_params).toEqual(expect.objectContaining({ order_verified: 'yes', to_email: 'support@example.com', customer_email: 'customer@example.com' }));
+		expect(storedRecords(fetchMock).every((record) => record.orderVerified === true)).toBe(true);
+	});
+
+	it('only notifies the operator for an order that does not match, with an identical response', async () => {
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		const fetchMock = routeWithdrawalFetch({
+			stripe: () => jsonResponse({ id: 'cs_test_12345678', customer_details: { email: 'owner@example.com' } }),
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const response = await submitWithdrawal('victim@example.com');
+
+		expect(response.statusCode).toBe(202);
+		expect(Object.keys(response.payload).sort()).toEqual(['receivedAt', 'received', 'requestId'].sort());
+		const emails = sentEmails(fetchMock);
+		expect(emails).toHaveLength(1);
+		expect(emails[0].template_id).toBe('withdrawal-operator');
+		expect(emails[0].template_params.order_verified).toBe('no');
+		expect(emails.some((email) => email.template_params.to_email === 'victim@example.com')).toBe(false);
+		expect(storedRecords(fetchMock).every((record) => record.orderVerified === false)).toBe(true);
+	});
+
+	it('looks the order up in the portal database first', async () => {
+		process.env.VITE_SUPABASE_URL = 'https://project.supabase.co';
+		process.env.VITE_SUPABASE_PUBLISHABLE_KEY = 'public-key';
+		process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
+		const stripe = vi.fn();
+		const fetchMock = routeWithdrawalFetch({ stripe, supabase: () => jsonResponse([{ customer_email: 'customer@example.com' }]) });
+		vi.stubGlobal('fetch', fetchMock);
+		await submitWithdrawal();
+
+		const lookup = fetchMock.mock.calls.find(([url]) => String(url).startsWith('https://project.supabase.co/'));
+		expect(lookup[0]).toBe('https://project.supabase.co/rest/v1/orders?stripe_session_id=eq.cs_test_12345678&select=customer_email&limit=1');
+		expect(stripe).not.toHaveBeenCalled();
+		expect(sentEmails(fetchMock)).toHaveLength(2);
+	});
+
+	it('records and notifies the operator when the order lookup is unavailable', async () => {
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		const fetchMock = routeWithdrawalFetch({ stripe: () => jsonResponse({ error: { message: 'down' } }, false, 500) });
+		vi.stubGlobal('fetch', fetchMock);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = await submitWithdrawal();
+		consoleError.mockRestore();
+
+		expect(response.statusCode).toBe(202);
+		const emails = sentEmails(fetchMock);
+		expect(emails.map((email) => email.template_id)).toEqual(['withdrawal-operator']);
+		expect(storedRecords(fetchMock).length).toBeGreaterThan(0);
+	});
+
+	it('does not acknowledge an unverifiable reference when no order source is configured', async () => {
+		const fetchMock = routeWithdrawalFetch();
+		vi.stubGlobal('fetch', fetchMock);
+		const response = await submitWithdrawal('customer@example.com', 'CS_TEST_12345678');
+		expect(response.statusCode).toBe(202);
+		expect(sentEmails(fetchMock).map((email) => email.template_id)).toEqual(['withdrawal-operator']);
+	});
+
+	it('compares order emails case-insensitively', () => {
+		expect(withdrawal.emailsMatch('Customer@Example.com', 'customer@example.com')).toBe(true);
+		expect(withdrawal.emailsMatch('other@example.com', 'customer@example.com')).toBe(false);
+		expect(withdrawal.emailsMatch(null, 'customer@example.com')).toBe(false);
 	});
 
 	it('accepts a duplicate without sending another acknowledgement', async () => {
@@ -913,7 +1119,9 @@ afterEach(() => {
 		'LEGAL_NAME', 'LEGAL_ADDRESS', 'BUSINESS_REGISTRATION_ID', 'VAT_STATUS', 'SUPPORT_EMAIL',
 		'RELEASE_SOURCE_COMMIT', 'RELEASE_FINGERPRINT', 'VERCEL_GIT_COMMIT_SHA',
 		'STAFF_PORTAL_ENABLED',
+		'HEALTH_CHECK_TOKEN', 'TURNSTILE_SECRET_KEY', 'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY',
 	]) delete process.env[key];
+	health.resetPortalProbeCache();
 });
 
 describe('browser error reporting API', () => {
@@ -929,7 +1137,7 @@ describe('browser error reporting API', () => {
 		const response = createResponse();
 		await browserErrors({
 			method: 'POST',
-			headers: { 'x-forwarded-for': '203.0.113.20' },
+			headers: { 'x-forwarded-for': '203.0.113.20', origin: 'https://softhe.io', host: 'softhe.io', 'content-type': 'application/json' },
 			body: { message: 'Failure\u0000message', stack: 'stack', url: 'https://softhe.io/store' },
 		}, response);
 

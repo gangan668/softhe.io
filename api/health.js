@@ -71,8 +71,35 @@ const getConfigurationStatus = (environment = process.env) => {
 	return { ready: missing.length === 0 && uniqueInvalid.length === 0, missing, invalid: uniqueInvalid };
 };
 
+// The portal probe uses the service-role key, so unauthenticated traffic must not be
+// able to trigger it on every request. Results are cached per warm instance.
+const PORTAL_PROBE_TTL_MS = 60 * 1000;
+let portalProbeCache = null;
+
+const resetPortalProbeCache = () => { portalProbeCache = null; };
+
+const probePortalAccess = async ({ fresh = false, now = Date.now() } = {}) => {
+	if (!fresh && portalProbeCache && portalProbeCache.expiresAt > now) return portalProbeCache.value;
+	let value = true;
+	try { await adminRequest('profiles?select=id&limit=1'); } catch { value = false; }
+	portalProbeCache = { value, expiresAt: now + PORTAL_PROBE_TTL_MS };
+	return value;
+};
+
+// true for a valid HEALTH_CHECK_TOKEN bearer, false when no credential was sent,
+// null when a credential was sent but does not match (or no token is configured).
+const detailedAccess = (req) => {
+	const header = String(req.headers?.authorization || '').trim();
+	if (!header) return false;
+	const supplied = header.replace(/^Bearer\s+/i, '');
+	const configured = process.env.HEALTH_CHECK_TOKEN?.trim();
+	if (!configured || !supplied || !safeEqual(configured, supplied)) return null;
+	return true;
+};
+
 async function health(req, res) {
 	res.setHeader('Cache-Control', 'no-store');
+	res.setHeader('Vary', 'Authorization');
 	if (req.method === 'POST') {
 		if (process.env.VERCEL_ENV !== 'preview') return res.status(404).json({ error: 'Not found' });
 		const configuredSecret = process.env.MONITORING_TEST_SECRET;
@@ -91,6 +118,9 @@ async function health(req, res) {
 		return res.status(405).json({ error: 'Method not allowed' });
 	}
 
+	const detailed = detailedAccess(req);
+	if (detailed === null) return res.status(401).json({ error: 'Unauthorized' });
+
 	const configuration = getConfigurationStatus();
 	const readyFor = (keys) => !keys.some((key) => configuration.missing.includes(key) || configuration.invalid.includes(key));
 	const storageKeys = ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'];
@@ -98,10 +128,10 @@ async function health(req, res) {
 		? ['RESEND_API_KEY', 'EMAIL_FROM']
 		: ['EMAILJS_SERVICE_ID', 'EMAILJS_PUBLIC_KEY', 'EMAILJS_PRIVATE_KEY', 'EMAILJS_ORDER_TEMPLATE_ID'];
 	let portalAccess = readyFor(['SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','SUPABASE_SERVICE_ROLE_KEY']);
-	if (portalAccess) {
-		try { await adminRequest('profiles?select=id&limit=1'); } catch { portalAccess = false; }
-	}
+	// Authenticated release checks always probe fresh; public hits share the cached result.
+	if (portalAccess) portalAccess = await probePortalAccess({ fresh: detailed });
 	const ready = configuration.ready && portalAccess;
+	if (!detailed) return res.status(ready ? 200 : 503).json({ status: ready ? 'ready' : 'configuration-required' });
 	const sourceCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.RELEASE_SOURCE_COMMIT || null;
 	const releaseStage = process.env.COMMERCE_ENABLED === 'true' ? 'commerce' : 'stage1';
 	const fingerprint = process.env.VERCEL_GIT_COMMIT_SHA
@@ -129,3 +159,6 @@ module.exports = health;
 module.exports.REQUIRED_CONFIGURATION = REQUIRED_CONFIGURATION;
 module.exports.getConfigurationStatus = getConfigurationStatus;
 module.exports.safeEqual = safeEqual;
+module.exports.PORTAL_PROBE_TTL_MS = PORTAL_PROBE_TTL_MS;
+module.exports.probePortalAccess = probePortalAccess;
+module.exports.resetPortalProbeCache = resetPortalProbeCache;

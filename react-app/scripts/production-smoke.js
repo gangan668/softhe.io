@@ -12,10 +12,12 @@ const assert = (condition, message) => {
 	if (!condition) throw new Error(message);
 };
 
-const request = async (path) => {
-	if (process.env.SMOKE_VERCEL_AUTH === 'true') return requestVercel(baseUrl, path);
+const healthCheckToken = process.env.HEALTH_CHECK_TOKEN?.trim();
+
+const request = async (path, headers = {}) => {
+	if (process.env.SMOKE_VERCEL_AUTH === 'true') return requestVercel(baseUrl, path, headers);
 	const response = await fetch(`${baseUrl}${path}`, {
-		headers: { 'User-Agent': 'softhe-production-smoke/1.0' },
+		headers: { 'User-Agent': 'softhe-production-smoke/1.0', ...headers },
 		redirect: 'follow',
 	});
 	return { response, text: await response.text() };
@@ -45,17 +47,24 @@ const unknown = await request('/production-smoke-route-that-must-not-exist');
 assert(unknown.response.status === 404, `unknown route returned ${unknown.response.status}, expected 404`);
 
 if (requireServerlessApi) {
-	const { response: healthResponse, text: healthText } = await request('/api/health');
+	// Detailed health (release identity and per-integration checks) requires the
+	// HEALTH_CHECK_TOKEN bearer; the public response only carries the overall status.
+	const healthHeaders = healthCheckToken ? { Authorization: `Bearer ${healthCheckToken}` } : {};
+	const { response: healthResponse, text: healthText } = await request('/api/health', healthHeaders);
 	assert(healthResponse.status === 200, `/api/health returned ${healthResponse.status}: ${healthText.slice(0, 300)}`);
 	assert(healthResponse.headers.get('content-type')?.includes('application/json'), '/api/health did not return JSON');
 	const health = JSON.parse(healthText);
 	assert(health.status === 'ready', `/api/health is not ready: ${healthText.slice(0, 300)}`);
-	assert(Object.values(health.checks || {}).every(Boolean), `/api/health has incomplete checks: ${healthText.slice(0, 300)}`);
-	if (expectedReleaseCommit) {
-		assert(health.release?.sourceCommit === expectedReleaseCommit, `/api/health reports source commit ${health.release?.sourceCommit || 'missing'}, expected ${expectedReleaseCommit}`);
-	}
-	if (expectedReleaseFingerprint) {
-		assert(health.release?.fingerprint === expectedReleaseFingerprint, '/api/health reports an unexpected release fingerprint');
+	if (healthCheckToken) {
+		assert(health.checks && Object.values(health.checks).every(Boolean), `/api/health has incomplete checks: ${healthText.slice(0, 300)}`);
+		if (expectedReleaseCommit) {
+			assert(health.release?.sourceCommit === expectedReleaseCommit, `/api/health reports source commit ${health.release?.sourceCommit || 'missing'}, expected ${expectedReleaseCommit}`);
+		}
+		if (expectedReleaseFingerprint) {
+			assert(health.release?.fingerprint === expectedReleaseFingerprint, '/api/health reports an unexpected release fingerprint');
+		}
+	} else {
+		console.log('HEALTH_CHECK_TOKEN is not set: only the public /api/health status was verified; release commit, fingerprint, and per-integration checks were skipped.');
 	}
 }
 

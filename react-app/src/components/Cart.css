@@ -24,7 +24,8 @@
 	box-shadow: -24px 0 60px rgba(0, 0, 0, 0.4);
 	transform: translateX(100%);
 	transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-	z-index: 999;
+	/* Above the fixed navbar (1000) so the cart header and close button show. */
+	z-index: 1001;
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;

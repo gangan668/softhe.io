@@ -319,8 +319,10 @@
 	font-size: 0.9rem;
 }
 
+/* Icon column wide enough for the Stripe text chip so labels align. */
 .payment-features .feature i {
-	width: 20px;
+	width: 3rem;
+	justify-content: flex-start;
 }
 
 .accepted-payments {

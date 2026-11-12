@@ -51,7 +51,7 @@
 .cookie-header i {
   width: 0.8rem;
   height: 0.8rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--secondary-color, #ffb020);
   filter: drop-shadow(0 0 12px rgba(255, 176, 32, 0.35));
 }
@@ -254,7 +254,7 @@
   gap: 0.5rem;
   margin-top: 1rem;
   font-size: 0.8rem;
-  color: var(--text-muted, #687786);
+  color: var(--text-muted, #8a98a8);
   font-style: italic;
 }
 

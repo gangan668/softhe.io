@@ -63,6 +63,18 @@ describe('server checkout validation', () => {
 		expect(JSON.parse(form.get('metadata[order_items]'))).toEqual(items);
 	});
 
+	it('offers promotion codes only when no bundle discount applies', () => {
+		const single = createStripeForm(normalizeItems([{ id: 'windows-10', quantity: 2 }]), 'https://softhe.io');
+		expect(single.discountRate).toBe(0);
+		expect(single.form.get('allow_promotion_codes')).toBe('true');
+
+		for (const ids of [['windows-10', 'bios-optimization'], ['windows-10', 'windows-11', 'bios-optimization']]) {
+			const bundle = createStripeForm(normalizeItems(ids.map((id) => ({ id, quantity: 1 }))), 'https://softhe.io');
+			expect(bundle.discountRate).toBeGreaterThan(0);
+			expect(bundle.form.has('allow_promotion_codes')).toBe(false);
+		}
+	});
+
 	it('uses only a configured public origin and allowlists Stripe redirect URLs', () => {
 		const previousOrigin = process.env.PUBLIC_SITE_URL;
 		process.env.PUBLIC_SITE_URL = 'https://shop.softhe.io/path';

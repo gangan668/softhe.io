@@ -54,6 +54,17 @@ describe('monitoring alert checker', () => {
 		}
 	});
 
+	it('authenticates detailed health checks with the HEALTH_CHECK_TOKEN secret', () => {
+		const read = (name) => readFileSync(join(process.cwd(), '..', '.github', 'workflows', name), 'utf8');
+		for (const name of ['monitoring-alerts.yml', 'release-gate.yml', 'production-smoke.yml']) {
+			expect(read(name)).toContain('HEALTH_CHECK_TOKEN: ${{ secrets.HEALTH_CHECK_TOKEN }}');
+		}
+		expect(read('monitoring-alerts.yml')).toContain('health_auth=(--header "Authorization: Bearer $HEALTH_CHECK_TOKEN")');
+		expect(read('release-gate.yml')).toContain('--max-time 30 "${health_auth[@]}" > candidate-health.json');
+		const smoke = readFileSync(join(process.cwd(), 'scripts', 'production-smoke.js'), 'utf8');
+		expect(smoke).toContain('Authorization: `Bearer ${healthCheckToken}`');
+	});
+
 	it('requires explicit aligned Preview configuration for controlled runtime tests', () => {
 		const workflow = readFileSync(join(process.cwd(), '..', '.github', 'workflows', 'monitoring-alerts.yml'), 'utf8');
 		expect(workflow).toContain('MONITOR_BASE_URL: ${{ vars.MONITOR_BASE_URL }}');

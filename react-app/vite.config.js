@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath, URL } from "node:url";
+import { devHeaders, previewHeaders } from "./securityHeaders.js";
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
@@ -37,45 +38,9 @@ export default defineConfig(() => ({
 		},
 	},
 	server: {
-		headers: {
-			// Content Security Policy (relaxed for dev - no upgrade-insecure-requests)
-			"Content-Security-Policy": [
-				"default-src 'self' 'unsafe-inline' 'unsafe-eval'",
-				"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
-				"style-src 'self' 'unsafe-inline'",
-				"font-src 'self'",
-				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' ws: wss: http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com",
-				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
-				"object-src 'none'",
-				"base-uri 'self'",
-				"form-action 'self' https://buy.stripe.com",
-			].join("; "),
-
-			// Prevent clickjacking
-			"X-Frame-Options": "DENY",
-
-			// Prevent MIME type sniffing
-			"X-Content-Type-Options": "nosniff",
-
-			// Enable XSS protection
-			"X-XSS-Protection": "1; mode=block",
-
-			// Referrer Policy
-			"Referrer-Policy": "strict-origin-when-cross-origin",
-
-			// Permissions Policy (formerly Feature Policy)
-			"Permissions-Policy": [
-				"camera=()",
-				"microphone=()",
-				"geolocation=()",
-				'payment=(self "https://buy.stripe.com")',
-				"usb=()",
-				"magnetometer=()",
-				"accelerometer=()",
-				"gyroscope=()",
-			].join(", "),
-		},
+		// Relaxed dev CSP derived from the production policy in ../vercel.json
+		// (adds inline/eval for react-refresh + HMR, inline styles, ws: for HMR).
+		headers: devHeaders(),
 	},
 	build: {
 		// Keep source maps out of public production deploys.
@@ -85,34 +50,8 @@ export default defineConfig(() => ({
 		chunkSizeWarningLimit: 1000,
 	},
 	preview: {
-		headers: {
-			// Apply same security headers for preview (relaxed for local testing)
-			"Content-Security-Policy": [
-				"default-src 'self' 'unsafe-inline'",
-				"script-src 'self' 'unsafe-inline' https://buy.stripe.com https://js.stripe.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://challenges.cloudflare.com",
-				"style-src 'self' 'unsafe-inline'",
-				"font-src 'self'",
-				"img-src 'self' data: https: http: blob:",
-				"connect-src 'self' http: https: https://buy.stripe.com https://api.stripe.com https://*.google-analytics.com https://api.emailjs.com",
-				"frame-src 'self' https://buy.stripe.com https://js.stripe.com https://challenges.cloudflare.com",
-				"object-src 'none'",
-				"base-uri 'self'",
-				"form-action 'self' https://buy.stripe.com",
-			].join("; "),
-			"X-Frame-Options": "DENY",
-			"X-Content-Type-Options": "nosniff",
-			"X-XSS-Protection": "1; mode=block",
-			"Referrer-Policy": "strict-origin-when-cross-origin",
-			"Permissions-Policy": [
-				"camera=()",
-				"microphone=()",
-				"geolocation=()",
-				'payment=(self "https://buy.stripe.com")',
-				"usb=()",
-				"magnetometer=()",
-				"accelerometer=()",
-				"gyroscope=()",
-			].join(", "),
-		},
+		// Exactly the production headers from ../vercel.json, minus HSTS and
+		// upgrade-insecure-requests (both break plain http://localhost).
+		headers: previewHeaders(),
 	},
 }));
