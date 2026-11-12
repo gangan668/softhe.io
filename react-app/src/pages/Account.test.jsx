@@ -86,6 +86,17 @@ it('reports rejected profile writes and sign-out without unhandled errors', asyn
 	supabase.from().then = (_resolve, reject) => Promise.reject(new Error('network')).then(_resolve, reject);
 	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'Save profile' })); await screen.findByText('Profile could not be saved. Please try again.');
 	supabase.auth.signOut.mockRejectedValue(new Error('network')); fireEvent.click(screen.getByRole('button', { name: 'Sign out' })); await screen.findByText('Sign-out could not be completed. Please try again.'); expect(screen.queryByText('Signed out destination')).not.toBeInTheDocument();
+	// The session is still active, so the account data must still be shown.
+	expect(screen.getByText('Hello, Customer')).toBeInTheDocument();
+});
+
+it('keeps account data when Supabase returns a sign-out error', async () => {
+	supabase.auth.signOut.mockResolvedValue({ error: { message: 'logout failed' } });
+	mount(); await screen.findByText('Hello, Customer');
+	fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+	await screen.findByText('Sign-out could not be completed. Please try again.');
+	expect(screen.getByText('Hello, Customer')).toBeInTheDocument();
+	expect(screen.queryByText('Signed out destination')).not.toBeInTheDocument();
 });
 it('does not claim AAL2 success when MFA session refresh fails', async () => {
 	supabase.auth.mfa.listFactors.mockResolvedValue({ data: { totp: [{ id: 'factor', status: 'verified' }] } }); supabase.auth.mfa.challenge.mockResolvedValue({ data: { id: 'challenge' } }); supabase.auth.mfa.verify.mockResolvedValue({}); supabase.auth.refreshSession = vi.fn().mockResolvedValue({ error: new Error('refresh failed') });

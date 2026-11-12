@@ -119,7 +119,9 @@ function AccountSession() {
 		} catch (error) { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: getUserErrorMessage(error, 'Reply could not be sent. Please try again.') })); }
 		finally { replyInFlight.current = false; if (scope === requestScope.current) setReplySending(false); }
 	};
-	const signOut = async () => { const scope = requestScope.current; setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); try { const result = await supabase.auth.signOut(); if (result?.error) throw result.error; if (scope === requestScope.current) navigate('/login', { replace: true }); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Sign-out could not be completed. Please try again.', message: '' })); } };
+	// Clear account data only after Supabase confirms the sign-out; on failure the
+	// session is still active, so the page keeps its data and shows an error.
+	const signOut = async () => { const scope = requestScope.current; try { const result = await supabase.auth.signOut(); if (result?.error) throw result.error; setData({ profile: null, orders: [], tickets: [], activity: [] }); setMessages([]); setSelectedTicket(null); if (scope === requestScope.current) navigate('/login', { replace: true }); } catch { if (scope === requestScope.current) setStatus((value) => ({ ...value, error: 'Sign-out could not be completed. Please try again.', message: '' })); } };
 	// Supabase emails a one-time nonce. With "Secure password change" enabled it is
 	// required only for sessions older than 24 hours; "Require current password"
 	// closes that window. Both checks are enforced by Supabase, not this page.
