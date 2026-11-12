@@ -161,7 +161,8 @@ jobs:
           if [ -n "$HEALTH_CHECK_TOKEN" ]; then
             health_auth=(--header "Authorization: Bearer $HEALTH_CHECK_TOKEN")
           else
-            echo '::warning::HEALTH_CHECK_TOKEN is not configured; release identity and per-integration checks cannot be verified.'
+            echo '::error::HEALTH_CHECK_TOKEN is required to verify the staged release identity.'
+            exit 1
           fi
           npx --yes vercel@59.3.0 curl /api/health --deployment "$CANDIDATE_URL" -- --silent --show-error --max-time 30 "${health_auth[@]}" > candidate-health.json
           node -e "const fs=require('fs');const h=JSON.parse(fs.readFileSync('candidate-health.json','utf8'));console.log(JSON.stringify(h));if(h.status!=='ready')throw Error('Staged candidate configuration is not ready');if(process.env.HEALTH_CHECK_TOKEN){if(!(h.checks&&Object.values(h.checks).every(Boolean)))throw Error('Staged candidate configuration is not ready');if(h.release?.sourceCommit!==process.env.GITHUB_SHA)throw Error('Staged candidate source identity mismatch');if(h.release?.fingerprint!=='softhe-'+process.env.GITHUB_SHA.slice(0,7)+'-stage1')throw Error('Staged candidate release fingerprint mismatch')}"

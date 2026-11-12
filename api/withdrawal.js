@@ -115,21 +115,32 @@ const sendWithdrawalEmails = async (record) => {
 		received_at: record.receivedAt,
 		withdrawal_url: `${(process.env.PUBLIC_SITE_URL || 'https://softhe.io').replace(/\/$/, '')}/withdrawal`,
 	};
+	// The operator notification is the legally relevant record, so it is sent
+	// independently of the customer acknowledgement and decides the outcome.
 	// The acknowledgement goes only to an address proven to own the order, so the
 	// form cannot be used to send mail to arbitrary recipients.
-	if (record.orderVerified === true) {
-		await sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_TEMPLATE_ID, {
+	const [acknowledgement, notification] = await Promise.allSettled([
+		record.orderVerified === true
+			? sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_TEMPLATE_ID, {
+				...templateParams,
+				message_type: 'customer_acknowledgement',
+			})
+			: Promise.resolve(),
+		sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID, {
 			...templateParams,
-			message_type: 'customer_acknowledgement',
-		});
+			to_email: process.env.SUPPORT_EMAIL,
+			customer_email: record.email,
+			order_verified: record.orderVerified === true ? 'yes' : 'no',
+			message_type: 'operator_notification',
+		}),
+	]);
+	if (notification.status === 'rejected') throw notification.reason;
+	if (acknowledgement.status === 'rejected') {
+		// Same 202 response as an unverified request; the operator follows up.
+		console.error('withdrawal_acknowledgement_failed', { requestId: record.requestId, message: acknowledgement.reason?.message });
+		return { acknowledgementSent: false };
 	}
-	await sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID, {
-		...templateParams,
-		to_email: process.env.SUPPORT_EMAIL,
-		customer_email: record.email,
-		order_verified: record.orderVerified === true ? 'yes' : 'no',
-		message_type: 'operator_notification',
-	});
+	return { acknowledgementSent: record.orderVerified === true };
 };
 
 async function withdrawal(req, res) {
@@ -177,8 +188,8 @@ async function withdrawal(req, res) {
 		};
 		delete record.website;
 		await setKey(`withdrawal:request:${requestId}`, JSON.stringify(record), retentionSeconds);
-		await sendWithdrawalEmails(record);
-		await setKey(`withdrawal:request:${requestId}`, JSON.stringify({ ...record, status: 'acknowledged' }), retentionSeconds);
+		const { acknowledgementSent } = await sendWithdrawalEmails(record);
+		await setKey(`withdrawal:request:${requestId}`, JSON.stringify({ ...record, status: 'acknowledged', acknowledgementSent }), retentionSeconds);
 
 		// Identical response whether or not the order matched, so the endpoint
 		// cannot be used to test which order references belong to which addresses.

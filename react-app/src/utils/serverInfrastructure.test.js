@@ -716,13 +716,13 @@ describe('withdrawal API validation', () => {
 	});
 
 	const EMAILJS_URL = 'https://api.emailjs.com/api/v1.0/email/send';
-	const routeWithdrawalFetch = ({ stripe, supabase } = {}) => vi.fn(async (url, options = {}) => {
+	const routeWithdrawalFetch = ({ stripe, supabase, emailjs } = {}) => vi.fn(async (url, options = {}) => {
 		const target = String(url);
 		if (target === 'https://redis.example') {
 			const command = JSON.parse(options.body);
 			return jsonResponse({ result: command[0] === 'EVAL' ? 1 : 'OK' });
 		}
-		if (target === EMAILJS_URL) return jsonResponse({}, true, 200);
+		if (target === EMAILJS_URL) return emailjs ? emailjs(JSON.parse(options.body)) : jsonResponse({}, true, 200);
 		if (target.startsWith('https://api.stripe.com/')) return stripe();
 		if (target.startsWith('https://project.supabase.co/')) return supabase();
 		throw new Error(`Unexpected fetch ${target}`);
@@ -745,6 +745,36 @@ describe('withdrawal API validation', () => {
 		.filter((command) => command[0] === 'SET' && String(command[1]).startsWith('withdrawal:request:'))
 		.map((command) => JSON.parse(command[2]));
 
+	it('still notifies the operator and returns 202 when the customer acknowledgement fails', async () => {
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		const fetchMock = routeWithdrawalFetch({
+			stripe: () => jsonResponse({ id: 'cs_test_12345678', customer_details: { email: 'customer@example.com' } }),
+			emailjs: (payload) => payload.template_id === 'withdrawal-customer' ? jsonResponse({}, false, 503) : jsonResponse({}, true, 200),
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = await submitWithdrawal();
+		consoleError.mockRestore();
+		expect(response.statusCode).toBe(202);
+		expect(sentEmails(fetchMock).map((email) => email.template_id)).toEqual(['withdrawal-customer', 'withdrawal-operator']);
+		const records = storedRecords(fetchMock);
+		expect(records).toHaveLength(2);
+		expect(records[1]).toEqual(expect.objectContaining({ status: 'acknowledged', acknowledgementSent: false }));
+	});
+
+	it('fails the request when the operator notification cannot be delivered', async () => {
+		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
+		const fetchMock = routeWithdrawalFetch({
+			stripe: () => jsonResponse({ id: 'cs_test_12345678', customer_details: { email: 'customer@example.com' } }),
+			emailjs: (payload) => payload.template_id === 'withdrawal-operator' ? jsonResponse({}, false, 503) : jsonResponse({}, true, 200),
+		});
+		vi.stubGlobal('fetch', fetchMock);
+		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const response = await submitWithdrawal();
+		consoleError.mockRestore();
+		expect(response.statusCode).toBe(502);
+	});
+
 	it('acknowledges the customer only when the Stripe order belongs to the submitted email', async () => {
 		process.env.STRIPE_SECRET_KEY = 'sk_test_secret';
 		const fetchMock = routeWithdrawalFetch({
@@ -760,7 +790,8 @@ describe('withdrawal API validation', () => {
 		expect(emails[0].template_params.to_email).toBe('customer@example.com');
 		expect(emails[1].template_params).toEqual(expect.objectContaining({ order_verified: 'yes', to_email: 'support@example.com', customer_email: 'customer@example.com' }));
 		const records = storedRecords(fetchMock);
-		expect(records.length).toBeGreaterThan(0);
+		// "received" and "acknowledged" writes; every() alone would pass on an empty list.
+		expect(records).toHaveLength(2);
 		expect(records.every((record) => record.orderVerified === true)).toBe(true);
 	});
 
@@ -779,7 +810,9 @@ describe('withdrawal API validation', () => {
 		expect(emails[0].template_id).toBe('withdrawal-operator');
 		expect(emails[0].template_params.order_verified).toBe('no');
 		expect(emails.some((email) => email.template_params.to_email === 'victim@example.com')).toBe(false);
-		expect(storedRecords(fetchMock).every((record) => record.orderVerified === false)).toBe(true);
+		const records = storedRecords(fetchMock);
+		expect(records).toHaveLength(2);
+		expect(records.every((record) => record.orderVerified === false)).toBe(true);
 	});
 
 	it('looks the order up in the portal database first', async () => {
@@ -823,7 +856,8 @@ describe('withdrawal API validation', () => {
 		expect(response.statusCode).toBe(202);
 		expect(sentEmails(fetchMock).map((email) => email.template_id)).toEqual(['withdrawal-operator']);
 		const records = storedRecords(fetchMock);
-		expect(records.length).toBeGreaterThan(0);
+		// "received" and "acknowledged" writes; every() alone would pass on an empty list.
+		expect(records).toHaveLength(2);
 		expect(records.every((record) => record.orderVerified === false)).toBe(true);
 	});
 

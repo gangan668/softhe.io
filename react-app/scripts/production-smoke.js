@@ -49,6 +49,10 @@ assert(unknown.response.status === 404, `unknown route returned ${unknown.respon
 if (requireServerlessApi) {
 	// Detailed health (release identity and per-integration checks) requires the
 	// HEALTH_CHECK_TOKEN bearer; the public response only carries the overall status.
+	// A requested release identity can only be verified with the token, so a
+	// missing token must fail instead of silently skipping the comparison.
+	const releaseIdentityRequested = Boolean(expectedReleaseCommit || expectedReleaseFingerprint);
+	assert(!releaseIdentityRequested || healthCheckToken, 'EXPECTED_RELEASE_SOURCE_COMMIT or EXPECTED_RELEASE_FINGERPRINT requires HEALTH_CHECK_TOKEN');
 	const healthHeaders = healthCheckToken ? { Authorization: `Bearer ${healthCheckToken}` } : {};
 	const { response: healthResponse, text: healthText } = await request('/api/health', healthHeaders);
 	assert(healthResponse.status === 200, `/api/health returned ${healthResponse.status}: ${healthText.slice(0, 300)}`);
