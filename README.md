@@ -8,7 +8,6 @@ Softhe.io is a React storefront and information site for Windows and BIOS optimi
 api/             Contact, checkout, health, withdrawal, webhook, and durable helpers
 docs/            Current deployment and commercial-launch documentation
 react-app/       React client, tests, build scripts, and public assets
-archive_legacy/  Historical static-site material; not deployed
 vercel.json      Production build and security-header configuration
 ```
 
