@@ -3,6 +3,7 @@ import { beforeEach, expect, it, vi } from 'vitest';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import Account from './Account';
+import { SafeMessageError } from '../utils/userErrors';
 const mock = vi.hoisted(() => ({ recover: vi.fn(), write: vi.fn(), notify: vi.fn(), revoke: vi.fn() }));
 vi.mock('../utils/portalSession', () => ({ runPortalQueriesWithSessionRecovery: mock.recover }));
 vi.mock('../utils/portal', () => ({ writeTicket: mock.write, notifyTicketReply: mock.notify, revokeOtherSessions: mock.revoke }));
@@ -22,7 +23,7 @@ it('shows empty orders and tickets', async () => { mount(); await screen.findByT
 it('settles rejected account loading', async () => { mock.recover.mockRejectedValue(new Error('network failed')); mount(); await screen.findByRole('alert'); expect(screen.getByRole('alert')).toHaveTextContent('Account could not be loaded'); expect(screen.queryByText('Loading account…')).not.toBeInTheDocument(); });
 it('persists profile updates scoped to the customer id', async () => { mount(); await screen.findByLabelText('Full name'); fireEvent.change(screen.getByLabelText('Full name'), { target: { value: 'Updated Customer' } }); fireEvent.change(screen.getByLabelText('City'), { target: { value: 'Berlin' } }); fireEvent.click(screen.getByRole('button', { name: 'Save profile' })); await waitFor(() => expect(supabase.from().update).toHaveBeenCalled()); expect(supabase.from).toHaveBeenCalledWith('profiles'); expect(supabase.from().update).toHaveBeenCalledWith(expect.objectContaining({ full_name: 'Updated Customer', billing_address: expect.objectContaining({ city: 'Berlin' }) })); expect(supabase.from().eq).toHaveBeenCalledWith('id', 'customer'); });
 it('creates tickets and preserves success when email delivery fails', async () => { mock.notify.mockResolvedValue(false); mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'New ticket' })); fireEvent.change(screen.getByLabelText('Subject'), { target: { value: 'New question' } }); fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Please help' } }); fireEvent.click(screen.getByRole('button', { name: 'Create ticket' })); await screen.findByText('Ticket new-tick created.'); expect(mock.write).toHaveBeenCalledWith({ access_token: 'fixture' }, { action: 'create', subject: 'New question', category: 'general', message: 'Please help' }); expect(screen.getByRole('alert')).toHaveTextContent('Ticket saved, but the email notification could not be sent.'); });
-it('blocks duplicate replies while a request is pending and permits retry after failure', async () => { mock.recover.mockResolvedValue(results([ticket])); let reject; mock.write.mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; })); mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: /Existing ticket/ })); await screen.findByText('Earlier reply'); fireEvent.change(screen.getByLabelText('Reply'), { target: { value: '  Follow up  ' } }); const form = screen.getByRole('button', { name: 'Send reply' }).closest('form'); fireEvent.submit(form); fireEvent.submit(form); expect(mock.write).toHaveBeenCalledTimes(1); await act(async () => reject(new Error('Reply rejected'))); expect(screen.getByRole('alert')).toHaveTextContent('Reply rejected'); expect(screen.getByLabelText('Reply')).toHaveValue('  Follow up  '); fireEvent.submit(form); await waitFor(() => expect(mock.write).toHaveBeenCalledTimes(2)); expect(mock.write).toHaveBeenLastCalledWith({ access_token: 'fixture' }, { action: 'message', ticketId: 'ticket-1', message: 'Follow up' }); });
+it('blocks duplicate replies while a request is pending and permits retry after failure', async () => { mock.recover.mockResolvedValue(results([ticket])); let reject; mock.write.mockReturnValueOnce(new Promise((_resolve, fail) => { reject = fail; })); mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: /Existing ticket/ })); await screen.findByText('Earlier reply'); fireEvent.change(screen.getByLabelText('Reply'), { target: { value: '  Follow up  ' } }); const form = screen.getByRole('button', { name: 'Send reply' }).closest('form'); fireEvent.submit(form); fireEvent.submit(form); expect(mock.write).toHaveBeenCalledTimes(1); await act(async () => reject(new SafeMessageError('Reply rejected'))); expect(screen.getByRole('alert')).toHaveTextContent('Reply rejected'); expect(screen.getByLabelText('Reply')).toHaveValue('  Follow up  '); fireEvent.submit(form); await waitFor(() => expect(mock.write).toHaveBeenCalledTimes(2)); expect(mock.write).toHaveBeenLastCalledWith({ access_token: 'fixture' }, { action: 'message', ticketId: 'ticket-1', message: 'Follow up' }); });
 it('clears the invalid session locally and navigates to login', async () => { mock.recover.mockResolvedValue({ ...results(), sessionInvalid: true, error: new Error('Session expired') }); mount(); await screen.findByText('Signed out destination'); expect(supabase.auth.signOut).toHaveBeenCalledWith({ scope: 'local' }); expect(screen.queryByText('Hello, Customer')).not.toBeInTheDocument(); });
 it('reports MFA enrollment and challenge failures', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'Set up authenticator app' })); await screen.findByText('Authenticator setup could not be started. Please try again.'); supabase.auth.mfa.listFactors.mockResolvedValue({ data: { totp: [{ id: 'factor', status: 'verified' }] } }); fireEvent.click(screen.getByRole('button', { name: 'Set up authenticator app' })); await screen.findByLabelText('Six-digit code'); fireEvent.change(screen.getByLabelText('Six-digit code'), { target: { value: '123456' } }); fireEvent.click(screen.getByRole('button', { name: 'Verify code' })); await screen.findByText('Authenticator verification could not be started. Please try again.'); expect(supabase.auth.mfa.verify).not.toHaveBeenCalled(); });
 it('signs out and removes customer data from the view', async () => { mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'Sign out' })); await screen.findByText('Signed out destination'); expect(supabase.auth.signOut).toHaveBeenCalledOnce(); });
@@ -85,6 +86,17 @@ it('reports rejected profile writes and sign-out without unhandled errors', asyn
 	supabase.from().then = (_resolve, reject) => Promise.reject(new Error('network')).then(_resolve, reject);
 	mount(); await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'Save profile' })); await screen.findByText('Profile could not be saved. Please try again.');
 	supabase.auth.signOut.mockRejectedValue(new Error('network')); fireEvent.click(screen.getByRole('button', { name: 'Sign out' })); await screen.findByText('Sign-out could not be completed. Please try again.'); expect(screen.queryByText('Signed out destination')).not.toBeInTheDocument();
+	// The session is still active, so the account data must still be shown.
+	expect(screen.getByText('Hello, Customer')).toBeInTheDocument();
+});
+
+it('keeps account data when Supabase returns a sign-out error', async () => {
+	supabase.auth.signOut.mockResolvedValue({ error: { message: 'logout failed' } });
+	mount(); await screen.findByText('Hello, Customer');
+	fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+	await screen.findByText('Sign-out could not be completed. Please try again.');
+	expect(screen.getByText('Hello, Customer')).toBeInTheDocument();
+	expect(screen.queryByText('Signed out destination')).not.toBeInTheDocument();
 });
 it('does not claim AAL2 success when MFA session refresh fails', async () => {
 	supabase.auth.mfa.listFactors.mockResolvedValue({ data: { totp: [{ id: 'factor', status: 'verified' }] } }); supabase.auth.mfa.challenge.mockResolvedValue({ data: { id: 'challenge' } }); supabase.auth.mfa.verify.mockResolvedValue({}); supabase.auth.refreshSession = vi.fn().mockResolvedValue({ error: new Error('refresh failed') });
@@ -167,4 +179,23 @@ it('explains authenticator apps to customers and shows when one is already on', 
 	render(<MemoryRouter><AuthContext.Provider value={{ user: { id: 'customer', email: 'customer@example.test', factors: [{ id: 'factor', status: 'verified' }] }, session: { access_token: 'fixture' }, supabase }}><Account /></AuthContext.Provider></MemoryRouter>);
 	await screen.findByText('Hello, Customer'); fireEvent.click(screen.getByRole('button', { name: 'security', exact: true }));
 	expect(screen.getByText(/Your authenticator app is on/)).toBeInTheDocument(); expect(screen.queryByRole('button', { name: 'Set up authenticator app' })).not.toBeInTheDocument();
+});
+it('never shows raw provider errors and caps API error messages', async () => {
+	mock.recover.mockResolvedValue({ ...results([ticket]), error: { code: '42501', message: 'permission denied for table activity_events' } });
+	mount(); await screen.findByText('Hello, Customer');
+	expect(screen.getByRole('alert')).toHaveTextContent('You do not have permission to do that.');
+	expect(screen.queryByText(/activity_events/)).not.toBeInTheDocument();
+	supabase.from().then = (resolve) => Promise.resolve({ error: { code: '23514', message: 'violates check constraint "profiles_country_check"' } }).then(resolve);
+	fireEvent.click(screen.getByRole('button', { name: 'Save profile' }));
+	await screen.findByText('Some details could not be accepted. Check the form and try again.');
+	expect(screen.queryByText(/profiles_country_check/)).not.toBeInTheDocument();
+	mock.write.mockRejectedValueOnce(new Error('duplicate key value violates unique constraint "tickets_pkey"'));
+	fireEvent.click(screen.getByRole('button', { name: 'tickets', exact: true })); fireEvent.click(screen.getByRole('button', { name: 'New ticket' }));
+	fireEvent.change(screen.getByLabelText('Subject'), { target: { value: 'Question' } }); fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Help' } });
+	fireEvent.click(screen.getByRole('button', { name: 'Create ticket' }));
+	await screen.findByText('Ticket could not be saved. Please try again.');
+	expect(screen.queryByText(/tickets_pkey/)).not.toBeInTheDocument();
+	mock.write.mockRejectedValueOnce(new SafeMessageError('x'.repeat(5000)));
+	fireEvent.click(screen.getByRole('button', { name: 'Create ticket' }));
+	await waitFor(() => expect(screen.getByRole('alert').textContent.length).toBeLessThanOrEqual(200));
 });

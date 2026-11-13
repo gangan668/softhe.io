@@ -1,36 +1,12 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { readFileSync } from "node:fs";
 import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
+import { devHeaders, previewHeaders } from "./securityHeaders.js";
 
-// Local servers reuse the production headers from vercel.json so policy drift shows up locally.
-const productionHeaders = JSON.parse(readFileSync(new URL("../vercel.json", import.meta.url), "utf8"))
-	.headers.find((rule) => rule.source === "/(.*)").headers;
-
-function localHeaders({ dev }) {
-	const headers = Object.fromEntries(productionHeaders.map(({ key, value }) => [key, value]));
-	const directives = headers["Content-Security-Policy"]
-		.split(";")
-		.map((directive) => directive.trim())
-		// localhost is served over plain HTTP.
-		.filter((directive) => directive && directive !== "upgrade-insecure-requests");
-	// Only the isolated portal browser suite may connect to its mocked provider.
-	if (!dev && process.env.SOFTHE_E2E_MODE === "portal") {
-		const index = directives.findIndex((directive) => directive.startsWith("connect-src "));
-		directives[index] += " https://portal-fixture.supabase.co";
-	}
-	if (dev) {
-		// The Vite dev server injects the React refresh preamble and CSS inline, and uses a websocket for HMR.
-		const additions = { "script-src": "'unsafe-inline'", "style-src": "'unsafe-inline'", "connect-src": "ws: wss:" };
-		for (const [name, extra] of Object.entries(additions)) {
-			const index = directives.findIndex((directive) => directive.startsWith(`${name} `));
-			directives[index] = `${directives[index]} ${extra}`;
-		}
-	}
-	headers["Content-Security-Policy"] = directives.join("; ");
-	return headers;
-}
+// Local servers reuse the production headers from ../vercel.json (see securityHeaders.js) so policy drift shows up locally.
+// Only the isolated portal browser suite may connect to its mocked provider.
+const fixtureConnectSrc = process.env.SOFTHE_E2E_MODE === "portal" ? ["https://portal-fixture.supabase.co"] : [];
 
 // https://vite.dev/config/
 export default defineConfig(() => ({
@@ -67,7 +43,8 @@ export default defineConfig(() => ({
 		},
 	},
 	server: {
-		headers: localHeaders({ dev: true }),
+		// Production policy plus inline/eval scripts, inline styles and ws: for HMR; no reporting.
+		headers: devHeaders(),
 	},
 	build: {
 		manifest: true,
@@ -78,6 +55,7 @@ export default defineConfig(() => ({
 		chunkSizeWarningLimit: 1000,
 	},
 	preview: {
-		headers: localHeaders({ dev: false }),
+		// Production headers minus HSTS and upgrade-insecure-requests, which break http://localhost.
+		headers: previewHeaders(undefined, { connectSrc: fixtureConnectSrc }),
 	},
 }));

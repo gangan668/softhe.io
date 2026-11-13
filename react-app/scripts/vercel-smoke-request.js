@@ -23,14 +23,15 @@ export const parseCurlResponse = (raw) => {
 	throw new Error('Missing authenticated HTTP response');
 };
 
-export const requestVercel = async (origin, path) => {
+export const requestVercel = async (origin, path, headers = {}) => {
 	const url = new URL(origin);
 	if (url.protocol !== 'https:' || !url.hostname.endsWith('.vercel.app') || url.origin !== origin) {
 		throw new Error('Authenticated smoke requires an immutable HTTPS Vercel deployment origin');
 	}
+	const headerArgs = Object.entries(headers).flatMap(([key, value]) => ['--header', `${key}: ${value}`]);
 	const { stdout } = await execute('npx', [
 		'--yes', 'vercel@59.3.0', 'curl', path, '--deployment', origin, '--',
-		'--silent', '--show-error', '--include', '--max-time', '30',
+		'--silent', '--show-error', '--include', '--max-time', '30', ...headerArgs,
 	], { timeout: 60000, maxBuffer: 4 * 1024 * 1024 });
 	return parseCurlResponse(stdout);
 };

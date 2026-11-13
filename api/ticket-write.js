@@ -9,7 +9,7 @@ const IDEMPOTENCY_KEY = /^[A-Za-z0-9_-]{20,100}$/;
 
 const runIdempotent = async (req, user, operation) => {
 	const supplied = String(req.headers?.['idempotency-key'] || '').trim();
-	if (!IDEMPOTENCY_KEY.test(supplied)) throw Object.assign(new Error('A valid idempotency key is required'), { statusCode: 400 });
+	if (!IDEMPOTENCY_KEY.test(supplied)) throw Object.assign(new Error('A valid idempotency key is required'), { statusCode: 400, publicMessage: 'A valid idempotency key is required' });
 	const key = `portal:ticket-write:${user.id}:${supplied}`;
 	const cached = await redisCommand(['GET', key]);
 	if (cached) return { ...JSON.parse(cached), duplicate: true };
@@ -50,7 +50,7 @@ async function ticketWrite(req, res) {
 			if (!uuid.test(ticketId) || body.length < 1 || body.length > 5000) return res.status(400).json({ error: 'Invalid ticket reply' });
 			const result = await runIdempotent(req, user, async () => {
 				const ticket = (await adminRequest(`tickets?id=eq.${ticketId}&user_id=eq.${user.id}&select=id,status`))?.[0];
-				if (!ticket || ticket.status === 'closed') throw Object.assign(new Error('Ticket reply is not permitted'), { statusCode: 403 });
+				if (!ticket || ticket.status === 'closed') throw Object.assign(new Error('Ticket reply is not permitted'), { statusCode: 403, publicMessage: 'Ticket reply is not permitted' });
 				return { id: await adminRequest('rpc/add_ticket_message_for_user', { method: 'POST', body: { ticket_user: user.id, target_ticket: ticketId, message_body: body } }) };
 			});
 			return res.status(result.duplicate ? 200 : 201).json(result);

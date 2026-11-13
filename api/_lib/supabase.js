@@ -21,22 +21,34 @@ const jwtClaims = (token) => {
 const verifyUser = async (req, { required = true } = {}) => {
 	const token = getBearerToken(req);
 	if (!token) {
-		if (required) throw Object.assign(new Error('Authentication required'), { statusCode: 401 });
+		if (required) throw Object.assign(new Error('Authentication required'), { statusCode: 401, publicMessage: 'Authentication required' });
 		return null;
 	}
 	const { url, publishableKey } = getConfig();
 	const response = await fetchWithTimeout(`${url}/auth/v1/user`, {
 		headers: { apikey: publishableKey, Authorization: `Bearer ${token}` },
 	});
-	if (!response.ok) throw Object.assign(new Error('Invalid or expired session'), { statusCode: 401 });
+	if (!response.ok) throw Object.assign(new Error('Invalid or expired session'), { statusCode: 401, publicMessage: 'Invalid or expired session' });
 	const user = await response.json();
-	if (!user?.id || !user?.email) throw Object.assign(new Error('Invalid user session'), { statusCode: 401 });
+	if (!user?.id || !user?.email) throw Object.assign(new Error('Invalid user session'), { statusCode: 401, publicMessage: 'Invalid or expired session' });
 	// A password alone must not unlock an account that has enrolled a second factor.
 	const hasVerifiedFactor = Array.isArray(user.factors) && user.factors.some((factor) => factor?.status === 'verified');
 	if (hasVerifiedFactor && jwtClaims(token).aal !== 'aal2') {
 		throw Object.assign(new Error('MFA required'), { statusCode: 403, publicMessage: 'Multi-factor authentication is required.' });
 	}
 	return { ...user, token };
+};
+
+// PostgREST/Supabase error text can reveal schema, policy, or constraint names. Keep it
+// on error.detail for server logs only; the error message itself stays generic.
+const upstreamError = async (response) => {
+	const data = await response.json().catch(() => ({}));
+	const detail = [data.code, data.message || data.error, data.details, data.hint]
+		.filter((part) => typeof part === 'string' && part).join(' | ').slice(0, 500);
+	return Object.assign(new Error(`Customer data request failed (${response.status})`), {
+		detail: detail || undefined,
+		upstreamStatus: response.status,
+	});
 };
 
 const adminRequest = async (path, { method = 'GET', body, headers = {} } = {}) => {
@@ -48,27 +60,23 @@ const adminRequest = async (path, { method = 'GET', body, headers = {} } = {}) =
 		headers: { apikey: serviceKey, ...authorization, 'Content-Type': 'application/json', ...headers },
 		body: body === undefined ? undefined : JSON.stringify(body),
 	});
-	if (!response.ok) {
-		const data = await response.json().catch(() => ({}));
-		throw new Error(data.message || data.error || `Customer data request failed (${response.status})`);
-	}
+	if (!response.ok) throw await upstreamError(response);
 	if (response.status === 204) return null;
 	return response.json().catch(() => null);
 };
 
 const userRequest = async (user, path, { method = 'GET', body, headers = {} } = {}) => {
 	const { url, publishableKey } = getConfig();
-	if (!user?.token) throw Object.assign(new Error('Authentication required'), { statusCode: 401 });
+	if (!user?.token) throw Object.assign(new Error('Authentication required'), { statusCode: 401, publicMessage: 'Authentication required' });
 	const response = await fetchWithTimeout(`${url}/rest/v1/${path}`, {
 		method,
 		headers: { apikey: publishableKey, Authorization: `Bearer ${user.token}`, 'Content-Type': 'application/json', ...headers },
 		body: body === undefined ? undefined : JSON.stringify(body),
 	});
 	if (!response.ok) {
-		const data = await response.json().catch(() => ({}));
-		// Keep upstream details in logs; clients only receive a generic message.
+		// Keep upstream details on error.detail for logs; clients only receive a generic message.
 		const publicMessage = response.status === 401 ? 'Your session has expired. Please sign in again.' : 'Request could not be completed';
-		throw Object.assign(new Error(data.message || data.error || `Customer data request failed (${response.status})`), { statusCode: response.status, publicMessage });
+		throw Object.assign(await upstreamError(response), { statusCode: response.status, publicMessage });
 	}
 	if (response.status === 204) return null;
 	return response.json().catch(() => null);

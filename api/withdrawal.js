@@ -5,9 +5,13 @@ const { sendEmailTemplate } = require('./_lib/emailjs');
 const { assertOperatorIdentity } = require('./_lib/config');
 const { readJsonBody } = require('./_lib/json-body');
 const { sendPublicError } = require('./_lib/portal-security');
+const { fetchWithTimeout } = require('./_lib/fetch');
+const { adminRequest, portalServerConfigured } = require('./_lib/supabase');
+const { verifyTurnstile } = require('./_lib/turnstile');
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ORDER_REFERENCE_PATTERN = /^[A-Za-z0-9_-]{8,100}$/;
+const STRIPE_SESSION_PATTERN = /^cs_(?:test_|live_)?[A-Za-z0-9]{8,}$/;
 const ALLOWED_ITEMS = new Set(['entire-order', 'windows-10', 'windows-11', 'bios-optimization']);
 
 const cleanText = (value, maxLength) => typeof value === 'string'
@@ -62,6 +66,45 @@ const getIdempotencyKey = (submission) => {
 	return crypto.createHmac('sha256', secret).update(canonical).digest('hex');
 };
 
+// Compares normalized addresses in constant time (fixed-length digests).
+const emailsMatch = (left, right) => {
+	if (typeof left !== 'string' || typeof right !== 'string' || !left.trim() || !right.trim()) return false;
+	const digest = (value) => crypto.createHash('sha256').update(value.trim().toLowerCase()).digest();
+	return crypto.timingSafeEqual(digest(left), digest(right));
+};
+
+// Resolves the e-mail address of the order behind a reference (a Stripe Checkout
+// Session ID): the portal database first, then the Stripe session itself. Returns
+// null when the order cannot be found. Provider errors are thrown.
+const lookupOrderEmail = async (orderReference) => {
+	if (portalServerConfigured()) {
+		const rows = await adminRequest(`orders?stripe_session_id=eq.${encodeURIComponent(orderReference)}&select=customer_email&limit=1`);
+		const email = Array.isArray(rows) ? rows[0]?.customer_email : null;
+		if (email) return email;
+	}
+	if (process.env.STRIPE_SECRET_KEY && STRIPE_SESSION_PATTERN.test(orderReference)) {
+		const response = await fetchWithTimeout(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(orderReference)}`, {
+			headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
+		});
+		if (response.status === 404) return null;
+		if (!response.ok) throw new Error(`Order lookup failed (${response.status})`);
+		const session = await response.json();
+		return session?.customer_details?.email || null;
+	}
+	return null;
+};
+
+// Never throws: an unavailable provider is treated as "not verified" so the
+// operator still receives every withdrawal request.
+const verifyOrderOwnership = async (submission, lookup = lookupOrderEmail) => {
+	try {
+		return emailsMatch(await lookup(submission.orderReference), submission.email);
+	} catch (error) {
+		console.error('withdrawal_order_lookup_failed', { message: error.message });
+		return false;
+	}
+};
+
 const sendWithdrawalEmails = async (record) => {
 	const templateParams = {
 		to_email: record.email,
@@ -72,15 +115,32 @@ const sendWithdrawalEmails = async (record) => {
 		received_at: record.receivedAt,
 		withdrawal_url: `${(process.env.PUBLIC_SITE_URL || 'https://softhe.io').replace(/\/$/, '')}/withdrawal`,
 	};
-	await sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_TEMPLATE_ID, {
-		...templateParams,
-		message_type: 'customer_acknowledgement',
-	});
-	await sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID, {
-		...templateParams,
-		customer_email: record.email,
-		message_type: 'operator_notification',
-	});
+	// The operator notification is the legally relevant record, so it is sent
+	// independently of the customer acknowledgement and decides the outcome.
+	// The acknowledgement goes only to an address proven to own the order, so the
+	// form cannot be used to send mail to arbitrary recipients.
+	const [acknowledgement, notification] = await Promise.allSettled([
+		record.orderVerified === true
+			? sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_TEMPLATE_ID, {
+				...templateParams,
+				message_type: 'customer_acknowledgement',
+			})
+			: Promise.resolve(),
+		sendEmailTemplate(process.env.EMAILJS_WITHDRAWAL_NOTIFICATION_TEMPLATE_ID, {
+			...templateParams,
+			to_email: process.env.SUPPORT_EMAIL,
+			customer_email: record.email,
+			order_verified: record.orderVerified === true ? 'yes' : 'no',
+			message_type: 'operator_notification',
+		}),
+	]);
+	if (notification.status === 'rejected') throw notification.reason;
+	if (acknowledgement.status === 'rejected') {
+		// Same 202 response as an unverified request; the operator follows up.
+		console.error('withdrawal_acknowledgement_failed', { requestId: record.requestId, message: acknowledgement.reason?.message });
+		return { acknowledgementSent: false };
+	}
+	return { acknowledgementSent: record.orderVerified === true };
 };
 
 async function withdrawal(req, res) {
@@ -97,6 +157,9 @@ async function withdrawal(req, res) {
 	}
 	const validationError = validateWithdrawal(submission);
 	if (validationError) return res.status(400).json({ error: validationError });
+
+	const captcha = await verifyTurnstile(req, { body });
+	if (!captcha.ok) return res.status(captcha.status).json({ error: captcha.error });
 
 	let idempotencyKey;
 	let requestId;
@@ -115,17 +178,21 @@ async function withdrawal(req, res) {
 		const claimed = await claimKey(idempotencyKey, requestId, retentionSeconds);
 		if (!claimed) return res.status(202).json({ received: true, duplicate: true });
 
+		const orderVerified = await verifyOrderOwnership(submission);
 		const record = {
 			requestId,
 			receivedAt: new Date().toISOString(),
 			status: 'received',
 			...submission,
+			orderVerified,
 		};
 		delete record.website;
 		await setKey(`withdrawal:request:${requestId}`, JSON.stringify(record), retentionSeconds);
-		await sendWithdrawalEmails(record);
-		await setKey(`withdrawal:request:${requestId}`, JSON.stringify({ ...record, status: 'acknowledged' }), retentionSeconds);
+		const { acknowledgementSent } = await sendWithdrawalEmails(record);
+		await setKey(`withdrawal:request:${requestId}`, JSON.stringify({ ...record, status: 'acknowledged', acknowledgementSent }), retentionSeconds);
 
+		// Identical response whether or not the order matched, so the endpoint
+		// cannot be used to test which order references belong to which addresses.
 		return res.status(202).json({
 			received: true,
 			requestId,
@@ -151,3 +218,6 @@ module.exports.getRetentionSeconds = getRetentionSeconds;
 module.exports.normalizeWithdrawal = normalizeWithdrawal;
 module.exports.sendWithdrawalEmails = sendWithdrawalEmails;
 module.exports.validateWithdrawal = validateWithdrawal;
+module.exports.emailsMatch = emailsMatch;
+module.exports.lookupOrderEmail = lookupOrderEmail;
+module.exports.verifyOrderOwnership = verifyOrderOwnership;

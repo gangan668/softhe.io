@@ -1,12 +1,17 @@
 import BenchmarkEvidenceLink from '../components/BenchmarkEvidenceLink';
-import { benchmarkMethodology, benchmarkPublication, benchmarkResults, formatPercentChange, idleOverhead } from '../data/benchmark';
+import { benchmarkMethodology, benchmarkResults, formatPercentChange } from '../data/benchmark';
+import { PRODUCTS } from '../data/products';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
 import { absoluteUrl, siteConfig } from '../config/site';
+import { getBundleDiscountRate } from '../utils/cart';
 import { commerceEnabled } from '../utils/runtimeConfig';
 import './Home.css';
 
 const { averageFps, onePercentLowFps, frameTimeMs } = benchmarkResults;
+// Derived from the catalogue and cart pricing so the proof strip cannot drift from checkout.
+const lowestPrice = Math.min(...PRODUCTS.map((product) => product.price));
+const maxBundleDiscount = Math.round(getBundleDiscountRate(PRODUCTS.length) * 100);
 
 function Home() {
 	return (
@@ -103,59 +108,32 @@ function Home() {
 									</div>
 								</div>
 								<p className="result-note">One PC, with a different Windows edition, memory settings, and GPU driver. This cannot isolate the effect of one product. <BenchmarkEvidenceLink /></p>
+								<Link to="/performance" className="text-link panel-link">
+									Read the benchmark details
+									<i className="fas fa-arrow-right" aria-hidden="true"></i>
+								</Link>
 							</div>
 						</div>
 					</div>
 				</header>
 
-				<section className="proof-strip" aria-label="Preliminary test summary">
+				<section className="proof-strip" aria-label="What you can order">
 					<div className="container proof-grid">
 						<div>
-							<strong>{formatPercentChange(averageFps.change)}</strong>
-							<span>Average FPS in one whole-system CS2 comparison</span>
+							<strong>{PRODUCTS.length} products</strong>
+							<span>Windows 11 build, Windows 10 build, and BIOS tuning</span>
 						</div>
 						<div>
-							<strong>{formatPercentChange(frameTimeMs.change)}</strong>
-							<span>Frame time change in the same comparison</span>
+							<strong>From €{lowestPrice}</strong>
+							<span>Every price is listed in the store before you order</span>
 						</div>
 						<div>
-							<strong>{idleOverhead.processes.optimized}</strong>
-							<span>Idle processes in the SoftheOS sample</span>
+							<strong>Up to {maxBundleDiscount}% off</strong>
+							<span>Bundle discount when you combine two or three products</span>
 						</div>
 						<div>
 							<strong>14 days</strong>
 							<span>General statutory withdrawal period for eligible consumers; exceptions apply</span>
-						</div>
-					</div>
-				</section>
-
-				<section className="performance-preview">
-					<div className="container preview-grid">
-						<div className="preview-copy">
-							<span className="section-kicker">Preliminary test data</span>
-							<h2>Read the numbers and the test limits before you buy.</h2>
-							<p>
-								The sample compares two configurations of one PC. Windows edition, memory settings,
-								and GPU driver changed. The {benchmarkPublication.captureCountText} raw captures are published on the benchmark page. The result cannot
-								show what any one product contributed.
-							</p>
-							<Link to="/performance" className="text-link">
-								Read the benchmark details
-								<i className="fas fa-arrow-right" aria-hidden="true"></i>
-							</Link>
-						</div>
-						<div className="comparison-card">
-							<div className="comparison-row">
-								<span>Default Windows</span>
-								<strong className="baseline">{averageFps.stock} FPS</strong>
-							</div>
-							<div className="comparison-row featured">
-								<span>SoftheOS + BIOS</span>
-								<strong>{averageFps.optimized} FPS</strong>
-							</div>
-							<div className="comparison-footnote">
-								Preliminary whole-system sample from one PC.
-							</div>
 						</div>
 					</div>
 				</section>
