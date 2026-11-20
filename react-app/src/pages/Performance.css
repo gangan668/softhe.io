@@ -41,6 +41,8 @@
 	color: var(--primary-color);
 	font-size: clamp(2rem, 4vw, 3rem);
 	line-height: 1;
+	letter-spacing: -0.03em;
+	font-variant-numeric: tabular-nums;
 }
 
 .performance-stats span {
@@ -83,7 +85,7 @@
 }
 
 .native-card-topline span {
-	color: var(--primary-color);
+	color: var(--text-caveat);
 	font-size: var(--font-md);
 	font-weight: 600;
 }
@@ -95,11 +97,13 @@
 .native-card-topline b {
 	flex-shrink: 0;
 	white-space: nowrap;
-	padding: 0.38rem 0.7rem;
+	padding: 0.3rem 0.65rem;
+	border: 1px solid var(--accent-line);
 	border-radius: 999px;
-	color: var(--text-on-accent);
+	color: var(--text-accent);
 	font-size: var(--font-sm);
-	background: var(--gradient);
+	font-weight: 600;
+	background: var(--accent-tint);
 }
 
 .native-benchmark-card,
@@ -120,8 +124,8 @@
 	right: -12rem;
 	top: -15rem;
 	border-radius: 50%;
-	background: var(--accent-tint-strong);
-	filter: blur(55px);
+	/* Gradient instead of filter: blur(); same glow without a filter pass. */
+	background: radial-gradient(circle, rgba(66, 232, 196, 0.13), transparent 68%);
 	pointer-events: none;
 }
 
@@ -242,8 +246,10 @@
 
 .overhead-heading {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 5rem;
+	/* Same tracks as .overhead-metric so each heading sits over its own column. */
+	grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr);
+	gap: 1rem;
+	padding: 0 1.25rem;
 	margin-bottom: 1rem;
 }
 
@@ -253,13 +259,22 @@
 }
 
 .overhead-heading > div:last-child {
-	text-align: right;
+	grid-column: 3;
 }
 
 .overhead-heading span {
 	color: var(--primary-color);
 	font-size: var(--font-md);
 	font-weight: 600;
+}
+
+/* Over the stock figures, which sit at the right edge of the first column. */
+.overhead-heading > div:first-child {
+	text-align: right;
+}
+
+.overhead-heading > div:first-child span {
+	color: var(--text-secondary);
 }
 
 .overhead-metric {
@@ -271,15 +286,15 @@
 	border-top: 1px solid var(--border-color);
 }
 
-.overhead-metric > div:not(.overhead-change) {
+.overhead-metric > div:not(.overhead-change, .overhead-bars) {
 	display: flex;
 	align-items: baseline;
 	justify-content: space-between;
 	gap: 1rem;
 }
 
-.overhead-metric > div:last-child {
-	flex-direction: row-reverse;
+.overhead-metric > div:nth-child(3) {
+	justify-content: flex-start;
 }
 
 .overhead-metric span,
@@ -294,8 +309,32 @@
 	line-height: 1;
 }
 
-.overhead-metric > div:last-child strong {
+.overhead-metric > div:nth-child(3) strong {
 	color: var(--primary-color);
+}
+
+.overhead-bars {
+	grid-column: 1 / -1;
+	display: grid;
+	gap: 0.35rem;
+	margin-top: 0.25rem;
+}
+
+.overhead-bar {
+	--bar: 100%;
+	display: block;
+	width: var(--bar);
+	height: 8px;
+	border-radius: 999px;
+}
+
+.overhead-bar--stock {
+	background: linear-gradient(90deg, rgba(174, 184, 198, 0.35), rgba(174, 184, 198, 0.55));
+}
+
+.overhead-bar--optimized {
+	background: var(--gradient);
+	box-shadow: 0 0 16px rgba(66, 232, 196, 0.3);
 }
 
 /* Read by assistive technology everywhere; shown only once the column headings are hidden on mobile. */
@@ -506,7 +545,7 @@
 		grid-template-columns: 1fr;
 	}
 
-	.overhead-metric > div:not(.overhead-change) {
+	.overhead-metric > div:not(.overhead-change, .overhead-bars) {
 		flex-wrap: wrap;
 		row-gap: 0.25rem;
 	}

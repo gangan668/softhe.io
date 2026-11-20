@@ -1,5 +1,92 @@
-:root { color-scheme: dark; font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #080c12; color: #f5f7fa; }
-        main { max-width: 42rem; padding: 2rem; text-align: center; }
-        p { color: #aeb8c5; line-height: 1.7; }
-        a { display: inline-block; margin-top: 1rem; padding: .8rem 1.1rem; border-radius: .75rem; background: #4be1c3; color: #06110f; font-weight: 800; text-decoration: none; }
+/* Static fallback page: mirrors the app's tokens (App.css) so a missing URL still looks like Softhe.io. */
+@font-face {
+	font-family: "Inter Variable";
+	font-style: normal;
+	font-display: swap;
+	font-weight: 100 900;
+	src: url("/fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+:root {
+	color-scheme: dark;
+	font-family: "Inter Variable", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	--gradient: linear-gradient(135deg, #42e8c4 0%, #4fd8e8 48%, #72a7ff 100%);
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+	display: grid;
+	place-items: center;
+	background-color: #080a0f;
+	background-image:
+		radial-gradient(circle at 50% 30%, rgba(66, 232, 196, 0.12), transparent 30rem),
+		radial-gradient(circle at 85% 10%, rgba(114, 167, 255, 0.1), transparent 26rem),
+		linear-gradient(rgba(174, 197, 218, 0.045) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(174, 197, 218, 0.045) 1px, transparent 1px);
+	background-size: auto, auto, 36px 36px, 36px 36px;
+	color: #f2f6fb;
+	-webkit-font-smoothing: antialiased;
+}
+
+main {
+	max-width: 42rem;
+	padding: 2rem;
+	text-align: center;
+}
+
+p {
+	color: #a9b7c6;
+	line-height: 1.7;
+	margin: 0;
+}
+
+.mark {
+	display: inline-block;
+	margin-bottom: 1.5rem;
+}
+
+.mark span {
+	display: block;
+	width: 56px;
+	height: 56px;
+	background: var(--gradient);
+	-webkit-mask: url("/images/softhe-icon-v2-192.png") center / contain no-repeat;
+	mask: url("/images/softhe-icon-v2-192.png") center / contain no-repeat;
+}
+
+.code {
+	font-size: clamp(5rem, 16vw, 8rem);
+	font-weight: 750;
+	line-height: 0.9;
+	letter-spacing: -0.06em;
+	color: transparent;
+	background: var(--gradient);
+	-webkit-background-clip: text;
+	background-clip: text;
+}
+
+h1 {
+	margin: 0.75rem 0 0.5rem;
+	font-size: 1.75rem;
+	letter-spacing: -0.022em;
+}
+
+.button {
+	display: inline-block;
+	margin-top: 1.5rem;
+	padding: 0.8rem 1.2rem;
+	border-radius: 8px;
+	background-color: #42e8c4;
+	background-image: linear-gradient(135deg, #46ecc6 0%, #4fd8e8 100%);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 16px 36px rgba(66, 196, 216, 0.16);
+	color: #03100d;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.button:focus-visible,
+.mark:focus-visible {
+	outline: 2px solid rgba(66, 232, 196, 0.72);
+	outline-offset: 3px;
+}

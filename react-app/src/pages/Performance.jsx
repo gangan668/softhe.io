@@ -86,8 +86,8 @@ function Performance() {
 							<h2 id="frametime-title" className="section-title">The gap widens in the slowest frames</h2>
 							<p>
 								In this sample, the difference grows from {frameTimeGap(0.5)} at the median frame to {frameTimeGap(0.001)} at the 99.9th percentile.
-								Each line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
-								drawn from the published raw captures. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
+								Each faint line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
+								drawn from the published raw captures. The bold line is each configuration&apos;s median, and the shaded band is the gap between them. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
 								Averages hide this tail, and it is where stutter shows up.
 							</p>
 						</div>
@@ -115,11 +115,21 @@ function Performance() {
 								<div><small className="overhead-profile">Default Windows</small><span>Background processes</span><strong>{processes.stock}</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(processes.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
 								<div><small className="overhead-profile">SoftheOS</small><strong>{processes.optimized}</strong></div>
+								{/* Proportional bars make the drop visible; the numbers above carry the values for assistive technology. */}
+								<div className="overhead-bars" aria-hidden="true">
+									<span className="overhead-bar overhead-bar--stock" style={{ '--bar': '100%' }}></span>
+									<span className="overhead-bar overhead-bar--optimized" style={{ '--bar': `${(processes.optimized / processes.stock) * 100}%` }}></span>
+								</div>
 							</div>
 							<div className="overhead-metric">
 								<div><small className="overhead-profile">Default Windows</small><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(memoryGb.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
 								<div><small className="overhead-profile">SoftheOS</small><strong>{memoryGb.optimized} GB</strong></div>
+								{/* Proportional bars make the drop visible; the numbers above carry the values for assistive technology. */}
+								<div className="overhead-bars" aria-hidden="true">
+									<span className="overhead-bar overhead-bar--stock" style={{ '--bar': '100%' }}></span>
+									<span className="overhead-bar overhead-bar--optimized" style={{ '--bar': `${(memoryGb.optimized / memoryGb.stock) * 100}%` }}></span>
+								</div>
 							</div>
 							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
 						</div>

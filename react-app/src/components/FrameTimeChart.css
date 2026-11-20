@@ -84,6 +84,13 @@
 .frametime-line--stock { stroke: var(--chart-stock); }
 .frametime-line--optimized { stroke: var(--chart-optimized); }
 
+.frametime-gap-stop { stop-color: var(--chart-optimized); }
+
+.frametime-line--run {
+	stroke-width: 1;
+	opacity: 0.35;
+}
+
 .frametime-end-label {
 	font-size: 13px;
 	font-weight: 600;
@@ -249,4 +256,5 @@
 	.frametime-line--optimized { stroke: Highlight; }
 	.frametime-key--stock { background: CanvasText; }
 	.frametime-key--optimized { background: Highlight; }
+	.frametime-gap { display: none; }
 }

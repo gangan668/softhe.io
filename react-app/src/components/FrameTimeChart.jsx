@@ -58,8 +58,11 @@ export default function FrameTimeChart() {
 		}
 	};
 
+	const medianValues = Object.fromEntries(profiles.map(({ id }) => [id, exceedance.map((_, index) => profileFrameTime(id, index))]));
+	// The band between the two median curves is the story of this section: it widens towards the slowest frames.
+	const gapPath = `${path(medianValues.stock)}${medianValues.optimized.map((value, index) => ({ value, index })).reverse().map(({ value, index }) => `L${x(exceedance[index]).toFixed(1)},${y(value).toFixed(1)}`).join('')}Z`;
 	const p1 = percentileRows.find((row) => row.share === 0.01).values;
-	const summary = `Frame-time percentile curves, one line per recorded run. At the 99th percentile, used for P1 FPS, ${profiles.map(({ id, label }) => `${label} took ${formatMs(p1[id])}`).join(' and ')}. The table below lists the values.`;
+	const summary = `Frame-time percentile curves: a faint line for each recorded run, a bold median line for each configuration, and a shaded band between the two medians. At the 99th percentile, used for P1 FPS, ${profiles.map(({ id, label }) => `${label} took ${formatMs(p1[id])}`).join(' and ')}. The table below lists the values.`;
 	const endLabelY = profiles.map(({ id }) => y(profileFrameTime(id, exceedance.length - 1)));
 	// Keep end labels apart when the two curves finish close together.
 	if (Math.abs(endLabelY[0] - endLabelY[1]) < 16) {
@@ -116,7 +119,16 @@ export default function FrameTimeChart() {
 					<text className="frametime-axis-title" x={margin.left + plotWidth / 2} y={height - 8} textAnchor="middle">Share of frames that took longer (log scale)</text>
 					<line className="frametime-reference" x1={x(0.01)} x2={x(0.01)} y1={margin.top} y2={margin.top + plotHeight} />
 					<text className="frametime-reference-label" x={x(0.01) - 6} y={margin.top + 12} textAnchor="end">P1 FPS</text>
-					{runs.map((run) => <path key={run.id} className={`frametime-line frametime-line--${run.profile}`} d={path(run.frameTimeMs)} />)}
+					<defs>
+						<linearGradient id="frametime-gap-fill" x1="0" x2="1" y1="0" y2="0">
+							<stop className="frametime-gap-stop" offset="0%" stopOpacity="0.04" />
+							<stop className="frametime-gap-stop" offset="100%" stopOpacity="0.22" />
+						</linearGradient>
+					</defs>
+					<path className="frametime-gap" d={gapPath} fill="url(#frametime-gap-fill)" />
+					{/* Individual runs are faint traces; the median of each profile is the bold line. */}
+					{runs.map((run) => <path key={run.id} className={`frametime-line frametime-line--run frametime-line--${run.profile}`} d={path(run.frameTimeMs)} />)}
+					{profiles.map(({ id }) => <path key={id} className={`frametime-line frametime-line--${id}`} d={path(medianValues[id])} />)}
 					{profiles.map(({ id, label }, index) => (
 						<text key={id} className={`frametime-end-label frametime-end-label--${id}`} x={margin.left + plotWidth + 10} y={endLabelY[index]} dominantBaseline="middle">{compact ? label.split(' ')[0] : label}</text>
 					))}

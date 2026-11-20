@@ -165,6 +165,7 @@ function Store() {
 				{!commerceEnabled && (
 					<div className="checkout-result checkout-result-pending" role="status">
 						<div className="container">
+							<i className="fas fa-info-circle" aria-hidden="true"></i>
 							<strong>Online ordering is unavailable</strong>
 							<span>You can review products and prices here. Contact us with your hardware details if you have questions.</span>
 							<Link to="/contact" className="status-contact-link">Ask about an order</Link>
@@ -264,7 +265,7 @@ function Store() {
 											</button>
 												</>
 											) : (
-												<span className="product-unavailable" role="status">Ordering temporarily unavailable</span>
+												<span className="product-unavailable" role="status"><i className="fas fa-lock" aria-hidden="true"></i>Ordering temporarily unavailable</span>
 											)}
 										</div>
 									</div>

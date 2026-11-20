@@ -79,8 +79,8 @@ test('static 404 retains its layout under strict production CSP', async ({ page 
 	await page.goto('/404.html');
 	await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
 	await expect(page.locator('body')).toHaveCSS('display', 'grid');
-	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(8, 12, 18)');
-	await expect(page.getByRole('link', { name: 'Return to Softhe.io' })).toHaveCSS('background-color', 'rgb(75, 225, 195)');
+	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(8, 10, 15)');
+	await expect(page.getByRole('link', { name: 'Return to Softhe.io' })).toHaveCSS('background-color', 'rgb(66, 232, 196)');
 	expect(violations).toEqual([]);
 	await page.getByRole('link', { name: 'Return to Softhe.io' }).click();
 	await expect(page).toHaveURL(/\/$/);
