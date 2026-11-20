@@ -62,7 +62,7 @@ export default function FrameTimeChart() {
 	// The band between the two median curves is the story of this section: it widens towards the slowest frames.
 	const gapPath = `${path(medianValues.stock)}${medianValues.optimized.map((value, index) => ({ value, index })).reverse().map(({ value, index }) => `L${x(exceedance[index]).toFixed(1)},${y(value).toFixed(1)}`).join('')}Z`;
 	const p1 = percentileRows.find((row) => row.share === 0.01).values;
-	const summary = `Frame-time percentile curves, one line per recorded run. At the 99th percentile, used for P1 FPS, ${profiles.map(({ id, label }) => `${label} took ${formatMs(p1[id])}`).join(' and ')}. The table below lists the values.`;
+	const summary = `Frame-time percentile curves: a faint line for each recorded run, a bold median line for each configuration, and a shaded band between the two medians. At the 99th percentile, used for P1 FPS, ${profiles.map(({ id, label }) => `${label} took ${formatMs(p1[id])}`).join(' and ')}. The table below lists the values.`;
 	const endLabelY = profiles.map(({ id }) => y(profileFrameTime(id, exceedance.length - 1)));
 	// Keep end labels apart when the two curves finish close together.
 	if (Math.abs(endLabelY[0] - endLabelY[1]) < 16) {

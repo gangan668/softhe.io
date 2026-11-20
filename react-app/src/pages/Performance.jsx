@@ -86,8 +86,8 @@ function Performance() {
 							<h2 id="frametime-title" className="section-title">The gap widens in the slowest frames</h2>
 							<p>
 								In this sample, the difference grows from {frameTimeGap(0.5)} at the median frame to {frameTimeGap(0.001)} at the 99.9th percentile.
-								Each line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
-								drawn from the published raw captures. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
+								Each faint line is one {captureSeconds}-second run of {Math.min(...framesPerRun).toLocaleString('en-US')} to {Math.max(...framesPerRun).toLocaleString('en-US')} frames,
+								drawn from the published raw captures. The bold line is each configuration&apos;s median, and the shaded band is the gap between them. Read across to see how long the slowest 1 in 10, 100, or 1,000 frames took.
 								Averages hide this tail, and it is where stutter shows up.
 							</p>
 						</div>

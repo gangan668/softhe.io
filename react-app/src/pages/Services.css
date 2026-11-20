@@ -293,7 +293,9 @@
 		gap: 1.5rem;
 	}
 
+	/* Re-shown here: the tablet query above hides the horizontal rail. */
 	.process-steps::before {
+		display: block;
 		top: 22px;
 		bottom: 22px;
 		left: 21px;
