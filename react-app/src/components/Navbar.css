@@ -3,11 +3,24 @@
 	top: 0;
 	width: 100%;
 	background: var(--glass-bg);
-	border-bottom: 1px solid var(--border-color);
+	border-bottom: 1px solid rgba(174, 197, 218, 0.1);
 	backdrop-filter: var(--glass-filter);
 	-webkit-backdrop-filter: var(--glass-filter);
+	box-shadow: var(--edge-highlight), 0 10px 30px rgba(0, 0, 0, 0.18);
 	z-index: 1000;
 	transition: var(--transition);
+}
+
+/* Brand hairline along the bottom edge, brightest under the logo and fading out to the right. */
+.navbar::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: -1px;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, rgba(66, 232, 196, 0.35) 22%, rgba(114, 167, 255, 0.18) 60%, transparent);
+	pointer-events: none;
 }
 
 
@@ -165,27 +178,6 @@
 	box-shadow: 0 10px 30px rgba(62, 193, 205, 0.12), inset 0 0 20px rgba(72, 218, 216, 0.045);
 }
 
-
-.nav-link::after {
-	content: "";
-	position: absolute;
-	bottom: -5px;
-	left: 0;
-	width: 0;
-	height: 2px;
-	background: var(--gradient);
-	transition: var(--transition);
-}
-
-
-.nav-link:hover::after {
-	width: 100%;
-}
-
-.nav-link.active::after {
-
-	display: none;
-}
 
 
 .hamburger {

@@ -115,11 +115,21 @@ function Performance() {
 								<div><small className="overhead-profile">Default Windows</small><span>Background processes</span><strong>{processes.stock}</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(processes.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
 								<div><small className="overhead-profile">SoftheOS</small><strong>{processes.optimized}</strong></div>
+								{/* Proportional bars make the drop visible; the numbers above carry the values for assistive technology. */}
+								<div className="overhead-bars" aria-hidden="true">
+									<span className="overhead-bar overhead-bar--stock" style={{ '--bar': '100%' }}></span>
+									<span className="overhead-bar overhead-bar--optimized" style={{ '--bar': `${(processes.optimized / processes.stock) * 100}%` }}></span>
+								</div>
 							</div>
 							<div className="overhead-metric">
 								<div><small className="overhead-profile">Default Windows</small><span>Idle memory</span><strong>{memoryGb.stock} GB</strong></div>
 								<div className="overhead-change"><b>{formatPercentChange(memoryGb.change)}</b><i className="fas fa-arrow-right" aria-hidden="true"></i></div>
 								<div><small className="overhead-profile">SoftheOS</small><strong>{memoryGb.optimized} GB</strong></div>
+								{/* Proportional bars make the drop visible; the numbers above carry the values for assistive technology. */}
+								<div className="overhead-bars" aria-hidden="true">
+									<span className="overhead-bar overhead-bar--stock" style={{ '--bar': '100%' }}></span>
+									<span className="overhead-bar overhead-bar--optimized" style={{ '--bar': `${(memoryGb.optimized / memoryGb.stock) * 100}%` }}></span>
+								</div>
 							</div>
 							<p>Idle readings are illustrative snapshots from the documented configurations, not guaranteed targets for every PC.</p>
 						</div>

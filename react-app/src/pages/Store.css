@@ -29,6 +29,7 @@
 
 .store-trust {
 	display: grid;
+	align-self: center;
 }
 
 .store-note,
@@ -166,7 +167,7 @@
    feature lists, and actions line up across a row. */
 .product-card {
 	overflow: hidden;
-	transition: var(--transition);
+	transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
 	position: relative;
 	display: grid;
 	grid-row: span 6;
@@ -177,15 +178,17 @@
 .product-card:hover {
 	transform: translateY(-4px);
 	border-color: var(--accent-line-strong);
+	box-shadow: var(--edge-highlight), 0 22px 50px rgba(2, 8, 23, 0.4), 0 0 0 1px rgba(66, 232, 196, 0.06);
 }
 
 .product-badge {
 	position: absolute;
 	top: 1rem;
 	right: 1rem;
-	background: var(--gradient);
-	color: var(--text-on-accent);
-	padding: 5px 12px;
+	background: rgba(8, 14, 18, 0.55);
+	border: 1px solid var(--accent-line);
+	color: var(--text-accent);
+	padding: 4px 11px;
 	border-radius: 999px;
 	font-size: var(--font-sm);
 	font-weight: 600;
@@ -194,7 +197,12 @@
 
 .product-image {
 	height: 96px;
-	background: linear-gradient(135deg, var(--accent-tint-strong), rgba(114, 167, 255, 0.08)),
+	position: relative;
+	overflow: hidden;
+	/* Dot texture fading to the right gives the header band some material without competing with the copy. */
+	background:
+		radial-gradient(rgba(174, 197, 218, 0.13) 1px, transparent 1.2px) 0 0 / 14px 14px,
+		linear-gradient(135deg, var(--accent-tint-strong), rgba(114, 167, 255, 0.08)),
 		rgba(255, 255, 255, 0.02);
 	display: flex;
 	align-items: center;
@@ -246,6 +254,8 @@
 	font-weight: 700;
 	color: var(--primary-color);
 	line-height: 1;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
 }
 
 .best-for {
@@ -321,11 +331,23 @@
 
 .product-unavailable {
 	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
 	padding: 0.75rem;
-	border: 1px solid var(--border-color);
+	/* Dashed and recessed so it can never be mistaken for a button. */
+	border: 1px dashed rgba(174, 197, 218, 0.22);
 	border-radius: var(--radius-sm);
-	color: var(--text-secondary);
+	background: rgba(0, 0, 0, 0.18);
+	color: var(--text-muted);
+	font-size: var(--font-md);
 	text-align: center;
+	cursor: not-allowed;
+}
+
+.product-unavailable i {
+	font-size: var(--font-sm);
 }
 
 
@@ -449,6 +471,37 @@
 	padding-bottom: 1rem;
 }
 
+/* "Ordering unavailable" is a caveat, so it uses the amber caveat colour and stays one compact line. */
+.checkout-result-pending {
+	border-bottom-color: var(--caveat-line);
+	background: linear-gradient(90deg, rgba(245, 185, 66, 0.12), rgba(245, 185, 66, 0.04));
+	font-size: var(--font-md);
+}
+
+.checkout-result-pending .container {
+	gap: 0.6rem;
+	padding-top: 0.7rem;
+	padding-bottom: 0.7rem;
+}
+
+.checkout-result-pending i {
+	color: var(--text-caveat);
+}
+
+.checkout-result-pending strong {
+	color: var(--text-caveat);
+	white-space: nowrap;
+}
+
+.checkout-result-pending span {
+	color: var(--text-secondary);
+}
+
+.checkout-result-pending .status-contact-link {
+	color: var(--text-caveat);
+	text-underline-offset: 3px;
+}
+
 .status-contact-link {
 	margin-left: auto;
 	color: currentColor;
@@ -470,5 +523,24 @@
 	.checkout-result .container {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+
+	/* On phones the notice is a two-line strip: icon + title + link, then a short explanation. */
+	.checkout-result-pending .container {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: 0.25rem 0.55rem;
+	}
+
+	.checkout-result-pending span {
+		grid-column: 1 / -1;
+		font-size: var(--font-sm);
+	}
+
+	.checkout-result-pending .status-contact-link {
+		grid-column: 1 / -1;
+		margin-left: 0;
+		font-size: var(--font-sm);
 	}
 }

@@ -8,7 +8,6 @@
 }
 
 .faq-categories,
-.faq-item,
 .no-results,
 .faq-cta {
 	background: var(--surface-card);
@@ -56,7 +55,6 @@
 .faq-search {
 	position: relative;
 	margin: 0 auto 2.5rem;
-	max-width: 720px;
 }
 
 .faq-search i {
@@ -107,14 +105,29 @@
 	color: var(--primary-color);
 }
 
+/* Questions are a divided list rather than 26 stacked cards; only the open answer is raised. */
 .faq-item {
-	margin-bottom: 0.75rem;
 	overflow: hidden;
-	transition: var(--transition);
+	border: 1px solid transparent;
+	border-bottom-color: var(--border-color);
+	border-radius: 0;
+	transition: background 0.22s ease, border-color 0.22s ease, border-radius 0.22s ease;
+}
+
+.category-title + .faq-item {
+	border-top-color: var(--border-color);
 }
 
 .faq-item:hover {
-	border-color: var(--accent-line-strong);
+	background: var(--surface-tint-subtle);
+}
+
+.faq-item.active {
+	margin: 0.5rem 0;
+	border-color: var(--accent-line);
+	border-radius: var(--radius-lg);
+	background: var(--surface-card);
+	box-shadow: var(--shadow-soft);
 }
 
 .faq-question {
@@ -135,7 +148,7 @@
 }
 
 .faq-question:hover {
-	color: var(--primary-color);
+	color: var(--text-accent);
 }
 
 .faq-question i {

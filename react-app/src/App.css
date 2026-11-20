@@ -18,7 +18,9 @@
 	--text-primary: #f2f6fb;
 	--text-secondary: #a9b7c6;
 	--text-muted: #92a2b1; /* At least 5.9:1 on every card surface (WCAG AA). */
-	--border-color: rgba(174, 197, 218, 0.16);
+	--border-color: rgba(174, 197, 218, 0.19);
+	/* Top-edge light on raised surfaces; reads as a machined edge on the dark theme. */
+	--edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.055);
 	--success-color: #35d28f;
 	--error-color: #ff5c75;
 	--warning-color: #f5b942;
@@ -28,11 +30,19 @@
 	--text-on-accent: #03100d;
 	/* Teal for text links and navigation; lighter than --primary-color for small type. */
 	--text-accent: #80e9e2;
+	/* Section kickers: quieter than the primary teal so they label rather than compete. */
+	--text-kicker: #5fd6bd;
+	/* Caveats and preliminary data use amber, so teal can mean "result". */
+	--text-caveat: #ffd27a;
+	--caveat-tint: rgba(245, 185, 66, 0.1);
+	--caveat-line: rgba(245, 185, 66, 0.34);
 	/* The "before" benchmark figure: readable but deliberately quieter than the result. */
 	--text-figure-muted: #aeb8c6;
 	/* Card surfaces and white washes layered on them. */
 	--surface-card: linear-gradient(180deg, rgba(23, 33, 44, 0.96), rgba(13, 19, 27, 0.96));
 	--surface-inset: #0b1718;
+	/* The background under translucent section bands, for rings that must blend into them. */
+	--surface-section: #0c1118;
 	--surface-tint-subtle: rgba(255, 255, 255, 0.025);
 	--surface-tint: rgba(255, 255, 255, 0.035);
 	--surface-tint-strong: rgba(255, 255, 255, 0.04);
@@ -44,9 +54,11 @@
 	--accent-line-strong: rgba(66, 232, 196, 0.38);
 	--accent-focus: rgba(66, 232, 196, 0.72);
 	--gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--brand-cyan) 48%, var(--brand-blue) 100%);
+	/* Buttons stay in the teal-cyan range; the blue end is kept for display text. */
+	--gradient-button: linear-gradient(135deg, #46ecc6 0%, #4fd8e8 100%);
 	--gradient-warm: linear-gradient(135deg, #ffb020 0%, #ff6b6b 100%);
 	--shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
-	--shadow-soft: 0 14px 40px rgba(2, 8, 23, 0.26);
+	--shadow-soft: var(--edge-highlight), 0 14px 40px rgba(2, 8, 23, 0.26);
 	--transition: all 0.22s ease;
 	--navbar-height: 70px;
 	/* Type scale: use these rather than one-off sizes. */
@@ -62,8 +74,8 @@
 	--font-5xl: 2.5rem;
 	--glow-primary: 0 0 0 1px rgba(82, 218, 222, 0.22), 0 16px 36px rgba(66, 196, 216, 0.16);
 	--font-page-title: clamp(2.25rem, 4.5vw, 3.5rem);
-	--glass-bg: rgba(8, 10, 15, 0.78);
-	--glass-filter: blur(20px) saturate(140%);
+	--glass-bg: rgba(8, 10, 15, 0.62);
+	--glass-filter: blur(16px) saturate(180%);
 	--radius-lg: 14px;
 	--radius-md: 10px;
 	--radius-sm: 8px;
@@ -76,15 +88,45 @@
 
 body {
 	font-family: "Inter Variable", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-	background:
-		radial-gradient(circle at 15% 0%, var(--accent-tint-strong), transparent 32rem),
-		radial-gradient(circle at 85% 12%, rgba(114, 167, 255, 0.12), transparent 28rem),
-		var(--background-color);
+	background: var(--background-color);
 	color: var(--text-primary);
 	line-height: 1.6;
 	overflow-x: clip;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Ambient light stays with the viewport so long pages never fall into a flat void. */
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background:
+		radial-gradient(circle at 12% -4%, var(--accent-tint-strong), transparent 34rem),
+		radial-gradient(circle at 88% 8%, rgba(114, 167, 255, 0.11), transparent 30rem),
+		radial-gradient(ellipse at 50% 115%, rgba(66, 196, 216, 0.06), transparent 60%);
+}
+
+/* Fine film grain over the page: removes gradient banding and gives the dark surfaces texture. */
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: 999;
+	pointer-events: none;
+	opacity: 0.045;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+h1,
+h2 {
+	letter-spacing: -0.022em;
+}
+
+h3 {
+	letter-spacing: -0.01em;
 }
 
 /* Form controls do not inherit the page font by default. */
@@ -160,18 +202,19 @@ li {
 }
 
 .btn-primary {
-	background: var(--gradient);
+	background: var(--gradient-button);
 	color: var(--text-on-accent);
-	box-shadow: var(--glow-primary);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.12), var(--glow-primary);
 }
 
 .btn-primary:hover {
 	transform: translateY(-2px);
-	box-shadow: 0 18px 42px rgba(66, 232, 196, 0.22);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -1px 0 rgba(0, 0, 0, 0.12), 0 18px 42px rgba(66, 232, 196, 0.22);
 }
 
 .btn-secondary {
 	background: var(--surface-tint-strong);
+	box-shadow: var(--edge-highlight);
 	color: var(--text-primary);
 	border: 1px solid var(--border-color);
 }
@@ -196,7 +239,7 @@ textarea:focus-visible {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.55rem;
-	color: var(--primary-color);
+	color: var(--text-kicker);
 	font-size: var(--font-sm);
 	font-weight: 700;
 	letter-spacing: 0.08em;
@@ -233,9 +276,31 @@ textarea:focus-visible {
 
 .page-header {
 	padding: 130px 0 48px;
+	position: relative;
 	background:
 		linear-gradient(180deg, rgba(17, 24, 33, 0.74), rgba(8, 10, 15, 0)),
 		radial-gradient(ellipse at 20% 0%, var(--accent-tint-strong) 0%, transparent 66%);
+}
+
+/* Shared tinted chip: labels and badges, deliberately unlike the gradient call-to-action buttons. */
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.65rem;
+	border: 1px solid var(--accent-line);
+	border-radius: 999px;
+	background: var(--accent-tint);
+	color: var(--text-accent);
+	font-size: var(--font-sm);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.chip-caveat {
+	border-color: var(--caveat-line);
+	background: var(--caveat-tint);
+	color: var(--text-caveat);
 }
 
 .page-header h1 {
